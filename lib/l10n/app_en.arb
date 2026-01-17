@@ -1,0 +1,13 @@
+{
+    "appTitle": "Oksigenia SOS",
+    "sosButton": "SOS",
+    "statusReady": "Oksigenia System Ready.",
+    "statusConnecting": "Connecting satellites...",
+    "statusSent": "Alert sent successfully.",
+    "statusError": "ERROR: {error}",
+    "menuWeb": "Official Website",
+    "menuSupport": "Tech Support",
+    "menuLanguages": "Language",
+    "motto": "Respira > Inspira > Crece;",
+    "panicMessage": "🆘 *OKSIGENIA ALERT* 🆘\n\nI need urgent help.\n📍 Location: {link}\n\nRespira > Inspira > Crece;"
+}
