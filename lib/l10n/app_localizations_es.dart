@@ -38,10 +38,31 @@ class AppLocalizationsEs extends AppLocalizations {
   String get menuLanguages => 'Idioma';
 
   @override
+  String get menuSettings => 'Configuración';
+
+  @override
   String get motto => 'Respira > Inspira > Crece;';
 
   @override
   String panicMessage(Object link) {
     return '🆘 *ALERTA OKSIGENIA* 🆘\n\nNecesito ayuda urgente.\n📍 Ubicación: $link\n\nRespira > Inspira > Crece;';
   }
+
+  @override
+  String get settingsTitle => 'Configuración SOS';
+
+  @override
+  String get settingsLabel => 'Teléfono de Emergencia';
+
+  @override
+  String get settingsHint => 'Ej: 600123456';
+
+  @override
+  String get settingsSave => 'GUARDAR';
+
+  @override
+  String get settingsSavedMsg => 'Contacto guardado correctamente';
+
+  @override
+  String get errorNoContact => '⚠️ ¡Configura un contacto primero!';
 }

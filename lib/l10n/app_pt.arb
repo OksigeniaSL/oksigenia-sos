@@ -1,0 +1,20 @@
+{
+    "appTitle": "Oksigenia SOS",
+    "sosButton": "SOS",
+    "statusReady": "Sistema Oksigenia pronto.",
+    "statusConnecting": "Conectando satélites...",
+    "statusSent": "Alerta enviado com sucesso.",
+    "statusError": "ERRO: {error}",
+    "menuWeb": "Site Oficial",
+    "menuSupport": "Suporte Técnico",
+    "menuLanguages": "Idioma",
+    "menuSettings": "Configurações",
+    "motto": "Respira > Inspira > Crece;",
+    "panicMessage": "🆘 *ALERTA OKSIGENIA* 🆘\n\nPreciso de ajuda urgente.\n📍 Localização: {link}\n\nRespira > Inspira > Crece;",
+    "settingsTitle": "Configurações SOS",
+    "settingsLabel": "Telefone de Emergência",
+    "settingsHint": "Ex: +351 91 234 5678",
+    "settingsSave": "SALVAR",
+    "settingsSavedMsg": "Contato salvo com sucesso",
+    "errorNoContact": "⚠️ Configure um contato primeiro!"
+}

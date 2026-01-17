@@ -1,0 +1,20 @@
+{
+    "appTitle": "Oksigenia SOS",
+    "sosButton": "SOS",
+    "statusReady": "Oksigenia System bereit.",
+    "statusConnecting": "Verbindung zu Satelliten...",
+    "statusSent": "Alarm erfolgreich gesendet.",
+    "statusError": "FEHLER: {error}",
+    "menuWeb": "Offizielle Webseite",
+    "menuSupport": "Technischer Support",
+    "menuLanguages": "Sprache",
+    "menuSettings": "Einstellungen",
+    "motto": "Respira > Inspira > Crece;",
+    "panicMessage": "🆘 *OKSIGENIA ALARM* 🆘\n\nIch brauche dringend Hilfe.\n📍 Standort: {link}\n\nRespira > Inspira > Crece;",
+    "settingsTitle": "SOS Einstellungen",
+    "settingsLabel": "Notrufnummer",
+    "settingsHint": "Bsp: +49 151 12345678",
+    "settingsSave": "SPEICHERN",
+    "settingsSavedMsg": "Kontakt erfolgreich gespeichert",
+    "errorNoContact": "⚠️ Bitte erst Kontakt konfigurieren!"
+}

@@ -8,6 +8,13 @@
     "menuWeb": "Web Oficial",
     "menuSupport": "Soporte Técnico",
     "menuLanguages": "Idioma",
+    "menuSettings": "Configuración",
     "motto": "Respira > Inspira > Crece;",
-    "panicMessage": "🆘 *ALERTA OKSIGENIA* 🆘\n\nNecesito ayuda urgente.\n📍 Ubicación: {link}\n\nRespira > Inspira > Crece;"
+    "panicMessage": "🆘 *ALERTA OKSIGENIA* 🆘\n\nNecesito ayuda urgente.\n📍 Ubicación: {link}\n\nRespira > Inspira > Crece;",
+    "settingsTitle": "Configuración SOS",
+    "settingsLabel": "Teléfono de Emergencia",
+    "settingsHint": "Ej: 600123456",
+    "settingsSave": "GUARDAR",
+    "settingsSavedMsg": "Contacto guardado correctamente",
+    "errorNoContact": "⚠️ ¡Configura un contacto primero!"
 }

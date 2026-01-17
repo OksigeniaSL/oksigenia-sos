@@ -38,10 +38,31 @@ class AppLocalizationsEn extends AppLocalizations {
   String get menuLanguages => 'Language';
 
   @override
+  String get menuSettings => 'Settings';
+
+  @override
   String get motto => 'Respira > Inspira > Crece;';
 
   @override
   String panicMessage(Object link) {
     return '🆘 *OKSIGENIA ALERT* 🆘\n\nI need urgent help.\n📍 Location: $link\n\nRespira > Inspira > Crece;';
   }
+
+  @override
+  String get settingsTitle => 'SOS Settings';
+
+  @override
+  String get settingsLabel => 'Emergency Phone Number';
+
+  @override
+  String get settingsHint => 'Ex: +1 555-0199';
+
+  @override
+  String get settingsSave => 'SAVE';
+
+  @override
+  String get settingsSavedMsg => 'Contact saved successfully';
+
+  @override
+  String get errorNoContact => '⚠️ Configure a contact first!';
 }

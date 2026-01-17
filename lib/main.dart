@@ -2,7 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
-import 'l10n/app_localizations.dart'; 
+import 'package:font_awesome_flutter/font_awesome_flutter.dart';
+import 'package:shared_preferences/shared_preferences.dart'; // IMPORTANTE: Persistencia
+import 'l10n/app_localizations.dart';
 
 void main() {
   runApp(const OksigeniaSOSApp());
@@ -29,8 +31,6 @@ class _OksigeniaSOSAppState extends State<OksigeniaSOSApp> {
     return MaterialApp(
       debugShowCheckedModeBanner: false,
       title: 'Oksigenia SOS',
-      
-      // CONFIGURACIÓN DE IDIOMAS
       locale: _locale,
       localizationsDelegates: const [
         AppLocalizations.delegate,
@@ -39,10 +39,12 @@ class _OksigeniaSOSAppState extends State<OksigeniaSOSApp> {
         GlobalCupertinoLocalizations.delegate,
       ],
       supportedLocales: const [
-        Locale('en'), // Inglés
-        Locale('es'), // Español
+        Locale('en'), 
+        Locale('es'), 
+        Locale('fr'), 
+        Locale('pt'), 
+        Locale('de'), 
       ],
-
       theme: ThemeData(
         colorScheme: ColorScheme.fromSeed(
           seedColor: const Color(0xFFB71C1C),
@@ -70,47 +72,98 @@ class _SOSScreenState extends State<SOSScreen> {
   bool _isLoading = false;
   String? _customStatusMessage;
 
+  // Lógica de Activación SOS
   Future<void> _activarProtocoloSOS() async {
     final l10n = AppLocalizations.of(context)!;
     
+    // 1. RECUPERAR NÚMERO GUARDADO
+    final prefs = await SharedPreferences.getInstance();
+    final String? contactoEmergencia = prefs.getString('sos_contact');
+
+    // Validación: Si no hay contacto, mandamos al usuario a Configuración
+    if (contactoEmergencia == null || contactoEmergencia.isEmpty) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(l10n.errorNoContact),
+            backgroundColor: Colors.orange,
+            duration: const Duration(seconds: 3),
+          ),
+        );
+        // Navegar a Configuración automáticamente
+        Navigator.push(
+          context,
+          MaterialPageRoute(builder: (context) => const ConfigScreen()),
+        );
+      }
+      return; // Detener ejecución
+    }
+
     setState(() {
       _isLoading = true;
       _customStatusMessage = l10n.statusConnecting;
     });
 
+    String mensajeFinal = "";
+    String ubicacionUrl = "";
+
+    // --- FASE 1: GEOLOCALIZACIÓN ---
     try {
+      bool serviceEnabled = await Geolocator.isLocationServiceEnabled();
+      if (!serviceEnabled) throw 'GPS_OFF';
+
       LocationPermission permission = await Geolocator.checkPermission();
       if (permission == LocationPermission.denied) {
         permission = await Geolocator.requestPermission();
-        if (permission == LocationPermission.denied) throw 'Sin permiso GPS';
+        if (permission == LocationPermission.denied) throw 'GPS_DENIED';
       }
+      
+      if (permission == LocationPermission.deniedForever) throw 'GPS_BLOCKED';
 
       Position position = await Geolocator.getCurrentPosition(
         desiredAccuracy: LocationAccuracy.high,
+        timeLimit: const Duration(seconds: 5), 
       );
 
-      String mapsLink = "https://www.google.com/maps/search/?api=1&query=${position.latitude},${position.longitude}";
-      String mensaje = l10n.panicMessage(mapsLink);
-
-      final Uri whatsappUrl = Uri.parse("https://wa.me/?text=${Uri.encodeComponent(mensaje)}");
-
-      if (!await launchUrl(whatsappUrl, mode: LaunchMode.externalApplication)) {
-        throw 'Error launching WhatsApp';
-      }
-
-      setState(() {
-        _isLoading = false;
-        _customStatusMessage = l10n.statusSent;
-      });
+      ubicacionUrl = "http://maps.google.com/?q=${position.latitude},${position.longitude}";
+      mensajeFinal = l10n.panicMessage(ubicacionUrl);
 
     } catch (e) {
+      debugPrint("⚠️ Fallo GPS Controlado: $e");
+      mensajeFinal = l10n.panicMessage("N/A (GPS Error/Timeout)");
+    }
+
+    // --- FASE 2: ENVÍO SMS ---
+    try {
+      final Uri smsUri = Uri(
+        scheme: 'sms',
+        path: contactoEmergencia, // Usamos el número recuperado de memoria
+        queryParameters: <String, String>{
+          'body': mensajeFinal,
+        },
+      );
+
+      if (await canLaunchUrl(smsUri)) {
+        await launchUrl(smsUri, mode: LaunchMode.platformDefault);
+        
+        setState(() {
+          _isLoading = false;
+          _customStatusMessage = l10n.statusSent;
+        });
+      } else {
+        throw 'NO_SMS_APP';
+      }
+
+    } catch (e) {
+      debugPrint("❌ Error SMS: $e");
       setState(() {
         _isLoading = false;
-        _customStatusMessage = l10n.statusError(e.toString());
+        _customStatusMessage = l10n.statusError("SMS ERROR");
       });
     }
   }
 
+  // --- NAVEGACIÓN ---
   Future<void> _abrirLink(String url) async {
     final Uri uri = Uri.parse(url);
     if (!await launchUrl(uri, mode: LaunchMode.externalApplication)) {
@@ -137,7 +190,6 @@ class _SOSScreenState extends State<SOSScreen> {
     return Scaffold(
       backgroundColor: Colors.black,
       
-      // BARRA SUPERIOR
       appBar: AppBar(
         title: Text(l10n.appTitle, style: const TextStyle(fontWeight: FontWeight.bold, letterSpacing: 2.0)),
         centerTitle: true,
@@ -145,10 +197,10 @@ class _SOSScreenState extends State<SOSScreen> {
         elevation: 0,
       ),
       
-      // MENÚ LATERAL COMPLETO
       drawer: Drawer(
         backgroundColor: const Color(0xFF181818),
-        child: Column(
+        child: ListView(
+          padding: EdgeInsets.zero,
           children: [
             DrawerHeader(
               decoration: const BoxDecoration(
@@ -166,7 +218,7 @@ class _SOSScreenState extends State<SOSScreen> {
                     Image.asset('assets/images/OksigeniaAlfa.png', height: 80, color: Colors.white),
                     const SizedBox(height: 15),
                     Text(
-                      l10n.motto, // Usa el texto con el ; del archivo de idioma
+                      l10n.motto,
                       style: const TextStyle(color: Colors.white70, fontSize: 12, fontStyle: FontStyle.italic),
                     ),
                   ],
@@ -174,50 +226,50 @@ class _SOSScreenState extends State<SOSScreen> {
               ),
             ),
             
-            // 1. SELECTOR DE IDIOMA
+            // BOTÓN DE CONFIGURACIÓN (NUEVO)
+            ListTile(
+              leading: const Icon(Icons.settings, color: Colors.redAccent),
+              title: Text(l10n.menuSettings, style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
+              onTap: () {
+                Navigator.pop(context); // Cierra drawer
+                Navigator.push(context, MaterialPageRoute(builder: (context) => const ConfigScreen()));
+              },
+            ),
+            
+            const Divider(color: Colors.white10),
+
             ExpansionTile(
               leading: const Icon(Icons.translate, color: Colors.orangeAccent),
               title: Text(l10n.menuLanguages, style: const TextStyle(color: Colors.white)),
               children: [
-                ListTile(
-                  title: const Text("Español", style: TextStyle(color: Colors.white70)),
-                  onTap: () {
-                    widget.onLanguageChanged(const Locale('es'));
-                    Navigator.pop(context);
-                  },
-                ),
-                ListTile(
-                  title: const Text("English", style: TextStyle(color: Colors.white70)),
-                  onTap: () {
-                    widget.onLanguageChanged(const Locale('en'));
-                    Navigator.pop(context);
-                  },
-                ),
+                _buildLanguageItem(context, "ES", "Español", const Locale('es')),
+                _buildLanguageItem(context, "EN", "English", const Locale('en')),
+                _buildLanguageItem(context, "FR", "Français", const Locale('fr')),
+                _buildLanguageItem(context, "PT", "Português", const Locale('pt')),
+                _buildLanguageItem(context, "DE", "Deutsch", const Locale('de')),
               ],
             ),
 
             const Divider(color: Colors.white10),
 
-            // 2. REDES SOCIALES Y WEB (Recuperados)
             ListTile(
-              leading: const Icon(Icons.language, color: Colors.blueAccent),
+              leading: const FaIcon(FontAwesomeIcons.globe, color: Colors.blueAccent),
               title: Text(l10n.menuWeb, style: const TextStyle(color: Colors.white)),
               onTap: () => _abrirLink('https://oksigenia.com'),
             ),
             ListTile(
-              leading: const Icon(Icons.camera_alt, color: Colors.purpleAccent),
+              leading: const FaIcon(FontAwesomeIcons.instagram, color: Colors.purpleAccent),
               title: const Text('Instagram', style: TextStyle(color: Colors.white)),
               onTap: () => _abrirLink('https://instagram.com/oksigenia'),
             ),
             ListTile(
-              leading: const Icon(Icons.close, color: Colors.white),
-              title: const Text('X (Twitter)', style: TextStyle(color: Colors.white)),
+              leading: const FaIcon(FontAwesomeIcons.xTwitter, color: Colors.white),
+              title: const Text('X', style: TextStyle(color: Colors.white)),
               onTap: () => _abrirLink('https://x.com/oksigeniaX'),
             ),
             
             const Divider(color: Colors.white10),
             
-            // 3. SOPORTE (Recuperado)
             ListTile(
               leading: const Icon(Icons.support_agent, color: Colors.greenAccent),
               title: Text(l10n.menuSupport, style: const TextStyle(color: Colors.white)),
@@ -225,51 +277,189 @@ class _SOSScreenState extends State<SOSScreen> {
               onTap: _enviarEmail,
             ),
 
-            const Spacer(),
+            const SizedBox(height: 30),
             const Padding(
               padding: EdgeInsets.all(20.0),
-              child: Text("© 2026 Oksigenia v0.4", style: TextStyle(color: Colors.white24)),
+              child: Text("© 2026 Oksigenia v0.9", 
+                style: TextStyle(color: Colors.white24),
+                textAlign: TextAlign.center,
+              ),
             ),
           ],
         ),
       ),
       
-      // BOTÓN SOS
       body: Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            GestureDetector(
-              onTap: _isLoading ? null : _activarProtocoloSOS,
-              child: Container(
-                width: 240,
-                height: 240,
-                decoration: BoxDecoration(
-                  shape: BoxShape.circle,
-                  gradient: LinearGradient(
-                    colors: _isLoading 
-                      ? [Colors.grey.shade800, Colors.grey.shade900]
-                      : [const Color(0xFFE53935), const Color(0xFFB71C1C)],
-                    begin: Alignment.topLeft,
-                    end: Alignment.bottomRight,
+        child: SingleChildScrollView(
+          padding: const EdgeInsets.all(20.0),
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              GestureDetector(
+                onTap: _isLoading ? null : _activarProtocoloSOS,
+                child: Container(
+                  width: 240,
+                  height: 240,
+                  decoration: BoxDecoration(
+                    shape: BoxShape.circle,
+                    gradient: LinearGradient(
+                      colors: _isLoading 
+                        ? [Colors.grey.shade800, Colors.grey.shade900]
+                        : [const Color(0xFFE53935), const Color(0xFFB71C1C)],
+                      begin: Alignment.topLeft,
+                      end: Alignment.bottomRight,
+                    ),
+                    boxShadow: [if (!_isLoading) BoxShadow(color: const Color(0xFFB71C1C).withOpacity(0.5), blurRadius: 30, spreadRadius: 5)],
+                    border: Border.all(color: Colors.white12, width: 3),
                   ),
-                  boxShadow: [if (!_isLoading) BoxShadow(color: const Color(0xFFB71C1C).withOpacity(0.5), blurRadius: 30, spreadRadius: 5)],
-                  border: Border.all(color: Colors.white12, width: 3),
-                ),
-                child: Center(
-                  child: _isLoading
-                      ? const CircularProgressIndicator(color: Colors.white)
-                      : Text(l10n.sosButton, style: const TextStyle(fontSize: 50, fontWeight: FontWeight.bold, color: Colors.white)),
+                  child: Center(
+                    child: _isLoading
+                        ? const CircularProgressIndicator(color: Colors.white)
+                        : Text(
+                            l10n.sosButton, 
+                            style: const TextStyle(fontSize: 50, fontWeight: FontWeight.bold, color: Colors.white)
+                          ),
+                  ),
                 ),
               ),
+              const SizedBox(height: 50),
+              
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+                decoration: BoxDecoration(color: Colors.white.withOpacity(0.05), borderRadius: BorderRadius.circular(20)),
+                child: Text(
+                  _customStatusMessage ?? l10n.statusReady,
+                  textAlign: TextAlign.center,
+                  style: const TextStyle(
+                    color: Colors.white70, 
+                    fontFamily: 'Monospace', 
+                    fontSize: 15,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildLanguageItem(BuildContext context, String code, String label, Locale locale) {
+    return ListTile(
+      leading: Container(
+        width: 34,
+        height: 34,
+        decoration: BoxDecoration(
+          color: Colors.white.withOpacity(0.05),
+          shape: BoxShape.circle,
+          border: Border.all(color: Colors.white24, width: 1.5),
+        ),
+        child: Center(
+          child: Text(
+            code,
+            style: const TextStyle(color: Colors.white, fontSize: 11, fontWeight: FontWeight.bold),
+          ),
+        ),
+      ),
+      title: Text(label, style: const TextStyle(color: Colors.white70, fontSize: 14)),
+      onTap: () {
+        widget.onLanguageChanged(locale);
+        Navigator.pop(context);
+      },
+    );
+  }
+}
+
+// ---------------------------------------------------------------------------
+// PANTALLA DE CONFIGURACIÓN (NUEVA CLASE)
+// ---------------------------------------------------------------------------
+class ConfigScreen extends StatefulWidget {
+  const ConfigScreen({super.key});
+
+  @override
+  State<ConfigScreen> createState() => _ConfigScreenState();
+}
+
+class _ConfigScreenState extends State<ConfigScreen> {
+  final TextEditingController _phoneController = TextEditingController();
+  bool _isSaving = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _loadSavedNumber();
+  }
+
+  Future<void> _loadSavedNumber() async {
+    final prefs = await SharedPreferences.getInstance();
+    setState(() {
+      _phoneController.text = prefs.getString('sos_contact') ?? '';
+    });
+  }
+
+  Future<void> _saveNumber() async {
+    setState(() { _isSaving = true; });
+    
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setString('sos_contact', _phoneController.text.trim());
+    
+    if (mounted) {
+      final l10n = AppLocalizations.of(context)!;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(l10n.settingsSavedMsg), backgroundColor: Colors.green),
+      );
+      Navigator.pop(context); // Volver atrás al guardar
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
+
+    return Scaffold(
+      backgroundColor: Colors.black,
+      appBar: AppBar(
+        title: Text(l10n.settingsTitle, style: const TextStyle(color: Colors.white)),
+        backgroundColor: Colors.transparent,
+        iconTheme: const IconThemeData(color: Colors.white), // Flecha atrás blanca
+      ),
+      body: Padding(
+        padding: const EdgeInsets.all(20.0),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              l10n.settingsLabel,
+              style: const TextStyle(color: Colors.white70, fontSize: 16),
             ),
-            const SizedBox(height: 50),
-            Container(
-              padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
-              decoration: BoxDecoration(color: Colors.white.withOpacity(0.05), borderRadius: BorderRadius.circular(20)),
-              child: Text(
-                _customStatusMessage ?? l10n.statusReady,
-                style: const TextStyle(color: Colors.white70, fontFamily: 'Monospace', fontSize: 12),
+            const SizedBox(height: 10),
+            TextField(
+              controller: _phoneController,
+              keyboardType: TextInputType.phone,
+              style: const TextStyle(color: Colors.white, fontSize: 18),
+              decoration: InputDecoration(
+                hintText: l10n.settingsHint,
+                hintStyle: const TextStyle(color: Colors.white24),
+                filled: true,
+                fillColor: Colors.white.withOpacity(0.1),
+                border: OutlineInputBorder(borderRadius: BorderRadius.circular(10)),
+                prefixIcon: const Icon(Icons.phone, color: Colors.redAccent),
+              ),
+            ),
+            const SizedBox(height: 30),
+            SizedBox(
+              width: double.infinity,
+              height: 50,
+              child: ElevatedButton(
+                onPressed: _isSaving ? null : _saveNumber,
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: const Color(0xFFD32F2F),
+                  foregroundColor: Colors.white,
+                ),
+                child: _isSaving 
+                  ? const CircularProgressIndicator(color: Colors.white)
+                  : Text(l10n.settingsSave, style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
               ),
             ),
           ],

@@ -8,6 +8,13 @@
     "menuWeb": "Official Website",
     "menuSupport": "Tech Support",
     "menuLanguages": "Language",
+    "menuSettings": "Settings",
     "motto": "Respira > Inspira > Crece;",
-    "panicMessage": "🆘 *OKSIGENIA ALERT* 🆘\n\nI need urgent help.\n📍 Location: {link}\n\nRespira > Inspira > Crece;"
+    "panicMessage": "🆘 *OKSIGENIA ALERT* 🆘\n\nI need urgent help.\n📍 Location: {link}\n\nRespira > Inspira > Crece;",
+    "settingsTitle": "SOS Settings",
+    "settingsLabel": "Emergency Phone Number",
+    "settingsHint": "Ex: +1 555-0199",
+    "settingsSave": "SAVE",
+    "settingsSavedMsg": "Contact saved successfully",
+    "errorNoContact": "⚠️ Configure a contact first!"
 }

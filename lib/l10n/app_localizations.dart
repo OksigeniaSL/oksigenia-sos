@@ -5,8 +5,11 @@ import 'package:flutter/widgets.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:intl/intl.dart' as intl;
 
+import 'app_localizations_de.dart';
 import 'app_localizations_en.dart';
 import 'app_localizations_es.dart';
+import 'app_localizations_fr.dart';
+import 'app_localizations_pt.dart';
 
 // ignore_for_file: type=lint
 
@@ -94,8 +97,11 @@ abstract class AppLocalizations {
 
   /// A list of this localizations delegate's supported locales.
   static const List<Locale> supportedLocales = <Locale>[
+    Locale('de'),
     Locale('en'),
     Locale('es'),
+    Locale('fr'),
+    Locale('pt'),
   ];
 
   /// No description provided for @appTitle.
@@ -152,6 +158,12 @@ abstract class AppLocalizations {
   /// **'Language'**
   String get menuLanguages;
 
+  /// No description provided for @menuSettings.
+  ///
+  /// In en, this message translates to:
+  /// **'Settings'**
+  String get menuSettings;
+
   /// No description provided for @motto.
   ///
   /// In en, this message translates to:
@@ -163,6 +175,42 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'🆘 *OKSIGENIA ALERT* 🆘\n\nI need urgent help.\n📍 Location: {link}\n\nRespira > Inspira > Crece;'**
   String panicMessage(Object link);
+
+  /// No description provided for @settingsTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'SOS Settings'**
+  String get settingsTitle;
+
+  /// No description provided for @settingsLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Emergency Phone Number'**
+  String get settingsLabel;
+
+  /// No description provided for @settingsHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Ex: +1 555-0199'**
+  String get settingsHint;
+
+  /// No description provided for @settingsSave.
+  ///
+  /// In en, this message translates to:
+  /// **'SAVE'**
+  String get settingsSave;
+
+  /// No description provided for @settingsSavedMsg.
+  ///
+  /// In en, this message translates to:
+  /// **'Contact saved successfully'**
+  String get settingsSavedMsg;
+
+  /// No description provided for @errorNoContact.
+  ///
+  /// In en, this message translates to:
+  /// **'⚠️ Configure a contact first!'**
+  String get errorNoContact;
 }
 
 class _AppLocalizationsDelegate
@@ -176,7 +224,7 @@ class _AppLocalizationsDelegate
 
   @override
   bool isSupported(Locale locale) =>
-      <String>['en', 'es'].contains(locale.languageCode);
+      <String>['de', 'en', 'es', 'fr', 'pt'].contains(locale.languageCode);
 
   @override
   bool shouldReload(_AppLocalizationsDelegate old) => false;
@@ -185,10 +233,16 @@ class _AppLocalizationsDelegate
 AppLocalizations lookupAppLocalizations(Locale locale) {
   // Lookup logic when only language code is specified.
   switch (locale.languageCode) {
+    case 'de':
+      return AppLocalizationsDe();
     case 'en':
       return AppLocalizationsEn();
     case 'es':
       return AppLocalizationsEs();
+    case 'fr':
+      return AppLocalizationsFr();
+    case 'pt':
+      return AppLocalizationsPt();
   }
 
   throw FlutterError(
