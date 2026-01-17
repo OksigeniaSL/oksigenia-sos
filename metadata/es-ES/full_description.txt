@@ -1,0 +1,9 @@
+Oksigenia SOS es una herramienta de apoyo para tu seguridad en actividades al aire libre (ciclismo, senderismo, náutica). 
+
+Funciones principales:
+- Detección inteligente de impactos y caídas.
+- Monitor de inactividad (Dead Man's Switch).
+- Envío automático de SMS con ubicación GPS a tu contacto de confianza.
+- Privacidad total: funciona de forma local y sin trackers.
+
+IMPORTANTE: Esta app es una herramienta de apoyo y NO sustituye a los servicios de emergencia profesionales. Su funcionamiento depende de la cobertura móvil y señal GPS.
