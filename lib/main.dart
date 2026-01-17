@@ -1,9 +1,10 @@
+import 'dart:io'; // NECESARIO PARA DETECTAR PAÍS DEL SISTEMA
 import 'package:flutter/material.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
-import 'package:shared_preferences/shared_preferences.dart'; // IMPORTANTE: Persistencia
+import 'package:shared_preferences/shared_preferences.dart';
 import 'l10n/app_localizations.dart';
 
 void main() {
@@ -72,31 +73,24 @@ class _SOSScreenState extends State<SOSScreen> {
   bool _isLoading = false;
   String? _customStatusMessage;
 
-  // Lógica de Activación SOS
   Future<void> _activarProtocoloSOS() async {
     final l10n = AppLocalizations.of(context)!;
     
-    // 1. RECUPERAR NÚMERO GUARDADO
+    // 1. RECUPERAR NÚMERO
     final prefs = await SharedPreferences.getInstance();
     final String? contactoEmergencia = prefs.getString('sos_contact');
 
-    // Validación: Si no hay contacto, mandamos al usuario a Configuración
     if (contactoEmergencia == null || contactoEmergencia.isEmpty) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(l10n.errorNoContact),
-            backgroundColor: Colors.orange,
-            duration: const Duration(seconds: 3),
-          ),
+          SnackBar(content: Text(l10n.errorNoContact), backgroundColor: Colors.orange),
         );
-        // Navegar a Configuración automáticamente
         Navigator.push(
           context,
           MaterialPageRoute(builder: (context) => const ConfigScreen()),
         );
       }
-      return; // Detener ejecución
+      return; 
     }
 
     setState(() {
@@ -107,29 +101,38 @@ class _SOSScreenState extends State<SOSScreen> {
     String mensajeFinal = "";
     String ubicacionUrl = "";
 
-    // --- FASE 1: GEOLOCALIZACIÓN ---
+    // --- FASE 1: GEOLOCALIZACIÓN (MODO CONSCIENTE) ---
     try {
+      // A) Comprobar Hardware GPS
       bool serviceEnabled = await Geolocator.isLocationServiceEnabled();
-      if (!serviceEnabled) throw 'GPS_OFF';
+      if (!serviceEnabled) {
+        await Geolocator.openLocationSettings();
+        setState(() {
+          _isLoading = false;
+          _customStatusMessage = "⚠️ Activa GPS y pulsa de nuevo";
+        });
+        return; 
+      }
 
+      // B) Permisos
       LocationPermission permission = await Geolocator.checkPermission();
       if (permission == LocationPermission.denied) {
         permission = await Geolocator.requestPermission();
         if (permission == LocationPermission.denied) throw 'GPS_DENIED';
       }
-      
       if (permission == LocationPermission.deniedForever) throw 'GPS_BLOCKED';
 
+      // C) Obtener Posición
       Position position = await Geolocator.getCurrentPosition(
         desiredAccuracy: LocationAccuracy.high,
-        timeLimit: const Duration(seconds: 5), 
+        timeLimit: const Duration(seconds: 10), 
       );
 
       ubicacionUrl = "http://maps.google.com/?q=${position.latitude},${position.longitude}";
       mensajeFinal = l10n.panicMessage(ubicacionUrl);
 
     } catch (e) {
-      debugPrint("⚠️ Fallo GPS Controlado: $e");
+      debugPrint("⚠️ Fallo GPS Técnico: $e");
       mensajeFinal = l10n.panicMessage("N/A (GPS Error/Timeout)");
     }
 
@@ -137,7 +140,7 @@ class _SOSScreenState extends State<SOSScreen> {
     try {
       final Uri smsUri = Uri(
         scheme: 'sms',
-        path: contactoEmergencia, // Usamos el número recuperado de memoria
+        path: contactoEmergencia,
         queryParameters: <String, String>{
           'body': mensajeFinal,
         },
@@ -145,7 +148,6 @@ class _SOSScreenState extends State<SOSScreen> {
 
       if (await canLaunchUrl(smsUri)) {
         await launchUrl(smsUri, mode: LaunchMode.platformDefault);
-        
         setState(() {
           _isLoading = false;
           _customStatusMessage = l10n.statusSent;
@@ -226,12 +228,12 @@ class _SOSScreenState extends State<SOSScreen> {
               ),
             ),
             
-            // BOTÓN DE CONFIGURACIÓN (NUEVO)
+            // BOTÓN CONFIG
             ListTile(
               leading: const Icon(Icons.settings, color: Colors.redAccent),
               title: Text(l10n.menuSettings, style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
               onTap: () {
-                Navigator.pop(context); // Cierra drawer
+                Navigator.pop(context);
                 Navigator.push(context, MaterialPageRoute(builder: (context) => const ConfigScreen()));
               },
             ),
@@ -280,7 +282,7 @@ class _SOSScreenState extends State<SOSScreen> {
             const SizedBox(height: 30),
             const Padding(
               padding: EdgeInsets.all(20.0),
-              child: Text("© 2026 Oksigenia v0.9", 
+              child: Text("© 2026 Oksigenia v0.9.2", 
                 style: TextStyle(color: Colors.white24),
                 textAlign: TextAlign.center,
               ),
@@ -372,7 +374,7 @@ class _SOSScreenState extends State<SOSScreen> {
 }
 
 // ---------------------------------------------------------------------------
-// PANTALLA DE CONFIGURACIÓN (NUEVA CLASE)
+// PANTALLA DE CONFIGURACIÓN (CON PREFIJO DE REGIÓN REAL)
 // ---------------------------------------------------------------------------
 class ConfigScreen extends StatefulWidget {
   const ConfigScreen({super.key});
@@ -393,12 +395,57 @@ class _ConfigScreenState extends State<ConfigScreen> {
 
   Future<void> _loadSavedNumber() async {
     final prefs = await SharedPreferences.getInstance();
+    String? savedNumber = prefs.getString('sos_contact');
+    
+    // Si no hay número, adivinamos prefijo usando la Región del Sistema
+    if (savedNumber == null || savedNumber.isEmpty) {
+      savedNumber = _getSmartPrefix();
+    }
+    
     setState(() {
-      _phoneController.text = prefs.getString('sos_contact') ?? '';
+      _phoneController.text = savedNumber ?? '';
     });
   }
 
+  // --- LÓGICA INTELIGENTE DE PREFIJOS ---
+  String _getSmartPrefix() {
+    try {
+      // Obtenemos el Locale del Sistema Operativo (Ej: "es_MX" o "en_US")
+      // Esto es más fiable que el idioma de la app.
+      final String systemLocale = Platform.localeName; 
+      final List<String> parts = systemLocale.split('_');
+      
+      if (parts.length < 2) return '+'; // Si no tiene región, fallback
+
+      String countryCode = parts[1].toUpperCase(); // Ej: "MX", "ES", "AR"
+
+      // Mapeo de los países más comunes para tu target
+      switch (countryCode) {
+        case 'ES': return '+34 '; // España
+        case 'FR': return '+33 '; // Francia
+        case 'PT': return '+351 '; // Portugal
+        case 'DE': return '+49 '; // Alemania
+        case 'US': return '+1 ';  // USA
+        case 'MX': return '+52 '; // México
+        case 'AR': return '+54 '; // Argentina
+        case 'CO': return '+57 '; // Colombia
+        case 'BR': return '+55 '; // Brasil
+        case 'GB': return '+44 '; // Reino Unido
+        default: return '+';      // Genérico
+      }
+    } catch (e) {
+      return '+';
+    }
+  }
+
   Future<void> _saveNumber() async {
+    if (_phoneController.text.length < 6) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text("⚠️ Número demasiado corto / Number too short"), backgroundColor: Colors.red),
+      );
+      return;
+    }
+
     setState(() { _isSaving = true; });
     
     final prefs = await SharedPreferences.getInstance();
@@ -409,7 +456,7 @@ class _ConfigScreenState extends State<ConfigScreen> {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text(l10n.settingsSavedMsg), backgroundColor: Colors.green),
       );
-      Navigator.pop(context); // Volver atrás al guardar
+      Navigator.pop(context);
     }
   }
 
@@ -422,7 +469,7 @@ class _ConfigScreenState extends State<ConfigScreen> {
       appBar: AppBar(
         title: Text(l10n.settingsTitle, style: const TextStyle(color: Colors.white)),
         backgroundColor: Colors.transparent,
-        iconTheme: const IconThemeData(color: Colors.white), // Flecha atrás blanca
+        iconTheme: const IconThemeData(color: Colors.white),
       ),
       body: Padding(
         padding: const EdgeInsets.all(20.0),
