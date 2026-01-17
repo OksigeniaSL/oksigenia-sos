@@ -100,4 +100,33 @@ class AppLocalizationsPt extends AppLocalizations {
   @override
   String get privacyPolicyContent =>
       'POLÍTICA DE PRIVACIDADE E TERMOS DE USO\n\n1. SEM COLETA DE DADOS\nOksigenia SOS foi projetado com privacidade desde a conceção. O aplicativo opera inteiramente de forma local. Não enviamos seus dados para nenhuma nuvem, não usamos servidores de rastreamento e não vendemos suas informações. Seus contatos de emergência permanecem estritamente no seu dispositivo.\n\n2. USO DE PERMISSÕES\n- Localização: Usada estritamente para obter coordenadas GPS em caso de impacto ou ativação manual. Nenhum rastreamento em segundo plano ocorre quando o monitoramento está desativado.\n- SMS: Usado exclusivamente para enviar a mensagem de alerta ao seu contato definido. O aplicativo não lê suas mensagens pessoais.\n\n3. LIMITAÇÃO DE RESPONSABILIDADE\nEste aplicativo é fornecido \'como está\', sem garantia de qualquer tipo. A Oksigenia e seus desenvolvedores não são responsáveis por danos ou consequências resultantes de falhas no software, incluindo: falta de cobertura celular, bateria descarregada ou erros de GPS.\n\nEsta ferramenta é um complemento de segurança e nunca deve ser considerada um substituto infalível para serviços de emergência profissionais.';
+
+  @override
+  String get advSettingsTitle => 'Funcionalidades Avançadas';
+
+  @override
+  String get advSettingsSubtitle => 'Multi-contato, Rastreamento GPS...';
+
+  @override
+  String get dialogCommunityTitle => '💎 Oksigenia Community';
+
+  @override
+  String get dialogCommunityBody =>
+      'Esta é a versão COMMUNITY (Livre).\n\nTodas as funcionalidades estão desbloqueadas graças ao código aberto.\n\nSe for útil, considere uma doação voluntária.';
+
+  @override
+  String get dialogStoreTitle => '🔒 Oksigenia Pro';
+
+  @override
+  String get dialogStoreBody =>
+      'Assine a versão PRO para desbloquear múltiplos contatos e rastreamento em tempo real nos nossos servidores privados.';
+
+  @override
+  String get btnDonate => 'Pagar um café ☕';
+
+  @override
+  String get btnSubscribe => 'Assinar';
+
+  @override
+  String get btnClose => 'Fechar';
 }

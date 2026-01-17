@@ -105,7 +105,6 @@ class _SOSScreenState extends State<SOSScreen> {
   void initState() {
     super.initState();
     _verificarMensajesRemotos();
-    // Añadimos delay para asegurar que el contexto de localización esté listo
     WidgetsBinding.instance.addPostFrameCallback((_) => _checkDisclaimer());
   }
 
@@ -116,14 +115,13 @@ class _SOSScreenState extends State<SOSScreen> {
     super.dispose();
   }
 
-  // --- DISCLAIMER LEGAL MULTI-IDIOMA ---
+  // --- DISCLAIMER ---
   Future<void> _checkDisclaimer() async {
     final prefs = await SharedPreferences.getInstance();
     final bool accepted = prefs.getBool('disclaimer_accepted') ?? false;
 
     if (!accepted && mounted) {
       final l10n = AppLocalizations.of(context)!;
-      
       showDialog(
         context: context,
         barrierDismissible: false,
@@ -548,7 +546,7 @@ class _SOSScreenState extends State<SOSScreen> {
              const SizedBox(height: 30),
             const Padding(
               padding: EdgeInsets.all(20.0),
-              child: Text("© 2026 Oksigenia v2.1", style: TextStyle(color: Colors.white24), textAlign: TextAlign.center),
+              child: Text("© 2026 Oksigenia v2.2", style: TextStyle(color: Colors.white24), textAlign: TextAlign.center),
             ),
           ],
         ),
@@ -746,27 +744,27 @@ class _ConfigScreenState extends State<ConfigScreen> {
               const Divider(color: Colors.white24),
               ListTile(
                 contentPadding: EdgeInsets.zero,
-                title: const Text("Funciones Avanzadas", style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
-                subtitle: const Text("Multi-contacto, Tracking GPS...", style: TextStyle(color: Colors.white54)),
+                title: Text(l10n.advSettingsTitle, style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
+                subtitle: Text(l10n.advSettingsSubtitle, style: const TextStyle(color: Colors.white54)),
                 trailing: const Icon(Icons.lock_open, color: Colors.amber),
                 onTap: () {
                   showDialog(
                     context: context,
                     builder: (ctx) => AlertDialog(
                       backgroundColor: Colors.grey.shade900,
-                      title: Text(AppConfig.isCommunity ? "💎 Oksigenia Community" : "🔒 Oksigenia Pro", style: const TextStyle(color: Colors.white)),
+                      title: Text(AppConfig.isCommunity ? l10n.dialogCommunityTitle : l10n.dialogStoreTitle, style: const TextStyle(color: Colors.white)),
                       content: Text(
                         AppConfig.isCommunity 
-                          ? "Esta es la versión COMMUNITY (Libre).\n\nTodas las funciones están desbloqueadas gracias al código abierto.\n\nSi te es útil, considera una donación voluntaria."
-                          : "Suscríbete a la versión PRO para desbloquear múltiples contactos y seguimiento en tiempo real.",
+                          ? l10n.dialogCommunityBody
+                          : l10n.dialogStoreBody,
                         style: const TextStyle(color: Colors.white70),
                       ),
                       actions: [
-                        TextButton(onPressed: () => Navigator.pop(ctx), child: const Text("Cerrar")),
+                        TextButton(onPressed: () => Navigator.pop(ctx), child: Text(l10n.btnClose)),
                         if (AppConfig.isCommunity)
-                          ElevatedButton(onPressed: () => _abrirWebDonar(), child: const Text("Invitar a un café ☕")),
+                          ElevatedButton(onPressed: () => _abrirWebDonar(), child: Text(l10n.btnDonate)),
                         if (AppConfig.isStore)
-                          ElevatedButton(onPressed: () {}, child: const Text("Suscribirse")),
+                          ElevatedButton(onPressed: () {}, child: Text(l10n.btnSubscribe)),
                       ],
                     ),
                   );
@@ -779,12 +777,13 @@ class _ConfigScreenState extends State<ConfigScreen> {
     );
   }
   void _abrirWebDonar() async {
-    final Uri uri = Uri.parse("https://oksigenia.com/donar");
+    // URL DE DONACIÓN DIRECTA
+    final Uri uri = Uri.parse("https://www.paypal.com/donate/?business=paypal@oksigenia.cc&no_recurring=0&currency_code=EUR");
     if (!await launchUrl(uri, mode: LaunchMode.externalApplication)) debugPrint("Error $uri");
   }
 }
 
-// PANTALLA DE PRIVACIDAD Y LEGAL
+// PANTALLA DE PRIVACIDAD
 class PrivacyScreen extends StatelessWidget {
   const PrivacyScreen({super.key});
 

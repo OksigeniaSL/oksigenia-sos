@@ -277,6 +277,60 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'PRIVACY POLICY & TERMS OF USE\n\n1. NO DATA COLLECTION\nOksigenia SOS is built on a privacy-by-design principle. The application operates entirely locally. We do not upload your data to any cloud, do not use tracking servers, and do not sell your information to third parties. Your emergency contacts and location history remain strictly on your device.\n\n2. PERMISSION USAGE\n- Location: Used strictly to retrieve GPS coordinates in the event of an impact or manual activation. No background tracking occurs when monitoring is disabled.\n- SMS: Used exclusively to send the alert message to your defined contact. The app does not read your personal messages.\n\n3. LIMITATION OF LIABILITY\nThis application is provided \'as is\', without warranty of any kind. Oksigenia and its developers are not liable for damages, injuries, or death resulting from software failure, including but not limited to: lack of cellular coverage, battery drain, operating system failures, or GPS hardware errors.\n\nThis tool is a safety supplement and should never be considered an infallible substitute for professional emergency services.'**
   String get privacyPolicyContent;
+
+  /// No description provided for @advSettingsTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Advanced Features'**
+  String get advSettingsTitle;
+
+  /// No description provided for @advSettingsSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Multi-contact, GPS Tracking...'**
+  String get advSettingsSubtitle;
+
+  /// No description provided for @dialogCommunityTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'💎 Oksigenia Community'**
+  String get dialogCommunityTitle;
+
+  /// No description provided for @dialogCommunityBody.
+  ///
+  /// In en, this message translates to:
+  /// **'This is the COMMUNITY version (Free).\n\nAll features are unlocked thanks to open source.\n\nIf you find it useful, consider a voluntary donation.'**
+  String get dialogCommunityBody;
+
+  /// No description provided for @dialogStoreTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'🔒 Oksigenia Pro'**
+  String get dialogStoreTitle;
+
+  /// No description provided for @dialogStoreBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Subscribe to PRO version to unlock multiple contacts and real-time tracking on our private servers.'**
+  String get dialogStoreBody;
+
+  /// No description provided for @btnDonate.
+  ///
+  /// In en, this message translates to:
+  /// **'Buy me a coffee ☕'**
+  String get btnDonate;
+
+  /// No description provided for @btnSubscribe.
+  ///
+  /// In en, this message translates to:
+  /// **'Subscribe'**
+  String get btnSubscribe;
+
+  /// No description provided for @btnClose.
+  ///
+  /// In en, this message translates to:
+  /// **'Close'**
+  String get btnClose;
 }
 
 class _AppLocalizationsDelegate

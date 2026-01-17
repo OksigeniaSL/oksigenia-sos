@@ -100,4 +100,33 @@ class AppLocalizationsFr extends AppLocalizations {
   @override
   String get privacyPolicyContent =>
       'POLITIQUE DE CONFIDENTIALITÉ ET CONDITIONS D\'UTILISATION\n\n1. AUCUNE COLLECTE DE DONNÉES\nOksigenia SOS est conçue selon le principe de confidentialité par défaut. L\'application fonctionne entièrement localement. Nous ne téléchargeons pas vos données dans le cloud, n\'utilisons pas de serveurs de suivi et ne vendons pas vos informations. Vos contacts d\'urgence restent strictement sur votre appareil.\n\n2. UTILISATION DES PERMISSIONS\n- Localisation : Utilisée strictement pour obtenir les coordonnées GPS en cas d\'impact ou d\'activation manuelle. Aucun suivi en arrière-plan n\'est effectué lorsque la surveillance est désactivée.\n- SMS : Utilisé exclusivement pour envoyer le message d\'alerte à votre contact défini. L\'application ne lit pas vos messages personnels.\n\n3. LIMITATION DE RESPONSABILITÉ\nCette application est fournie \'telle quelle\', sans garantie d\'aucune sorte. Oksigenia et ses développeurs ne sont pas responsables des dommages ou conséquences résultant d\'une défaillance du logiciel, y compris : absence de couverture mobile, batterie déchargée ou erreurs GPS.\n\nCet outil est un complément de sécurité et ne doit jamais être considéré comme un substitut infaillible aux secours professionnels.';
+
+  @override
+  String get advSettingsTitle => 'Fonctionnalités Avancées';
+
+  @override
+  String get advSettingsSubtitle => 'Multi-contact, Suivi GPS...';
+
+  @override
+  String get dialogCommunityTitle => '💎 Oksigenia Community';
+
+  @override
+  String get dialogCommunityBody =>
+      'Ceci est la version COMMUNITY (Gratuite).\n\nToutes les fonctionnalités sont débloquées grâce à l\'open source.\n\nSi elle vous est utile, envisagez un don volontaire.';
+
+  @override
+  String get dialogStoreTitle => '🔒 Oksigenia Pro';
+
+  @override
+  String get dialogStoreBody =>
+      'Abonnez-vous à la version PRO pour débloquer plusieurs contacts et le suivi en temps réel sur nos serveurs privés.';
+
+  @override
+  String get btnDonate => 'Offrez-moi un café ☕';
+
+  @override
+  String get btnSubscribe => 'S\'abonner';
+
+  @override
+  String get btnClose => 'Fermer';
 }

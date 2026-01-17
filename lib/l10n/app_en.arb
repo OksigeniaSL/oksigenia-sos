@@ -29,4 +29,14 @@
     "menuPrivacy": "Privacy & Legal",
     "privacyTitle": "Terms & Privacy",
     "privacyPolicyContent": "PRIVACY POLICY & TERMS OF USE\n\n1. NO DATA COLLECTION\nOksigenia SOS is built on a privacy-by-design principle. The application operates entirely locally. We do not upload your data to any cloud, do not use tracking servers, and do not sell your information to third parties. Your emergency contacts and location history remain strictly on your device.\n\n2. PERMISSION USAGE\n- Location: Used strictly to retrieve GPS coordinates in the event of an impact or manual activation. No background tracking occurs when monitoring is disabled.\n- SMS: Used exclusively to send the alert message to your defined contact. The app does not read your personal messages.\n\n3. LIMITATION OF LIABILITY\nThis application is provided 'as is', without warranty of any kind. Oksigenia and its developers are not liable for damages, injuries, or death resulting from software failure, including but not limited to: lack of cellular coverage, battery drain, operating system failures, or GPS hardware errors.\n\nThis tool is a safety supplement and should never be considered an infallible substitute for professional emergency services."
+    ,
+    "advSettingsTitle": "Advanced Features",
+    "advSettingsSubtitle": "Multi-contact, GPS Tracking...",
+    "dialogCommunityTitle": "💎 Oksigenia Community",
+    "dialogCommunityBody": "This is the COMMUNITY version (Free).\n\nAll features are unlocked thanks to open source.\n\nIf you find it useful, consider a voluntary donation.",
+    "dialogStoreTitle": "🔒 Oksigenia Pro",
+    "dialogStoreBody": "Subscribe to PRO version to unlock multiple contacts and real-time tracking on our private servers.",
+    "btnDonate": "Buy me a coffee ☕",
+    "btnSubscribe": "Subscribe",
+    "btnClose": "Close"
 }
