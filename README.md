@@ -14,9 +14,17 @@
 
 ## 📸 Screenshots / Capturas
 
-| Home & Status | Settings & Privacy | Alerta / Alert |
-|:---:|:---:|:---:|
-| <img src="screenshots/screen_main.jpg" width="200" /> | <img src="screenshots/screen_settings.jpg" width="200" /> | <img src="screenshots/screen_alert.jpg" width="200" /> |
+| Home & Status | Settings |
+|:---:|:---:|
+| <img src="screenshots/screen_main.jpg" width="200" /> | <img src="screenshots/screen_settings.jpg" width="200" /> |
+
+| Alerta / Alert | Enviado / Sent |
+|:---:|:---:|
+| <img src="screenshots/screen_alert.jpg" width="200" /> | <img src="screenshots/screen_send.jpg" width="200" /> |
+
+| FOSS Info | Legal & Disclaimer |
+|:---:|:---:|
+| <img src="screenshots/screen_foss.jpg" width="200" /> | <img src="screenshots/Captura08.jpg" width="200" /> |
 
 ---
 
