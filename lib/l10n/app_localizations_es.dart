@@ -44,6 +44,18 @@ class AppLocalizationsEs extends AppLocalizations {
   String get menuSettings => 'Ajustes';
 
   @override
+  String get menuPrivacy => 'Privacidad y Legal';
+
+  @override
+  String get menuDonate => 'Donar / Donate';
+
+  @override
+  String get menuX => 'X (Twitter)';
+
+  @override
+  String get menuInsta => 'Instagram';
+
+  @override
   String get motto => 'Respira > Inspira > Crece;';
 
   @override
@@ -110,14 +122,11 @@ class AppLocalizationsEs extends AppLocalizations {
   String get btnDecline => 'SALIR';
 
   @override
-  String get menuPrivacy => 'Privacidad y Legal';
-
-  @override
   String get privacyTitle => 'Términos y Privacidad';
 
   @override
   String get privacyPolicyContent =>
-      'POLÍTICA DE PRIVACIDAD Y TÉRMINOS\n\n1. SIN RECOPILACIÓN DE DATOS\nOksigenia SOS opera localmente. No subimos datos a la nube ni vendemos tu información.\n\n2. PERMISOS\n- Ubicación: Para coordenadas en caso de alerta.\n- SMS: Exclusivamente para enviar el mensaje de socorro.\n\n3. LIMITACIÓN DE RESPONSABILIDAD\nApp entregada \'tal cual\'. No nos hacemos responsables por fallos de cobertura o hardware.';
+      'POLÍTICA DE PRIVACIDAD Y TÉRMINOS\n\n1. SIN RECOLECCIÓN DE DATOS\nOksigenia SOS funciona localmente. No subimos datos a la nube ni vendemos tu información.\n\n2. PERMISOS\n- Ubicación: Para coordenadas en caso de alerta.\n- SMS: Exclusivamente para enviar el mensaje de socorro.\n\n3. LIMITACIÓN DE RESPONSABILIDAD\nApp entregada \'tal cual\'. No nos hacemos responsables por fallos de cobertura o hardware.';
 
   @override
   String get advSettingsTitle => 'Funciones Avanzadas';
@@ -130,7 +139,7 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get dialogCommunityBody =>
-      'Esta es la versión COMMUNITY (Gratis).\n\nTodas las funciones están desbloqueadas gracias al código abierto.\n\nSi te es útil, considera una donación voluntaria.';
+      'Esta es la versión COMMUNITY (Gratis).\n\nTodas las funciones están desbloqueadas gracias al código abierto.';
 
   @override
   String get dialogStoreTitle => '🔒 Oksigenia Pro';
@@ -159,11 +168,20 @@ class AppLocalizationsEs extends AppLocalizations {
   String get permSmsButton => 'Activar SMS en Ajustes';
 
   @override
+  String get restrictedSettingsTitle => 'Ajustes Restringidos';
+
+  @override
+  String get restrictedSettingsBody =>
+      'Android ha restringido este permiso porque la aplicación se instaló manualmente (side-loaded).';
+
+  @override
+  String get btnGoToSettings => 'IR A AJUSTES';
+
+  @override
   String get contactsTitle => 'Contactos de Emergencia';
 
   @override
-  String get contactsSubtitle =>
-      'El primero (Principal) recibirá el seguimiento GPS.';
+  String get contactsSubtitle => 'El primero recibirá el seguimiento GPS.';
 
   @override
   String get contactsAddHint => 'Nuevo número';
@@ -229,7 +247,7 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get donateDialogBody =>
-      'Esta app es Software Libre y Gratuito.\nSi te da seguridad, invítanos a un café para mantener los servidores.';
+      'Esta app es Software Libre y Gratuito. Si te da seguridad, invítanos a un café para mantener los servidores.';
 
   @override
   String get donateBtn => 'Donar con PayPal';

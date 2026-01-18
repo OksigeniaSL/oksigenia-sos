@@ -170,16 +170,40 @@ abstract class AppLocalizations {
   /// **'Settings'**
   String get menuSettings;
 
+  /// No description provided for @menuPrivacy.
+  ///
+  /// In en, this message translates to:
+  /// **'Privacy & Legal'**
+  String get menuPrivacy;
+
+  /// No description provided for @menuDonate.
+  ///
+  /// In en, this message translates to:
+  /// **'Donar / Donate'**
+  String get menuDonate;
+
+  /// No description provided for @menuX.
+  ///
+  /// In en, this message translates to:
+  /// **'X (Twitter)'**
+  String get menuX;
+
+  /// No description provided for @menuInsta.
+  ///
+  /// In en, this message translates to:
+  /// **'Instagram'**
+  String get menuInsta;
+
   /// No description provided for @motto.
   ///
   /// In en, this message translates to:
-  /// **'Breathe > Inspire > Grow;'**
+  /// **'Respira > Inspira > Crece;'**
   String get motto;
 
   /// No description provided for @panicMessage.
   ///
   /// In en, this message translates to:
-  /// **'🆘 *OKSIGENIA ALERT* 🆘\n\nI need urgent help.\n📍 Location: {link}\n\nBreathe > Inspire > Grow;'**
+  /// **'🆘 *OKSIGENIA ALERT* 🆘\n\nI need urgent help.\n📍 Location: {link}\n\nRespira > Inspira > Crece;'**
   String panicMessage(Object link);
 
   /// No description provided for @settingsTitle.
@@ -296,12 +320,6 @@ abstract class AppLocalizations {
   /// **'EXIT'**
   String get btnDecline;
 
-  /// No description provided for @menuPrivacy.
-  ///
-  /// In en, this message translates to:
-  /// **'Privacy & Legal'**
-  String get menuPrivacy;
-
   /// No description provided for @privacyTitle.
   ///
   /// In en, this message translates to:
@@ -335,7 +353,7 @@ abstract class AppLocalizations {
   /// No description provided for @dialogCommunityBody.
   ///
   /// In en, this message translates to:
-  /// **'This is the COMMUNITY version (Free).\n\nAll features are unlocked thanks to open source.\n\nIf useful, consider a voluntary donation.'**
+  /// **'This is the COMMUNITY version (Free).'**
   String get dialogCommunityBody;
 
   /// No description provided for @dialogStoreTitle.
@@ -385,6 +403,24 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Enable SMS in Settings'**
   String get permSmsButton;
+
+  /// No description provided for @restrictedSettingsTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Restricted Settings'**
+  String get restrictedSettingsTitle;
+
+  /// No description provided for @restrictedSettingsBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Android has restricted this permission because the app was installed manually (side-loaded).'**
+  String get restrictedSettingsBody;
+
+  /// No description provided for @btnGoToSettings.
+  ///
+  /// In en, this message translates to:
+  /// **'GO TO SETTINGS'**
+  String get btnGoToSettings;
 
   /// No description provided for @contactsTitle.
   ///
@@ -521,7 +557,7 @@ abstract class AppLocalizations {
   /// No description provided for @donateDialogBody.
   ///
   /// In en, this message translates to:
-  /// **'This app is Free & Open Source Software.\nIf it keeps you safe, buy us a coffee to keep servers running.'**
+  /// **'This app is Free & Open Source Software. If it keeps you safe, buy us a coffee.'**
   String get donateDialogBody;
 
   /// No description provided for @donateBtn.

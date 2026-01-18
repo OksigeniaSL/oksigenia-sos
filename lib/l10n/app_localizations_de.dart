@@ -35,7 +35,7 @@ class AppLocalizationsDe extends AppLocalizations {
   String get menuWeb => 'Offizielle Webseite';
 
   @override
-  String get menuSupport => 'Technischer Support';
+  String get menuSupport => 'Support';
 
   @override
   String get menuLanguages => 'Sprache';
@@ -44,11 +44,23 @@ class AppLocalizationsDe extends AppLocalizations {
   String get menuSettings => 'Einstellungen';
 
   @override
-  String get motto => 'Atmen > Inspirieren > Wachsen;';
+  String get menuPrivacy => 'Datenschutz';
+
+  @override
+  String get menuDonate => 'Donar / Donate';
+
+  @override
+  String get menuX => 'X (Twitter)';
+
+  @override
+  String get menuInsta => 'Instagram';
+
+  @override
+  String get motto => 'Respira > Inspira > Crece;';
 
   @override
   String panicMessage(Object link) {
-    return '🆘 *OKSIGENIA ALARM* 🆘\n\nIch brauche dringend Hilfe.\n📍 Standort: $link\n\nAtmen > Inspirieren > Wachsen;';
+    return '🆘 *OKSIGENIA ALARM* 🆘\n\nBrauche Hilfe.\n📍 Standort: $link\n\nRespira > Inspira > Crece;';
   }
 
   @override
@@ -58,89 +70,83 @@ class AppLocalizationsDe extends AppLocalizations {
   String get settingsLabel => 'Notrufnummer';
 
   @override
-  String get settingsHint => 'Bsp: +49 151 1234 5678';
+  String get settingsHint => 'Bsp: +49 170 0000000';
 
   @override
   String get settingsSave => 'SPEICHERN';
 
   @override
-  String get settingsSavedMsg => 'Kontakt erfolgreich gespeichert';
+  String get settingsSavedMsg => 'Kontakt gespeichert';
 
   @override
-  String get errorNoContact => '⚠️ Bitte zuerst Kontakt konfigurieren!';
+  String get errorNoContact => '⚠️ Kontakt konfigurieren!';
 
   @override
   String get autoModeLabel => 'Sturzerkennung';
 
   @override
-  String get autoModeDescription => 'Überwacht schwere Stöße.';
+  String get autoModeDescription => 'Überwacht Stürze.';
 
   @override
   String get inactivityModeLabel => 'Inaktivitätsmonitor';
 
   @override
-  String get inactivityModeDescription => 'Alarm bei fehlender Bewegung.';
+  String get inactivityModeDescription => 'Alarm bei Ruhe.';
 
   @override
-  String get alertFallDetected => 'AUFPRALL ERKANNT!';
+  String get alertFallDetected => 'STURZ ERKANNT!';
 
   @override
-  String get alertFallBody => 'Schwerer Sturz erkannt. Alles okay?';
+  String get alertFallBody => 'Sturz erkannt. Alles okay?';
 
   @override
-  String get alertInactivityDetected => 'INAKTIVITÄT ERKANNT!';
+  String get alertInactivityDetected => 'INAKTIVITÄT!';
 
   @override
-  String get alertInactivityBody => 'Keine Bewegung erkannt. Alles okay?';
+  String get alertInactivityBody => 'Keine Bewegung. Alles okay?';
 
   @override
   String get btnImOkay => 'MIR GEHT ES GUT';
 
   @override
-  String get disclaimerTitle => '⚠️ RECHTLICHER HINWEIS & DATENSCHUTZ';
+  String get disclaimerTitle => '⚠️ HINWEIS';
 
   @override
   String get disclaimerText =>
-      'Oksigenia SOS ist ein Hilfsmittel, kein Ersatz für professionelle Rettungsdienste. Der Betrieb hängt von externen Faktoren ab: Akku, GPS-Signal und Mobilfunkabdeckung.\n\nMit der Aktivierung dieser App akzeptieren Sie, dass die Software \'wie besehen\' geliefert wird, und stellen die Entwickler von der gesetzlichen Haftung für technische Ausfälle frei. Sie sind für Ihre eigene Sicherheit verantwortlich.';
+      'Oksigenia SOS ist ein Tool, kein Ersatz für professionelle Rettungsdienste.';
 
   @override
-  String get btnAccept => 'ICH AKZEPTIERE DAS RISIKO';
+  String get btnAccept => 'AKZEPTIEREN';
 
   @override
   String get btnDecline => 'BEENDEN';
 
   @override
-  String get menuPrivacy => 'Datenschutz & Rechtliches';
+  String get privacyTitle => 'Bedingungen';
 
   @override
-  String get privacyTitle => 'AGB & Datenschutz';
-
-  @override
-  String get privacyPolicyContent =>
-      'DATENSCHUTZRICHTLINIE & BEDINGUNGEN\n\n1. KEINE DATENSAMMLUNG\nOksigenia SOS arbeitet lokal. Wir laden keine Daten in die Cloud hoch und verkaufen Ihre Informationen nicht.\n\n2. BERECHTIGUNGEN\n- Standort: Für Koordinaten im Alarmfall.\n- SMS: Ausschließlich zum Senden des Notrufs.\n\n3. HAFTUNGSBESCHRÄNKUNG\nApp wird \'wie besehen\' bereitgestellt. Wir haften nicht für Netz- oder Hardwareausfälle.';
+  String get privacyPolicyContent => 'DATENSCHUTZ.';
 
   @override
   String get advSettingsTitle => 'Erweiterte Funktionen';
 
   @override
-  String get advSettingsSubtitle => 'Multi-Kontakt, GPS-Tracking...';
+  String get advSettingsSubtitle => 'GPS-Tracking...';
 
   @override
   String get dialogCommunityTitle => '💎 Oksigenia Community';
 
   @override
-  String get dialogCommunityBody =>
-      'Dies ist die COMMUNITY-Version (Kostenlos).\n\nAlle Funktionen sind dank Open Source freigeschaltet.\n\nWenn es nützlich ist, erwägen Sie eine freiwillige Spende.';
+  String get dialogCommunityBody => 'COMMUNITY-Version (Gratis).';
 
   @override
   String get dialogStoreTitle => '🔒 Oksigenia Pro';
 
   @override
-  String get dialogStoreBody =>
-      'Abonnieren Sie PRO, um mehrere Kontakte und Echtzeit-Tracking freizuschalten.';
+  String get dialogStoreBody => 'PRO abonnieren.';
 
   @override
-  String get btnDonate => 'Spendier mir einen Kaffee ☕';
+  String get btnDonate => 'Kaffee spendieren ☕';
 
   @override
   String get btnSubscribe => 'Abonnieren';
@@ -149,88 +155,96 @@ class AppLocalizationsDe extends AppLocalizations {
   String get btnClose => 'Schließen';
 
   @override
-  String get permSmsTitle => 'GEFAHR! SMS-Berechtigung blockiert';
+  String get permSmsTitle => 'GEFAHR! SMS blockiert';
 
   @override
-  String get permSmsBody => 'Die App kann OHNE Erlaubnis keine Alarme senden.';
+  String get permSmsBody => 'Die App kann keine Alarme senden.';
 
   @override
-  String get permSmsButton => 'SMS in Einstellungen aktivieren';
+  String get permSmsButton => 'SMS aktivieren';
+
+  @override
+  String get restrictedSettingsTitle => 'Einstellungen';
+
+  @override
+  String get restrictedSettingsBody =>
+      'Android hat die Berechtigung eingeschränkt.';
+
+  @override
+  String get btnGoToSettings => 'EINSTELLUNGEN';
 
   @override
   String get contactsTitle => 'Notfallkontakte';
 
   @override
-  String get contactsSubtitle => 'Der erste (Haupt) erhält das GPS-Tracking.';
+  String get contactsSubtitle => 'Hauptkontakt erhält GPS.';
 
   @override
-  String get contactsAddHint => 'Neue Nummer';
+  String get contactsAddHint => 'Nummer hinzufügen';
 
   @override
-  String get contactsEmpty => '⚠️ Keine Kontakte. Alarm wird nicht gesendet.';
+  String get contactsEmpty => '⚠️ Keine Kontakte.';
 
   @override
-  String get messageTitle => 'Benutzerdefinierte Nachricht';
+  String get messageTitle => 'Eigene Nachricht';
 
   @override
-  String get messageSubtitle => 'Wird VOR den Koordinaten gesendet.';
+  String get messageSubtitle => 'Vor Koordinaten gesendet.';
 
   @override
-  String get messageHint => 'Bsp: Diabetiker. Nordroute...';
+  String get messageHint => 'Z.B.: Diabetiker...';
 
   @override
   String get trackingTitle => 'GPS-Tracking';
 
   @override
-  String get trackingSubtitle => 'Sendet Position alle X an Hauptkontakt.';
+  String get trackingSubtitle => 'Sendet Position.';
 
   @override
   String get trackOff => '❌ Deaktiviert';
 
   @override
-  String get track30 => '⏱️ Alle 30 Min';
+  String get track30 => '⏱️ 30 Min.';
 
   @override
-  String get track60 => '⏱️ Alle 1 Std';
+  String get track60 => '⏱️ 1 Std.';
 
   @override
-  String get track120 => '⏱️ Alle 2 Std';
+  String get track120 => '⏱️ 2 Std.';
 
   @override
-  String get contactMain => 'Haupt';
+  String get contactMain => 'Hauptkontakt';
 
   @override
-  String get inactivityTimeTitle => 'Zeit bis Alarm';
+  String get inactivityTimeTitle => 'Zeit vor Alarm';
 
   @override
-  String get inactivityTimeSubtitle => 'Wie lange ohne Bewegung?';
+  String get inactivityTimeSubtitle => 'Zeit ohne Bewegung?';
 
   @override
-  String get ina30s => '🧪 30 Sek (TEST-Modus)';
+  String get ina30s => '🧪 30 Sek.';
 
   @override
-  String get ina1h => '⏱️ 1 Stunde (Empfohlen)';
+  String get ina1h => '⏱️ 1 Std.';
 
   @override
-  String get ina2h => '⏱️ 2 Stunden (Lange Pause)';
+  String get ina2h => '⏱️ 2 Std.';
 
   @override
-  String get testModeWarning =>
-      '⚠️ TEST-MODUS AKTIV: Alarm wird in 30s ausgelöst.';
+  String get testModeWarning => '⚠️ TESTMODUS: 30s.';
 
   @override
-  String get toastHoldToSOS => 'Für SOS gedrückt halten';
+  String get toastHoldToSOS => 'Gedrückt halten';
 
   @override
-  String get donateDialogTitle => '💎 Projekt unterstützen';
+  String get donateDialogTitle => '💎 Unterstützung';
 
   @override
-  String get donateDialogBody =>
-      'Diese App ist freie und Open-Source-Software.\nWenn sie Ihnen Sicherheit gibt, spendieren Sie uns einen Kaffee, um die Server zu finanzieren.';
+  String get donateDialogBody => 'Kaffee spendieren.';
 
   @override
-  String get donateBtn => 'Spenden via PayPal';
+  String get donateBtn => 'PayPal';
 
   @override
-  String get donateClose => 'SCHLIEßEN';
+  String get donateClose => 'SCHLIESSEN';
 }

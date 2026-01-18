@@ -4,6 +4,17 @@ plugins {
     id("dev.flutter.flutter-gradle-plugin")
 }
 
+// 1. IMPORTACIONES NECESARIAS PARA LEER EL KEYSTORE
+import java.util.Properties
+import java.io.FileInputStream
+
+// 2. CARGAR EL ARCHIVO key.properties
+val keystoreProperties = Properties()
+val keystorePropertiesFile = rootProject.file("key.properties")
+if (keystorePropertiesFile.exists()) {
+    keystoreProperties.load(FileInputStream(keystorePropertiesFile))
+}
+
 android {
     namespace = "com.oksigenia.oksigenia_sos"
     compileSdk = flutter.compileSdkVersion
@@ -27,14 +38,28 @@ android {
         minSdk = flutter.minSdkVersion
         targetSdk = flutter.targetSdkVersion
         
-        // SIMPLIFICACIÓN: Versiones fijas para evitar el error de java.util
-        versionCode = 1
-        versionName = "1.0"
+        versionCode = flutter.versionCode
+        versionName = flutter.versionName
+    }
+
+    // 3. DEFINIR LA CONFIGURACIÓN DE FIRMA (RELEASE)
+    signingConfigs {
+        create("release") {
+            keyAlias = keystoreProperties["keyAlias"] as String
+            keyPassword = keystoreProperties["keyPassword"] as String
+            storeFile = file(keystoreProperties["storeFile"] as String)
+            storePassword = keystoreProperties["storePassword"] as String
+        }
     }
 
     buildTypes {
         getByName("release") {
-            signingConfig = signingConfigs.getByName("debug")
+            // 4. APLICAR LA FIRMA DE RELEASE (¡CRÍTICO!)
+            signingConfig = signingConfigs.getByName("release")
+            
+            // Mantenemos esto en false por seguridad en esta versión para evitar problemas de ofuscación con el servicio
+            isMinifyEnabled = false
+            isShrinkResources = false
         }
     }
 }

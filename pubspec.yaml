@@ -1,7 +1,7 @@
 name: oksigenia_sos
 description: "Oksigenia SOS - Outdoor Emergency Assistant"
 publish_to: 'none'
-version: 3.6.0+2002
+version: 3.6.1+4057
 
 environment:
   sdk: '>=3.2.0 <4.0.0'
@@ -12,11 +12,12 @@ dependencies:
   flutter_localizations:
     sdk: flutter
   
-  # Core Logic
+  # Core Logic & Background (MOVIDO AQUÍ)
+  flutter_background_service: ^5.0.0
   geolocator: ^13.0.1
   url_launcher: ^6.3.1
   permission_handler: ^12.0.1
-  wakelock_plus: ^1.2.8  # <--- NUEVO: Para mantener la pantalla encendida
+  wakelock_plus: ^1.2.8
   
   # Sensors & Audio
   sensors_plus: ^6.1.0       
@@ -36,7 +37,6 @@ dev_dependencies:
 flutter:
   uses-material-design: true
   generate: true
-
   assets:
     - assets/sounds/
     - assets/images/

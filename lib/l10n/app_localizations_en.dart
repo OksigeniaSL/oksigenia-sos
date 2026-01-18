@@ -44,11 +44,23 @@ class AppLocalizationsEn extends AppLocalizations {
   String get menuSettings => 'Settings';
 
   @override
-  String get motto => 'Breathe > Inspire > Grow;';
+  String get menuPrivacy => 'Privacy & Legal';
+
+  @override
+  String get menuDonate => 'Donar / Donate';
+
+  @override
+  String get menuX => 'X (Twitter)';
+
+  @override
+  String get menuInsta => 'Instagram';
+
+  @override
+  String get motto => 'Respira > Inspira > Crece;';
 
   @override
   String panicMessage(Object link) {
-    return '🆘 *OKSIGENIA ALERT* 🆘\n\nI need urgent help.\n📍 Location: $link\n\nBreathe > Inspire > Grow;';
+    return '🆘 *OKSIGENIA ALERT* 🆘\n\nI need urgent help.\n📍 Location: $link\n\nRespira > Inspira > Crece;';
   }
 
   @override
@@ -110,9 +122,6 @@ class AppLocalizationsEn extends AppLocalizations {
   String get btnDecline => 'EXIT';
 
   @override
-  String get menuPrivacy => 'Privacy & Legal';
-
-  @override
   String get privacyTitle => 'Terms & Privacy';
 
   @override
@@ -129,8 +138,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get dialogCommunityTitle => '💎 Oksigenia Community';
 
   @override
-  String get dialogCommunityBody =>
-      'This is the COMMUNITY version (Free).\n\nAll features are unlocked thanks to open source.\n\nIf useful, consider a voluntary donation.';
+  String get dialogCommunityBody => 'This is the COMMUNITY version (Free).';
 
   @override
   String get dialogStoreTitle => '🔒 Oksigenia Pro';
@@ -156,6 +164,16 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get permSmsButton => 'Enable SMS in Settings';
+
+  @override
+  String get restrictedSettingsTitle => 'Restricted Settings';
+
+  @override
+  String get restrictedSettingsBody =>
+      'Android has restricted this permission because the app was installed manually (side-loaded).';
+
+  @override
+  String get btnGoToSettings => 'GO TO SETTINGS';
 
   @override
   String get contactsTitle => 'Emergency Contacts';
@@ -227,7 +245,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get donateDialogBody =>
-      'This app is Free & Open Source Software.\nIf it keeps you safe, buy us a coffee to keep servers running.';
+      'This app is Free & Open Source Software. If it keeps you safe, buy us a coffee.';
 
   @override
   String get donateBtn => 'Donate via PayPal';
