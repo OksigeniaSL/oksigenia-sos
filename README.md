@@ -13,7 +13,7 @@
 
 ---
 
-## 📸 Screenshots
+## 📸 Screenshots / Capturas
 
 | Home | Settings | Alert |
 |:---:|:---:|:---:|
@@ -23,7 +23,19 @@
 
 ---
 
-## 🚀 Features (v3.5.0)
+## ⚠️ Troubleshooting: Permissions (Android 13+ / GrapheneOS)
+
+[ES] Si al intentar activar los SMS ves un aviso de **"Ajustes restringidos"**, sigue estos pasos:
+[EN] If you see a **"Restricted settings"** warning when enabling SMS permissions, follow these steps:
+
+1. **App Info:** Go to your phone Settings > Apps > Oksigenia SOS. / *Ajustes > Apps > Oksigenia SOS.*
+2. **Menu:** Tap the three dots (**⋮**) in the top right corner. / *Pulsa los tres puntos (**⋮**) arriba a la derecha.*
+3. **Allow:** Select **"Allow restricted settings"**. / *Selecciona **"Permitir ajustes restringidos"**.*
+4. **Enable:** Now you can grant the SMS permission inside the app. / *Ya puedes activar el permiso de SMS en la app.*
+
+---
+
+## 🚀 Features / Características (v3.5.0)
 
 | Feature | English | Español |
 |:---|:---|:---|
@@ -47,4 +59,4 @@
 ```bash
 git clone [https://github.com/Oksigenia/oksigenia-sos.git](https://github.com/Oksigenia/oksigenia-sos.git)
 flutter pub get
-flutter build apk --release
+flutter build apk --release --split-per-abi
