@@ -147,4 +147,93 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get btnClose => 'Cerrar';
+
+  @override
+  String get permSmsTitle => '¡PELIGRO! Permiso SMS bloqueado';
+
+  @override
+  String get permSmsBody =>
+      'La app NO podrá enviar alertas aunque tengas contactos.';
+
+  @override
+  String get permSmsButton => 'Activar SMS en Ajustes';
+
+  @override
+  String get contactsTitle => 'Contactos de Emergencia';
+
+  @override
+  String get contactsSubtitle =>
+      'El primero (Principal) recibirá el seguimiento GPS.';
+
+  @override
+  String get contactsAddHint => 'Nuevo número';
+
+  @override
+  String get contactsEmpty => '⚠️ Sin contactos. La alerta no saldrá.';
+
+  @override
+  String get messageTitle => 'Mensaje Personalizado';
+
+  @override
+  String get messageSubtitle => 'Se enviará ANTES de las coordenadas.';
+
+  @override
+  String get messageHint => 'Ej: Soy diabético. Ruta Norte...';
+
+  @override
+  String get trackingTitle => 'Seguimiento GPS';
+
+  @override
+  String get trackingSubtitle => 'Envía posición al Principal cada X tiempo.';
+
+  @override
+  String get trackOff => '❌ Desactivado';
+
+  @override
+  String get track30 => '⏱️ Cada 30 min';
+
+  @override
+  String get track60 => '⏱️ Cada 1 hora';
+
+  @override
+  String get track120 => '⏱️ Cada 2 horas';
+
+  @override
+  String get contactMain => 'Principal';
+
+  @override
+  String get inactivityTimeTitle => 'Tiempo para Alerta';
+
+  @override
+  String get inactivityTimeSubtitle =>
+      '¿Cuánto tiempo sin moverte antes de avisar?';
+
+  @override
+  String get ina30s => '🧪 30 seg (Modo TEST)';
+
+  @override
+  String get ina1h => '⏱️ 1 hora (Recomendado)';
+
+  @override
+  String get ina2h => '⏱️ 2 horas (Pausa larga)';
+
+  @override
+  String get testModeWarning =>
+      '⚠️ MODO TEST ACTIVADO: La alerta saltará en 30s.';
+
+  @override
+  String get toastHoldToSOS => 'Mantén pulsado para SOS';
+
+  @override
+  String get donateDialogTitle => '💎 Apoya el Proyecto';
+
+  @override
+  String get donateDialogBody =>
+      'Esta app es Software Libre y Gratuito.\nSi te da seguridad, invítanos a un café para mantener los servidores.';
+
+  @override
+  String get donateBtn => 'Donar con PayPal';
+
+  @override
+  String get donateClose => 'CERRAR';
 }

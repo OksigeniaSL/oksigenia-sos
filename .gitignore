@@ -46,5 +46,7 @@ app.*.map.json
 
 # --- SECRETOS DE OKSIGENIA (NO SUBIR NUNCA) ---
 key.properties
-**/*.jks
 **/*.keystore
+**/*.jks
+/android/key.properties
+/android/app/upload-keystore.jks

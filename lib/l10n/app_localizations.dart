@@ -173,13 +173,13 @@ abstract class AppLocalizations {
   /// No description provided for @motto.
   ///
   /// In en, this message translates to:
-  /// **'Respira > Inspira > Crece;'**
+  /// **'Breathe > Inspire > Grow;'**
   String get motto;
 
   /// No description provided for @panicMessage.
   ///
   /// In en, this message translates to:
-  /// **'🆘 *OKSIGENIA ALERT* 🆘\n\nI need urgent help.\n📍 Location: {link}\n\nRespira > Inspira > Crece;'**
+  /// **'🆘 *OKSIGENIA ALERT* 🆘\n\nI need urgent help.\n📍 Location: {link}\n\nBreathe > Inspire > Grow;'**
   String panicMessage(Object link);
 
   /// No description provided for @settingsTitle.
@@ -191,13 +191,13 @@ abstract class AppLocalizations {
   /// No description provided for @settingsLabel.
   ///
   /// In en, this message translates to:
-  /// **'Emergency Phone Number'**
+  /// **'Emergency Phone'**
   String get settingsLabel;
 
   /// No description provided for @settingsHint.
   ///
   /// In en, this message translates to:
-  /// **'Ex: +1 555-0199'**
+  /// **'Ex: +1 555 123 456'**
   String get settingsHint;
 
   /// No description provided for @settingsSave.
@@ -263,7 +263,7 @@ abstract class AppLocalizations {
   /// No description provided for @alertInactivityBody.
   ///
   /// In en, this message translates to:
-  /// **'No movement detected for a while. Are you okay?'**
+  /// **'No movement detected. Are you okay?'**
   String get alertInactivityBody;
 
   /// No description provided for @btnImOkay.
@@ -281,7 +281,7 @@ abstract class AppLocalizations {
   /// No description provided for @disclaimerText.
   ///
   /// In en, this message translates to:
-  /// **'Oksigenia SOS is a support tool, not a replacement for professional emergency services. Its operation depends entirely on external factors: battery level, GPS signal, and cellular coverage.\n\nBy activating this app, you agree that the software is provided \'as is\' and release the developers from any legal liability for technical failures, lack of signal, or hardware errors. You are ultimately responsible for your own safety and for checking your equipment before heading out.'**
+  /// **'Oksigenia SOS is a support tool, not a substitute for professional emergency services. Its operation depends on external factors: battery, GPS signal, and mobile coverage.\n\nBy activating this app, you accept that the software is provided \'as is\' and release the developers from legal liability for technical failures. You are responsible for your own safety.'**
   String get disclaimerText;
 
   /// No description provided for @btnAccept.
@@ -311,7 +311,7 @@ abstract class AppLocalizations {
   /// No description provided for @privacyPolicyContent.
   ///
   /// In en, this message translates to:
-  /// **'PRIVACY POLICY AND TERMS OF USE\n\n1. NO DATA COLLECTION\nOksigenia SOS operates entirely locally. We do not upload your data to any cloud or sell your information. Your contacts and locations remain strictly on your device.\n\n2. USE OF PERMISSIONS\n- Location: Strictly for coordinates in case of alert.\n- SMS: Exclusively to send the distress message.\n\n3. LIMITATION OF LIABILITY\nThis app is provided \'as is\', without warranties. Developers are not liable for damages, injuries, or deaths resulting from software failure, including: lack of coverage, dead battery, OS failures, or hardware errors. This tool must never be considered an infallible substitute for professional emergency services (112/911).'**
+  /// **'PRIVACY POLICY & TERMS\n\n1. NO DATA COLLECTION\nOksigenia SOS operates locally. We do not upload data to the cloud nor sell your information.\n\n2. PERMISSIONS\n- Location: For coordinates in case of alert.\n- SMS: Exclusively to send the distress message.\n\n3. LIMITATION OF LIABILITY\nApp provided \'as is\'. We are not responsible for coverage or hardware failures.'**
   String get privacyPolicyContent;
 
   /// No description provided for @advSettingsTitle.
@@ -335,7 +335,7 @@ abstract class AppLocalizations {
   /// No description provided for @dialogCommunityBody.
   ///
   /// In en, this message translates to:
-  /// **'This is the COMMUNITY version (Free).\n\nAll features are unlocked thanks to open source.\n\nIf you find it useful, consider a voluntary donation.'**
+  /// **'This is the COMMUNITY version (Free).\n\nAll features are unlocked thanks to open source.\n\nIf useful, consider a voluntary donation.'**
   String get dialogCommunityBody;
 
   /// No description provided for @dialogStoreTitle.
@@ -347,7 +347,7 @@ abstract class AppLocalizations {
   /// No description provided for @dialogStoreBody.
   ///
   /// In en, this message translates to:
-  /// **'Subscribe to PRO version to unlock multiple contacts and real-time tracking on our private servers.'**
+  /// **'Subscribe to PRO to unlock multiple contacts and real-time tracking.'**
   String get dialogStoreBody;
 
   /// No description provided for @btnDonate.
@@ -367,6 +367,174 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Close'**
   String get btnClose;
+
+  /// No description provided for @permSmsTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'DANGER! SMS Permission Blocked'**
+  String get permSmsTitle;
+
+  /// No description provided for @permSmsBody.
+  ///
+  /// In en, this message translates to:
+  /// **'App CANNOT send alerts even with saved contacts.'**
+  String get permSmsBody;
+
+  /// No description provided for @permSmsButton.
+  ///
+  /// In en, this message translates to:
+  /// **'Enable SMS in Settings'**
+  String get permSmsButton;
+
+  /// No description provided for @contactsTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Emergency Contacts'**
+  String get contactsTitle;
+
+  /// No description provided for @contactsSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'The first one (Main) will receive GPS tracking.'**
+  String get contactsSubtitle;
+
+  /// No description provided for @contactsAddHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Add number'**
+  String get contactsAddHint;
+
+  /// No description provided for @contactsEmpty.
+  ///
+  /// In en, this message translates to:
+  /// **'⚠️ No contacts. Alert will not be sent.'**
+  String get contactsEmpty;
+
+  /// No description provided for @messageTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Custom Message'**
+  String get messageTitle;
+
+  /// No description provided for @messageSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Sent BEFORE the coordinates.'**
+  String get messageSubtitle;
+
+  /// No description provided for @messageHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Ex: Diabetic. North Route...'**
+  String get messageHint;
+
+  /// No description provided for @trackingTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'GPS Tracking'**
+  String get trackingTitle;
+
+  /// No description provided for @trackingSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Sends position to Main contact every X time.'**
+  String get trackingSubtitle;
+
+  /// No description provided for @trackOff.
+  ///
+  /// In en, this message translates to:
+  /// **'❌ Disabled'**
+  String get trackOff;
+
+  /// No description provided for @track30.
+  ///
+  /// In en, this message translates to:
+  /// **'⏱️ Every 30 min'**
+  String get track30;
+
+  /// No description provided for @track60.
+  ///
+  /// In en, this message translates to:
+  /// **'⏱️ Every 1 hour'**
+  String get track60;
+
+  /// No description provided for @track120.
+  ///
+  /// In en, this message translates to:
+  /// **'⏱️ Every 2 hours'**
+  String get track120;
+
+  /// No description provided for @contactMain.
+  ///
+  /// In en, this message translates to:
+  /// **'Main'**
+  String get contactMain;
+
+  /// No description provided for @inactivityTimeTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Time before Alert'**
+  String get inactivityTimeTitle;
+
+  /// No description provided for @inactivityTimeSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'How long without movement before alerting?'**
+  String get inactivityTimeSubtitle;
+
+  /// No description provided for @ina30s.
+  ///
+  /// In en, this message translates to:
+  /// **'🧪 30 sec (TEST Mode)'**
+  String get ina30s;
+
+  /// No description provided for @ina1h.
+  ///
+  /// In en, this message translates to:
+  /// **'⏱️ 1 hour (Recommended)'**
+  String get ina1h;
+
+  /// No description provided for @ina2h.
+  ///
+  /// In en, this message translates to:
+  /// **'⏱️ 2 hours (Long break)'**
+  String get ina2h;
+
+  /// No description provided for @testModeWarning.
+  ///
+  /// In en, this message translates to:
+  /// **'⚠️ TEST MODE ON: Alert will trigger in 30s.'**
+  String get testModeWarning;
+
+  /// No description provided for @toastHoldToSOS.
+  ///
+  /// In en, this message translates to:
+  /// **'Hold button to SOS'**
+  String get toastHoldToSOS;
+
+  /// No description provided for @donateDialogTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'💎 Support the Project'**
+  String get donateDialogTitle;
+
+  /// No description provided for @donateDialogBody.
+  ///
+  /// In en, this message translates to:
+  /// **'This app is Free & Open Source Software.\nIf it keeps you safe, buy us a coffee to keep servers running.'**
+  String get donateDialogBody;
+
+  /// No description provided for @donateBtn.
+  ///
+  /// In en, this message translates to:
+  /// **'Donate via PayPal'**
+  String get donateBtn;
+
+  /// No description provided for @donateClose.
+  ///
+  /// In en, this message translates to:
+  /// **'CLOSE'**
+  String get donateClose;
 }
 
 class _AppLocalizationsDelegate

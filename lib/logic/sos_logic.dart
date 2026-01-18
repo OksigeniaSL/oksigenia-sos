@@ -8,10 +8,14 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:audioplayers/audioplayers.dart';
 import 'package:sensors_plus/sensors_plus.dart';
 import 'package:url_launcher/url_launcher.dart';
-import 'package:wakelock_plus/wakelock_plus.dart'; 
+import 'package:wakelock_plus/wakelock_plus.dart';
+import 'package:vibration/vibration.dart'; // NUEVO: Librería de vibración
 import 'package:oksigenia_sos/l10n/app_localizations.dart'; 
+import '../services/preferences_service.dart';
+import '../screens/settings_screen.dart'; 
 
 enum SOSStatus { ready, scanning, locationFixed, preAlert, sent, error }
+enum AlertCause { manual, fall, inactivity }
 
 class SOSLogic extends ChangeNotifier {
   SOSStatus _status = SOSStatus.ready;
@@ -20,12 +24,18 @@ class SOSLogic extends ChangeNotifier {
   
   bool _isFallDetectionActive = false;
   bool _isInactivityMonitorActive = false;
-  String? _emergencyContact;
   
+  AlertCause _lastTrigger = AlertCause.manual;
+  AlertCause get lastTrigger => _lastTrigger;
+
+  int _currentInactivityLimit = 3600; 
+  int get currentInactivityLimit => _currentInactivityLimit;
+
   double _currentGForce = 1.0;
   DateTime _lastMovementTime = DateTime.now();
   
   Timer? _inactivityTimer;
+  Timer? _periodicUpdateTimer;
   StreamSubscription? _accelerometerSubscription;
   StreamSubscription? _gpsSubscription;
   
@@ -41,7 +51,11 @@ class SOSLogic extends ChangeNotifier {
   bool get isInactivityMonitorActive => _isInactivityMonitorActive;
   int get countdownSeconds => _countdownSeconds;
   double get currentGForce => _currentGForce;
-  String? get emergencyContact => _emergencyContact;
+  
+  String? get emergencyContact {
+    final contacts = PreferencesService().getContacts();
+    return contacts.isNotEmpty ? contacts.first : null;
+  }
 
   Future<void> init() async {
     await _loadSettings();
@@ -51,17 +65,24 @@ class SOSLogic extends ChangeNotifier {
   }
 
   Future<void> _loadSettings() async {
-    final prefs = await SharedPreferences.getInstance();
-    _emergencyContact = prefs.getString('emergency_contact');
+    _currentInactivityLimit = PreferencesService().getInactivityTime();
     notifyListeners();
   }
 
-  // Monitor Pasivo GPS (Semáforo)
+  Future<void> refreshConfig() async {
+    _currentInactivityLimit = PreferencesService().getInactivityTime();
+    if (_isInactivityMonitorActive) {
+      toggleInactivityMonitor(false);
+      toggleInactivityMonitor(true);
+    }
+    notifyListeners();
+  }
+
   void _startPassiveGPS() async {
     final LocationSettings locationSettings = AndroidSettings(
         accuracy: LocationAccuracy.high,
         distanceFilter: 10,
-        forceLocationManager: true,
+        forceLocationManager: true, 
         intervalDuration: const Duration(seconds: 5)
     );
 
@@ -74,33 +95,34 @@ class SOSLogic extends ChangeNotifier {
           }, onError: (_) {
              if (_status == SOSStatus.locationFixed) _setStatus(SOSStatus.ready);
           });
-    } catch (e) { print("Passive GPS Error: $e"); }
+    } catch (e) { debugPrint("Passive GPS Error: $e"); }
   }
 
   void _startGForceMonitoring() {
-    _accelerometerSubscription = accelerometerEventStream(samplingPeriod: SensorInterval.gameInterval)
+    _accelerometerSubscription = accelerometerEventStream(samplingPeriod: SensorInterval.uiInterval)
       .listen((AccelerometerEvent event) {
         double rawMagnitude = sqrt(event.x * event.x + event.y * event.y + event.z * event.z);
         _currentGForce = rawMagnitude / 9.81;
 
-        // Sensibilidad de movimiento
         if ((_currentGForce > 1.2 || _currentGForce < 0.8)) {
            _lastMovementTime = DateTime.now();
         }
         
-        // Detección de impacto (Sacudida para test o Caída real)
         if (_isFallDetectionActive && _currentGForce > 3.5 && (_status == SOSStatus.ready || _status == SOSStatus.locationFixed)) {
-          _triggerPreAlert();
+          _triggerPreAlert(AlertCause.fall);
         }
         notifyListeners();
-      }, onError: (e) => print("Sensor Error: $e"));
+      }, onError: (e) => debugPrint("Sensor Error: $e"));
   }
 
   Future<void> _checkPermissions() async {
     await [Permission.location, Permission.sms, Permission.notification].request();
   }
 
-  void openSettings(BuildContext context) => _showContactDialog(context);
+  void openSettings(BuildContext context) {
+    Navigator.push(context, MaterialPageRoute(builder: (context) => const SettingsScreen()))
+      .then((_) => refreshConfig());
+  }
   
   void openPrivacy(BuildContext context) {
     showDialog(context: context, builder: (ctx) => AlertDialog(
@@ -111,17 +133,18 @@ class SOSLogic extends ChangeNotifier {
   }
 
   void openDonation(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     showDialog(context: context, builder: (ctx) => AlertDialog(
-      title: const Text("💎 Oksigenia FOSS"),
-      content: const Text("Versión Libre y Open Source.\nSi esta herramienta te da seguridad, apóyanos."),
+      title: Text(l10n.donateDialogTitle),
+      content: Text(l10n.donateDialogBody),
       actions: [
-        TextButton(onPressed: () => Navigator.pop(ctx), child: const Text("CERRAR")),
+        TextButton(onPressed: () => Navigator.pop(ctx), child: Text(l10n.donateClose)),
         ElevatedButton(
           onPressed: () {
             launchURL("https://www.paypal.com/donate/?business=paypal@oksigenia.cc&currency_code=EUR");
             Navigator.pop(ctx);
           }, 
-          child: const Text("PayPal")
+          child: Text(l10n.donateBtn)
         )
       ],
     ));
@@ -144,9 +167,8 @@ class SOSLogic extends ChangeNotifier {
       _inactivityTimer = Timer.periodic(const Duration(seconds: 2), (timer) {
         if (_status != SOSStatus.ready && _status != SOSStatus.locationFixed) return;
         
-        // TIEMPO DE INACTIVIDAD: 3600 segundos (1 HORA)
-        if (DateTime.now().difference(_lastMovementTime).inSeconds > 3600) {
-          _triggerPreAlert();
+        if (DateTime.now().difference(_lastMovementTime).inSeconds > _currentInactivityLimit) {
+          _triggerPreAlert(AlertCause.inactivity);
         }
       });
     } else {
@@ -156,9 +178,9 @@ class SOSLogic extends ChangeNotifier {
     notifyListeners();
   }
 
-  void _triggerPreAlert() async {
+  void _triggerPreAlert(AlertCause cause) async {
+    _lastTrigger = cause;
     _gpsSubscription?.pause(); 
-    
     try { await platform.invokeMethod('wakeScreen'); } catch(_) {}
 
     _status = SOSStatus.preAlert;
@@ -166,22 +188,26 @@ class SOSLogic extends ChangeNotifier {
     _currentVolume = 0.2;
     notifyListeners();
 
+    // 1. SONIDO
     try {
         _audioPlayer?.dispose();
         _audioPlayer = AudioPlayer();
         await _audioPlayer!.setAudioContext(AudioContext(
-           android: AudioContextAndroid(
-             isSpeakerphoneOn: true, stayAwake: true, 
-             contentType: AndroidContentType.sonification, 
-             usageType: AndroidUsageType.alarm, 
-             audioFocus: AndroidAudioFocus.gainTransient
-           ),
+           android: AudioContextAndroid(isSpeakerphoneOn: true, stayAwake: true, contentType: AndroidContentType.sonification, usageType: AndroidUsageType.alarm, audioFocus: AndroidAudioFocus.gainTransient),
            iOS: AudioContextIOS(category: AVAudioSessionCategory.playback)
         ));
         await _audioPlayer!.setReleaseMode(ReleaseMode.loop);
         await _audioPlayer!.play(AssetSource('sounds/alarm.mp3'), volume: _currentVolume);
-    } catch(e) { print("Audio Panic: $e"); }
+    } catch(e) { debugPrint("Audio Panic: $e"); }
     
+    // 2. VIBRACIÓN (NUEVO) - Patrón intenso
+    try {
+      if (await Vibration.hasVibrator() ?? false) {
+        // Vibra 500ms, para 500ms, repite indefinidamente (índice 0)
+        Vibration.vibrate(pattern: [500, 1000, 500, 1000], repeat: 0);
+      }
+    } catch (e) { debugPrint("Vibration Error: $e"); }
+
     _preAlertTimer = Timer.periodic(const Duration(seconds: 1), (timer) {
       if (_countdownSeconds > 0) {
         _countdownSeconds--;
@@ -202,60 +228,81 @@ class SOSLogic extends ChangeNotifier {
     _status = SOSStatus.ready;
     _lastMovementTime = DateTime.now();
     _gpsSubscription?.resume();
-    
     try { await platform.invokeMethod('sleepScreen'); } catch(_) {}
-    
     notifyListeners();
   }
 
   void _stopAllAlerts() {
     _preAlertTimer?.cancel();
-    try { 
-      _audioPlayer?.stop(); 
-      _audioPlayer?.dispose();
-      _audioPlayer = null;
-    } catch(_) {}
+    _periodicUpdateTimer?.cancel();
+    // DETENER AUDIO Y VIBRACIÓN
+    try { _audioPlayer?.stop(); _audioPlayer?.dispose(); _audioPlayer = null; } catch(_) {}
+    try { Vibration.cancel(); } catch(_) {}
   }
 
   Future<void> sendSOS() async {
-    if (_emergencyContact == null || _emergencyContact!.isEmpty) return;
+    final prefs = PreferencesService();
+    final List<String> recipients = prefs.getContacts();
+    final String customNote = prefs.getSosMessage();
+
+    if (recipients.isEmpty) {
+      _setStatus(SOSStatus.error, "No contacts / Sin contactos");
+      return;
+    }
     
     _setStatus(SOSStatus.scanning);
-    
     _isInactivityMonitorActive = false;
     _isFallDetectionActive = false;
     _inactivityTimer?.cancel();
     _gpsSubscription?.cancel();
     
-    String msgBody = "🆘 SOS OKSIGENIA\nHelp!";
+    String msgBody = "🆘 SOS OKSIGENIA";
+    if (customNote.isNotEmpty) {
+      msgBody += "\n$customNote"; 
+    } else {
+      msgBody += "\n¡AYUDA / HELP!"; 
+    }
     
     try {
-      final LocationSettings locationSettings = AndroidSettings(
-        accuracy: LocationAccuracy.high, distanceFilter: 10,
-        forceLocationManager: true, timeLimit: const Duration(seconds: 10)
-      );
+      final LocationSettings locationSettings = AndroidSettings(accuracy: LocationAccuracy.high, forceLocationManager: true, timeLimit: const Duration(seconds: 15));
       Position pos = await Geolocator.getCurrentPosition(locationSettings: locationSettings);
       _setStatus(SOSStatus.locationFixed);
       msgBody += "\nhttp://googleusercontent.com/maps.google.com/?q=${pos.latitude},${pos.longitude}";
     } catch (e) {
-      msgBody += "\n(GPS Unavailable - Hardware Timeout)";
+      msgBody += "\n(GPS Error/Timeout)";
     }
 
-    try {
-      final String result = await platform.invokeMethod('sendSMS', {
-        "phone": _emergencyContact,
-        "msg": msgBody
-      });
-      
-      if (result == "OK") {
-        _setStatus(SOSStatus.sent);
-        await platform.invokeMethod('sleepScreen');
-      } else {
-        _setStatus(SOSStatus.error, "SMS Failed");
-      }
-    } catch (e) {
-      _setStatus(SOSStatus.error, "SMS Error: $e");
+    int successCount = 0;
+    for (String number in recipients) {
+      try {
+        final String result = await platform.invokeMethod('sendSMS', {"phone": number, "msg": msgBody});
+        if (result == "OK") successCount++;
+      } catch (e) { debugPrint("Error enviando: $e"); }
     }
+
+    if (successCount > 0) {
+      _setStatus(SOSStatus.sent);
+      await platform.invokeMethod('sleepScreen');
+      
+      int interval = prefs.getUpdateInterval();
+      if (interval > 0) _startPeriodicUpdates(interval, recipients);
+    } else {
+      _setStatus(SOSStatus.error, "Fallo SMS / SMS Failed");
+    }
+  }
+
+  void _startPeriodicUpdates(int minutes, List<String> recipients) {
+    if (recipients.isEmpty) return;
+    String target = recipients.first; 
+    
+    _periodicUpdateTimer?.cancel();
+    _periodicUpdateTimer = Timer.periodic(Duration(minutes: minutes), (timer) async {
+      try {
+        Position pos = await Geolocator.getCurrentPosition(timeLimit: const Duration(seconds: 20));
+        String updateMsg = "📍 SEGUIMIENTO Oksigenia: Sigo en ruta / Still moving.\nhttp://googleusercontent.com/maps.google.com/?q=${pos.latitude},${pos.longitude}";
+        await platform.invokeMethod('sendSMS', {"phone": target, "msg": updateMsg});
+      } catch (e) { debugPrint("❌ Fallo update: $e"); }
+    });
   }
 
   void _setStatus(SOSStatus s, [String? e]) { 
@@ -263,40 +310,13 @@ class SOSLogic extends ChangeNotifier {
       if (e != null) _errorMessage = e; 
       notifyListeners(); 
   }
-
-  void _showContactDialog(BuildContext context) {
-    String initial = _emergencyContact ?? "";
-    if (initial.isEmpty) {
-      String code = View.of(context).platformDispatcher.locale.countryCode ?? "ES";
-      Map<String, String> prefixes = {"ES":"+34", "FR":"+33", "PT":"+351", "DE":"+49", "US":"+1", "GB":"+44"};
-      initial = prefixes[code] ?? "+";
-    }
-    final ctrl = TextEditingController(text: initial);
-    final l10n = AppLocalizations.of(context)!;
-    showDialog(
-      context: context, barrierDismissible: false,
-      builder: (ctx) => AlertDialog(
-        title: Text(l10n.settingsTitle),
-        content: TextField(controller: ctrl, keyboardType: TextInputType.phone, autofocus: true, decoration: InputDecoration(labelText: l10n.settingsLabel)),
-        actions: [
-          TextButton(onPressed: () => Navigator.pop(ctx), child: Text(l10n.btnClose)),
-          ElevatedButton(onPressed: () async {
-            final p = await SharedPreferences.getInstance();
-            await p.setString('emergency_contact', ctrl.text);
-            _emergencyContact = ctrl.text;
-            notifyListeners();
-            if (ctx.mounted) Navigator.pop(ctx);
-          }, child: Text(l10n.settingsSave))
-        ],
-      ),
-    );
-  }
   
   @override
   void dispose() {
     _accelerometerSubscription?.cancel();
     _gpsSubscription?.cancel();
     _inactivityTimer?.cancel();
+    _periodicUpdateTimer?.cancel();
     _preAlertTimer?.cancel();
     _audioPlayer?.dispose();
     super.dispose();

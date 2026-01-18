@@ -3,11 +3,14 @@ import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:oksigenia_sos/l10n/app_localizations.dart'; 
 import 'logic/sos_logic.dart'; 
-import 'screens/disclaimer_screen.dart'; 
+import 'screens/disclaimer_screen.dart';
+import 'services/preferences_service.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
+  await PreferencesService().init(); 
   final prefs = await SharedPreferences.getInstance();
+  
   runApp(OksigeniaApp(initialAccepted: prefs.getBool('disclaimer_accepted') ?? false));
 }
 
@@ -26,6 +29,7 @@ class _OksigeniaAppState extends State<OksigeniaApp> {
   Widget build(BuildContext context) {
     return MaterialApp(
       debugShowCheckedModeBanner: false,
+      title: 'Oksigenia SOS',
       theme: ThemeData(
         colorScheme: ColorScheme.fromSeed(seedColor: Colors.red), 
         useMaterial3: true,
@@ -37,9 +41,7 @@ class _OksigeniaAppState extends State<OksigeniaApp> {
         GlobalWidgetsLocalizations.delegate, 
         GlobalCupertinoLocalizations.delegate
       ],
-      supportedLocales: const [
-        Locale('en'), Locale('es'), Locale('fr'), Locale('pt'), Locale('de')
-      ],
+      supportedLocales: const [Locale('en'), Locale('es'), Locale('fr'), Locale('pt'), Locale('de')],
       locale: _locale,
       home: widget.initialAccepted ? const HomeScreen() : const DisclaimerScreen(),
     );
@@ -72,11 +74,9 @@ class _HomeScreenState extends State<HomeScreen> {
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
     
-    // PANTALLAS DE ESTADO (Prioridad Alta)
     if (_sosLogic.status == SOSStatus.preAlert) return _buildPreAlertOverlay(l10n);
     if (_sosLogic.status == SOSStatus.sent) return _buildSentOverlay(l10n);
 
-    // PANTALLA PRINCIPAL (Home)
     return Scaffold(
       appBar: AppBar(
         title: const Text("OKSIGENIA SOS", style: TextStyle(fontWeight: FontWeight.bold, letterSpacing: 1.2)),
@@ -103,7 +103,34 @@ class _HomeScreenState extends State<HomeScreen> {
         child: Padding(
           padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 20),
           child: Column(
+            crossAxisAlignment: CrossAxisAlignment.center,
             children: [
+              if (_sosLogic.currentInactivityLimit == 30)
+                Container(
+                  margin: const EdgeInsets.only(bottom: 20),
+                  padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 16),
+                  decoration: BoxDecoration(
+                    color: Colors.orange[100], 
+                    borderRadius: BorderRadius.circular(30),
+                    border: Border.all(color: Colors.orange)
+                  ),
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      const Icon(Icons.warning, color: Colors.orange, size: 20), 
+                      const SizedBox(width: 8), 
+                      Flexible(
+                        child: Text(
+                          l10n.testModeWarning, 
+                          style: const TextStyle(color: Colors.deepOrange, fontWeight: FontWeight.bold, fontSize: 13),
+                          textAlign: TextAlign.center,
+                        )
+                      )
+                    ]
+                  ),
+                ),
+
               _buildStatusBadge(l10n),
               const SizedBox(height: 40), 
               _buildSOSButton(l10n),
@@ -129,33 +156,21 @@ class _HomeScreenState extends State<HomeScreen> {
   Widget _buildStatusBadge(AppLocalizations l10n) {
     Color c = Colors.grey;
     String text = "";
-    
-    // Si tenemos el GPS pasivo funcionando, mostramos locationFixed
-    // aunque estemos en Ready (naranja) o PreAlert (rojo) internamente
-    if (_sosLogic.status == SOSStatus.locationFixed) {
-        c = Colors.green;
-        text = l10n.statusLocationFixed;
-    } else if (_sosLogic.status == SOSStatus.scanning) {
-        c = Colors.blue;
-        text = l10n.statusConnecting;
-    } else if (_sosLogic.status == SOSStatus.error) {
-        c = Colors.red;
-        text = "ERROR";
-    } else {
-        c = Colors.orange;
-        text = l10n.statusReady;
-    }
+    if (_sosLogic.status == SOSStatus.locationFixed) { c = Colors.green; text = l10n.statusLocationFixed; }
+    else if (_sosLogic.status == SOSStatus.scanning) { c = Colors.blue; text = l10n.statusConnecting; }
+    else if (_sosLogic.status == SOSStatus.error) { c = Colors.red; text = "ERROR"; }
+    else { c = Colors.orange; text = l10n.statusReady; }
     
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 8),
       decoration: BoxDecoration(color: c.withOpacity(0.1), borderRadius: BorderRadius.circular(30), border: Border.all(color: c)),
       child: Row(
-        mainAxisSize: MainAxisSize.min,
+        mainAxisSize: MainAxisSize.min, 
         children: [
-          Icon(Icons.circle, color: c, size: 10),
-          const SizedBox(width: 8),
-          Text(text, style: TextStyle(color: c, fontWeight: FontWeight.bold)),
-        ],
+          Icon(Icons.circle, color: c, size: 10), 
+          const SizedBox(width: 8), 
+          Text(text, style: TextStyle(color: c, fontWeight: FontWeight.bold))
+        ]
       ),
     );
   }
@@ -164,31 +179,21 @@ class _HomeScreenState extends State<HomeScreen> {
     return Column(
       children: [
         const Text("FORCE G", style: TextStyle(fontSize: 10, color: Colors.grey, fontWeight: FontWeight.bold)),
-        Text(
-          "${_sosLogic.currentGForce.toStringAsFixed(2)} G", 
-          style: TextStyle(
-            fontSize: 28, 
-            fontWeight: FontWeight.w900, 
-            color: _sosLogic.currentGForce > 3.0 ? Colors.red : Colors.grey[600]
-          )
-        ),
+        Text("${_sosLogic.currentGForce.toStringAsFixed(2)} G", 
+          style: TextStyle(fontSize: 28, fontWeight: FontWeight.w900, color: _sosLogic.currentGForce > 3.0 ? Colors.red : Colors.grey[600])),
       ],
     );
   }
 
   Widget _buildSOSButton(AppLocalizations l10n) {
     return GestureDetector(
-      onLongPress: _sosLogic.sendSOS, 
-      onTap: () {
-         ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text("Mantén pulsado / Hold to SOS"), duration: Duration(seconds: 1)));
+      onLongPress: () => _sosLogic.sendSOS(), // Llamada normal a la función async
+      onTap: () { 
+        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(l10n.toastHoldToSOS), duration: const Duration(seconds: 1))); 
       },
       child: Container(
         width: 180, height: 180,
-        decoration: BoxDecoration(
-          shape: BoxShape.circle, 
-          gradient: const LinearGradient(colors: [Color(0xFFD32F2F), Color(0xFFEF5350)]),
-          boxShadow: [BoxShadow(color: Colors.red.withOpacity(0.4), blurRadius: 30, spreadRadius: 10)]
-        ),
+        decoration: BoxDecoration(shape: BoxShape.circle, gradient: const LinearGradient(colors: [Color(0xFFD32F2F), Color(0xFFEF5350)]), boxShadow: [BoxShadow(color: Colors.red.withOpacity(0.4), blurRadius: 30, spreadRadius: 10)]),
         child: Center(child: Text(l10n.sosButton, style: const TextStyle(color: Colors.white, fontSize: 40, fontWeight: FontWeight.w900))),
       ),
     );
@@ -205,12 +210,8 @@ class _HomeScreenState extends State<HomeScreen> {
         value: v,
         activeColor: Colors.red,
         onChanged: (val) {
-           if (val && (_sosLogic.emergencyContact == null || _sosLogic.emergencyContact!.isEmpty)) {
-             ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-               content: Text(AppLocalizations.of(context)!.errorNoContact), 
-               backgroundColor: Colors.red, 
-               action: SnackBarAction(label: "CONFIG", textColor: Colors.white, onPressed: () => _sosLogic.openSettings(context))
-             ));
+           if (val && (_sosLogic.emergencyContact == null)) {
+             ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(AppLocalizations.of(context)!.errorNoContact), backgroundColor: Colors.red, action: SnackBarAction(label: "CONFIG", textColor: Colors.white, onPressed: () => _sosLogic.openSettings(context))));
              return;
            }
            onChanged(val);
@@ -219,63 +220,37 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 
-  // --- PANTALLA ROJA (Modificada con Info GPS) ---
   Widget _buildPreAlertOverlay(AppLocalizations l10n) {
-    // Comprobamos si el GPS estaba fijado antes de entrar en alerta
-    // (Accedemos a una propiedad interna o asumimos que si el pasivo funcionó, está ready)
-    // Para simplificar, mostramos el icono siempre y cambiamos el color/texto según lógica.
+    // LÓGICA DE SYLVIA: Decidir texto según la causa
+    String title = "";
+    String body = "";
     
+    if (_sosLogic.lastTrigger == AlertCause.fall) {
+      title = l10n.alertFallDetected;
+      body = l10n.alertFallBody;
+    } else {
+      // Por defecto asumimos inactividad si no es caída
+      title = l10n.alertInactivityDetected;
+      body = l10n.alertInactivityBody;
+    }
+
     return Scaffold(
       backgroundColor: Colors.red[900],
       body: SafeArea(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            // INFORMACIÓN GPS EN PANTALLA ROJA
-            Container(
-              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-              decoration: BoxDecoration(
-                color: Colors.black26,
-                borderRadius: BorderRadius.circular(20)
-              ),
-              child: const Row(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Icon(Icons.satellite_alt, color: Colors.white, size: 20),
-                  SizedBox(width: 10),
-                  // Nota: Aquí lo ideal sería leer el estado real del fix, 
-                  // pero visualmente ayuda saber que el sistema está trabajando.
-                  Text("GPS ACTIVE", style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold))
-                ],
-              ),
-            ),
-            
+            Container(padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8), decoration: BoxDecoration(color: Colors.black26, borderRadius: BorderRadius.circular(20)), child: const Row(mainAxisSize: MainAxisSize.min, children: [Icon(Icons.satellite_alt, color: Colors.white, size: 20), SizedBox(width: 10), Text("GPS ACTIVE", style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold))])),
             const Spacer(),
             const Icon(Icons.warning_amber_rounded, color: Colors.white, size: 100),
             const SizedBox(height: 20),
-            Text(l10n.alertInactivityDetected, textAlign: TextAlign.center, style: const TextStyle(color: Colors.white, fontSize: 26, fontWeight: FontWeight.bold)),
+            Text(title, textAlign: TextAlign.center, style: const TextStyle(color: Colors.white, fontSize: 26, fontWeight: FontWeight.bold)),
             const SizedBox(height: 10),
-            Text(l10n.alertInactivityBody, textAlign: TextAlign.center, style: const TextStyle(color: Colors.white70, fontSize: 16)),
+            Text(body, textAlign: TextAlign.center, style: const TextStyle(color: Colors.white70, fontSize: 16)),
             const Spacer(),
-            Stack(
-              alignment: Alignment.center,
-              children: [
-                SizedBox(width: 200, height: 200, child: CircularProgressIndicator(value: _sosLogic.countdownSeconds / 60, strokeWidth: 15, color: Colors.white, backgroundColor: Colors.white24)),
-                Text("${_sosLogic.countdownSeconds}", style: const TextStyle(color: Colors.white, fontSize: 80, fontWeight: FontWeight.bold)),
-              ],
-            ),
+            Stack(alignment: Alignment.center, children: [SizedBox(width: 200, height: 200, child: CircularProgressIndicator(value: _sosLogic.countdownSeconds / 60, strokeWidth: 15, color: Colors.white, backgroundColor: Colors.white24)), Text("${_sosLogic.countdownSeconds}", style: const TextStyle(color: Colors.white, fontSize: 80, fontWeight: FontWeight.bold))]),
             const Spacer(),
-            Padding(
-              padding: const EdgeInsets.all(30.0),
-              child: SizedBox(
-                width: double.infinity, height: 70,
-                child: ElevatedButton(
-                  onPressed: () => _sosLogic.cancelAlert(),
-                  style: ElevatedButton.styleFrom(backgroundColor: Colors.white, foregroundColor: Colors.red[900], elevation: 10),
-                  child: Text(l10n.btnImOkay, style: const TextStyle(fontSize: 22, fontWeight: FontWeight.bold)),
-                ),
-              ),
-            ),
+            Padding(padding: const EdgeInsets.all(30.0), child: SizedBox(width: double.infinity, height: 70, child: ElevatedButton(onPressed: () => _sosLogic.cancelAlert(), style: ElevatedButton.styleFrom(backgroundColor: Colors.white, foregroundColor: Colors.red[900], elevation: 10), child: Text(l10n.btnImOkay, style: const TextStyle(fontSize: 22, fontWeight: FontWeight.bold))))),
           ],
         ),
       ),
@@ -293,16 +268,9 @@ class _HomeScreenState extends State<HomeScreen> {
             const SizedBox(height: 30),
             Text(l10n.statusSent, textAlign: TextAlign.center, style: const TextStyle(color: Colors.white, fontSize: 28, fontWeight: FontWeight.bold)),
             const SizedBox(height: 20),
-            const Padding(
-              padding: EdgeInsets.symmetric(horizontal: 40),
-              child: Text("Monitor detenido / Monitor stopped.\nPantalla apagada en breve / Screen sleeping soon.", textAlign: TextAlign.center, style: TextStyle(color: Colors.white70, fontSize: 16)),
-            ),
+            const Padding(padding: EdgeInsets.symmetric(horizontal: 40), child: Text("Monitor detenido / Monitor stopped.\nPantalla apagada en breve / Screen sleeping soon.", textAlign: TextAlign.center, style: TextStyle(color: Colors.white70, fontSize: 16))),
             const SizedBox(height: 50),
-            ElevatedButton(
-              onPressed: () => _sosLogic.cancelAlert(), // Reset
-              style: ElevatedButton.styleFrom(backgroundColor: Colors.white, foregroundColor: Colors.blue[900], padding: const EdgeInsets.symmetric(horizontal: 40, vertical: 15)),
-              child: const Text("RESET / RESTART", style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
-            ),
+            ElevatedButton(onPressed: () => _sosLogic.cancelAlert(), style: ElevatedButton.styleFrom(backgroundColor: Colors.white, foregroundColor: Colors.blue[900], padding: const EdgeInsets.symmetric(horizontal: 40, vertical: 15)), child: const Text("RESET / RESTART", style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold))),
           ],
         ),
       ),
@@ -320,25 +288,10 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   void _showLanguageDialog(BuildContext context) {
-    showDialog(context: context, builder: (context) => SimpleDialog(
-      title: const Text('Idioma / Language'),
-      children: [
-        _langOption('Español', const Locale('es')),
-        _langOption('English', const Locale('en')),
-        _langOption('Français', const Locale('fr')),
-        _langOption('Português', const Locale('pt')),
-        _langOption('Deutsch', const Locale('de')),
-      ],
-    ));
+    showDialog(context: context, builder: (context) => SimpleDialog(title: const Text('Idioma / Language'), children: [_langOption('Español', const Locale('es')), _langOption('English', const Locale('en')), _langOption('Français', const Locale('fr')), _langOption('Português', const Locale('pt')), _langOption('Deutsch', const Locale('de'))]));
   }
 
   Widget _langOption(String text, Locale locale) {
-    return SimpleDialogOption(
-      onPressed: () { 
-        context.findAncestorStateOfType<_OksigeniaAppState>()?.setLocale(locale); 
-        Navigator.pop(context); 
-      }, 
-      child: Padding(padding: const EdgeInsets.symmetric(vertical: 10), child: Text(text, style: const TextStyle(fontSize: 16)))
-    );
+    return SimpleDialogOption(onPressed: () { context.findAncestorStateOfType<_OksigeniaAppState>()?.setLocale(locale); Navigator.pop(context); }, child: Padding(padding: const EdgeInsets.symmetric(vertical: 10), child: Text(text, style: const TextStyle(fontSize: 16))));
   }
 }

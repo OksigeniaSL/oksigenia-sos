@@ -44,21 +44,21 @@ class AppLocalizationsEn extends AppLocalizations {
   String get menuSettings => 'Settings';
 
   @override
-  String get motto => 'Respira > Inspira > Crece;';
+  String get motto => 'Breathe > Inspire > Grow;';
 
   @override
   String panicMessage(Object link) {
-    return '🆘 *OKSIGENIA ALERT* 🆘\n\nI need urgent help.\n📍 Location: $link\n\nRespira > Inspira > Crece;';
+    return '🆘 *OKSIGENIA ALERT* 🆘\n\nI need urgent help.\n📍 Location: $link\n\nBreathe > Inspire > Grow;';
   }
 
   @override
   String get settingsTitle => 'SOS Settings';
 
   @override
-  String get settingsLabel => 'Emergency Phone Number';
+  String get settingsLabel => 'Emergency Phone';
 
   @override
-  String get settingsHint => 'Ex: +1 555-0199';
+  String get settingsHint => 'Ex: +1 555 123 456';
 
   @override
   String get settingsSave => 'SAVE';
@@ -91,8 +91,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get alertInactivityDetected => 'INACTIVITY DETECTED!';
 
   @override
-  String get alertInactivityBody =>
-      'No movement detected for a while. Are you okay?';
+  String get alertInactivityBody => 'No movement detected. Are you okay?';
 
   @override
   String get btnImOkay => 'I\'M OKAY';
@@ -102,7 +101,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get disclaimerText =>
-      'Oksigenia SOS is a support tool, not a replacement for professional emergency services. Its operation depends entirely on external factors: battery level, GPS signal, and cellular coverage.\n\nBy activating this app, you agree that the software is provided \'as is\' and release the developers from any legal liability for technical failures, lack of signal, or hardware errors. You are ultimately responsible for your own safety and for checking your equipment before heading out.';
+      'Oksigenia SOS is a support tool, not a substitute for professional emergency services. Its operation depends on external factors: battery, GPS signal, and mobile coverage.\n\nBy activating this app, you accept that the software is provided \'as is\' and release the developers from legal liability for technical failures. You are responsible for your own safety.';
 
   @override
   String get btnAccept => 'I ACCEPT THE RISK';
@@ -118,7 +117,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get privacyPolicyContent =>
-      'PRIVACY POLICY AND TERMS OF USE\n\n1. NO DATA COLLECTION\nOksigenia SOS operates entirely locally. We do not upload your data to any cloud or sell your information. Your contacts and locations remain strictly on your device.\n\n2. USE OF PERMISSIONS\n- Location: Strictly for coordinates in case of alert.\n- SMS: Exclusively to send the distress message.\n\n3. LIMITATION OF LIABILITY\nThis app is provided \'as is\', without warranties. Developers are not liable for damages, injuries, or deaths resulting from software failure, including: lack of coverage, dead battery, OS failures, or hardware errors. This tool must never be considered an infallible substitute for professional emergency services (112/911).';
+      'PRIVACY POLICY & TERMS\n\n1. NO DATA COLLECTION\nOksigenia SOS operates locally. We do not upload data to the cloud nor sell your information.\n\n2. PERMISSIONS\n- Location: For coordinates in case of alert.\n- SMS: Exclusively to send the distress message.\n\n3. LIMITATION OF LIABILITY\nApp provided \'as is\'. We are not responsible for coverage or hardware failures.';
 
   @override
   String get advSettingsTitle => 'Advanced Features';
@@ -131,14 +130,14 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get dialogCommunityBody =>
-      'This is the COMMUNITY version (Free).\n\nAll features are unlocked thanks to open source.\n\nIf you find it useful, consider a voluntary donation.';
+      'This is the COMMUNITY version (Free).\n\nAll features are unlocked thanks to open source.\n\nIf useful, consider a voluntary donation.';
 
   @override
   String get dialogStoreTitle => '🔒 Oksigenia Pro';
 
   @override
   String get dialogStoreBody =>
-      'Subscribe to PRO version to unlock multiple contacts and real-time tracking on our private servers.';
+      'Subscribe to PRO to unlock multiple contacts and real-time tracking.';
 
   @override
   String get btnDonate => 'Buy me a coffee ☕';
@@ -148,4 +147,91 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get btnClose => 'Close';
+
+  @override
+  String get permSmsTitle => 'DANGER! SMS Permission Blocked';
+
+  @override
+  String get permSmsBody => 'App CANNOT send alerts even with saved contacts.';
+
+  @override
+  String get permSmsButton => 'Enable SMS in Settings';
+
+  @override
+  String get contactsTitle => 'Emergency Contacts';
+
+  @override
+  String get contactsSubtitle =>
+      'The first one (Main) will receive GPS tracking.';
+
+  @override
+  String get contactsAddHint => 'Add number';
+
+  @override
+  String get contactsEmpty => '⚠️ No contacts. Alert will not be sent.';
+
+  @override
+  String get messageTitle => 'Custom Message';
+
+  @override
+  String get messageSubtitle => 'Sent BEFORE the coordinates.';
+
+  @override
+  String get messageHint => 'Ex: Diabetic. North Route...';
+
+  @override
+  String get trackingTitle => 'GPS Tracking';
+
+  @override
+  String get trackingSubtitle => 'Sends position to Main contact every X time.';
+
+  @override
+  String get trackOff => '❌ Disabled';
+
+  @override
+  String get track30 => '⏱️ Every 30 min';
+
+  @override
+  String get track60 => '⏱️ Every 1 hour';
+
+  @override
+  String get track120 => '⏱️ Every 2 hours';
+
+  @override
+  String get contactMain => 'Main';
+
+  @override
+  String get inactivityTimeTitle => 'Time before Alert';
+
+  @override
+  String get inactivityTimeSubtitle =>
+      'How long without movement before alerting?';
+
+  @override
+  String get ina30s => '🧪 30 sec (TEST Mode)';
+
+  @override
+  String get ina1h => '⏱️ 1 hour (Recommended)';
+
+  @override
+  String get ina2h => '⏱️ 2 hours (Long break)';
+
+  @override
+  String get testModeWarning => '⚠️ TEST MODE ON: Alert will trigger in 30s.';
+
+  @override
+  String get toastHoldToSOS => 'Hold button to SOS';
+
+  @override
+  String get donateDialogTitle => '💎 Support the Project';
+
+  @override
+  String get donateDialogBody =>
+      'This app is Free & Open Source Software.\nIf it keeps you safe, buy us a coffee to keep servers running.';
+
+  @override
+  String get donateBtn => 'Donate via PayPal';
+
+  @override
+  String get donateClose => 'CLOSE';
 }
