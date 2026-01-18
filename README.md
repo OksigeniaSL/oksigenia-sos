@@ -29,7 +29,7 @@ Oksigenia SOS es una herramienta de seguridad personal diseñada para deportes d
 
 ---
 
-## 🚀 Características Principales (v4.4)
+## 🚀 Características Principales (v3.5.0)
 
 * **Detección de Caídas (Fall Detection):** Utiliza el acelerómetro para detectar impactos severos (>3.5G) y activar la alarma automáticamente.
 * **Monitor de Inactividad (Dead Man's Switch):** Si no detecta movimiento durante **60 minutos** (configurable), inicia el protocolo de emergencia.
@@ -45,7 +45,7 @@ Este proyecto es 100% Flutter. Para compilarlo necesitas el SDK de Flutter y And
 
 ```bash
 # 1. Clonar el repositorio
-git clone [https://github.com/tu-usuario/oksigenia-sos.git](https://github.com/tu-usuario/oksigenia-sos.git)
+git clone [https://github.com/Oksigenia/oksigenia-sos.git](https://github.com/Oksigenia/oksigenia-sos.git)
 
 # 2. Instalar dependencias
 flutter pub get
