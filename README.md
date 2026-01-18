@@ -63,11 +63,12 @@ If you sideload the APK and see this warning when enabling SMS, it is an Android
 
 | Feature | English | Español |
 |:---|:---|:---|
+| 👥 **Multi-contact** | Add multiple emergency contacts. The first one receives live tracking. | Añade varios contactos de emergencia. El primero recibe el seguimiento en vivo. |
+| 📍 **Live Tracking** | Sends periodic GPS updates every 30, 60, or 120 min after the SOS. | Envía actualizaciones GPS periódicas cada 30, 60 o 120 min tras el SOS. |
+| ✍️ **Custom Message** | Edit the SOS text to include medical info or route details. | Edita el texto de SOS para incluir info médica o detalles de la ruta. |
+| ⏱️ **Adjustable Timer** | Configurable inactivity limit: 30s (Test), 1h (Default), or 2h. | Límite de inactividad configurable: 30s (Test), 1h (Normal) o 2h. |
 | 📉 **Fall Detection** | Detects severe impacts (>3.5G) using the accelerometer. | Detecta impactos severos (>3.5G) usando el acelerómetro. |
-| ⏱️ **Inactivity Monitor** | Emergency protocol if no movement is detected for **1h or 2h**. | Protocolo de emergencia si no hay movimiento en **1h o 2h**. |
-| 🆘 **Panic Button** | Hold the large red button to trigger an immediate manual SOS. | Mantén pulsado el botón rojo para lanzar un SOS manual inmediato. |
-| 🔋 **Battery Saver** | Releases screen lock / CPU wakelock after sending SOS to save battery. | Libera el bloqueo de pantalla/CPU tras enviar el SOS para ahorrar batería. |
-| 🔒 **Privacy** | No registration, no tracking, no servers. SMS & GPS only. | Sin registro, sin rastreo, sin servidores. Solo SMS y GPS. |
+| 🔒 **Privacy** | 100% Offline. No registration, no tracking, no servers. | 100% Offline. Sin registro, sin rastreo, sin servidores. |
 
 ---
 
