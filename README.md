@@ -1,4 +1,4 @@
-# Oksigenia SOS 🏔️
+# Oksigenia SOS 🏔️ v3.6.1
 
 **Outdoor Emergency Assistant | FOSS | Privacy-First**
 
@@ -24,14 +24,14 @@
 
 ---
 
-## ✨ New in v3.6.0 / Novedades
+## ✨ New in v3.6.1 / Novedades
 
 | Feature | English | Español |
 |:---|:---|:---|
-| 🛡️ **Privacy Hardening** | **Removed Google Play Services**. Now uses raw GPS hardware directly via `forceLocationManager`. | **Eliminado Google Play Services**. Ahora usa el chip GPS directamente por hardware. |
-| 📳 **Vibration Alert** | Haptic feedback added to the acoustic alarm for better awareness in pockets. | Añadida vibración potente junto a la sirena acústica para mayor seguridad. |
-| 🧪 **Test Mode** | Added a **30-second mode** to safely test the Inactivity Monitor without waiting 1 hour. | Nuevo **Modo Test de 30s** para probar el sensor de inactividad de forma segura. |
-| 🌍 **Multi-language** | Full support for **EN, ES, FR, PT, DE**. Auto-detects phone prefix. | Soporte completo **EN, ES, FR, PT, DE**. Detección automática de prefijo. |
+| 🛡️ **Android 16 Ready** | **Immortal Service**. New foreground architecture prevents system kills on Pixel/Samsung devices (Android 14+). | **Servicio Inmortal**. Nueva arquitectura en primer plano que evita cierres del sistema en Pixel/Samsung (Android 14+). |
+| 🔵 **Live Status** | New **Cyan Badge** ("MONITORING") shows when sensors are active but GPS is still acquiring. | Nuevo **Indicador Cian** ("VIGILANDO") muestra cuando los sensores funcionan pero el GPS busca señal. |
+| 🌍 **Instant Lang** | Notifications now update immediately when changing app language (EN, ES, FR, PT, DE). | Las notificaciones persistentes ahora se traducen al instante al cambiar el idioma. |
+| 🔒 **Signed Release** | Now signed with a dedicated **2048-bit RSA Release Key** for enhanced security. | Firmada digitalmente con **Clave RSA 2048-bit** dedicada para mayor seguridad. |
 
 ---
 
