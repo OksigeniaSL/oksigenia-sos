@@ -8,7 +8,7 @@
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![Platform](https://img.shields.io/badge/Platform-Android-green.svg)]()
-[![Privacy](https://img.shields.io/badge/Privacy-Offline%20%26%20No%20Trackers-blue)]()
+[![Privacy](https://img.shields.io/badge/Privacy-Offline%20%20No%20Trackers-blue)]()
 
 👉 **[Donate via PayPal / Donar con PayPal](https://www.paypal.com/donate/?business=paypal@oksigenia.cc&currency_code=EUR)** 💙
 
@@ -16,11 +16,11 @@
 
 ## 📸 Screenshots / Capturas
 
-| Home (v3.6) | Settings (v3.6) |
-|:---:|:---:|
-| <img src="screenshots/Captura10.jpg" width="280" /> | <img src="screenshots/Captura09.jpg" width="280" /> |
-
-*(More screenshots coming soon / Más capturas pronto)*
+| Home (v3.6) | Menu | Alert |
+|:---:|:---:|:---:|
+| <img src="screenshots/Captura10.jpg" width="200" alt="Home Screen Test Mode" /> | <img src="screenshots/screen_settings.jpg" width="200" alt="Menu" /> | <img src="screenshots/screen_alert.jpg" width="200" alt="Red Alert" /> |
+| **Success / Enviado** | **FOSS / Donate** | **Legal** |
+| <img src="screenshots/screen_send.jpg" width="200" alt="Success Blue Screen" /> | <img src="screenshots/screen_foss.jpg" width="200" alt="Donation Dialog" /> | <img src="screenshots/Captura08.jpg" width="200" alt="Legal Notice" /> |
 
 ---
 
@@ -35,25 +35,27 @@
 
 ---
 
-## ⚠️ Troubleshooting: Permissions (Android 13+ / GrapheneOS)
+## ⚠️ Troubleshooting: "Restricted Settings" (Android 13+)
+
+<img src="screenshots/Captura09.jpg" align="right" width="180" alt="Restricted Settings Warning">
 
 ### 🇪🇸 Español
-Si al intentar activar los SMS ves un aviso de **"Ajustes restringidos"**, sigue estos pasos para desbloquear la aplicación (Medida de seguridad de Android para apps externas):
+Si instalas el APK manualmente y ves este aviso al activar los SMS, es una medida de seguridad de Android. **La app funciona correctamente**, solo necesitas autorizarla:
 
-1. **Información de la App:** Ve a Ajustes > Apps > Oksigenia SOS.
-2. **Menú oculto:** Pulsa los **tres puntos (⋮)** en la esquina superior derecha.
-3. **Desbloquear:** Selecciona **"Permitir ajustes restringidos"**.
-4. **Activar:** Ahora ya puedes volver a la app y activar el permiso de SMS normalmente.
+1. Ve a **Ajustes > Apps > Oksigenia SOS**.
+2. Pulsa los **tres puntos (⋮)** (esquina superior derecha).
+3. Selecciona **"Permitir ajustes restringidos"**.
+4. Vuelve a la app y activa el permiso de SMS.
 
----
+<br clear="right"/>
 
 ### 🇺🇸 English
-If you see a **"Restricted settings"** warning when enabling SMS permissions, follow these steps to unlock the app (Android security measure for side-loaded apps):
+If you sideload the APK and see this warning when enabling SMS, it is an Android security feature. **The app works correctly**, you just need to authorize it manually:
 
-1. **App Info:** Go to your phone Settings > Apps > Oksigenia SOS.
-2. **Hidden Menu:** Tap the **three dots (⋮)** in the top right corner.
-3. **Unlock:** Select **"Allow restricted settings"**.
-4. **Enable:** Now you can return to the app and grant the SMS permission as usual.
+1. Go to **Settings > Apps > Oksigenia SOS**.
+2. Tap the **three dots (⋮)** (top right corner).
+3. Select **"Allow restricted settings"**.
+4. Return to the app and grant the SMS permission.
 
 ---
 
@@ -61,7 +63,7 @@ If you see a **"Restricted settings"** warning when enabling SMS permissions, fo
 
 | Feature | English | Español |
 |:---|:---|:---|
-| 📉 **Fall Detection** | Detects severe impacts using the accelerometer and triggers alarm. | Detecta impactos severos usando el acelerómetro y activa la alarma. |
+| 📉 **Fall Detection** | Detects severe impacts (>3.5G) using the accelerometer. | Detecta impactos severos (>3.5G) usando el acelerómetro. |
 | ⏱️ **Inactivity Monitor** | Emergency protocol if no movement is detected for **1h or 2h**. | Protocolo de emergencia si no hay movimiento en **1h o 2h**. |
 | 🆘 **Panic Button** | Hold the large red button to trigger an immediate manual SOS. | Mantén pulsado el botón rojo para lanzar un SOS manual inmediato. |
 | 🔋 **Battery Saver** | Releases screen lock / CPU wakelock after sending SOS to save battery. | Libera el bloqueo de pantalla/CPU tras enviar el SOS para ahorrar batería. |
@@ -69,14 +71,12 @@ If you see a **"Restricted settings"** warning when enabling SMS permissions, fo
 
 ---
 
-## 🛠️ Download & Build / Descarga y Compilación
+## 🛠️ Download & Build
 
 ### 📦 Download APK
 Check the **[Releases Section](https://github.com/Oksigenia/oksigenia-sos/releases)** for the latest signed APKs.
 
 ### 💻 Build from source
-Built with Flutter. To build the release APKs (split per ABI to reduce size):
-
 ```bash
 git clone [https://github.com/Oksigenia/oksigenia-sos.git](https://github.com/Oksigenia/oksigenia-sos.git)
 flutter pub get
