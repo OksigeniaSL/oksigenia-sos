@@ -66,7 +66,7 @@ import 'app_localizations_pt.dart';
 /// property.
 abstract class AppLocalizations {
   AppLocalizations(String locale)
-    : localeName = intl.Intl.canonicalizedLocale(locale.toString());
+      : localeName = intl.Intl.canonicalizedLocale(locale.toString());
 
   final String localeName;
 
@@ -89,11 +89,11 @@ abstract class AppLocalizations {
   /// of delegates is preferred or required.
   static const List<LocalizationsDelegate<dynamic>> localizationsDelegates =
       <LocalizationsDelegate<dynamic>>[
-        delegate,
-        GlobalMaterialLocalizations.delegate,
-        GlobalCupertinoLocalizations.delegate,
-        GlobalWidgetsLocalizations.delegate,
-      ];
+    delegate,
+    GlobalMaterialLocalizations.delegate,
+    GlobalCupertinoLocalizations.delegate,
+    GlobalWidgetsLocalizations.delegate,
+  ];
 
   /// A list of this localizations delegate's supported locales.
   static const List<Locale> supportedLocales = <Locale>[
@@ -101,7 +101,7 @@ abstract class AppLocalizations {
     Locale('en'),
     Locale('es'),
     Locale('fr'),
-    Locale('pt'),
+    Locale('pt')
   ];
 
   /// No description provided for @appTitle.
@@ -127,6 +127,12 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Connecting satellites...'**
   String get statusConnecting;
+
+  /// No description provided for @statusLocationFixed.
+  ///
+  /// In en, this message translates to:
+  /// **'LOCATION FIXED'**
+  String get statusLocationFixed;
 
   /// No description provided for @statusSent.
   ///
@@ -224,6 +230,18 @@ abstract class AppLocalizations {
   /// **'Monitors severe impacts.'**
   String get autoModeDescription;
 
+  /// No description provided for @inactivityModeLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Inactivity Monitor'**
+  String get inactivityModeLabel;
+
+  /// No description provided for @inactivityModeDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'Alerts if no movement is detected.'**
+  String get inactivityModeDescription;
+
   /// No description provided for @alertFallDetected.
   ///
   /// In en, this message translates to:
@@ -236,22 +254,40 @@ abstract class AppLocalizations {
   /// **'Severe fall detected. Are you okay?'**
   String get alertFallBody;
 
+  /// No description provided for @alertInactivityDetected.
+  ///
+  /// In en, this message translates to:
+  /// **'INACTIVITY DETECTED!'**
+  String get alertInactivityDetected;
+
+  /// No description provided for @alertInactivityBody.
+  ///
+  /// In en, this message translates to:
+  /// **'No movement detected for a while. Are you okay?'**
+  String get alertInactivityBody;
+
+  /// No description provided for @btnImOkay.
+  ///
+  /// In en, this message translates to:
+  /// **'I\'M OKAY'**
+  String get btnImOkay;
+
   /// No description provided for @disclaimerTitle.
   ///
   /// In en, this message translates to:
-  /// **'⚠️ LEGAL DISCLAIMER & PRIVACY'**
+  /// **'⚠️ LEGAL NOTICE & PRIVACY'**
   String get disclaimerTitle;
 
   /// No description provided for @disclaimerText.
   ///
   /// In en, this message translates to:
-  /// **'This app is a support tool and DOES NOT replace professional emergency services (112, 911).\n\nPRIVACY: Oksigenia DOES NOT collect personal data. Your location and contacts remain exclusively on your device.\n\nFunctionality depends on device health, battery, and coverage. Use at your own risk.'**
+  /// **'Oksigenia SOS is a support tool, not a replacement for professional emergency services. Its operation depends entirely on external factors: battery level, GPS signal, and cellular coverage.\n\nBy activating this app, you agree that the software is provided \'as is\' and release the developers from any legal liability for technical failures, lack of signal, or hardware errors. You are ultimately responsible for your own safety and for checking your equipment before heading out.'**
   String get disclaimerText;
 
   /// No description provided for @btnAccept.
   ///
   /// In en, this message translates to:
-  /// **'ACCEPT'**
+  /// **'I ACCEPT THE RISK'**
   String get btnAccept;
 
   /// No description provided for @btnDecline.
@@ -275,7 +311,7 @@ abstract class AppLocalizations {
   /// No description provided for @privacyPolicyContent.
   ///
   /// In en, this message translates to:
-  /// **'PRIVACY POLICY & TERMS OF USE\n\n1. NO DATA COLLECTION\nOksigenia SOS is built on a privacy-by-design principle. The application operates entirely locally. We do not upload your data to any cloud, do not use tracking servers, and do not sell your information to third parties. Your emergency contacts and location history remain strictly on your device.\n\n2. PERMISSION USAGE\n- Location: Used strictly to retrieve GPS coordinates in the event of an impact or manual activation. No background tracking occurs when monitoring is disabled.\n- SMS: Used exclusively to send the alert message to your defined contact. The app does not read your personal messages.\n\n3. LIMITATION OF LIABILITY\nThis application is provided \'as is\', without warranty of any kind. Oksigenia and its developers are not liable for damages, injuries, or death resulting from software failure, including but not limited to: lack of cellular coverage, battery drain, operating system failures, or GPS hardware errors.\n\nThis tool is a safety supplement and should never be considered an infallible substitute for professional emergency services.'**
+  /// **'PRIVACY POLICY AND TERMS OF USE\n\n1. NO DATA COLLECTION\nOksigenia SOS operates entirely locally. We do not upload your data to any cloud or sell your information. Your contacts and locations remain strictly on your device.\n\n2. USE OF PERMISSIONS\n- Location: Strictly for coordinates in case of alert.\n- SMS: Exclusively to send the distress message.\n\n3. LIMITATION OF LIABILITY\nThis app is provided \'as is\', without warranties. Developers are not liable for damages, injuries, or deaths resulting from software failure, including: lack of coverage, dead battery, OS failures, or hardware errors. This tool must never be considered an infallible substitute for professional emergency services (112/911).'**
   String get privacyPolicyContent;
 
   /// No description provided for @advSettingsTitle.
@@ -366,9 +402,8 @@ AppLocalizations lookupAppLocalizations(Locale locale) {
   }
 
   throw FlutterError(
-    'AppLocalizations.delegate failed to load unsupported locale "$locale". This is likely '
-    'an issue with the localizations generation tool. Please file an issue '
-    'on GitHub with a reproducible sample app and the gen-l10n configuration '
-    'that was used.',
-  );
+      'AppLocalizations.delegate failed to load unsupported locale "$locale". This is likely '
+      'an issue with the localizations generation tool. Please file an issue '
+      'on GitHub with a reproducible sample app and the gen-l10n configuration '
+      'that was used.');
 }

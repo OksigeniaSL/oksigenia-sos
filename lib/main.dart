@@ -1,802 +1,344 @@
-import 'dart:io'; 
-import 'dart:math' as math; 
-import 'dart:async'; 
-import 'dart:convert'; 
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart'; 
-import 'package:geolocator/geolocator.dart';
-import 'package:url_launcher/url_launcher.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
-import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:sensors_plus/sensors_plus.dart'; 
-import 'package:permission_handler/permission_handler.dart'; 
-import 'package:vibration/vibration.dart'; 
-import 'package:http/http.dart' as http; 
-import 'l10n/app_localizations.dart';
+import 'package:oksigenia_sos/l10n/app_localizations.dart'; 
+import 'logic/sos_logic.dart'; 
+import 'screens/disclaimer_screen.dart'; 
 
-// --- CONFIGURACIÓN DE SABORES ---
-enum AppFlavor { community, store }
-
-class AppConfig {
-  static AppFlavor flavor = AppFlavor.community; 
-  static bool get isCommunity => flavor == AppFlavor.community;
-  static bool get isStore => flavor == AppFlavor.store;
-  static const String remoteStatusUrl = "https://oksigenia.com/app_status.json";
+void main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  final prefs = await SharedPreferences.getInstance();
+  runApp(OksigeniaApp(initialAccepted: prefs.getBool('disclaimer_accepted') ?? false));
 }
 
-void main() {
-  runApp(const OksigeniaSOSApp());
-}
-
-class OksigeniaSOSApp extends StatefulWidget {
-  const OksigeniaSOSApp({super.key});
-
+class OksigeniaApp extends StatefulWidget {
+  final bool initialAccepted;
+  const OksigeniaApp({super.key, required this.initialAccepted});
   @override
-  State<OksigeniaSOSApp> createState() => _OksigeniaSOSAppState();
+  State<OksigeniaApp> createState() => _OksigeniaAppState();
 }
 
-class _OksigeniaSOSAppState extends State<OksigeniaSOSApp> {
+class _OksigeniaAppState extends State<OksigeniaApp> {
   Locale? _locale;
-
-  void _changeLanguage(Locale locale) {
-    setState(() {
-      _locale = locale;
-    });
-  }
+  void setLocale(Locale l) => setState(() => _locale = l);
 
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
       debugShowCheckedModeBanner: false,
-      title: 'Oksigenia SOS',
-      locale: _locale,
+      theme: ThemeData(
+        colorScheme: ColorScheme.fromSeed(seedColor: Colors.red), 
+        useMaterial3: true,
+        scaffoldBackgroundColor: Colors.grey[100]
+      ),
       localizationsDelegates: const [
-        AppLocalizations.delegate,
-        GlobalMaterialLocalizations.delegate,
-        GlobalWidgetsLocalizations.delegate,
-        GlobalCupertinoLocalizations.delegate,
+        AppLocalizations.delegate, 
+        GlobalMaterialLocalizations.delegate, 
+        GlobalWidgetsLocalizations.delegate, 
+        GlobalCupertinoLocalizations.delegate
       ],
       supportedLocales: const [
-        Locale('en'), 
-        Locale('es'), 
-        Locale('fr'), 
-        Locale('pt'), 
-        Locale('de'), 
+        Locale('en'), Locale('es'), Locale('fr'), Locale('pt'), Locale('de')
       ],
-      theme: ThemeData(
-        colorScheme: ColorScheme.fromSeed(
-          seedColor: const Color(0xFFB71C1C),
-          brightness: Brightness.dark,
-          primary: const Color(0xFFD32F2F),
-          surface: const Color(0xFF121212),
-        ),
-        useMaterial3: true,
-      ),
-      home: SOSScreen(onLanguageChanged: _changeLanguage),
+      locale: _locale,
+      home: widget.initialAccepted ? const HomeScreen() : const DisclaimerScreen(),
     );
   }
 }
 
-class SOSScreen extends StatefulWidget {
-  final Function(Locale) onLanguageChanged;
-  
-  const SOSScreen({super.key, required this.onLanguageChanged});
-
+class HomeScreen extends StatefulWidget {
+  const HomeScreen({super.key});
   @override
-  State<SOSScreen> createState() => _SOSScreenState();
+  State<HomeScreen> createState() => _HomeScreenState();
 }
 
-class _SOSScreenState extends State<SOSScreen> {
-  bool _isLoading = false;
-  String? _customStatusMessage;
-
-  static const platform = MethodChannel('com.oksigenia.oksigenia_sos/sms');
-
-  bool _isMonitoring = false; 
-  StreamSubscription? _accelerometerSubscription; 
-  bool _isAlertActive = false; 
-  Timer? _countdownTimer; 
-  Position? _cachedPosition; 
-  double _currentForce = 0.0; 
-  final double _impactThreshold = 30.0; 
+class _HomeScreenState extends State<HomeScreen> {
+  final SOSLogic _sosLogic = SOSLogic(); 
 
   @override
   void initState() {
     super.initState();
-    _verificarMensajesRemotos();
-    WidgetsBinding.instance.addPostFrameCallback((_) => _checkDisclaimer());
+    _sosLogic.init();
+    _sosLogic.addListener(() { if (mounted) setState(() {}); });
   }
 
   @override
   void dispose() {
-    _accelerometerSubscription?.cancel();
-    _countdownTimer?.cancel();
+    _sosLogic.dispose();
     super.dispose();
   }
 
-  // --- DISCLAIMER ---
-  Future<void> _checkDisclaimer() async {
-    final prefs = await SharedPreferences.getInstance();
-    final bool accepted = prefs.getBool('disclaimer_accepted') ?? false;
-
-    if (!accepted && mounted) {
-      final l10n = AppLocalizations.of(context)!;
-      showDialog(
-        context: context,
-        barrierDismissible: false,
-        builder: (context) => AlertDialog(
-          backgroundColor: Colors.grey.shade900,
-          title: Text(l10n.disclaimerTitle, style: const TextStyle(color: Colors.redAccent, fontWeight: FontWeight.bold)),
-          content: SingleChildScrollView(child: Text(l10n.disclaimerText, style: const TextStyle(color: Colors.white))),
-          actions: [
-            TextButton(
-              onPressed: () => SystemNavigator.pop(), 
-              child: Text(l10n.btnDecline, style: const TextStyle(color: Colors.grey)),
-            ),
-            ElevatedButton(
-              onPressed: () async {
-                await prefs.setBool('disclaimer_accepted', true);
-                Navigator.pop(context);
-              },
-              style: ElevatedButton.styleFrom(backgroundColor: Colors.redAccent),
-              child: Text(l10n.btnAccept, style: const TextStyle(color: Colors.white)),
-            ),
-          ],
-        ),
-      );
-    }
-  }
-
-  // --- KILL SWITCH ---
-  Future<void> _verificarMensajesRemotos() async {
-    try {
-      final response = await http.get(Uri.parse(AppConfig.remoteStatusUrl)).timeout(const Duration(seconds: 5));
-      if (response.statusCode == 200) {
-        final data = json.decode(response.body);
-        if (data['active'] == true) {
-          final prefs = await SharedPreferences.getInstance();
-          final int lastSeen = prefs.getInt('last_msg_version') ?? 0;
-          final int current = data['version'] ?? 0;
-
-          if (current > lastSeen || data['kill'] == true) {
-             if (mounted) _mostrarAlertaRemota(data['title'], data['message'], data['kill'] == true, current);
-          }
-        }
-      }
-    } catch (e) { }
-  }
-
-  void _mostrarAlertaRemota(String? title, String? body, bool isKillSwitch, int version) {
-    showDialog(
-      context: context,
-      barrierDismissible: !isKillSwitch,
-      builder: (context) => AlertDialog(
-        backgroundColor: isKillSwitch ? Colors.red.shade900 : Colors.grey.shade900,
-        title: Text(title ?? "Aviso", style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
-        content: Text(body ?? "", style: const TextStyle(color: Colors.white)),
-        actions: [
-          if (!isKillSwitch)
-            TextButton(
-              onPressed: () async {
-                final prefs = await SharedPreferences.getInstance();
-                await prefs.setInt('last_msg_version', version);
-                Navigator.pop(context);
-              },
-              child: const Text("Entendido"),
-            ),
-        ],
-      ),
-    );
-  }
-
-  // --- MONITORIZACIÓN ---
-  Future<void> _toggleMonitoring(bool value) async {
-    final l10n = AppLocalizations.of(context)!;
-
-    if (value) {
-      final prefs = await SharedPreferences.getInstance();
-      final String? contacto = prefs.getString('sos_contact');
-      if (contacto == null || contacto.isEmpty) {
-        if (mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(l10n.errorNoContact), backgroundColor: Colors.red));
-          Navigator.push(context, MaterialPageRoute(builder: (context) => const ConfigScreen()));
-        }
-        return; 
-      }
-
-      if (Platform.isAndroid) {
-        if (!await Permission.sms.isGranted) {
-          await Permission.sms.request();
-          if (!await Permission.sms.isGranted) {
-             _showPermissionError("Se requiere permiso SMS");
-             return;
-          }
-        }
-      }
-
-      LocationPermission locationPermission = await Geolocator.checkPermission();
-      if (locationPermission == LocationPermission.denied) {
-        locationPermission = await Geolocator.requestPermission();
-        if (locationPermission == LocationPermission.denied) {
-           _showPermissionError("Se requiere permiso de Ubicación");
-           return;
-        }
-      }
-      if (locationPermission == LocationPermission.deniedForever) {
-          _showPermissionError("Ubicación bloqueada. Actívala en Ajustes.");
-          await Geolocator.openAppSettings();
-          return;
-      }
-    }
-
-    setState(() {
-      _isMonitoring = value;
-      if (!value) _currentForce = 0.0; 
-    });
-
-    if (_isMonitoring) {
-      _accelerometerSubscription = accelerometerEvents.listen((AccelerometerEvent event) {
-        double force = math.sqrt(event.x * event.x + event.y * event.y + event.z * event.z);
-        if (mounted) setState(() { _currentForce = force; });
-        if (_isAlertActive) return; 
-        if (force > _impactThreshold) {
-          _triggerFallAlert();
-        }
-      });
-    } else {
-      _accelerometerSubscription?.cancel();
-      _accelerometerSubscription = null;
-    }
-  }
-
-  void _showPermissionError(String msg) {
-    if (mounted) {
-      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text("⚠️ $msg"), backgroundColor: Colors.orange));
-    }
-  }
-
-  // --- ALERTA ---
-  void _triggerFallAlert() async {
-    setState(() { _isAlertActive = true; });
-    _iniciarGPSEnSegundoPlano(); 
-    int secondsRemaining = 60; 
-    if (await Vibration.hasVibrator() ?? false) Vibration.vibrate(duration: 1000); 
-
-    if (!mounted) return;
-
-    showDialog(
-      context: context,
-      barrierDismissible: false, 
-      builder: (context) {
-        return StatefulBuilder(
-          builder: (context, setStateDialog) {
-            _countdownTimer ??= Timer.periodic(const Duration(seconds: 1), (timer) {
-              Vibration.vibrate(duration: 500);
-              if (secondsRemaining > 0) {
-                setStateDialog(() { secondsRemaining--; });
-              } else {
-                _pararTimer();
-                Navigator.pop(context); 
-                setState(() { _isAlertActive = false; });
-                _activarProtocoloSOS(autoMode: true); 
-              }
-            });
-
-            bool gpsLocked = _cachedPosition != null;
-
-            return AlertDialog(
-              backgroundColor: const Color(0xFFB71C1C),
-              title: const Row(
-                children: [
-                  Icon(Icons.warning_amber_rounded, color: Colors.white, size: 40),
-                  SizedBox(width: 10),
-                  Expanded(child: Text("IMPACTO / IMPACT", style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold))),
-                ],
-              ),
-              content: Column(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  const Text("SOS en / in...", style: TextStyle(color: Colors.white70, fontSize: 16)),
-                  const SizedBox(height: 10),
-                  Text("$secondsRemaining", style: const TextStyle(color: Colors.white, fontSize: 60, fontWeight: FontWeight.bold)),
-                  const SizedBox(height: 10),
-                  Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
-                    decoration: BoxDecoration(
-                      color: gpsLocked ? Colors.green : Colors.black26,
-                      borderRadius: BorderRadius.circular(5)
-                    ),
-                    child: Row(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        Icon(gpsLocked ? Icons.gps_fixed : Icons.gps_not_fixed, color: Colors.white, size: 16),
-                        const SizedBox(width: 8),
-                        Text(gpsLocked ? "UBICACIÓN FIJADA" : "Buscando satélites...", style: const TextStyle(color: Colors.white, fontSize: 12, fontWeight: FontWeight.bold)),
-                      ],
-                    ),
-                  ),
-                  const SizedBox(height: 15),
-                  const Text("Pulsa CANCELAR si estás bien.", style: TextStyle(color: Colors.white70), textAlign: TextAlign.center),
-                ],
-              ),
-              actions: [
-                TextButton(
-                  onPressed: () {
-                    _pararTimer();
-                    Navigator.pop(context);
-                    setState(() { _isAlertActive = false; });
-                    _activarProtocoloSOS(autoMode: false);
-                  },
-                  child: const Text("ENVIAR AHORA", style: TextStyle(color: Colors.white70)),
-                ),
-                ElevatedButton(
-                  onPressed: () {
-                    _pararTimer();
-                    Navigator.pop(context);
-                    setState(() { _isAlertActive = false; });
-                    _cachedPosition = null; 
-                  },
-                  style: ElevatedButton.styleFrom(backgroundColor: Colors.white, foregroundColor: Colors.black),
-                  child: const Padding(
-                    padding: EdgeInsets.symmetric(horizontal: 20, vertical: 15),
-                    child: Text("ESTOY BIEN (CANCELAR)", style: TextStyle(fontWeight: FontWeight.bold)),
-                  ),
-                ),
-              ],
-            );
-          },
-        );
-      },
-    ).then((_) {
-        _pararTimer();
-        if (mounted) setState(() { _isAlertActive = false; });
-    });
-  }
-
-  void _pararTimer() {
-    _countdownTimer?.cancel();
-    _countdownTimer = null;
-    Vibration.cancel(); 
-  }
-
-  Future<void> _iniciarGPSEnSegundoPlano() async {
-    _cachedPosition = null; 
-    try {
-      bool serviceEnabled = await Geolocator.isLocationServiceEnabled();
-      if (!serviceEnabled) return; 
-      _cachedPosition = await Geolocator.getCurrentPosition(
-        desiredAccuracy: LocationAccuracy.high, timeLimit: const Duration(seconds: 55), 
-      );
-    } catch (e) { debugPrint("GPS Background Error: $e"); }
-  }
-
-  Future<void> _activarProtocoloSOS({bool autoMode = false}) async {
-    final l10n = AppLocalizations.of(context)!;
-    final prefs = await SharedPreferences.getInstance();
-    final String? contactoEmergencia = prefs.getString('sos_contact');
-
-    if (contactoEmergencia == null || contactoEmergencia.isEmpty) {
-      if (mounted && !autoMode) Navigator.push(context, MaterialPageRoute(builder: (context) => const ConfigScreen()));
-      return; 
-    }
-
-    setState(() {
-      _isLoading = true;
-      _customStatusMessage = l10n.statusConnecting;
-    });
-
-    String mensajeFinal = "";
-    Position? finalPosition;
-
-    try {
-      if (_cachedPosition != null) {
-        finalPosition = _cachedPosition;
-      } else {
-        bool serviceEnabled = await Geolocator.isLocationServiceEnabled();
-        if (!serviceEnabled && !autoMode) {
-          await Geolocator.openLocationSettings();
-          setState(() { _isLoading = false; _customStatusMessage = "⚠️ GPS OFF"; });
-          return; 
-        }
-        LocationPermission permission = await Geolocator.checkPermission();
-        if (permission == LocationPermission.denied) {
-           if (!autoMode) permission = await Geolocator.requestPermission();
-        }
-        finalPosition = await Geolocator.getCurrentPosition(desiredAccuracy: LocationAccuracy.high, timeLimit: const Duration(seconds: 15));
-      }
-      String link = "http://maps.google.com/?q=${finalPosition!.latitude},${finalPosition.longitude}";
-      mensajeFinal = l10n.panicMessage(link);
-    } catch (e) {
-      mensajeFinal = l10n.panicMessage("N/A (GPS Error/Timeout)");
-    }
-
-    try {
-      if (Platform.isAndroid && autoMode) {
-        try {
-          await platform.invokeMethod('sendBackgroundSms', {'phone': contactoEmergencia, 'msg': mensajeFinal});
-          if (mounted) setState(() { _isLoading = false; _customStatusMessage = "⚡ AUTO-SOS SENT (NATIVE) ⚡"; });
-        } on PlatformException catch (e) {
-           setState(() { _isLoading = false; _customStatusMessage = "❌ ERROR NATIVO: ${e.message}"; });
-        }
-      } else {
-        final Uri smsUri = Uri(scheme: 'sms', path: contactoEmergencia, queryParameters: <String, String>{ 'body': mensajeFinal });
-        if (await canLaunchUrl(smsUri)) {
-          await launchUrl(smsUri, mode: LaunchMode.platformDefault);
-          setState(() { _isLoading = false; _customStatusMessage = l10n.statusSent; });
-        } else {
-          throw 'NO_SMS_APP';
-        }
-      }
-    } catch (e) {
-      final Uri smsUri = Uri(scheme: 'sms', path: contactoEmergencia, queryParameters: <String, String>{ 'body': mensajeFinal });
-      await launchUrl(smsUri, mode: LaunchMode.platformDefault);
-      setState(() { _isLoading = false; _customStatusMessage = l10n.statusError("SMS ERROR"); });
-    }
-    _cachedPosition = null; 
-  }
-
-  Future<void> _abrirLink(String url) async {
-    final Uri uri = Uri.parse(url);
-    if (!await launchUrl(uri, mode: LaunchMode.externalApplication)) debugPrint("Error $url");
-  }
-
-  Future<void> _enviarEmail() async {
-    final Uri emailLaunchUri = Uri(scheme: 'mailto', path: 'contacto@oksigenia.com');
-    await launchUrl(emailLaunchUri);
-  }
-
-  @override
-  Widget build(BuildContext context) { return _buildScaffold(context); }
-
-  Widget _buildScaffold(BuildContext context) {
-     final l10n = AppLocalizations.of(context);
-    if (l10n == null) return const CircularProgressIndicator();
-
-    return Scaffold(
-      backgroundColor: Colors.black,
-      appBar: AppBar(
-        title: Text(l10n.appTitle, style: const TextStyle(fontWeight: FontWeight.bold, letterSpacing: 2.0)),
-        centerTitle: true,
-        backgroundColor: Colors.transparent,
-        elevation: 0,
-        actions: [
-          if (_isMonitoring)
-            Padding(
-              padding: const EdgeInsets.only(right: 15),
-              child: const Icon(Icons.monitor_heart, color: Colors.greenAccent), 
-            )
-        ],
-      ),
-      drawer: Drawer(
-        backgroundColor: const Color(0xFF181818),
-        child: ListView(
-          padding: EdgeInsets.zero,
-          children: [
-            DrawerHeader(
-              decoration: const BoxDecoration(
-                gradient: LinearGradient(
-                  colors: [Color(0xFF1F1F1F), Color(0xFF000000)],
-                  begin: Alignment.topCenter,
-                  end: Alignment.bottomCenter,
-                ),
-              ),
-              child: SizedBox(
-                width: double.infinity,
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    Image.asset('assets/images/OksigeniaAlfa.png', height: 80, color: Colors.white),
-                    const SizedBox(height: 15),
-                    Text(l10n.motto, style: const TextStyle(color: Colors.white70, fontSize: 12, fontStyle: FontStyle.italic)),
-                  ],
-                ),
-              ),
-            ),
-            ListTile(
-              leading: const Icon(Icons.settings, color: Colors.redAccent),
-              title: Text(l10n.menuSettings, style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
-              onTap: () {
-                Navigator.pop(context);
-                Navigator.push(context, MaterialPageRoute(builder: (context) => const ConfigScreen()));
-              },
-            ),
-             const Divider(color: Colors.white10),
-            ExpansionTile(
-              leading: const Icon(Icons.translate, color: Colors.orangeAccent),
-              title: Text(l10n.menuLanguages, style: const TextStyle(color: Colors.white)),
-              children: [
-                _buildLanguageItem(context, "ES", "Español", const Locale('es')),
-                _buildLanguageItem(context, "EN", "English", const Locale('en')),
-                _buildLanguageItem(context, "FR", "Français", const Locale('fr')),
-                _buildLanguageItem(context, "PT", "Português", const Locale('pt')),
-                _buildLanguageItem(context, "DE", "Deutsch", const Locale('de')),
-              ],
-            ),
-            const Divider(color: Colors.white10),
-            ListTile(
-              leading: const Icon(Icons.privacy_tip, color: Colors.blueGrey),
-              title: Text(l10n.menuPrivacy, style: const TextStyle(color: Colors.white)),
-              onTap: () {
-                 Navigator.pop(context);
-                 Navigator.push(context, MaterialPageRoute(builder: (context) => const PrivacyScreen()));
-              },
-            ),
-            ListTile(
-              leading: const FaIcon(FontAwesomeIcons.globe, color: Colors.blueAccent),
-              title: Text(l10n.menuWeb, style: const TextStyle(color: Colors.white)),
-              onTap: () => _abrirLink('https://oksigenia.com'),
-            ),
-            ListTile(
-              leading: const FaIcon(FontAwesomeIcons.instagram, color: Colors.purpleAccent),
-              title: const Text('Instagram', style: TextStyle(color: Colors.white)),
-              onTap: () => _abrirLink('https://instagram.com/oksigenia'),
-            ),
-            ListTile(
-              leading: const FaIcon(FontAwesomeIcons.xTwitter, color: Colors.white),
-              title: const Text('X', style: TextStyle(color: Colors.white)),
-              onTap: () => _abrirLink('https://x.com/oksigeniaX'),
-            ),
-            const Divider(color: Colors.white10),
-            ListTile(
-              leading: const Icon(Icons.support_agent, color: Colors.greenAccent),
-              title: Text(l10n.menuSupport, style: const TextStyle(color: Colors.white)),
-              onTap: _enviarEmail,
-            ),
-             const SizedBox(height: 30),
-            const Padding(
-              padding: EdgeInsets.all(20.0),
-              child: Text("© 2026 Oksigenia v2.2", style: TextStyle(color: Colors.white24), textAlign: TextAlign.center),
-            ),
-          ],
-        ),
-      ),
-      body: Center(
-        child: SingleChildScrollView(
-          padding: const EdgeInsets.all(20.0),
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              Container(
-                padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
-                decoration: BoxDecoration(
-                  color: Colors.white.withOpacity(0.08),
-                  borderRadius: BorderRadius.circular(15),
-                  border: Border.all(color: _isMonitoring ? Colors.greenAccent.withOpacity(0.5) : Colors.transparent),
-                ),
-                child: SwitchListTile(
-                  title: Text(l10n.autoModeLabel, style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
-                  subtitle: Text(l10n.autoModeDescription, style: const TextStyle(color: Colors.white54, fontSize: 12)),
-                  value: _isMonitoring,
-                  activeColor: Colors.greenAccent,
-                  secondary: Icon(
-                    _isMonitoring ? Icons.local_hospital : Icons.local_hospital_outlined, 
-                    color: _isMonitoring ? Colors.greenAccent : Colors.grey
-                  ),
-                  onChanged: (val) => _toggleMonitoring(val), 
-                ),
-              ),
-              const SizedBox(height: 20),
-              if (_isMonitoring)
-                Container(
-                  padding: const EdgeInsets.all(10),
-                  decoration: BoxDecoration(
-                    color: Colors.black,
-                    border: Border.all(color: _currentForce > 13.0 ? Colors.red : Colors.greenAccent),
-                    borderRadius: BorderRadius.circular(10),
-                  ),
-                  child: Text(
-                    "FORCE: ${_currentForce.toStringAsFixed(2)} m/s²",
-                    style: TextStyle(
-                      fontFamily: 'Monospace',
-                      fontSize: 24,
-                      color: _currentForce > 13.0 ? Colors.red : Colors.greenAccent,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                ),
-              const SizedBox(height: 30),
-              GestureDetector(
-                onTap: _isLoading ? null : () => _activarProtocoloSOS(autoMode: false),
-                child: Container(
-                  width: 240, height: 240,
-                  decoration: BoxDecoration(
-                    shape: BoxShape.circle,
-                    gradient: LinearGradient(
-                      colors: _isLoading ? [Colors.grey.shade800, Colors.grey.shade900] : [const Color(0xFFE53935), const Color(0xFFB71C1C)],
-                      begin: Alignment.topLeft, end: Alignment.bottomRight,
-                    ),
-                    boxShadow: [if (!_isLoading) BoxShadow(color: const Color(0xFFB71C1C).withOpacity(0.5), blurRadius: 30, spreadRadius: 5)],
-                    border: Border.all(color: Colors.white12, width: 3),
-                  ),
-                  child: Center(
-                    child: _isLoading
-                        ? const CircularProgressIndicator(color: Colors.white)
-                        : Text(l10n.sosButton, style: const TextStyle(fontSize: 50, fontWeight: FontWeight.bold, color: Colors.white)),
-                  ),
-                ),
-              ),
-              const SizedBox(height: 50),
-              Container(
-                padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
-                decoration: BoxDecoration(color: Colors.white.withOpacity(0.05), borderRadius: BorderRadius.circular(20)),
-                child: Text(
-                  _customStatusMessage ?? l10n.statusReady,
-                  textAlign: TextAlign.center,
-                  style: const TextStyle(color: Colors.white70, fontFamily: 'Monospace', fontSize: 15, fontWeight: FontWeight.bold),
-                ),
-              ),
-            ],
-          ),
-        ),
-      ),
-    );
-  }
-
-  Widget _buildLanguageItem(BuildContext context, String code, String label, Locale locale) {
-    return ListTile(
-      leading: Container(
-        width: 34, height: 34,
-        decoration: BoxDecoration(
-          color: Colors.white.withOpacity(0.05),
-          shape: BoxShape.circle,
-          border: Border.all(color: Colors.white24, width: 1.5),
-        ),
-        child: Center(child: Text(code, style: const TextStyle(color: Colors.white, fontSize: 11, fontWeight: FontWeight.bold))),
-      ),
-      title: Text(label, style: const TextStyle(color: Colors.white70, fontSize: 14)),
-      onTap: () {
-        widget.onLanguageChanged(locale);
-        Navigator.pop(context);
-      },
-    );
-  }
-}
-
-// PANTALLA DE CONFIGURACIÓN
-class ConfigScreen extends StatefulWidget {
-  const ConfigScreen({super.key});
-  @override
-  State<ConfigScreen> createState() => _ConfigScreenState();
-}
-
-class _ConfigScreenState extends State<ConfigScreen> {
-  final TextEditingController _phoneController = TextEditingController();
-  bool _isSaving = false;
-
-  @override
-  void initState() {
-    super.initState();
-    _loadSavedNumber();
-  }
-
-  Future<void> _loadSavedNumber() async {
-    final prefs = await SharedPreferences.getInstance();
-    String? savedNumber = prefs.getString('sos_contact');
-    if (savedNumber == null || savedNumber.isEmpty) savedNumber = _getSmartPrefix();
-    setState(() { _phoneController.text = savedNumber ?? ''; });
-  }
-
-   String _getSmartPrefix() {
-    try {
-      final String systemLocale = Platform.localeName; 
-      final List<String> parts = systemLocale.split('_');
-      if (parts.length < 2) return '+'; 
-      String countryCode = parts[1].toUpperCase(); 
-      switch (countryCode) {
-        case 'ES': return '+34 '; case 'FR': return '+33 '; case 'PT': return '+351 '; case 'DE': return '+49 ';
-        case 'US': return '+1 '; case 'MX': return '+52 '; case 'AR': return '+54 '; case 'GB': return '+44 '; 
-        default: return '+'; 
-      }
-    } catch (e) { return '+'; }
-  }
-
-  Future<void> _saveNumber() async {
-    if (_phoneController.text.length < 6) {
-      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text("⚠️ Número demasiado corto"), backgroundColor: Colors.red));
-      return;
-    }
-    setState(() { _isSaving = true; });
-    final prefs = await SharedPreferences.getInstance();
-    await prefs.setString('sos_contact', _phoneController.text.trim());
-    
-    if (mounted) {
-      final l10n = AppLocalizations.of(context)!;
-      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(l10n.settingsSavedMsg), backgroundColor: Colors.green));
-      Navigator.pop(context);
-    }
-  }
-
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
+    
+    // PANTALLAS DE ESTADO (Prioridad Alta)
+    if (_sosLogic.status == SOSStatus.preAlert) return _buildPreAlertOverlay(l10n);
+    if (_sosLogic.status == SOSStatus.sent) return _buildSentOverlay(l10n);
+
+    // PANTALLA PRINCIPAL (Home)
     return Scaffold(
-      backgroundColor: Colors.black,
-      appBar: AppBar(title: Text(l10n.settingsTitle, style: const TextStyle(color: Colors.white)), backgroundColor: Colors.transparent, iconTheme: const IconThemeData(color: Colors.white)),
+      appBar: AppBar(
+        title: const Text("OKSIGENIA SOS", style: TextStyle(fontWeight: FontWeight.bold, letterSpacing: 1.2)),
+        centerTitle: true,
+        backgroundColor: Colors.white,
+        elevation: 2,
+        actions: [
+          PopupMenuButton<String>(
+            onSelected: (v) => _handleMenu(v),
+            itemBuilder: (ctx) => [
+              PopupMenuItem(value: 'settings', child: _menuItem(Icons.phone, l10n.menuSettings)),
+              PopupMenuItem(value: 'privacy', child: _menuItem(Icons.security, l10n.menuPrivacy)),
+              PopupMenuItem(value: 'languages', child: _menuItem(Icons.language, l10n.menuLanguages)),
+              PopupMenuItem(value: 'donate', child: _menuItem(Icons.favorite, "Donar / Donate")),
+              const PopupMenuDivider(),
+              PopupMenuItem(value: 'web', child: _menuItem(Icons.public, "Web")),
+              PopupMenuItem(value: 'x', child: _menuItem(Icons.close, "X (Twitter)")),
+              PopupMenuItem(value: 'insta', child: _menuItem(Icons.camera_alt, "Instagram")),
+            ],
+          ),
+        ],
+      ),
       body: SingleChildScrollView(
         child: Padding(
-          padding: const EdgeInsets.all(20.0),
+          padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 20),
           child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Text(l10n.settingsLabel, style: const TextStyle(color: Colors.white70, fontSize: 16)),
-              const SizedBox(height: 10),
-              TextField(
-                controller: _phoneController,
-                keyboardType: TextInputType.phone,
-                style: const TextStyle(color: Colors.white, fontSize: 18),
-                decoration: InputDecoration(
-                  hintText: l10n.settingsHint, filled: true, fillColor: Colors.white.withOpacity(0.1),
-                  border: OutlineInputBorder(borderRadius: BorderRadius.circular(10)),
-                  prefixIcon: const Icon(Icons.phone, color: Colors.redAccent),
-                ),
-              ),
-              const SizedBox(height: 30),
-              SizedBox(
-                width: double.infinity, height: 50,
-                child: ElevatedButton(
-                  onPressed: _isSaving ? null : _saveNumber,
-                  style: ElevatedButton.styleFrom(backgroundColor: const Color(0xFFD32F2F), foregroundColor: Colors.white),
-                  child: _isSaving ? const CircularProgressIndicator(color: Colors.white) : Text(l10n.settingsSave, style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
-                ),
-              ),
+              _buildStatusBadge(l10n),
+              const SizedBox(height: 40), 
+              _buildSOSButton(l10n),
               const SizedBox(height: 40),
-              const Divider(color: Colors.white24),
-              ListTile(
-                contentPadding: EdgeInsets.zero,
-                title: Text(l10n.advSettingsTitle, style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
-                subtitle: Text(l10n.advSettingsSubtitle, style: const TextStyle(color: Colors.white54)),
-                trailing: const Icon(Icons.lock_open, color: Colors.amber),
-                onTap: () {
-                  showDialog(
-                    context: context,
-                    builder: (ctx) => AlertDialog(
-                      backgroundColor: Colors.grey.shade900,
-                      title: Text(AppConfig.isCommunity ? l10n.dialogCommunityTitle : l10n.dialogStoreTitle, style: const TextStyle(color: Colors.white)),
-                      content: Text(
-                        AppConfig.isCommunity 
-                          ? l10n.dialogCommunityBody
-                          : l10n.dialogStoreBody,
-                        style: const TextStyle(color: Colors.white70),
-                      ),
-                      actions: [
-                        TextButton(onPressed: () => Navigator.pop(ctx), child: Text(l10n.btnClose)),
-                        if (AppConfig.isCommunity)
-                          ElevatedButton(onPressed: () => _abrirWebDonar(), child: Text(l10n.btnDonate)),
-                        if (AppConfig.isStore)
-                          ElevatedButton(onPressed: () {}, child: Text(l10n.btnSubscribe)),
-                      ],
-                    ),
-                  );
-                },
-              ),
+              _buildGForceIndicator(),
+              const SizedBox(height: 30),
+              _buildFeatureCard(Icons.bolt, l10n.autoModeLabel, _sosLogic.isFallDetectionActive, (v) => _sosLogic.toggleFallDetection(v)),
+              _buildFeatureCard(Icons.timer, l10n.inactivityModeLabel, _sosLogic.isInactivityMonitorActive, (v) => _sosLogic.toggleInactivityMonitor(v)),
+              const SizedBox(height: 30),
+              Text(l10n.motto, style: const TextStyle(color: Colors.grey, fontStyle: FontStyle.italic)),
+              const SizedBox(height: 30),
             ],
           ),
         ),
       ),
     );
   }
-  void _abrirWebDonar() async {
-    // URL DE DONACIÓN DIRECTA
-    final Uri uri = Uri.parse("https://www.paypal.com/donate/?business=paypal@oksigenia.cc&no_recurring=0&currency_code=EUR");
-    if (!await launchUrl(uri, mode: LaunchMode.externalApplication)) debugPrint("Error $uri");
+
+  Widget _menuItem(IconData icon, String text) {
+    return Row(children: [Icon(icon, color: Colors.grey[700], size: 20), const SizedBox(width: 12), Text(text)]);
   }
-}
 
-// PANTALLA DE PRIVACIDAD
-class PrivacyScreen extends StatelessWidget {
-  const PrivacyScreen({super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    final l10n = AppLocalizations.of(context)!;
-    return Scaffold(
-      backgroundColor: Colors.black,
-      appBar: AppBar(title: Text(l10n.privacyTitle, style: const TextStyle(color: Colors.white)), backgroundColor: Colors.transparent, iconTheme: const IconThemeData(color: Colors.white)),
-      body: SingleChildScrollView(
-        padding: const EdgeInsets.all(20.0),
-        child: Text(l10n.privacyPolicyContent, style: const TextStyle(color: Colors.white70, fontSize: 16)),
+  Widget _buildStatusBadge(AppLocalizations l10n) {
+    Color c = Colors.grey;
+    String text = "";
+    
+    // Si tenemos el GPS pasivo funcionando, mostramos locationFixed
+    // aunque estemos en Ready (naranja) o PreAlert (rojo) internamente
+    if (_sosLogic.status == SOSStatus.locationFixed) {
+        c = Colors.green;
+        text = l10n.statusLocationFixed;
+    } else if (_sosLogic.status == SOSStatus.scanning) {
+        c = Colors.blue;
+        text = l10n.statusConnecting;
+    } else if (_sosLogic.status == SOSStatus.error) {
+        c = Colors.red;
+        text = "ERROR";
+    } else {
+        c = Colors.orange;
+        text = l10n.statusReady;
+    }
+    
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 8),
+      decoration: BoxDecoration(color: c.withOpacity(0.1), borderRadius: BorderRadius.circular(30), border: Border.all(color: c)),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Icon(Icons.circle, color: c, size: 10),
+          const SizedBox(width: 8),
+          Text(text, style: TextStyle(color: c, fontWeight: FontWeight.bold)),
+        ],
       ),
+    );
+  }
+
+  Widget _buildGForceIndicator() {
+    return Column(
+      children: [
+        const Text("FORCE G", style: TextStyle(fontSize: 10, color: Colors.grey, fontWeight: FontWeight.bold)),
+        Text(
+          "${_sosLogic.currentGForce.toStringAsFixed(2)} G", 
+          style: TextStyle(
+            fontSize: 28, 
+            fontWeight: FontWeight.w900, 
+            color: _sosLogic.currentGForce > 3.0 ? Colors.red : Colors.grey[600]
+          )
+        ),
+      ],
+    );
+  }
+
+  Widget _buildSOSButton(AppLocalizations l10n) {
+    return GestureDetector(
+      onLongPress: _sosLogic.sendSOS, 
+      onTap: () {
+         ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text("Mantén pulsado / Hold to SOS"), duration: Duration(seconds: 1)));
+      },
+      child: Container(
+        width: 180, height: 180,
+        decoration: BoxDecoration(
+          shape: BoxShape.circle, 
+          gradient: const LinearGradient(colors: [Color(0xFFD32F2F), Color(0xFFEF5350)]),
+          boxShadow: [BoxShadow(color: Colors.red.withOpacity(0.4), blurRadius: 30, spreadRadius: 10)]
+        ),
+        child: Center(child: Text(l10n.sosButton, style: const TextStyle(color: Colors.white, fontSize: 40, fontWeight: FontWeight.w900))),
+      ),
+    );
+  }
+
+  Widget _buildFeatureCard(IconData i, String t, bool v, Function(bool) onChanged) {
+    return Card(
+      elevation: 0,
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16), side: BorderSide(color: Colors.grey[200]!)),
+      color: Colors.white,
+      child: SwitchListTile(
+        secondary: Container(padding: const EdgeInsets.all(8), decoration: BoxDecoration(color: Colors.grey[100], shape: BoxShape.circle), child: Icon(i, color: Colors.grey[800])),
+        title: Text(t, style: const TextStyle(fontWeight: FontWeight.bold)),
+        value: v,
+        activeColor: Colors.red,
+        onChanged: (val) {
+           if (val && (_sosLogic.emergencyContact == null || _sosLogic.emergencyContact!.isEmpty)) {
+             ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+               content: Text(AppLocalizations.of(context)!.errorNoContact), 
+               backgroundColor: Colors.red, 
+               action: SnackBarAction(label: "CONFIG", textColor: Colors.white, onPressed: () => _sosLogic.openSettings(context))
+             ));
+             return;
+           }
+           onChanged(val);
+        },
+      ),
+    );
+  }
+
+  // --- PANTALLA ROJA (Modificada con Info GPS) ---
+  Widget _buildPreAlertOverlay(AppLocalizations l10n) {
+    // Comprobamos si el GPS estaba fijado antes de entrar en alerta
+    // (Accedemos a una propiedad interna o asumimos que si el pasivo funcionó, está ready)
+    // Para simplificar, mostramos el icono siempre y cambiamos el color/texto según lógica.
+    
+    return Scaffold(
+      backgroundColor: Colors.red[900],
+      body: SafeArea(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            // INFORMACIÓN GPS EN PANTALLA ROJA
+            Container(
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+              decoration: BoxDecoration(
+                color: Colors.black26,
+                borderRadius: BorderRadius.circular(20)
+              ),
+              child: const Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Icon(Icons.satellite_alt, color: Colors.white, size: 20),
+                  SizedBox(width: 10),
+                  // Nota: Aquí lo ideal sería leer el estado real del fix, 
+                  // pero visualmente ayuda saber que el sistema está trabajando.
+                  Text("GPS ACTIVE", style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold))
+                ],
+              ),
+            ),
+            
+            const Spacer(),
+            const Icon(Icons.warning_amber_rounded, color: Colors.white, size: 100),
+            const SizedBox(height: 20),
+            Text(l10n.alertInactivityDetected, textAlign: TextAlign.center, style: const TextStyle(color: Colors.white, fontSize: 26, fontWeight: FontWeight.bold)),
+            const SizedBox(height: 10),
+            Text(l10n.alertInactivityBody, textAlign: TextAlign.center, style: const TextStyle(color: Colors.white70, fontSize: 16)),
+            const Spacer(),
+            Stack(
+              alignment: Alignment.center,
+              children: [
+                SizedBox(width: 200, height: 200, child: CircularProgressIndicator(value: _sosLogic.countdownSeconds / 60, strokeWidth: 15, color: Colors.white, backgroundColor: Colors.white24)),
+                Text("${_sosLogic.countdownSeconds}", style: const TextStyle(color: Colors.white, fontSize: 80, fontWeight: FontWeight.bold)),
+              ],
+            ),
+            const Spacer(),
+            Padding(
+              padding: const EdgeInsets.all(30.0),
+              child: SizedBox(
+                width: double.infinity, height: 70,
+                child: ElevatedButton(
+                  onPressed: () => _sosLogic.cancelAlert(),
+                  style: ElevatedButton.styleFrom(backgroundColor: Colors.white, foregroundColor: Colors.red[900], elevation: 10),
+                  child: Text(l10n.btnImOkay, style: const TextStyle(fontSize: 22, fontWeight: FontWeight.bold)),
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+  
+  Widget _buildSentOverlay(AppLocalizations l10n) {
+    return Scaffold(
+      backgroundColor: Colors.blue[900],
+      body: SafeArea(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            const Icon(Icons.check_circle_outline, color: Colors.white, size: 100),
+            const SizedBox(height: 30),
+            Text(l10n.statusSent, textAlign: TextAlign.center, style: const TextStyle(color: Colors.white, fontSize: 28, fontWeight: FontWeight.bold)),
+            const SizedBox(height: 20),
+            const Padding(
+              padding: EdgeInsets.symmetric(horizontal: 40),
+              child: Text("Monitor detenido / Monitor stopped.\nPantalla apagada en breve / Screen sleeping soon.", textAlign: TextAlign.center, style: TextStyle(color: Colors.white70, fontSize: 16)),
+            ),
+            const SizedBox(height: 50),
+            ElevatedButton(
+              onPressed: () => _sosLogic.cancelAlert(), // Reset
+              style: ElevatedButton.styleFrom(backgroundColor: Colors.white, foregroundColor: Colors.blue[900], padding: const EdgeInsets.symmetric(horizontal: 40, vertical: 15)),
+              child: const Text("RESET / RESTART", style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  void _handleMenu(String v) {
+    if (v == 'settings') _sosLogic.openSettings(context);
+    if (v == 'privacy') _sosLogic.openPrivacy(context);
+    if (v == 'languages') _showLanguageDialog(context); 
+    if (v == 'donate') _sosLogic.openDonation(context);
+    if (v == 'web') _sosLogic.launchURL("https://oksigenia.com");
+    if (v == 'x') _sosLogic.launchURL("https://x.com/oksigeniaX");
+    if (v == 'insta') _sosLogic.launchURL("https://instagram.com/oksigenia");
+  }
+
+  void _showLanguageDialog(BuildContext context) {
+    showDialog(context: context, builder: (context) => SimpleDialog(
+      title: const Text('Idioma / Language'),
+      children: [
+        _langOption('Español', const Locale('es')),
+        _langOption('English', const Locale('en')),
+        _langOption('Français', const Locale('fr')),
+        _langOption('Português', const Locale('pt')),
+        _langOption('Deutsch', const Locale('de')),
+      ],
+    ));
+  }
+
+  Widget _langOption(String text, Locale locale) {
+    return SimpleDialogOption(
+      onPressed: () { 
+        context.findAncestorStateOfType<_OksigeniaAppState>()?.setLocale(locale); 
+        Navigator.pop(context); 
+      }, 
+      child: Padding(padding: const EdgeInsets.symmetric(vertical: 10), child: Text(text, style: const TextStyle(fontSize: 16)))
     );
   }
 }

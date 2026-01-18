@@ -15,13 +15,16 @@ class AppLocalizationsEs extends AppLocalizations {
   String get sosButton => 'SOS';
 
   @override
-  String get statusReady => 'Sistema Oksigenia listo.';
+  String get statusReady => 'Sistema Oksigenia Listo.';
 
   @override
   String get statusConnecting => 'Conectando satélites...';
 
   @override
-  String get statusSent => 'Alerta enviada correctamente.';
+  String get statusLocationFixed => 'UBICACIÓN FIJADA';
+
+  @override
+  String get statusSent => 'Alerta enviada con éxito.';
 
   @override
   String statusError(Object error) {
@@ -38,7 +41,7 @@ class AppLocalizationsEs extends AppLocalizations {
   String get menuLanguages => 'Idioma';
 
   @override
-  String get menuSettings => 'Configuración';
+  String get menuSettings => 'Ajustes';
 
   @override
   String get motto => 'Respira > Inspira > Crece;';
@@ -55,7 +58,7 @@ class AppLocalizationsEs extends AppLocalizations {
   String get settingsLabel => 'Teléfono de Emergencia';
 
   @override
-  String get settingsHint => 'Ej: 600123456';
+  String get settingsHint => 'Ej: +34 600 123 456';
 
   @override
   String get settingsSave => 'GUARDAR';
@@ -70,23 +73,38 @@ class AppLocalizationsEs extends AppLocalizations {
   String get autoModeLabel => 'Detección de Caídas';
 
   @override
-  String get autoModeDescription => 'Monitoriza impactos fuertes.';
+  String get autoModeDescription => 'Monitoriza impactos severos.';
+
+  @override
+  String get inactivityModeLabel => 'Monitor de Inactividad';
+
+  @override
+  String get inactivityModeDescription => 'Alerta si no se detecta movimiento.';
 
   @override
   String get alertFallDetected => '¡IMPACTO DETECTADO!';
 
   @override
-  String get alertFallBody => 'Se ha detectado una caída grave. ¿Estás bien?';
+  String get alertFallBody => 'Caída severa detectada. ¿Estás bien?';
+
+  @override
+  String get alertInactivityDetected => '¡INACTIVIDAD DETECTADA!';
+
+  @override
+  String get alertInactivityBody => 'Sin movimiento detectado. ¿Estás bien?';
+
+  @override
+  String get btnImOkay => 'ESTOY BIEN';
 
   @override
   String get disclaimerTitle => '⚠️ AVISO LEGAL Y PRIVACIDAD';
 
   @override
   String get disclaimerText =>
-      'Esta aplicación es una herramienta de ayuda y NO sustituye a los servicios de emergencia profesionales (112, 911).\n\nPRIVACIDAD: Oksigenia NO recolecta datos personales. Tu ubicación y contactos se quedan exclusivamente en tu dispositivo.\n\nEl funcionamiento depende del estado del dispositivo, batería y cobertura. Úsala bajo tu propia responsabilidad.';
+      'Oksigenia SOS es una herramienta de apoyo, no un sustituto de servicios de emergencia profesionales. Su operación depende de factores externos: batería, señal GPS y cobertura móvil.\n\nAl activar esta app, aceptas que el software se entrega \'tal cual\' y liberas a los desarrolladores de responsabilidad legal por fallos técnicos. Eres responsable de tu propia seguridad.';
 
   @override
-  String get btnAccept => 'ACEPTAR';
+  String get btnAccept => 'ACEPTO EL RIESGO';
 
   @override
   String get btnDecline => 'SALIR';
@@ -99,7 +117,7 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get privacyPolicyContent =>
-      'POLÍTICA DE PRIVACIDAD Y TÉRMINOS DE USO\n\n1. SIN RECOLECCIÓN DE DATOS\nOksigenia SOS está diseñada bajo el principio de privacidad por diseño. La aplicación funciona de manera totalmente local. No subimos tus datos a ninguna nube, no utilizamos servidores de rastreo, ni vendemos tu información a terceros. Tus contactos de emergencia y tu historial de ubicaciones permanecen estrictamente dentro de tu dispositivo.\n\n2. USO DE PERMISOS\n- Ubicación: Se utiliza estrictamente para obtener las coordenadas GPS en caso de detectar un impacto o activación manual. No se realiza seguimiento en segundo plano cuando la monitorización está desactivada.\n- SMS: Se utiliza exclusivamente para enviar el mensaje de alerta a tu contacto definido. La aplicación no lee tus mensajes personales.\n\n3. LIMITACIÓN DE RESPONSABILIDAD\nEsta aplicación se proporciona \'tal cual\', sin garantías de ningún tipo. Oksigenia y sus desarrolladores no se hacen responsables de daños, lesiones o muertes derivadas de fallos en el funcionamiento del software, incluyendo pero no limitado a: falta de cobertura móvil, agotamiento de batería, fallos del sistema operativo o errores en el hardware GPS.\n\nEsta herramienta es un complemento de seguridad y nunca debe considerarse un sustituto infalible de los servicios de emergencia profesionales.';
+      'POLÍTICA DE PRIVACIDAD Y TÉRMINOS\n\n1. SIN RECOPILACIÓN DE DATOS\nOksigenia SOS opera localmente. No subimos datos a la nube ni vendemos tu información.\n\n2. PERMISOS\n- Ubicación: Para coordenadas en caso de alerta.\n- SMS: Exclusivamente para enviar el mensaje de socorro.\n\n3. LIMITACIÓN DE RESPONSABILIDAD\nApp entregada \'tal cual\'. No nos hacemos responsables por fallos de cobertura o hardware.';
 
   @override
   String get advSettingsTitle => 'Funciones Avanzadas';
@@ -108,21 +126,21 @@ class AppLocalizationsEs extends AppLocalizations {
   String get advSettingsSubtitle => 'Multi-contacto, Rastreo GPS...';
 
   @override
-  String get dialogCommunityTitle => '💎 Oksigenia Community';
+  String get dialogCommunityTitle => '💎 Comunidad Oksigenia';
 
   @override
   String get dialogCommunityBody =>
-      'Esta es la versión COMMUNITY (Libre).\n\nTodas las funciones están desbloqueadas gracias al código abierto.\n\nSi te es útil, considera una donación voluntaria.';
+      'Esta es la versión COMMUNITY (Gratis).\n\nTodas las funciones están desbloqueadas gracias al código abierto.\n\nSi te es útil, considera una donación voluntaria.';
 
   @override
   String get dialogStoreTitle => '🔒 Oksigenia Pro';
 
   @override
   String get dialogStoreBody =>
-      'Suscríbete a la versión PRO para desbloquear múltiples contactos y seguimiento en tiempo real en nuestros servidores privados.';
+      'Suscríbete a PRO para desbloquear múltiples contactos y rastreo en tiempo real.';
 
   @override
-  String get btnDonate => 'Invitar a un café ☕';
+  String get btnDonate => 'Invítame a un café ☕';
 
   @override
   String get btnSubscribe => 'Suscribirse';

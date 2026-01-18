@@ -21,6 +21,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get statusConnecting => 'Connecting satellites...';
 
   @override
+  String get statusLocationFixed => 'LOCATION FIXED';
+
+  @override
   String get statusSent => 'Alert sent successfully.';
 
   @override
@@ -73,20 +76,36 @@ class AppLocalizationsEn extends AppLocalizations {
   String get autoModeDescription => 'Monitors severe impacts.';
 
   @override
+  String get inactivityModeLabel => 'Inactivity Monitor';
+
+  @override
+  String get inactivityModeDescription => 'Alerts if no movement is detected.';
+
+  @override
   String get alertFallDetected => 'IMPACT DETECTED!';
 
   @override
   String get alertFallBody => 'Severe fall detected. Are you okay?';
 
   @override
-  String get disclaimerTitle => '⚠️ LEGAL DISCLAIMER & PRIVACY';
+  String get alertInactivityDetected => 'INACTIVITY DETECTED!';
+
+  @override
+  String get alertInactivityBody =>
+      'No movement detected for a while. Are you okay?';
+
+  @override
+  String get btnImOkay => 'I\'M OKAY';
+
+  @override
+  String get disclaimerTitle => '⚠️ LEGAL NOTICE & PRIVACY';
 
   @override
   String get disclaimerText =>
-      'This app is a support tool and DOES NOT replace professional emergency services (112, 911).\n\nPRIVACY: Oksigenia DOES NOT collect personal data. Your location and contacts remain exclusively on your device.\n\nFunctionality depends on device health, battery, and coverage. Use at your own risk.';
+      'Oksigenia SOS is a support tool, not a replacement for professional emergency services. Its operation depends entirely on external factors: battery level, GPS signal, and cellular coverage.\n\nBy activating this app, you agree that the software is provided \'as is\' and release the developers from any legal liability for technical failures, lack of signal, or hardware errors. You are ultimately responsible for your own safety and for checking your equipment before heading out.';
 
   @override
-  String get btnAccept => 'ACCEPT';
+  String get btnAccept => 'I ACCEPT THE RISK';
 
   @override
   String get btnDecline => 'EXIT';
@@ -99,7 +118,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get privacyPolicyContent =>
-      'PRIVACY POLICY & TERMS OF USE\n\n1. NO DATA COLLECTION\nOksigenia SOS is built on a privacy-by-design principle. The application operates entirely locally. We do not upload your data to any cloud, do not use tracking servers, and do not sell your information to third parties. Your emergency contacts and location history remain strictly on your device.\n\n2. PERMISSION USAGE\n- Location: Used strictly to retrieve GPS coordinates in the event of an impact or manual activation. No background tracking occurs when monitoring is disabled.\n- SMS: Used exclusively to send the alert message to your defined contact. The app does not read your personal messages.\n\n3. LIMITATION OF LIABILITY\nThis application is provided \'as is\', without warranty of any kind. Oksigenia and its developers are not liable for damages, injuries, or death resulting from software failure, including but not limited to: lack of cellular coverage, battery drain, operating system failures, or GPS hardware errors.\n\nThis tool is a safety supplement and should never be considered an infallible substitute for professional emergency services.';
+      'PRIVACY POLICY AND TERMS OF USE\n\n1. NO DATA COLLECTION\nOksigenia SOS operates entirely locally. We do not upload your data to any cloud or sell your information. Your contacts and locations remain strictly on your device.\n\n2. USE OF PERMISSIONS\n- Location: Strictly for coordinates in case of alert.\n- SMS: Exclusively to send the distress message.\n\n3. LIMITATION OF LIABILITY\nThis app is provided \'as is\', without warranties. Developers are not liable for damages, injuries, or deaths resulting from software failure, including: lack of coverage, dead battery, OS failures, or hardware errors. This tool must never be considered an infallible substitute for professional emergency services (112/911).';
 
   @override
   String get advSettingsTitle => 'Advanced Features';

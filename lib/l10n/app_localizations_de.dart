@@ -15,10 +15,13 @@ class AppLocalizationsDe extends AppLocalizations {
   String get sosButton => 'SOS';
 
   @override
-  String get statusReady => 'Oksigenia System bereit.';
+  String get statusReady => 'Oksigenia System Bereit.';
 
   @override
-  String get statusConnecting => 'Verbindung zu Satelliten...';
+  String get statusConnecting => 'Verbinde Satelliten...';
+
+  @override
+  String get statusLocationFixed => 'STANDORT FIXIERT';
 
   @override
   String get statusSent => 'Alarm erfolgreich gesendet.';
@@ -29,7 +32,7 @@ class AppLocalizationsDe extends AppLocalizations {
   }
 
   @override
-  String get menuWeb => 'Offizielle Webseite';
+  String get menuWeb => 'Offizielle Website';
 
   @override
   String get menuSupport => 'Technischer Support';
@@ -55,22 +58,28 @@ class AppLocalizationsDe extends AppLocalizations {
   String get settingsLabel => 'Notrufnummer';
 
   @override
-  String get settingsHint => 'Bsp: +49 151 12345678';
+  String get settingsHint => 'Bsp: +49 150 123 456';
 
   @override
   String get settingsSave => 'SPEICHERN';
 
   @override
-  String get settingsSavedMsg => 'Kontakt erfolgreich gespeichert';
+  String get settingsSavedMsg => 'Kontakt gespeichert';
 
   @override
-  String get errorNoContact => '⚠️ Bitte erst Kontakt konfigurieren!';
+  String get errorNoContact => '⚠️ Zuerst Kontakt konfigurieren!';
 
   @override
   String get autoModeLabel => 'Sturzerkennung';
 
   @override
-  String get autoModeDescription => 'Überwacht starke Aufpralle.';
+  String get autoModeDescription => 'Überwacht schwere Stöße.';
+
+  @override
+  String get inactivityModeLabel => 'Inaktivitätsmonitor';
+
+  @override
+  String get inactivityModeDescription => 'Alarm bei fehlender Bewegung.';
 
   @override
   String get alertFallDetected => 'AUFPRALL ERKANNT!';
@@ -79,14 +88,23 @@ class AppLocalizationsDe extends AppLocalizations {
   String get alertFallBody => 'Schwerer Sturz erkannt. Alles okay?';
 
   @override
+  String get alertInactivityDetected => 'INAKTIVITÄT ERKANNT!';
+
+  @override
+  String get alertInactivityBody => 'Keine Bewegung erkannt. Alles okay?';
+
+  @override
+  String get btnImOkay => 'MIR GEHT ES GUT';
+
+  @override
   String get disclaimerTitle => '⚠️ RECHTSHINWEIS & DATENSCHUTZ';
 
   @override
   String get disclaimerText =>
-      'Diese App ist ein Hilfsmittel und ERSETZT NICHT professionelle Rettungsdienste (112, 911).\n\nDATENSCHUTZ: Oksigenia sammelt KEINE persönlichen Daten. Ihr Standort und Ihre Kontakte verbleiben ausschließlich auf Ihrem Gerät.\n\nDie Funktionalität hängt vom Gerätezustand, Akku und Netzabdeckung ab. Nutzung auf eigene Gefahr.';
+      'Oksigenia SOS ist ein Hilfsmittel. Der Betrieb hängt von Akku, GPS und Mobilfunknetz ab.\n\nSie akzeptieren die Nutzung \'wie besehen\' auf eigenes Risiko.';
 
   @override
-  String get btnAccept => 'AKZEPTIEREN';
+  String get btnAccept => 'ICH AKZEPTIERE DAS RISIKO';
 
   @override
   String get btnDecline => 'BEENDEN';
@@ -95,11 +113,11 @@ class AppLocalizationsDe extends AppLocalizations {
   String get menuPrivacy => 'Datenschutz & Rechtliches';
 
   @override
-  String get privacyTitle => 'Bedingungen & Datenschutz';
+  String get privacyTitle => 'Begriffe & Datenschutz';
 
   @override
   String get privacyPolicyContent =>
-      'DATENSCHUTZRICHTLINIE & NUTZUNGSBEDINGUNGEN\n\n1. KEINE DATENERFASSUNG\nOksigenia SOS basiert auf dem Prinzip \'Privacy by Design\'. Die Anwendung arbeitet vollständig lokal. Wir laden Ihre Daten nicht in eine Cloud hoch, nutzen keine Tracking-Server und verkaufen Ihre Informationen nicht. Ihre Notfallkontakte bleiben streng auf Ihrem Gerät.\n\n2. NUTZUNG VON BERECHTIGUNGEN\n- Standort: Wird ausschließlich verwendet, um GPS-Koordinaten im Falle eines Aufpralls oder einer manuellen Aktivierung abzurufen. Es erfolgt kein Hintergrund-Tracking, wenn die Überwachung deaktiviert ist.\n- SMS: Wird ausschließlich verwendet, um die Alarmnachricht an Ihren definierten Kontakt zu senden. Die App liest Ihre persönlichen Nachrichten nicht.\n\n3. HAFTUNGSBESCHRÄNKUNG\nDiese Anwendung wird \'wie besehen\' zur Verfügung gestellt, ohne jegliche Garantie. Oksigenia und seine Entwickler haften nicht für Schäden oder Folgen, die aus einem Softwarefehler resultieren, einschließlich: fehlende Mobilfunkabdeckung, leerer Akku oder GPS-Fehler.\n\nDieses Tool ist eine Sicherheitsergänzung und darf niemals als unfehlbarer Ersatz für professionelle Rettungsdienste angesehen werden.';
+      'DATENSCHUTZRICHTLINIE\n\n1. KEINE DATENSAMMLUNG\nLokaler Betrieb.\n\n2. BERECHTIGUNGEN\n- GPS: Für Alarm.\n- SMS: Für Hilferuf.\n\n3. HAFTUNG\nSoftware ohne Garantie.';
 
   @override
   String get advSettingsTitle => 'Erweiterte Funktionen';
@@ -112,17 +130,16 @@ class AppLocalizationsDe extends AppLocalizations {
 
   @override
   String get dialogCommunityBody =>
-      'Dies ist die COMMUNITY-Version (Kostenlos).\n\nAlle Funktionen sind dank Open Source freigeschaltet.\n\nWenn sie nützlich ist, erwägen Sie eine freiwillige Spende.';
+      'COMMUNITY Version (Kostenlos).\n\nOpen Source.\n\nSpenden Sie, wenn nützlich.';
 
   @override
   String get dialogStoreTitle => '🔒 Oksigenia Pro';
 
   @override
-  String get dialogStoreBody =>
-      'Abonnieren Sie die PRO-Version, um mehrere Kontakte und Echtzeit-Tracking auf unseren privaten Servern freizuschalten.';
+  String get dialogStoreBody => 'Abonnieren Sie PRO für Echtzeit-Tracking.';
 
   @override
-  String get btnDonate => 'Spendier mir einen Kaffee ☕';
+  String get btnDonate => 'Kauf mir einen Kaffee ☕';
 
   @override
   String get btnSubscribe => 'Abonnieren';

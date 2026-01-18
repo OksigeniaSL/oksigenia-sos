@@ -1,50 +1,86 @@
 package com.oksigenia.oksigenia_sos
 
+import android.os.Build
+import android.os.Bundle
+import android.telephony.SmsManager
+import android.view.WindowManager
 import androidx.annotation.NonNull
 import io.flutter.embedding.android.FlutterActivity
 import io.flutter.embedding.engine.FlutterEngine
 import io.flutter.plugin.common.MethodChannel
-import android.telephony.SmsManager
-import android.os.Build
 
 class MainActivity: FlutterActivity() {
-    private val CHANNEL = "com.oksigenia.oksigenia_sos/sms"
+    private val CHANNEL = "com.oksigenia.sos/sms"
 
     override fun configureFlutterEngine(@NonNull flutterEngine: FlutterEngine) {
         super.configureFlutterEngine(flutterEngine)
         
         MethodChannel(flutterEngine.dartExecutor.binaryMessenger, CHANNEL).setMethodCallHandler { call, result ->
-            if (call.method == "sendBackgroundSms") {
-                val phone = call.argument<String>("phone")
-                val msg = call.argument<String>("msg")
-
-                if (phone != null && msg != null) {
-                    sendSMS(phone, msg)
-                    result.success("SMS Enviado")
-                } else {
-                    result.error("INVALID_ARGS", "Faltan datos", null)
+            when (call.method) {
+                "sendSMS" -> {
+                    val phone = call.argument<String>("phone")
+                    val msg = call.argument<String>("msg")
+                    sendSMS(phone, msg, result)
                 }
-            } else {
-                result.notImplemented()
+                "wakeScreen" -> {
+                    wakeUpScreen()
+                    result.success("OK")
+                }
+                "sleepScreen" -> {
+                    allowScreenSleep()
+                    result.success("OK")
+                }
+                else -> result.notImplemented()
             }
         }
     }
 
-    private fun sendSMS(phoneNumber: String, message: String) {
+    // FUERZA ENCENDER PANTALLA (Para la Alarma Roja)
+    private fun wakeUpScreen() {
+        activity.runOnUiThread {
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O_MR1) {
+                setShowWhenLocked(true)
+                setTurnScreenOn(true)
+            }
+            window.addFlags(
+                WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON or
+                WindowManager.LayoutParams.FLAG_ALLOW_LOCK_WHILE_SCREEN_ON or
+                WindowManager.LayoutParams.FLAG_SHOW_WHEN_LOCKED or
+                WindowManager.LayoutParams.FLAG_TURN_SCREEN_ON
+            )
+        }
+    }
+
+    // PERMITE APAGAR PANTALLA (Para Ahorrar Batería tras el envío)
+    private fun allowScreenSleep() {
+        activity.runOnUiThread {
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O_MR1) {
+                setShowWhenLocked(false)
+                setTurnScreenOn(false)
+            }
+            window.clearFlags(
+                WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON or
+                WindowManager.LayoutParams.FLAG_ALLOW_LOCK_WHILE_SCREEN_ON or
+                WindowManager.LayoutParams.FLAG_SHOW_WHEN_LOCKED or
+                WindowManager.LayoutParams.FLAG_TURN_SCREEN_ON
+            )
+        }
+    }
+
+    private fun sendSMS(phone: String?, msg: String?, result: MethodChannel.Result) {
         try {
-            val smsManager: SmsManager = if (Build.VERSION.SDK_INT >= 31) {
-                this.getSystemService(SmsManager::class.java)
+            val smsManager = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+                context.getSystemService(SmsManager::class.java)
             } else {
-                @Suppress("DEPRECATION")
                 SmsManager.getDefault()
             }
             
-            // Dividimos el mensaje por si es muy largo (más de 160 caracteres)
-            val parts = smsManager.divideMessage(message)
-            smsManager.sendMultipartTextMessage(phoneNumber, null, parts, null, null)
+            val parts = smsManager.divideMessage(msg)
+            smsManager.sendMultipartTextMessage(phone, null, parts, null, null)
             
+            result.success("OK")
         } catch (e: Exception) {
-            e.printStackTrace()
+            result.error("SMS_ERROR", e.message, null)
         }
     }
 }

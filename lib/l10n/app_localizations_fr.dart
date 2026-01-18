@@ -15,10 +15,13 @@ class AppLocalizationsFr extends AppLocalizations {
   String get sosButton => 'SOS';
 
   @override
-  String get statusReady => 'Système Oksigenia prêt.';
+  String get statusReady => 'Système Oksigenia Prêt.';
 
   @override
-  String get statusConnecting => 'Connexion aux satellites...';
+  String get statusConnecting => 'Connexion satellites...';
+
+  @override
+  String get statusLocationFixed => 'LOCALISATION FIXE';
 
   @override
   String get statusSent => 'Alerte envoyée avec succès.';
@@ -45,81 +48,96 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String panicMessage(Object link) {
-    return '🆘 *ALERTE OKSIGENIA* 🆘\n\nJ\'ai besoin d\'une aide urgente.\n📍 Localisation: $link\n\nRespira > Inspira > Crece;';
+    return '🆘 *ALERTE OKSIGENIA* 🆘\n\nJ\'ai besoin d\'aide.\n📍 Localisation: $link\n\nRespira > Inspira > Crece;';
   }
 
   @override
-  String get settingsTitle => 'Paramètres SOS';
+  String get settingsTitle => 'Réglages SOS';
 
   @override
-  String get settingsLabel => 'Téléphone d\'urgence';
+  String get settingsLabel => 'Numéro d\'urgence';
 
   @override
-  String get settingsHint => 'Ex: +33 6 12 34 56 78';
+  String get settingsHint => 'Ex: +33 600 123 456';
 
   @override
-  String get settingsSave => 'ENREGISTRER';
+  String get settingsSave => 'SAUVEGARDER';
 
   @override
-  String get settingsSavedMsg => 'Contact enregistré avec succès';
+  String get settingsSavedMsg => 'Contact enregistré';
 
   @override
-  String get errorNoContact => '⚠️ Configurez d\'abord un contact !';
+  String get errorNoContact => '⚠️ Configurez un contact d\'abord !';
 
   @override
   String get autoModeLabel => 'Détection de Chute';
 
   @override
-  String get autoModeDescription => 'Surveille les impacts violents.';
+  String get autoModeDescription => 'Surveille les impacts sévères.';
+
+  @override
+  String get inactivityModeLabel => 'Moniteur d\'Inactivité';
+
+  @override
+  String get inactivityModeDescription => 'Alerte si aucun mouvement détecté.';
 
   @override
   String get alertFallDetected => 'IMPACT DÉTECTÉ !';
 
   @override
-  String get alertFallBody => 'Chute grave détectée. Ça va ?';
+  String get alertFallBody => 'Chute sévère détectée. Ça va ?';
 
   @override
-  String get disclaimerTitle => '⚠️ AVERTISSEMENT LEGAL & CONFIDENTIALITÉ';
+  String get alertInactivityDetected => 'INACTIVITÉ DÉTECTÉE !';
+
+  @override
+  String get alertInactivityBody => 'Aucun mouvement. Ça va ?';
+
+  @override
+  String get btnImOkay => 'JE VAIS BIEN';
+
+  @override
+  String get disclaimerTitle => '⚠️ AVIS LÉGAL & CONFIDENTIALITÉ';
 
   @override
   String get disclaimerText =>
-      'Cette application est un outil d\'aide et NE REMPLACE PAS les services d\'urgence professionnels (112, 911).\n\nCONFIDENTIALITÉ : Oksigenia NE collecte AUCUNE donnée personnelle. Votre localisation et vos contacts restent exclusivement sur votre appareil.\n\nLe fonctionnement dépend de l\'état de l\'appareil, de la batterie et de la couverture. À utiliser à vos propres risques.';
+      'Oksigenia SOS est un outil de support, pas un substitut aux urgences pro. Dépend de la batterie, GPS et réseau mobile.\n\nVous acceptez d\'utiliser le logiciel \'tel quel\' à vos propres risques.';
 
   @override
-  String get btnAccept => 'ACCEPTER';
+  String get btnAccept => 'J\'ACCEPTE LE RISQUE';
 
   @override
   String get btnDecline => 'QUITTER';
 
   @override
-  String get menuPrivacy => 'Confidentialité et Légal';
+  String get menuPrivacy => 'Privacité & Légal';
 
   @override
-  String get privacyTitle => 'Conditions et Confidentialité';
+  String get privacyTitle => 'Termes & Confidentialité';
 
   @override
   String get privacyPolicyContent =>
-      'POLITIQUE DE CONFIDENTIALITÉ ET CONDITIONS D\'UTILISATION\n\n1. AUCUNE COLLECTE DE DONNÉES\nOksigenia SOS est conçue selon le principe de confidentialité par défaut. L\'application fonctionne entièrement localement. Nous ne téléchargeons pas vos données dans le cloud, n\'utilisons pas de serveurs de suivi et ne vendons pas vos informations. Vos contacts d\'urgence restent strictement sur votre appareil.\n\n2. UTILISATION DES PERMISSIONS\n- Localisation : Utilisée strictement pour obtenir les coordonnées GPS en cas d\'impact ou d\'activation manuelle. Aucun suivi en arrière-plan n\'est effectué lorsque la surveillance est désactivée.\n- SMS : Utilisé exclusivement pour envoyer le message d\'alerte à votre contact défini. L\'application ne lit pas vos messages personnels.\n\n3. LIMITATION DE RESPONSABILITÉ\nCette application est fournie \'telle quelle\', sans garantie d\'aucune sorte. Oksigenia et ses développeurs ne sont pas responsables des dommages ou conséquences résultant d\'une défaillance du logiciel, y compris : absence de couverture mobile, batterie déchargée ou erreurs GPS.\n\nCet outil est un complément de sécurité et ne doit jamais être considéré comme un substitut infaillible aux secours professionnels.';
+      'POLITIQUE DE CONFIDENTIALITÉ\n\n1. PAS DE COLLECTE\nOpération 100% locale.\n\n2. PERMISSIONS\n- GPS: Pour l\'alerte.\n- SMS: Pour l\'envoi de secours.\n\n3. RESPONSABILITÉ\nLogiciel fourni sans garantie.';
 
   @override
-  String get advSettingsTitle => 'Fonctionnalités Avancées';
+  String get advSettingsTitle => 'Fonctions Avancées';
 
   @override
-  String get advSettingsSubtitle => 'Multi-contact, Suivi GPS...';
+  String get advSettingsSubtitle => 'Multi-contact, Tracking GPS...';
 
   @override
-  String get dialogCommunityTitle => '💎 Oksigenia Community';
+  String get dialogCommunityTitle => '💎 Communauté Oksigenia';
 
   @override
   String get dialogCommunityBody =>
-      'Ceci est la version COMMUNITY (Gratuite).\n\nToutes les fonctionnalités sont débloquées grâce à l\'open source.\n\nSi elle vous est utile, envisagez un don volontaire.';
+      'Version COMMUNITY (Gratuite).\n\nOpen Source.\n\nConsidérez un don si utile.';
 
   @override
   String get dialogStoreTitle => '🔒 Oksigenia Pro';
 
   @override
   String get dialogStoreBody =>
-      'Abonnez-vous à la version PRO pour débloquer plusieurs contacts et le suivi en temps réel sur nos serveurs privés.';
+      'Abonnez-vous à PRO pour le suivi en temps réel.';
 
   @override
   String get btnDonate => 'Offrez-moi un café ☕';
