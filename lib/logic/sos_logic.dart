@@ -17,7 +17,7 @@ import '../screens/settings_screen.dart';
 enum SOSStatus { ready, scanning, locationFixed, preAlert, sent, error }
 enum AlertCause { manual, fall, inactivity }
 
-class SOSLogic extends ChangeNotifier {
+class SOSLogic extends ChangeNotifier with WidgetsBindingObserver {
   SOSStatus _status = SOSStatus.ready;
   String _errorMessage = '';
   static const platform = MethodChannel('com.oksigenia.sos/sms');
@@ -57,13 +57,39 @@ class SOSLogic extends ChangeNotifier {
     return contacts.isNotEmpty ? contacts.first : null;
   }
 
+  // --- INICIO CORREGIDO (Arranque Inmediato) ---
   Future<void> init() async {
+    // 1. Enganchar ciclo de vida
+    WidgetsBinding.instance.addObserver(this);
+    
+    // 2. Cargar configuración
     await _loadSettings();
-    await _checkPermissions();
-    // CORRECCIÓN: Pequeña pausa para asegurar que los sensores arrancan bien
-    await Future.delayed(const Duration(milliseconds: 500));
+
+    // 3. ARRANCAR SENSOR YA (Sin esperas)
     _startGForceMonitoring();
-    _startPassiveGPS();
+
+    // 4. EL TRUCO: Retrasar los permisos un poco.
+    // Esto deja que la UI se dibuje y la aguja se mueva antes de que
+    // el sistema operativo congele la app con la ventana de permisos.
+    Future.delayed(const Duration(milliseconds: 800), () async {
+       await _checkPermissions();
+       // Arrancamos GPS solo después de los permisos
+       _startPassiveGPS();
+    });
+  }
+
+  // --- CONTROL DE CICLO DE VIDA (Reactiva sensores al volver) ---
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    if (state == AppLifecycleState.resumed) {
+      debugPrint("🔄 APP RESUMED: Reactivando sensores...");
+      // Forzamos reinicio del sensor por si se quedó congelado en la pausa
+      _startGForceMonitoring();
+      if (_status == SOSStatus.ready) _startPassiveGPS();
+    } else if (state == AppLifecycleState.paused) {
+      // Pausamos para ahorrar batería y evitar errores de stream
+      _accelerometerSubscription?.cancel();
+    }
   }
 
   Future<void> _loadSettings() async {
@@ -81,6 +107,8 @@ class SOSLogic extends ChangeNotifier {
   }
 
   void _startPassiveGPS() async {
+    await _gpsSubscription?.cancel();
+
     final LocationSettings locationSettings = AndroidSettings(
         accuracy: LocationAccuracy.high,
         distanceFilter: 10,
@@ -101,20 +129,29 @@ class SOSLogic extends ChangeNotifier {
   }
 
   void _startGForceMonitoring() {
-    _accelerometerSubscription = accelerometerEventStream(samplingPeriod: SensorInterval.uiInterval)
-      .listen((AccelerometerEvent event) {
-        double rawMagnitude = sqrt(event.x * event.x + event.y * event.y + event.z * event.z);
-        _currentGForce = rawMagnitude / 9.81;
+    // Cancelar suscripción previa para evitar duplicados en memoria
+    _accelerometerSubscription?.cancel();
 
-        if ((_currentGForce > 1.2 || _currentGForce < 0.8)) {
-           _lastMovementTime = DateTime.now();
-        }
-        
-        if (_isFallDetectionActive && _currentGForce > 3.5 && (_status == SOSStatus.ready || _status == SOSStatus.locationFixed)) {
-          _triggerPreAlert(AlertCause.fall);
-        }
-        notifyListeners();
-      }, onError: (e) => debugPrint("Sensor Error: $e"));
+    try {
+      _accelerometerSubscription = accelerometerEventStream(samplingPeriod: SensorInterval.uiInterval)
+        .listen((AccelerometerEvent event) {
+          double rawMagnitude = sqrt(event.x * event.x + event.y * event.y + event.z * event.z);
+          _currentGForce = rawMagnitude / 9.81;
+
+          // Detección de movimiento básico
+          if ((_currentGForce > 1.2 || _currentGForce < 0.8)) {
+             _lastMovementTime = DateTime.now();
+          }
+          
+          // Detección de Caída (Solo si está activo)
+          if (_isFallDetectionActive && _currentGForce > 3.5 && (_status == SOSStatus.ready || _status == SOSStatus.locationFixed)) {
+            _triggerPreAlert(AlertCause.fall);
+          }
+          notifyListeners();
+        }, onError: (e) => debugPrint("Sensor Error: $e"));
+    } catch (e) {
+      debugPrint("Error iniciando acelerómetro: $e");
+    }
   }
 
   Future<void> _checkPermissions() async {
@@ -202,10 +239,9 @@ class SOSLogic extends ChangeNotifier {
         await _audioPlayer!.play(AssetSource('sounds/alarm.mp3'), volume: _currentVolume);
     } catch(e) { debugPrint("Audio Panic: $e"); }
     
-    // 2. VIBRACIÓN (NUEVO) - Patrón intenso
+    // 2. VIBRACIÓN
     try {
       if (await Vibration.hasVibrator() ?? false) {
-        // Vibra 500ms, para 500ms, repite indefinidamente (índice 0)
         Vibration.vibrate(pattern: [500, 1000, 500, 1000], repeat: 0);
       }
     } catch (e) { debugPrint("Vibration Error: $e"); }
@@ -229,7 +265,7 @@ class SOSLogic extends ChangeNotifier {
     _stopAllAlerts();
     _status = SOSStatus.ready;
     _lastMovementTime = DateTime.now();
-    _gpsSubscription?.resume();
+    if (_status == SOSStatus.ready) _startPassiveGPS();
     try { await platform.invokeMethod('sleepScreen'); } catch(_) {}
     notifyListeners();
   }
@@ -237,7 +273,6 @@ class SOSLogic extends ChangeNotifier {
   void _stopAllAlerts() {
     _preAlertTimer?.cancel();
     _periodicUpdateTimer?.cancel();
-    // DETENER AUDIO Y VIBRACIÓN
     try { _audioPlayer?.stop(); _audioPlayer?.dispose(); _audioPlayer = null; } catch(_) {}
     try { Vibration.cancel(); } catch(_) {}
   }
@@ -269,10 +304,8 @@ class SOSLogic extends ChangeNotifier {
       final LocationSettings locationSettings = AndroidSettings(accuracy: LocationAccuracy.high, forceLocationManager: true, timeLimit: const Duration(seconds: 15));
       Position pos = await Geolocator.getCurrentPosition(locationSettings: locationSettings);
       _setStatus(SOSStatus.locationFixed);
-      // CORRECCIÓN DEFINITIVA: ISSUE #1 & OSM (Sin typos, con $)
-      // Google: Formato corto y seguro (HTTPS) que invoca la App.
-      msgBody += "\nMaps: https://maps.google.com/?q=${pos.latitude},${pos.longitude}";
-      // OSM: Enlace web universal.
+      // ENLACES CORRECTOS
+      msgBody += "\nMaps: http://googleusercontent.com/maps.google.com/?q=${pos.latitude},${pos.longitude}";
       msgBody += "\nOSM: https://www.openstreetmap.org/?mlat=${pos.latitude}&mlon=${pos.longitude}";
     } catch (e) {
       msgBody += "\n(GPS Error/Timeout)";
@@ -305,7 +338,6 @@ class SOSLogic extends ChangeNotifier {
     _periodicUpdateTimer = Timer.periodic(Duration(minutes: minutes), (timer) async {
       try {
         Position pos = await Geolocator.getCurrentPosition(timeLimit: const Duration(seconds: 20));
-        // CORRECCIÓN DEFINITIVA EN UPDATES TAMBIÉN
         String updateMsg = "📍 SEGUIMIENTO Oksigenia: Sigo en ruta / Still moving.";
         updateMsg += "\nMaps: http://googleusercontent.com/maps.google.com/?q=${pos.latitude},${pos.longitude}";
         updateMsg += "\nOSM: https://www.openstreetmap.org/?mlat=${pos.latitude}&mlon=${pos.longitude}";
@@ -322,6 +354,7 @@ class SOSLogic extends ChangeNotifier {
   
   @override
   void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
     _accelerometerSubscription?.cancel();
     _gpsSubscription?.cancel();
     _inactivityTimer?.cancel();
