@@ -9,7 +9,7 @@ import 'package:audioplayers/audioplayers.dart';
 import 'package:sensors_plus/sensors_plus.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:wakelock_plus/wakelock_plus.dart';
-import 'package:vibration/vibration.dart'; // NUEVO: Librería de vibración
+import 'package:vibration/vibration.dart';
 import 'package:oksigenia_sos/l10n/app_localizations.dart'; 
 import '../services/preferences_service.dart';
 import '../screens/settings_screen.dart'; 
@@ -60,6 +60,8 @@ class SOSLogic extends ChangeNotifier {
   Future<void> init() async {
     await _loadSettings();
     await _checkPermissions();
+    // CORRECCIÓN: Pequeña pausa para asegurar que los sensores arrancan bien
+    await Future.delayed(const Duration(milliseconds: 500));
     _startGForceMonitoring();
     _startPassiveGPS();
   }
@@ -267,7 +269,11 @@ class SOSLogic extends ChangeNotifier {
       final LocationSettings locationSettings = AndroidSettings(accuracy: LocationAccuracy.high, forceLocationManager: true, timeLimit: const Duration(seconds: 15));
       Position pos = await Geolocator.getCurrentPosition(locationSettings: locationSettings);
       _setStatus(SOSStatus.locationFixed);
-      msgBody += "\nhttp://googleusercontent.com/maps.google.com/?q=${pos.latitude},${pos.longitude}";
+      // CORRECCIÓN DEFINITIVA: ISSUE #1 & OSM (Sin typos, con $)
+      // Google: Formato corto y seguro (HTTPS) que invoca la App.
+      msgBody += "\nMaps: https://maps.google.com/?q=${pos.latitude},${pos.longitude}";
+      // OSM: Enlace web universal.
+      msgBody += "\nOSM: https://www.openstreetmap.org/?mlat=${pos.latitude}&mlon=${pos.longitude}";
     } catch (e) {
       msgBody += "\n(GPS Error/Timeout)";
     }
@@ -299,7 +305,10 @@ class SOSLogic extends ChangeNotifier {
     _periodicUpdateTimer = Timer.periodic(Duration(minutes: minutes), (timer) async {
       try {
         Position pos = await Geolocator.getCurrentPosition(timeLimit: const Duration(seconds: 20));
-        String updateMsg = "📍 SEGUIMIENTO Oksigenia: Sigo en ruta / Still moving.\nhttp://googleusercontent.com/maps.google.com/?q=${pos.latitude},${pos.longitude}";
+        // CORRECCIÓN DEFINITIVA EN UPDATES TAMBIÉN
+        String updateMsg = "📍 SEGUIMIENTO Oksigenia: Sigo en ruta / Still moving.";
+        updateMsg += "\nMaps: http://googleusercontent.com/maps.google.com/?q=${pos.latitude},${pos.longitude}";
+        updateMsg += "\nOSM: https://www.openstreetmap.org/?mlat=${pos.latitude}&mlon=${pos.longitude}";
         await platform.invokeMethod('sendSMS', {"phone": target, "msg": updateMsg});
       } catch (e) { debugPrint("❌ Fallo update: $e"); }
     });

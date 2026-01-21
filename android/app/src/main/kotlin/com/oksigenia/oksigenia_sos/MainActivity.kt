@@ -1,5 +1,6 @@
 package com.oksigenia.oksigenia_sos
 
+import android.app.KeyguardManager // <--- IMPORTANTE: Faltaba este
 import android.app.NotificationChannel
 import android.app.NotificationManager
 import android.content.Context
@@ -14,19 +15,18 @@ import io.flutter.plugin.common.MethodChannel
 
 class MainActivity: FlutterActivity() {
     private val CHANNEL = "com.oksigenia.sos/sms"
-    // EL MISMO ID QUE USAS EN DART
     private val NOTIFICATION_CHANNEL_ID = "oksigenia_sos_modular_v1" 
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        createNotificationChannel() // <--- ESTO ES LA CLAVE
+        createNotificationChannel()
     }
 
     private fun createNotificationChannel() {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             val name = "Oksigenia SOS Service"
             val descriptionText = "Canal de notificaciones persistentes"
-            val importance = NotificationManager.IMPORTANCE_HIGH // Low para que no suene
+            val importance = NotificationManager.IMPORTANCE_HIGH
             val channel = NotificationChannel(NOTIFICATION_CHANNEL_ID, name, importance).apply {
                 description = descriptionText
             }
@@ -61,15 +61,24 @@ class MainActivity: FlutterActivity() {
 
     private fun wakeUpScreen() {
         runOnUiThread {
+            // 1. Para Android 8.1 (O_MR1) y superior: Usar API moderna
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O_MR1) {
                 setShowWhenLocked(true)
                 setTurnScreenOn(true)
+                
+                // EXTRA: Solicitar quitar el bloqueo si no es seguro (Swipe/None)
+                val keyguardManager = getSystemService(Context.KEYGUARD_SERVICE) as KeyguardManager
+                keyguardManager.requestDismissKeyguard(this, null)
             }
+            
+            // 2. Flags Legacy (Para compatibilidad y refuerzo)
+            // Añadimos FLAG_DISMISS_KEYGUARD para intentar saltar el bloqueo
             window.addFlags(
                 WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON or
                 WindowManager.LayoutParams.FLAG_ALLOW_LOCK_WHILE_SCREEN_ON or
                 WindowManager.LayoutParams.FLAG_SHOW_WHEN_LOCKED or
-                WindowManager.LayoutParams.FLAG_TURN_SCREEN_ON
+                WindowManager.LayoutParams.FLAG_TURN_SCREEN_ON or
+                WindowManager.LayoutParams.FLAG_DISMISS_KEYGUARD
             )
         }
     }
@@ -84,7 +93,8 @@ class MainActivity: FlutterActivity() {
                 WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON or
                 WindowManager.LayoutParams.FLAG_ALLOW_LOCK_WHILE_SCREEN_ON or
                 WindowManager.LayoutParams.FLAG_SHOW_WHEN_LOCKED or
-                WindowManager.LayoutParams.FLAG_TURN_SCREEN_ON
+                WindowManager.LayoutParams.FLAG_TURN_SCREEN_ON or
+                WindowManager.LayoutParams.FLAG_DISMISS_KEYGUARD
             )
         }
     }
