@@ -26,11 +26,9 @@
 
 ## 📸 Screenshots / Capturas
 
-| Home | Menu | Alert |
-|:---:|:---:|:---:|
-| <img src="metadata/en-US/images/phoneScreenshots/screen_main.jpg" width="200" alt="Home Screen Monitoring" /> | <img src="metadata/en-US/images/phoneScreenshots/screen_settings.jpg" width="200" alt="Menu" /> | <img src="metadata/en-US/images/phoneScreenshots/screen_alert.jpg" width="200" alt="Red Alert" /> |
-| **Success / Enviado** | **FOSS / Donate** | **Legal** |
-| <img src="metadata/en-US/images/phoneScreenshots/screen_send.jpg" width="200" alt="Success Blue Screen" /> | <img src="metadata/en-US/images/phoneScreenshots/screen_foss.jpg" width="200" alt="Donation Dialog" /> | <img src="metadata/en-US/images/phoneScreenshots/legal_notice.jpg" width="200" alt="Legal Notice" /> |
+| Home | Menu | Alert | Success / Enviado |
+|:---:|:---:|:---:|:---:|
+| <img src="metadata/en-US/images/phoneScreenshots/screen_main.jpg" width="185" alt="Home Screen" /> | <img src="metadata/en-US/images/phoneScreenshots/screen_settings.jpg" width="185" alt="Settings Menu" /> | <img src="metadata/en-US/images/phoneScreenshots/screen_alert.jpg" width="185" alt="Red Alert" /> | <img src="metadata/en-US/images/phoneScreenshots/screen_send.jpg" width="185" alt="Success Screen" /> |
 
 ---
 
@@ -56,7 +54,6 @@
 3. Select **"Unrestricted"** / Selecciona **"Sin restricciones"**.
 
 ### 🛡️ 2. "Restricted Settings" (Android 13+)
-<img src="metadata/en-US/images/phoneScreenshots/sms_permisions.jpg" align="right" width="180" alt="Restricted Settings Warning">
 
 [ES] Si ves un aviso de "Ajustes Restringidos" al activar los SMS:
 1. Ve a **Ajustes > Apps > Oksigenia SOS**.
