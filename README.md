@@ -11,9 +11,14 @@
 [![License: GPL v3](https://img.shields.io/badge/License-GPLv3-blue.svg)](https://www.gnu.org/licenses/gpl-3.0)
 [![Platform](https://img.shields.io/badge/Platform-Android-green.svg)]()
 [![Privacy](https://img.shields.io/badge/Privacy-Offline%20%20No%20Trackers-blue)]()
-<a href="https://apt.izzysoft.de/packages/com.oksigenia.oksigenia_sos">
-  <img src="https://gitlab.com/IzzyOnDroid/repo/-/raw/master/assets/IzzyOnDroidButtonGreyBorder_nofont.png" height="55" alt="Get it on IzzyOnDroid">
-</a>
+
+<br>
+
+<p align="center">
+  <a href="https://apt.izzysoft.de/packages/com.oksigenia.oksigenia_sos">
+    <img src="https://gitlab.com/IzzyOnDroid/repo/-/raw/master/assets/IzzyOnDroidButtonGreyBorder_nofont.png" height="70" alt="Get it on IzzyOnDroid">
+  </a>
+</p>
 
 👉 **[Donate via PayPal / Donar con PayPal](https://www.paypal.com/donate/?business=paypal@oksigenia.cc&currency_code=EUR)** 💙
 
