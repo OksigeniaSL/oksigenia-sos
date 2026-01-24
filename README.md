@@ -15,7 +15,7 @@
 <br>
 
 <p align="center">
-  <a href="https://github.com/OksigeniaSL/oksigenia-sos/releases/latest">
+  <a href="https://apt.izzysoft.de/packages/com.oksigenia.oksigenia_sos">
     <img src="https://gitlab.com/IzzyOnDroid/repo/-/raw/master/assets/IzzyOnDroidButtonGreyBorder_nofont.png" height="70" alt="Get it on IzzyOnDroid">
   </a>
 </p>
