@@ -2,28 +2,23 @@ name: Build Android Release
 
 on:
   push:
-    # Solo se activa cuando se sube una etiqueta que empieza por 'v' (v3.8.1)
-    # Esto elimina el duplicado que se creaba al subir a la rama 'main'
+    # Solo se activa con etiquetas de versión
     tags:
       - 'v*'
-    
-    # Ignora cambios en estos archivos para no gastar minutos de compilación
+    # Ignora cambios en documentación para no gastar minutos
     paths-ignore:
       - '**.md'
       - 'docs/**'
       - '.gitignore'
-      - 'metadata/**'
-      - 'screenshots/**'
 
 jobs:
   build:
     runs-on: ubuntu-latest
-
     steps:
-    - uses: actions/checkout@v3
+    - uses: actions/checkout@v4
 
     - name: Setup Java
-      uses: actions/setup-java@v3
+      uses: actions/setup-java@v4
       with:
         distribution: 'zulu'
         java-version: '17'
@@ -31,41 +26,31 @@ jobs:
     - name: Setup Flutter
       uses: subosito/flutter-action@v2
       with:
-        flutter-version: '3.x'
         channel: 'stable'
 
     - name: Get Dependencies
       run: flutter pub get
 
-    # --- FIRMA DE LA APP (VERSIÓN BLINDADA) ---
-    - name: Create Keystore & Properties
+    # Fuerza un versionCode alto (7000) para evitar el error de instalación
+    - name: Bump Version Code
+      run: sed -i 's/version: .*/version: 3.8.1+7000/' pubspec.yaml
+
+    - name: Create Keystore
       run: |
-        # LIMPIEZA: Quitamos espacios y saltos de línea antes de decodificar
         echo "${{ secrets.KEYSTORE_BASE64 }}" | tr -d '\n\r ' | base64 --decode > android/app/upload-keystore.jks
-        
-        # CREACIÓN DE PROPIEDADES
         echo "storePassword=${{ secrets.KEY_PASSWORD }}" > android/key.properties
         echo "keyPassword=${{ secrets.ALIAS_PASSWORD }}" >> android/key.properties
         echo "keyAlias=${{ secrets.KEY_ALIAS }}" >> android/key.properties
         echo "storeFile=upload-keystore.jks" >> android/key.properties
 
-    # --- COMPILACIÓN RELEASE REAL ---
-    - name: Build Split APKs (Release)
+    - name: Build Split APKs
       run: flutter build apk --release --split-per-abi --no-shrink
 
-    # --- SUBIR LOS APKs COMO ARTEFACTOS ---
-    - name: Upload APKs
-      uses: actions/upload-artifact@v3
-      with:
-        name: oksigenia-release-apks
-        path: build/app/outputs/flutter-apk/app-*-release.apk
-
-    # --- CREAR LA RELEASE EN GITHUB AUTOMÁTICAMENTE ---
     - name: Create Release
       uses: softprops/action-gh-release@v1
       with:
         files: build/app/outputs/flutter-apk/app-*-release.apk
-        draft: true
+        draft: false
         prerelease: false
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
