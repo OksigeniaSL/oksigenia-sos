@@ -45,5 +45,10 @@ flutter:
 flutter_launcher_icons:
   android: "ic_launcher"
   ios: true
-  image_path: "assets/images/icon.png"
+  image_path: "assets/images/icon.png" # Para Androids antiguos (Legacy)
   min_sdk_android: 21
+
+  # --- CONFIGURACIÓN ADAPTATIVA ---
+  # Esto genera el XML que separa fondo y frente, igual que Proton Mail.
+  adaptive_icon_background: "#FFFFFF"  # Fondo Blanco Puro
+  adaptive_icon_foreground: "assets/images/icon_foreground.png" # El logo con fondo transparente

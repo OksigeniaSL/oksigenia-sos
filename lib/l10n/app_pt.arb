@@ -36,7 +36,7 @@
     "btnAccept": "ACEITO O RISCO",
     "btnDecline": "SAIR",
     "privacyTitle": "Termos e Privacidade",
-    "privacyPolicyContent": "POLÍTICA DE PRIVACIDAD Y TÉRMINOS",
+    "privacyPolicyContent": "POLÍTICA DE PRIVACIDADE E TERMOS\n\n1. SEM COLETA DE DADOS\nOksigenia SOS funciona localmente. Não enviamos dados para a nuvem nem vendemos as suas informações.\n\n2. PERMISSÕES\n- Localização: Para coordenadas em caso de alerta.\n- SMS: Exclusivamente para enviar a mensagem de socorro.\n\n3. LIMITAÇÃO DE RESPONSABILIDADE\nA aplicação é fornecida 'como está'. Não nos responsabilizamos por falhas de cobertura ou hardware.",
     "advSettingsTitle": "Funções Avançadas",
     "advSettingsSubtitle": "Multi-contacto, Rastreio GPS...",
     "dialogCommunityTitle": "💎 Comunidade Oksigenia",
