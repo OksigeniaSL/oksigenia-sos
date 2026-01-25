@@ -163,7 +163,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get permSmsBody => 'App CANNOT send alerts even with saved contacts.';
 
   @override
-  String get permSmsButton => 'Enable SMS in Settings';
+  String get permSmsButton => 'ENABLE PERMISSIONS';
 
   @override
   String get restrictedSettingsTitle => 'Restricted Settings';
@@ -195,13 +195,13 @@ class AppLocalizationsEn extends AppLocalizations {
   String get messageSubtitle => 'Sent BEFORE the coordinates.';
 
   @override
-  String get messageHint => 'Ex: Diabetic. North Route...';
+  String get messageHint => 'Ex: Diabetic, Blood type A+...';
 
   @override
-  String get trackingTitle => 'GPS Tracking';
+  String get trackingTitle => 'Route Tracking';
 
   @override
-  String get trackingSubtitle => 'Sends position to Main contact every X time.';
+  String get trackingSubtitle => 'Send location every X minutes after alert.';
 
   @override
   String get trackOff => '❌ Disabled';
@@ -286,4 +286,24 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get dialogClose => 'Close';
+
+  @override
+  String get permSmsText =>
+      'Missing SMS permissions. The app cannot send alerts.';
+
+  @override
+  String get phoneLabel => 'Phone (e.g. +1...)';
+
+  @override
+  String get btnAdd => 'ADD';
+
+  @override
+  String get noContacts => 'No contacts configured.';
+
+  @override
+  String get inactivityTitle => 'Inactivity Time';
+
+  @override
+  String get inactivitySubtitle =>
+      'Time without movement before calling for help.';
 }

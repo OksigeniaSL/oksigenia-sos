@@ -401,7 +401,7 @@ abstract class AppLocalizations {
   /// No description provided for @permSmsButton.
   ///
   /// In en, this message translates to:
-  /// **'Enable SMS in Settings'**
+  /// **'ENABLE PERMISSIONS'**
   String get permSmsButton;
 
   /// No description provided for @restrictedSettingsTitle.
@@ -461,19 +461,19 @@ abstract class AppLocalizations {
   /// No description provided for @messageHint.
   ///
   /// In en, this message translates to:
-  /// **'Ex: Diabetic. North Route...'**
+  /// **'Ex: Diabetic, Blood type A+...'**
   String get messageHint;
 
   /// No description provided for @trackingTitle.
   ///
   /// In en, this message translates to:
-  /// **'GPS Tracking'**
+  /// **'Route Tracking'**
   String get trackingTitle;
 
   /// No description provided for @trackingSubtitle.
   ///
   /// In en, this message translates to:
-  /// **'Sends position to Main contact every X time.'**
+  /// **'Send location every X minutes after alert.'**
   String get trackingSubtitle;
 
   /// No description provided for @trackOff.
@@ -637,6 +637,42 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Close'**
   String get dialogClose;
+
+  /// No description provided for @permSmsText.
+  ///
+  /// In en, this message translates to:
+  /// **'Missing SMS permissions. The app cannot send alerts.'**
+  String get permSmsText;
+
+  /// No description provided for @phoneLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Phone (e.g. +1...)'**
+  String get phoneLabel;
+
+  /// No description provided for @btnAdd.
+  ///
+  /// In en, this message translates to:
+  /// **'ADD'**
+  String get btnAdd;
+
+  /// No description provided for @noContacts.
+  ///
+  /// In en, this message translates to:
+  /// **'No contacts configured.'**
+  String get noContacts;
+
+  /// No description provided for @inactivityTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Inactivity Time'**
+  String get inactivityTitle;
+
+  /// No description provided for @inactivitySubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Time without movement before calling for help.'**
+  String get inactivitySubtitle;
 }
 
 class _AppLocalizationsDelegate

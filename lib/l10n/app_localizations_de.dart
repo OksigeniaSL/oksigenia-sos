@@ -162,7 +162,7 @@ class AppLocalizationsDe extends AppLocalizations {
   String get permSmsBody => 'Die App kann keine Alarme senden.';
 
   @override
-  String get permSmsButton => 'SMS aktivieren';
+  String get permSmsButton => 'BERECHTIGUNG AKTIVIEREN';
 
   @override
   String get restrictedSettingsTitle => 'Einstellungen';
@@ -193,13 +193,13 @@ class AppLocalizationsDe extends AppLocalizations {
   String get messageSubtitle => 'Vor Koordinaten gesendet.';
 
   @override
-  String get messageHint => 'Z.B.: Diabetiker...';
+  String get messageHint => 'Bsp: Diabetiker, Blutgruppe A+...';
 
   @override
-  String get trackingTitle => 'GPS-Tracking';
+  String get trackingTitle => 'Routenverfolgung';
 
   @override
-  String get trackingSubtitle => 'Sendet Position.';
+  String get trackingSubtitle => 'Standort alle X Min. nach Alarm senden.';
 
   @override
   String get trackOff => '❌ Deaktiviert';
@@ -282,4 +282,23 @@ class AppLocalizationsDe extends AppLocalizations {
 
   @override
   String get dialogClose => 'Schließen';
+
+  @override
+  String get permSmsText =>
+      'SMS-Berechtigung fehlt. App kann keine Warnung senden.';
+
+  @override
+  String get phoneLabel => 'Telefon (z.B. +49...)';
+
+  @override
+  String get btnAdd => 'HINZUFÜGEN';
+
+  @override
+  String get noContacts => 'Keine Kontakte konfiguriert.';
+
+  @override
+  String get inactivityTitle => 'Inaktivitätszeit';
+
+  @override
+  String get inactivitySubtitle => 'Zeit ohne Bewegung vor dem Notruf.';
 }

@@ -165,7 +165,7 @@ class AppLocalizationsEs extends AppLocalizations {
       'La app NO podrá enviar alertas aunque tengas contactos.';
 
   @override
-  String get permSmsButton => 'Activar SMS en Ajustes';
+  String get permSmsButton => 'ACTIVAR PERMISOS';
 
   @override
   String get restrictedSettingsTitle => 'Ajustes Restringidos';
@@ -196,13 +196,14 @@ class AppLocalizationsEs extends AppLocalizations {
   String get messageSubtitle => 'Se enviará ANTES de las coordenadas.';
 
   @override
-  String get messageHint => 'Ej: Soy diabético. Ruta Norte...';
+  String get messageHint => 'Ej: Soy diabético, grupo sanguíneo A+...';
 
   @override
-  String get trackingTitle => 'Seguimiento GPS';
+  String get trackingTitle => 'Seguimiento en Ruta';
 
   @override
-  String get trackingSubtitle => 'Envía posición al Principal cada X tiempo.';
+  String get trackingSubtitle =>
+      'Enviar ubicación cada X minutos tras la alerta.';
 
   @override
   String get trackOff => '❌ Desactivado';
@@ -288,4 +289,24 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get dialogClose => 'Cerrar';
+
+  @override
+  String get permSmsText =>
+      'Faltan permisos de SMS. La app no podrá enviar alertas.';
+
+  @override
+  String get phoneLabel => 'Teléfono (ej: +34...)';
+
+  @override
+  String get btnAdd => 'AÑADIR';
+
+  @override
+  String get noContacts => 'No hay contactos configurados.';
+
+  @override
+  String get inactivityTitle => 'Tiempo de Inactividad';
+
+  @override
+  String get inactivitySubtitle =>
+      'Tiempo sin movimiento antes de pedir ayuda.';
 }

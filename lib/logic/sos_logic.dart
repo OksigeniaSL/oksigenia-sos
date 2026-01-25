@@ -24,7 +24,6 @@ class SOSLogic extends ChangeNotifier with WidgetsBindingObserver {
   String _errorMessage = '';
   static const platform = MethodChannel('com.oksigenia.sos/sms');
   
-  // v3.9.0: Mantenemos 12G para impactos catastróficos.
   static const double _impactThreshold = 12.0;
 
   bool _isFallDetectionActive = false;
@@ -40,16 +39,11 @@ class SOSLogic extends ChangeNotifier with WidgetsBindingObserver {
   double _visualGForce = 1.0;
   DateTime _lastMovementTime = DateTime.now();
   
-  // v3.9.0: Buffer para calcular la varianza (energía) del movimiento
-  final List<double> _motionHistory = [];
-  static const int _historySize = 20; 
-  
   Timer? _inactivityTimer;
   Timer? _periodicUpdateTimer;
   StreamSubscription? _accelerometerSubscription;
   StreamSubscription? _gpsSubscription;
   
-  // --- DATOS VISUALES ---
   int _batteryLevel = 0;
   double _gpsAccuracy = 0.0;
   Timer? _healthCheckTimer;
@@ -108,10 +102,9 @@ class SOSLogic extends ChangeNotifier with WidgetsBindingObserver {
     try {
       _batteryLevel = await _battery.batteryLevel;
       
-      // LOGICA DE SEGURIDAD: ¿Está el sistema "Armado"?
       bool isSystemArmed = _isFallDetectionActive || _isInactivityMonitorActive;
 
-      // DYING GASP: Solo si batería < 5%, no se ha enviado ya, hay contacto Y EL SISTEMA ESTÁ VIGILANDO.
+      // DYING GASP (5% real)
       if (_batteryLevel <= 5 && !_isDyingGaspSent && emergencyContact != null && isSystemArmed) {
         _triggerDyingGasp();
       }
@@ -126,12 +119,18 @@ class SOSLogic extends ChangeNotifier with WidgetsBindingObserver {
   @override
   void didChangeAppLifecycleState(AppLifecycleState state) {
     if (state == AppLifecycleState.resumed) {
-      debugPrint("🔄 APP RESUMED: Reactivando sensores...");
-      _startGForceMonitoring();
+      debugPrint("🔄 APP RESUMED: Reactivando sensores UI...");
+      _startGForceMonitoring(); // Aseguramos que esté activo
       _checkHealth();
       if (_status == SOSStatus.ready) _startPassiveGPS();
     } else if (state == AppLifecycleState.paused) {
-      _accelerometerSubscription?.cancel();
+      // CORRECCIÓN CRÍTICA: NO CANCELAR SI ESTAMOS VIGILANDO
+      // Si el monitor está activo, el sensor debe seguir leyendo en background (gracias al Servicio Foreground)
+      if (!_isInactivityMonitorActive && !_isFallDetectionActive) {
+         _accelerometerSubscription?.cancel();
+      } else {
+         debugPrint("🛡️ Manteniendo sensores activos en segundo plano/bolsillo.");
+      }
     }
   }
 
@@ -179,9 +178,11 @@ class SOSLogic extends ChangeNotifier with WidgetsBindingObserver {
     } catch (e) { debugPrint("Passive GPS Error: $e"); }
   }
 
-  // --- NÚCLEO FÍSICO v3.9.0 (Smart Variance) ---
+  // --- NÚCLEO FÍSICO ---
   void _startGForceMonitoring() {
     _accelerometerSubscription?.cancel();
+    double lastG = 1.0;
+
     try {
       _accelerometerSubscription = accelerometerEventStream(samplingPeriod: SensorInterval.gameInterval)
         .listen((AccelerometerEvent event) {
@@ -194,20 +195,15 @@ class SOSLogic extends ChangeNotifier with WidgetsBindingObserver {
             _visualGForce = (_visualGForce * 0.90) + (instantG * 0.10); 
           }
 
-          _motionHistory.add(instantG);
-          if (_motionHistory.length > _historySize) {
-            _motionHistory.removeAt(0);
+          double delta = (instantG - lastG).abs();
+          lastG = instantG;
+
+          // 1. Detección de VIDA
+          if (delta > 0.01 || instantG > 1.1 || instantG < 0.9) {
+             _lastMovementTime = DateTime.now();
           }
 
-          if (_motionHistory.length >= _historySize) {
-             double mean = _motionHistory.reduce((a, b) => a + b) / _motionHistory.length;
-             double variance = _motionHistory.map((g) => pow(g - mean, 2)).reduce((a, b) => a + b) / _motionHistory.length;
-             
-             if (variance > 0.005) { 
-               _lastMovementTime = DateTime.now();
-             }
-          }
-          
+          // 2. Detección de CAÍDA (12G)
           if (_isFallDetectionActive && instantG > _impactThreshold && (_status == SOSStatus.ready || _status == SOSStatus.locationFixed)) {
             debugPrint("💥 IMPACTO DURO: ${instantG.toStringAsFixed(2)} G");
             _triggerPreAlert(AlertCause.fall);
@@ -284,25 +280,35 @@ class SOSLogic extends ChangeNotifier with WidgetsBindingObserver {
     }
     _isInactivityMonitorActive = value;
     if (value && _errorMessage == "NO_CONTACT") _setStatus(SOSStatus.ready); 
+    
+    final service = FlutterBackgroundService();
     if (value) {
-      final service = FlutterBackgroundService();
       if (!(await service.isRunning())) service.startService();
     }
+    
     PreferencesService().saveInactivityState(value);
 
     if (value) {
       _lastMovementTime = DateTime.now();
+      _inactivityTimer?.cancel(); 
       _inactivityTimer = Timer.periodic(const Duration(seconds: 2), (timer) {
+        if (!_isInactivityMonitorActive) {
+           timer.cancel();
+           return;
+        }
+
         if (_status != SOSStatus.ready && _status != SOSStatus.locationFixed) return;
         
         if (DateTime.now().difference(_lastMovementTime).inSeconds > _currentInactivityLimit) {
-          debugPrint("💤 ALERTA: Inactividad detectada (Varianza baja por demasiado tiempo)");
+          debugPrint("💤 ALERTA: Inactividad detectada");
           _triggerPreAlert(AlertCause.inactivity);
         }
       });
     } else {
       _inactivityTimer?.cancel();
-      if (_status == SOSStatus.preAlert) cancelAlert();
+      if (_status == SOSStatus.preAlert && _lastTrigger == AlertCause.inactivity) {
+        cancelAlert();
+      }
     }
     notifyListeners();
   }
@@ -349,7 +355,6 @@ class SOSLogic extends ChangeNotifier with WidgetsBindingObserver {
     });
   }
 
-  // --- FUNCIÓN DYING GASP (Corregida Lógica y URL) ---
   Future<void> _triggerDyingGasp() async {
     _isDyingGaspSent = true; 
     debugPrint("🪫 DYING GASP ACTIVADO: Batería crítica");
@@ -373,8 +378,8 @@ class SOSLogic extends ChangeNotifier with WidgetsBindingObserver {
         return await Geolocator.getLastKnownPosition() ?? Position(longitude: 0, latitude: 0, timestamp: DateTime.now(), accuracy: 0, altitude: 0, heading: 0, speed: 0, speedAccuracy: 0, altitudeAccuracy: 0, headingAccuracy: 0); 
       });
 
-      // CORRECCIÓN DEFINITIVA DE URL
-      msg += "\nhttp://googleusercontent.com/maps.google.com/maps?q=${pos.latitude},${pos.longitude}";
+      // CORRECCIÓN URL #1 (Standard Maps)
+      msg += "\nhttps://maps.google.com/?q=${pos.latitude},${pos.longitude}";
       
       for (String number in recipients) {
         await platform.invokeMethod('sendSMS', {"phone": number, "msg": msg});
@@ -435,10 +440,10 @@ class SOSLogic extends ChangeNotifier with WidgetsBindingObserver {
       Position pos = await Geolocator.getCurrentPosition(locationSettings: locationSettings);
       _setStatus(SOSStatus.locationFixed);
       
-      msgBody += "\nMaps: http://googleusercontent.com/maps.google.com/maps?q=${pos.latitude},${pos.longitude}";
+      // CORRECCIÓN URL #2
+      msgBody += "\nMaps: https://maps.google.com/?q=${pos.latitude},${pos.longitude}";
       msgBody += "\nOSM: https://www.openstreetmap.org/?mlat=${pos.latitude}&mlon=${pos.longitude}";
       
-      // Telemetría
       msgBody += "\n\n🔋Bat: $batteryLevel% | 📡Alt: ${pos.altitude.toStringAsFixed(0)}m | 🎯Acc: ${pos.accuracy.toStringAsFixed(0)}m";
 
     } catch (e) {
@@ -488,10 +493,11 @@ class SOSLogic extends ChangeNotifier with WidgetsBindingObserver {
       try {
         Position pos = await Geolocator.getCurrentPosition(timeLimit: const Duration(seconds: 20));
         String updateMsg = "📍 SEGUIMIENTO Oksigenia: Sigo en ruta / Still moving.";
-        updateMsg += "\nMaps: http://googleusercontent.com/maps.google.com/maps?q=${pos.latitude},${pos.longitude}";
+        
+        // CORRECCIÓN URL #3
+        updateMsg += "\nMaps: https://maps.google.com/?q=${pos.latitude},${pos.longitude}";
         updateMsg += "\nOSM: https://www.openstreetmap.org/?mlat=${pos.latitude}&mlon=${pos.longitude}";
         
-        // --- AQUÍ ESTABA EL ERROR (Ahora corregido sin barras invertidas) ---
         await platform.invokeMethod('sendSMS', {"phone": target, "msg": updateMsg});
         
       } catch (e) { debugPrint("❌ Fallo update: $e"); }
