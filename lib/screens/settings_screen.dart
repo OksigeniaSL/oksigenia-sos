@@ -249,7 +249,7 @@ class _SettingsScreenState extends State<SettingsScreen> with WidgetsBindingObse
                 ),
               ),
             ),
-
+/* BLOQUE A OCULTAR TEMPORALMENTE (TRACKING)
             const Divider(height: 40),
 
             Text(l10n.trackingTitle, style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
@@ -273,6 +273,8 @@ class _SettingsScreenState extends State<SettingsScreen> with WidgetsBindingObse
                 ),
               ),
             ),
+            */
+            
             const SizedBox(height: 50),
           ],
         ),
