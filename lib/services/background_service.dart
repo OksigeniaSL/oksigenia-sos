@@ -10,7 +10,6 @@ Future<void> initializeService() async {
   await service.configure(
     androidConfiguration: AndroidConfiguration(
       onStart: onStart,
-      icon: 'ic_stat_oksigenia',
       autoStart: false, 
       isForegroundMode: false, 
       notificationChannelId: 'oksigenia_sos_modular_v1', 

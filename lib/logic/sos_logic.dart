@@ -110,11 +110,20 @@ class SOSLogic extends ChangeNotifier with WidgetsBindingObserver {
     try {
       _batteryLevel = await _battery.batteryLevel;
       
-      // Lógica Dying Gasp (Último Suspiro)
-      // MODO TEST: <= 90 (Cambiar a <= 5 para producción)
-      if (_batteryLevel <= 90 && !_isDyingGaspSent && emergencyContact != null) {
+      // LOGICA DE SEGURIDAD: ¿Está el sistema "Armado"?
+      bool isSystemArmed = _isFallDetectionActive || _isInactivityMonitorActive;
+
+      // DYING GASP: Solo si batería < 5%, no se ha enviado ya, hay contacto Y EL SISTEMA ESTÁ VIGILANDO.
+      if (_batteryLevel <= 5 && !_isDyingGaspSent && emergencyContact != null && isSystemArmed) {
         _triggerDyingGasp();
       }
+
+      if (_status != SOSStatus.locationFixed) {
+         _gpsAccuracy = 0.0;
+      }
+      notifyListeners();
+    } catch(e) { debugPrint("Health Check Error: $e"); }
+  }
 
       if (_status != SOSStatus.locationFixed) {
          _gpsAccuracy = 0.0;

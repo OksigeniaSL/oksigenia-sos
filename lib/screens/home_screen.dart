@@ -142,7 +142,7 @@ class _HomeScreenState extends State<HomeScreen> {
                   // G-Force
                   Column(
                     children: [
-                      const Icon(Icons.speed, color: Colors.grey, size: 36), // Aumentado a 36
+                      const Icon(Icons.speed, color: Colors.grey, size: 48), // Aumentado a 48
                       const SizedBox(height: 6),
                       Text(
                         "${_sosLogic.currentGForce.toStringAsFixed(2)}G", // 2 Decimales
@@ -156,7 +156,7 @@ class _HomeScreenState extends State<HomeScreen> {
                       Icon(
                         _sosLogic.batteryLevel > 20 ? Icons.battery_std : Icons.battery_alert, 
                         color: _sosLogic.batteryLevel > 20 ? Colors.green : Colors.red, 
-                        size: 36 // Aumentado a 36
+                        size: 48 // Aumentado a 48
                       ),
                       const SizedBox(height: 6),
                       Text(
@@ -171,7 +171,7 @@ class _HomeScreenState extends State<HomeScreen> {
                       Icon(
                         Icons.gps_fixed, 
                         color: _sosLogic.gpsAccuracy > 0 ? Colors.green : Colors.grey, 
-                        size: 36 // Aumentado a 36
+                        size: 48 // Aumentado a 48
                       ),
                       const SizedBox(height: 6),
                       Text(
