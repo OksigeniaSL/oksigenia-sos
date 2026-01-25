@@ -17,6 +17,7 @@ void main() async {
 
   // Esto hará que la pantalla de inicio (splash) dure 1 segundo más, 
   // pero garantiza que Sylvia despierte tras un reinicio del móvil.
+  // ESTA ES LA BUENA (v3.8.3 Style)
   await initializeService(); 
   
   final bool accepted = prefs.getBool('disclaimer_accepted') ?? false;
@@ -55,6 +56,10 @@ class _OksigeniaAppState extends State<OksigeniaApp> {
   @override
   void initState() {
     super.initState();
+    // 🚀 AQUÍ DESPERTAMOS A SYLVIA
+    // Al hacerlo aquí, la app ya está cargando y no bloqueamos el splash screen.
+    // Además, al estar en el hilo de la UI, Android prioriza este proceso.
+    // initializeService();
     if (widget.savedLanguage != null) {
       _locale = Locale(widget.savedLanguage!);
     }

@@ -113,7 +113,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get disclaimerText =>
-      'Oksigenia SOS is a support tool, not a substitute for professional emergency services. Its operation depends on external factors: battery, GPS signal, and mobile coverage.\n\nBy activating this app, you accept that the software is provided \'as is\' and release the developers from legal liability for technical failures. You are responsible for your own safety.';
+      'Oksigenia SOS is a support tool, not a substitute for professional emergency services. Its operation depends on external factors: battery, GPS signal, and mobile coverage.\n\nBy activating this app, you accept that the software is provided \'as is\' and release the developers from legal liability for technical failures. You are responsible for your own safety.\n\nSMS Service Costs: All messaging costs are the responsibility of the user according to their mobile carrier\'s rates. Oksigenia does not cover or charge for these messages.';
 
   @override
   String get btnAccept => 'I ACCEPT THE RISK';
@@ -163,7 +163,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get permSmsBody => 'App CANNOT send alerts even with saved contacts.';
 
   @override
-  String get permSmsButton => 'ENABLE PERMISSIONS';
+  String get permSmsButton => 'Enable SMS in Settings';
 
   @override
   String get restrictedSettingsTitle => 'Restricted Settings';
@@ -195,13 +195,13 @@ class AppLocalizationsEn extends AppLocalizations {
   String get messageSubtitle => 'Sent BEFORE the coordinates.';
 
   @override
-  String get messageHint => 'Ex: Diabetic, Blood type A+...';
+  String get messageHint => 'Ex: Diabetic. North Route...';
 
   @override
-  String get trackingTitle => 'Route Tracking';
+  String get trackingTitle => 'GPS Tracking';
 
   @override
-  String get trackingSubtitle => 'Send location every X minutes after alert.';
+  String get trackingSubtitle => 'Sends position to Main contact every X time.';
 
   @override
   String get trackOff => '❌ Disabled';

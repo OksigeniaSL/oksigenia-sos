@@ -15,26 +15,30 @@ class HomeScreen extends StatefulWidget {
   State<HomeScreen> createState() => _HomeScreenState();
 }
 
-class _HomeScreenState extends State<HomeScreen> {
+// AÑADIDO: 'with WidgetsBindingObserver' para escuchar cuando la app vuelve al frente
+class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
   final SOSLogic _sosLogic = SOSLogic();
   bool _hasShownWarning = false; 
 
   @override
   void initState() {
     super.initState();
+    WidgetsBinding.instance.addObserver(this); // 1. Nos suscribimos a cambios
+    
     _sosLogic.init();
     WakelockPlus.enable();
     
-    // 1. Verificación de Servicio Local
+    // 2. EL CÓDIGO DE LA 3.8.3 (SEGURO DE VIDA)
+    // Si Sylvia no ha despertado en 1 segundo, la obligamos.
     Future.delayed(const Duration(seconds: 1), () {
       FlutterBackgroundService().isRunning().then((isRunning) {
         if (!isRunning) {
+          print("SYLVIA: Arrancando servicio forzosamente desde UI (Backup 3.8.3)");
           FlutterBackgroundService().startService();
         }
       });
     });
 
-    // 2. Verificación Remota
     _checkRemoteConfig();
   }
 
@@ -63,8 +67,29 @@ class _HomeScreenState extends State<HomeScreen> {
     }
   }
 
+  // 🚀 ESTE ES EL MÉTODO NUEVO QUE FALTABA
+  // Detecta cuando el usuario vuelve de Ajustes tras dar permisos
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    if (state == AppLifecycleState.resumed) {
+      print("🔄 APP RESUMED: Verificando servicio tras volver de ajustes...");
+      FlutterBackgroundService().isRunning().then((isRunning) {
+        if (!isRunning) {
+          // Si Sylvia estaba dormida, ¡DESPIERTA!
+          FlutterBackgroundService().startService();
+        } else {
+           // Si ya estaba despierta, le mandamos refrescar textos por si acaso
+           FlutterBackgroundService().invoke("updateLanguage");
+        }
+      });
+      // Refrescamos la lógica para que detecte que ya tenemos permisos
+      _sosLogic.init(); 
+    }
+  }
+
   @override
   void dispose() {
+    WidgetsBinding.instance.removeObserver(this); // Dejamos de observar
     _sosLogic.dispose();
     super.dispose();
   }
@@ -133,7 +158,7 @@ class _HomeScreenState extends State<HomeScreen> {
             
             const SizedBox(height: 25),
 
-            // HEALTH DASHBOARD MEJORADO (Iconos Grandes + Decimales)
+            // HEALTH DASHBOARD
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 30),
               child: Row(
@@ -142,10 +167,10 @@ class _HomeScreenState extends State<HomeScreen> {
                   // G-Force
                   Column(
                     children: [
-                      const Icon(Icons.speed, color: Colors.grey, size: 48), // Aumentado a 48
+                      const Icon(Icons.speed, color: Colors.grey, size: 48),
                       const SizedBox(height: 6),
                       Text(
-                        "${_sosLogic.currentGForce.toStringAsFixed(2)}G", // 2 Decimales
+                        "${_sosLogic.currentGForce.toStringAsFixed(2)}G",
                         style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 14)
                       ),
                     ],
@@ -156,7 +181,7 @@ class _HomeScreenState extends State<HomeScreen> {
                       Icon(
                         _sosLogic.batteryLevel > 20 ? Icons.battery_std : Icons.battery_alert, 
                         color: _sosLogic.batteryLevel > 20 ? Colors.green : Colors.red, 
-                        size: 48 // Aumentado a 48
+                        size: 48 
                       ),
                       const SizedBox(height: 6),
                       Text(
@@ -171,7 +196,7 @@ class _HomeScreenState extends State<HomeScreen> {
                       Icon(
                         Icons.gps_fixed, 
                         color: _sosLogic.gpsAccuracy > 0 ? Colors.green : Colors.grey, 
-                        size: 48 // Aumentado a 48
+                        size: 48
                       ),
                       const SizedBox(height: 6),
                       Text(
@@ -242,7 +267,7 @@ class _HomeScreenState extends State<HomeScreen> {
                 ),
               ),
 
-            // INTERRUPTORES INTELIGENTES
+            // INTERRUPTORES
             _buildQuickToggle(
               context, 
               l10n.autoModeLabel, 

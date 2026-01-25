@@ -113,7 +113,7 @@ class AppLocalizationsDe extends AppLocalizations {
 
   @override
   String get disclaimerText =>
-      'Oksigenia SOS ist ein Hilfsmittel, kein Ersatz für professionelle Rettungsdienste. Der Betrieb hängt von externen Faktoren ab: Batterie, GPS-Signal und Mobilfunkabdeckung.\n\nDurch die Aktivierung dieser App akzeptieren Sie, dass die Software \'wie besehen\' bereitgestellt wird, und befreien die Entwickler von der rechtlichen Haftung für technische Ausfälle. Sie sind für Ihre eigene Sicherheit verantwortlich.';
+      'Oksigenia SOS ist ein unterstützendes Tool und kein Ersatz für professionelle Rettungsdienste. Der Betrieb hängt von externen Faktoren ab: Batterie, GPS-Signal und Mobilfunkabdeckung.\n\nDurch die Aktivierung dieser App akzeptieren Sie, dass die Software \'wie besehen\' bereitgestellt wird, und stellen die Entwickler von der rechtlichen Haftung für technische Fehler frei. Sie sind für Ihre eigene Sicherheit verantwortlich.\n\nSMS-Servicekosten: Alle Verbindungskosten liegen in der Verantwortung des Nutzers gemäß den Tarifen seines Mobilfunkanbieters. Oksigenia übernimmt keine Kosten und erhebt keine Gebühren für diese Nachrichten.';
 
   @override
   String get btnAccept => 'AKZEPTIEREN';
@@ -162,7 +162,7 @@ class AppLocalizationsDe extends AppLocalizations {
   String get permSmsBody => 'Die App kann keine Alarme senden.';
 
   @override
-  String get permSmsButton => 'BERECHTIGUNG AKTIVIEREN';
+  String get permSmsButton => 'SMS aktivieren';
 
   @override
   String get restrictedSettingsTitle => 'Einstellungen';
@@ -193,13 +193,13 @@ class AppLocalizationsDe extends AppLocalizations {
   String get messageSubtitle => 'Vor Koordinaten gesendet.';
 
   @override
-  String get messageHint => 'Bsp: Diabetiker, Blutgruppe A+...';
+  String get messageHint => 'Z.B.: Diabetiker...';
 
   @override
-  String get trackingTitle => 'Routenverfolgung';
+  String get trackingTitle => 'GPS-Tracking';
 
   @override
-  String get trackingSubtitle => 'Standort alle X Min. nach Alarm senden.';
+  String get trackingSubtitle => 'Sendet Position.';
 
   @override
   String get trackOff => '❌ Deaktiviert';

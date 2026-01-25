@@ -10,11 +10,17 @@ Future<void> initializeService() async {
   await service.configure(
     androidConfiguration: AndroidConfiguration(
       onStart: onStart,
-      autoStart: false, 
+      
+      // Mantenemos esto en false como lo estaba (arranca con el toggle)
+      autoStart: true, 
       isForegroundMode: false, 
+      
       notificationChannelId: 'oksigenia_sos_modular_v1', 
+      
       initialNotificationTitle: 'OKSIGENIA SOS',
       initialNotificationContent: 'Iniciando...',
+      
+      // Mantiene los tipos de servicio (vital para GPS)
       foregroundServiceTypes: [
         AndroidForegroundType.location,
         AndroidForegroundType.dataSync,

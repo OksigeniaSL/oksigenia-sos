@@ -114,7 +114,7 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get disclaimerText =>
-      'Oksigenia SOS est un outil de soutien, et non un substitut aux services d\'urgence professionnels. Son fonctionnement dépend de facteurs externes : batterie, signal GPS et couverture mobile.\n\nEn activant cette application, vous acceptez que le logiciel soit fourni \'tel quel\' et vous libérez les développeurs de toute responsabilité légale en cas de défaillance technique. Vous êtes responsable de votre propre sécurité.';
+      'Oksigenia SOS est un outil de soutien et non un substitut aux services d\'urgence professionnels. Son fonctionnement dépend de facteurs externes : batterie, signal GPS et couverture mobile.\n\nEn activant cette application, vous acceptez que le logiciel soit fourni \'en l\'état\' et dégagez les développeurs de toute responsabilité légale en cas de défaillances techniques. Vous êtes responsable de votre propre sécurité.\n\nFrais de service SMS : Tous les coûts de messagerie sont à la charge de l\'utilisateur selon les tarifs de son opérateur mobile. Oksigenia ne couvre ni ne facture ces messages.';
 
   @override
   String get btnAccept => 'J\'ACCEPTE LE RISQUE';
@@ -164,7 +164,7 @@ class AppLocalizationsFr extends AppLocalizations {
   String get permSmsBody => 'L\'app NE PEUT PAS envoyer d\'alertes.';
 
   @override
-  String get permSmsButton => 'ACTIVER PERMISSIONS';
+  String get permSmsButton => 'Activer SMS';
 
   @override
   String get restrictedSettingsTitle => 'Paramètres Restreints';
@@ -195,14 +195,13 @@ class AppLocalizationsFr extends AppLocalizations {
   String get messageSubtitle => 'Envoyé AVANT les coordonnées.';
 
   @override
-  String get messageHint => 'Ex: Diabétique, Groupe sanguin A+...';
+  String get messageHint => 'Ex : Diabétique. Route Nord...';
 
   @override
-  String get trackingTitle => 'Suivi d\'itinéraire';
+  String get trackingTitle => 'Suivi GPS';
 
   @override
-  String get trackingSubtitle =>
-      'Envoyer position toutes les X min après alerte.';
+  String get trackingSubtitle => 'Envoie la position à intervalles.';
 
   @override
   String get trackOff => '❌ Désactivé';
