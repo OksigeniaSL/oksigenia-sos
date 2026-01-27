@@ -6,9 +6,9 @@ The following versions of Oksigenia SOS are currently supported with security up
 
 | Version | Supported          |
 | ------- | ------------------ |
-| 3.7.x   | :white_check_mark: |
-| 3.6.x   | :white_check_mark: |
-| < 3.6   | :x:                |
+| 3.9.x   | :white_check_mark: |
+| 3.8.x   | :white_check_mark: |
+| < 3.7   | :x:                |
 
 ## Reporting a Vulnerability
 
