@@ -28,7 +28,7 @@
 
 | Dashboard | Impact Alert | Settings | Menu |
 |:---:|:---:|:---:|:---:|
-| <img src="screenshots/main_en.jpg" width="185" alt="Main Dashboard" /> | <img src="screenshots/impact_en.jpg" width="185" alt="Impact Alert Red" /> | <img src="screenshots/settings_en.jpg" width="185" alt="Settings Star Contact" /> | <img src="screenshots/menu_en.jpg" width="185" alt="Navigation Drawer" /> |
+| <img src="screenshots/main_en.jpg" width="185" alt="Main Dashboard Dark Mode" /> | <img src="screenshots/impact_en.jpg" width="185" alt="Impact Alert Red" /> | <img src="screenshots/settings_en.jpg" width="185" alt="Settings Star Contact" /> | <img src="screenshots/menu_en.jpg" width="185" alt="Navigation Drawer" /> |
 
 | Inactivity Alert | Test Mode | Languages | About / Legal |
 |:---:|:---:|:---:|:---:|
@@ -36,14 +36,15 @@
 
 ---
 
-## 🚀 Evolution v3.9.x (The Face-Lift)
+## 🚀 Evolution v3.9.x (Design & Stability)
 
 | Feature | English | Español |
 |:---|:---|:---|
-| 🚨 **Circular UX** | **New Countdown UI**. (v3.9.1) Replaced the static counter with a dynamic red circular indicator to reduce user anxiety during false alarms. Shows clearly if the trigger was an **Impact** or **Inactivity**. | **Nueva UI Circular**. (v3.9.1) Reemplazo del contador estático por un indicador circular rojo dinámico para reducir la ansiedad en falsas alarmas. Indica claramente si fue **Impacto** o **Inactividad**. |
-| 🛡️ **Stability Core** | **Rock-Solid Reliability**. (v3.9.1) Fixed rotation issues (locked to Portrait), enhanced background service persistence, and solved GPS initialization bugs. | **Estabilidad Total**. (v3.9.1) Corrección de rotación (fijado en Vertical), mejora en la persistencia del servicio en segundo plano y solución de bugs de GPS. |
+| 🌑 **Native Dark Mode** | **Sleek & Tactical**. Full support for system Dark Mode. The interface uses pure blacks and high-contrast accents to reduce glare during night operations and save battery on OLED screens. | **Modo Oscuro Nativo**. Interfaz táctica y elegante. Soporte total para el tema oscuro del sistema, reduciendo el deslumbramiento en operaciones nocturnas y ahorrando batería en pantallas OLED. |
+| 🎨 **Vector Identity** | **Adaptive Iconography**. New vector logo that adapts to your launcher theme (Monochrome/Themed Icons). Looks crisp and modern on any background. | **Identidad Vectorial**. Nuevo logo vectorial que se adapta al tema de tu launcher (Iconos con tema). Nítido y moderno sobre cualquier fondo. |
+| 🚨 **Circular UX** | **Stress-Free Alerts**. Replaced the static counter with a dynamic red circular indicator. It clearly shows if the trigger was an **Impact** or **Inactivity**, reducing anxiety during false alarms. | **Alertas Sin Estrés**. Nuevo indicador circular rojo dinámico. Muestra claramente si la causa fue **Impacto** o **Inactividad**, reduciendo la ansiedad ante falsas alarmas. |
+| 🔒 **Stability Core** | **Portrait Lock & GPS**. Interface is strictly locked to Portrait mode to prevent disorientation. Solved GPS timeout bugs to ensure battery status is always sent, even without a fix. | **Bloqueo Vertical y GPS**. La interfaz está fijada en Vertical para evitar desorientación. Corregidos bugs de GPS para asegurar que el nivel de batería se envía siempre. |
 | 🪫 **Dying Gasp** | **Last Breath Alert**. If battery drops below 5% while monitoring is active, an automatic SOS with location is sent before the phone dies. | **El Último Suspiro**. Si la batería baja del 5% con el monitor activo, envía un SOS automático con ubicación antes de apagarse. |
-| 📉 **Smart Motion** | **High-Sensitivity Algorithm**. Physics engine distinguishes between active movement (stairs, jogging) and actual stillness, reducing false alarms. | **Algoritmo de Alta Sensibilidad**. Motor físico que distingue entre movimiento activo (escaleras, trote) e inmovilidad real, reduciendo falsas alarmas. |
 | 📡 **Rich Telemetry** | **Enhanced SOS**. Messages now include Altitude, Battery %, and Accuracy to help rescuers gauge the context. | **Telemetría Avanzada**. Los mensajes incluyen Altitud, Batería % y Precisión para dar contexto al rescate. |
 
 ---
