@@ -199,7 +199,9 @@ class SOSLogic extends ChangeNotifier with WidgetsBindingObserver {
           double delta = (instantG - lastG).abs();
           lastG = instantG;
 
-          if (delta > 0.01 || instantG > 1.1 || instantG < 0.9) {
+          bool isSignificantMovement = delta > 0.15 || instantG > 1.15 || instantG < 0.85;
+
+          if (isSignificantMovement) {
              _lastMovementTime = DateTime.now();
           }
 
@@ -550,5 +552,16 @@ class SOSLogic extends ChangeNotifier with WidgetsBindingObserver {
     _preAlertTimer?.cancel();
     _audioPlayer?.dispose();
     super.dispose();
+  }
+// =========================================================
+  // 🚑 PARCHE DE COMPATIBILIDAD V3.9.2
+  // =========================================================
+  int get currentCountdownSeconds => 30;
+
+  void cancelSOS() {
+    debugPrint("LOGIC: Cancelado por usuario");
+    _preAlertTimer?.cancel();
+    _audioPlayer?.stop(); // Si tienes audio
+    _setStatus(SOSStatus.ready);
   }
 }

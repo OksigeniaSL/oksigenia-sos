@@ -65,7 +65,8 @@
             android:foregroundServiceType="location|dataSync"
             android:enabled="true"
             android:exported="false"
-            tools:replace="android:foregroundServiceType, android:exported" />
+            android:stopWithTask="true" 
+            tools:replace="android:foregroundServiceType, android:exported, android:stopWithTask" />
 
         <meta-data android:name="flutterEmbedding" android:value="2" />
 

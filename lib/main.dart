@@ -90,46 +90,54 @@ class _OksigeniaAppState extends State<OksigeniaApp> {
 
   @override
   Widget build(BuildContext context) {
+    // 1. OBLIGAMOS AL SISTEMA (Barras de estado y navegación) A SER OSCUROS
     SystemChrome.setSystemUIOverlayStyle(const SystemUiOverlayStyle(
       statusBarColor: Colors.transparent,
-      statusBarIconBrightness: Brightness.dark, 
-      systemNavigationBarColor: Colors.white,
-      systemNavigationBarIconBrightness: Brightness.dark,
+      statusBarIconBrightness: Brightness.light, // Iconos blancos (sobre fondo oscuro)
+      systemNavigationBarColor: Colors.black,    // Barra de abajo NEGRA (Adiós flashazo)
+      systemNavigationBarIconBrightness: Brightness.light, // Botones blancos
     ));
 
     return MaterialApp(
       navigatorKey: oksigeniaNavigatorKey,
-
       debugShowCheckedModeBanner: false,
       title: 'Oksigenia SOS',
       
-      theme: ThemeData(
-        brightness: Brightness.light,
-        scaffoldBackgroundColor: Colors.white,
+      // 2. LA DICTADURA: Ignoramos la configuración del usuario
+      themeMode: ThemeMode.dark, 
+
+      // 3. TRAMPA: Definimos el tema "Light" TAMBIÉN como oscuro
+      // (Por si acaso Flutter intenta cargar el light por error milisegundos antes)
+      theme: ThemeData.dark().copyWith(
+        scaffoldBackgroundColor: Colors.black,
         colorScheme: ColorScheme.fromSeed(
           seedColor: const Color(0xFFB71C1C), 
-          brightness: Brightness.light,
+          brightness: Brightness.dark, // Forzado dark
         ),
         useMaterial3: true,
       ),
 
-      darkTheme: ThemeData(
-        brightness: Brightness.dark,
+      // 4. EL TEMA OSCURO REAL
+      darkTheme: ThemeData.dark().copyWith(
+        scaffoldBackgroundColor: Colors.black, // Negro absoluto
         colorScheme: ColorScheme.fromSeed(
           seedColor: const Color(0xFFB71C1C), 
           brightness: Brightness.dark,
         ),
         useMaterial3: true,
       ),
-      themeMode: ThemeMode.system, 
 
+      // Idiomas (Esto lo dejamos igual)
       locale: _locale,
       supportedLocales: const [
         Locale('en'), 
         Locale('es'), 
         Locale('fr'), 
         Locale('de'), 
-        Locale('pt'), 
+        Locale('pt'),
+        Locale('nl'),
+        Locale('sv'),
+        Locale('it'), 
       ],
       localizationsDelegates: const [
         AppLocalizations.delegate,

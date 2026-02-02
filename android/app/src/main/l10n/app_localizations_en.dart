@@ -173,6 +173,9 @@ class AppLocalizationsEn extends AppLocalizations {
       'Android has restricted this permission because the app was installed manually (side-loaded).';
 
   @override
+  String get btnGoToSettings => 'GO TO SETTINGS';
+
+  @override
   String get contactsTitle => 'Emergency Contacts';
 
   @override
@@ -211,6 +214,9 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get track120 => '⏱️ Every 2 hours';
+
+  @override
+  String get contactMain => 'Primary (Tracking / Battery)';
 
   @override
   String get inactivityTimeTitle => 'Time before Alert';
@@ -301,9 +307,6 @@ class AppLocalizationsEn extends AppLocalizations {
   String get invalidNumberWarning => 'Invalid or too short number';
 
   @override
-  String get contactMain => 'Primary (Tracking / Battery)';
-
-  @override
   String get inactivitySubtitle =>
       'Time without movement before calling for help.';
 
@@ -323,9 +326,6 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get dialogPermissionStep4 => '4. Return to this app.';
-
-  @override
-  String get btnGoToSettings => 'GO TO SETTINGS';
 
   @override
   String get timerLabel => 'Timer';

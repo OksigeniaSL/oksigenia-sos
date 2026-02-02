@@ -174,6 +174,9 @@ class AppLocalizationsFr extends AppLocalizations {
       'Android a restreint cette autorisation.';
 
   @override
+  String get btnGoToSettings => 'ALLER AUX PARAMÈTRES';
+
+  @override
   String get contactsTitle => 'Contacts d\'Urgence';
 
   @override
@@ -211,6 +214,9 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get track120 => '⏱️ Toutes les 2 h';
+
+  @override
+  String get contactMain => 'Principal (Suivi / Batterie)';
 
   @override
   String get inactivityTimeTitle => 'Délai avant Alerte';
@@ -299,9 +305,6 @@ class AppLocalizationsFr extends AppLocalizations {
   String get invalidNumberWarning => 'Numéro invalide ou trop court';
 
   @override
-  String get contactMain => 'Principal (Suivi / Batterie)';
-
-  @override
   String get inactivitySubtitle =>
       'Temps sans mouvement avant l\'appel à l\'aide.';
 
@@ -322,9 +325,6 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get dialogPermissionStep4 => '4. Revenez à cette application.';
-
-  @override
-  String get btnGoToSettings => 'ALLER AUX PARAMÈTRES';
 
   @override
   String get timerLabel => 'Minuteur';

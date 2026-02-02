@@ -172,6 +172,9 @@ class AppLocalizationsPt extends AppLocalizations {
   String get restrictedSettingsBody => 'O Android restringiu esta permissão.';
 
   @override
+  String get btnGoToSettings => 'IR PARA DEFINIÇÕES';
+
+  @override
   String get contactsTitle => 'Contactos de Emergência';
 
   @override
@@ -209,6 +212,9 @@ class AppLocalizationsPt extends AppLocalizations {
 
   @override
   String get track120 => '⏱️ A cada 2 horas';
+
+  @override
+  String get contactMain => 'Principal (Rastreio / Bateria)';
 
   @override
   String get inactivityTimeTitle => 'Tempo para Alerta';
@@ -297,9 +303,6 @@ class AppLocalizationsPt extends AppLocalizations {
   String get invalidNumberWarning => 'Número inválido ou muito curto';
 
   @override
-  String get contactMain => 'Principal (Rastreio / Bateria)';
-
-  @override
   String get inactivitySubtitle => 'Tempo sem movimento antes de pedir ajuda.';
 
   @override
@@ -319,9 +322,6 @@ class AppLocalizationsPt extends AppLocalizations {
 
   @override
   String get dialogPermissionStep4 => '4. Volte a esta aplicação.';
-
-  @override
-  String get btnGoToSettings => 'IR PARA DEFINIÇÕES';
 
   @override
   String get timerLabel => 'Temporizador';

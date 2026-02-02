@@ -97,6 +97,9 @@ Future<void> _updateNotificationText(AndroidServiceInstance service, {bool force
     else if (langCode == 'fr') { content = "Protection active"; }
     else if (langCode == 'pt') { content = "Proteção ativa"; }
     else if (langCode == 'de') { content = "Schutz aktiv"; }
+    else if (langCode == 'it') { content = "Protezione attiva"; } // <--- Nuevo (ulipo)
+    else if (langCode == 'nl') { content = "Beveiliging actief"; } // <--- Nuevo
+    else if (langCode == 'sv') { content = "Skydd aktivt"; }
 
     // ✨ LA MAGIA: Si el texto es igual al anterior y no nos obligan, NO HACEMOS NADA.
     // Esto evita que Android pite o parpadee innecesariamente.

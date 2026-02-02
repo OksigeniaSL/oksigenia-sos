@@ -117,7 +117,23 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
     }
 
     final l10n = AppLocalizations.of(context)!;
-    
+
+    Color gForceColor = Colors.grey; 
+    double g = _sosLogic.currentGForce;
+
+    // Si G > 0, asumimos que el sensor funciona.
+    if (g > 0.0) { 
+      if (g <= 1.05) {
+        gForceColor = Colors.green;   // Reposo
+      } else if (g > 1.05 && g <= 2.0) {
+        gForceColor = Colors.yellow;  // Movimiento
+      } else if (g > 2.0 && g <= 8.0) {
+        gForceColor = Colors.orange;  // Brusco
+      } else {
+        gForceColor = Colors.red;     // Impacto
+      }
+    }
+
     // UI Normal (Se adapta a Claro/Oscuro)
     return Center(
       child: SingleChildScrollView(
@@ -164,7 +180,7 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
                   // G-Force
                   Column(
                     children: [
-                      const Icon(Icons.speed, color: Colors.grey, size: 48),
+                      Icon(Icons.speed, color: gForceColor, size: 48),
                       const SizedBox(height: 6),
                       Text(
                         "${_sosLogic.currentGForce.toStringAsFixed(2)}G",

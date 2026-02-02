@@ -172,6 +172,9 @@ class AppLocalizationsDe extends AppLocalizations {
       'Android hat die Berechtigung eingeschränkt.';
 
   @override
+  String get btnGoToSettings => 'ZU DEN EINSTELLUNGEN';
+
+  @override
   String get contactsTitle => 'Notfallkontakte';
 
   @override
@@ -209,6 +212,9 @@ class AppLocalizationsDe extends AppLocalizations {
 
   @override
   String get track120 => '⏱️ 2 Std.';
+
+  @override
+  String get contactMain => 'Hauptkontakt (Tracking / Akku)';
 
   @override
   String get inactivityTimeTitle => 'Zeit vor Alarm';
@@ -297,9 +303,6 @@ class AppLocalizationsDe extends AppLocalizations {
   String get invalidNumberWarning => 'Ungültige oder zu kurze Nummer';
 
   @override
-  String get contactMain => 'Hauptkontakt (Tracking / Akku)';
-
-  @override
   String get inactivitySubtitle => 'Zeit ohne Bewegung vor dem Notruf.';
 
   @override
@@ -319,9 +322,6 @@ class AppLocalizationsDe extends AppLocalizations {
 
   @override
   String get dialogPermissionStep4 => '4. Kehren Sie zu dieser App zurück.';
-
-  @override
-  String get btnGoToSettings => 'ZU DEN EINSTELLUNGEN';
 
   @override
   String get timerLabel => 'Timer';

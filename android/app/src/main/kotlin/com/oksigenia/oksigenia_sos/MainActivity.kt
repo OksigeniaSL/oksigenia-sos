@@ -1,9 +1,10 @@
 package com.oksigenia.oksigenia_sos
 
-import android.app.KeyguardManager // <--- IMPORTANTE: Faltaba este
+import android.app.KeyguardManager
 import android.app.NotificationChannel
 import android.app.NotificationManager
 import android.content.Context
+import android.content.Intent
 import android.os.Build
 import android.os.Bundle
 import android.telephony.SmsManager
@@ -15,11 +16,12 @@ import io.flutter.plugin.common.MethodChannel
 
 class MainActivity: FlutterActivity() {
     private val CHANNEL = "com.oksigenia.sos/sms"
-    private val NOTIFICATION_CHANNEL_ID = "oksigenia_sos_modular_v1" 
+    private val NOTIFICATION_CHANNEL_ID = "oksigenia_sos_modular_v1"
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         createNotificationChannel()
+        // HE QUITADO LAS LÍNEAS DE WINDOW.BACKGROUND QUE CAUSABAN EL CONGELAMIENTO
     }
 
     private fun createNotificationChannel() {
@@ -46,6 +48,13 @@ class MainActivity: FlutterActivity() {
                     val msg = call.argument<String>("msg")
                     sendSMS(phone, msg, result)
                 }
+                "bringToFront" -> {
+                    wakeUpScreen() 
+                    val intent = Intent(this, MainActivity::class.java)
+                    intent.addFlags(Intent.FLAG_ACTIVITY_REORDER_TO_FRONT)
+                    startActivity(intent)
+                    result.success("OK")
+                }
                 "wakeScreen" -> {
                     wakeUpScreen()
                     result.success("OK")
@@ -61,18 +70,12 @@ class MainActivity: FlutterActivity() {
 
     private fun wakeUpScreen() {
         runOnUiThread {
-            // 1. Para Android 8.1 (O_MR1) y superior: Usar API moderna
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O_MR1) {
                 setShowWhenLocked(true)
                 setTurnScreenOn(true)
-                
-                // EXTRA: Solicitar quitar el bloqueo si no es seguro (Swipe/None)
                 val keyguardManager = getSystemService(Context.KEYGUARD_SERVICE) as KeyguardManager
                 keyguardManager.requestDismissKeyguard(this, null)
             }
-            
-            // 2. Flags Legacy (Para compatibilidad y refuerzo)
-            // Añadimos FLAG_DISMISS_KEYGUARD para intentar saltar el bloqueo
             window.addFlags(
                 WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON or
                 WindowManager.LayoutParams.FLAG_ALLOW_LOCK_WHILE_SCREEN_ON or

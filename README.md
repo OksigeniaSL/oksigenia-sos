@@ -1,4 +1,4 @@
-# Oksigenia SOS 🏔️ v3.9.1
+# Oksigenia SOS 🏔️ v3.9.2
 
 **Outdoor Emergency Assistant | FOSS | Privacy-First**
 
@@ -24,7 +24,7 @@
 
 ---
 
-## 📸 Interface / Interfaz (v3.9.1)
+## 📸 Interface / Interfaz (v3.9.x)
 
 | Dashboard | Impact Alert | Settings | Menu |
 |:---:|:---:|:---:|:---:|
@@ -36,16 +36,16 @@
 
 ---
 
-## 🚀 Evolution v3.9.x (Design & Stability)
+## 🚀 Evolution v3.9.2 (Stability & Expansion)
 
 | Feature | English | Español |
 |:---|:---|:---|
-| 🌑 **Native Dark Mode** | **Sleek & Tactical**. Full support for system Dark Mode. The interface uses pure blacks and high-contrast accents to reduce glare during night operations and save battery on OLED screens. | **Modo Oscuro Nativo**. Interfaz táctica y elegante. Soporte total para el tema oscuro del sistema, reduciendo el deslumbramiento en operaciones nocturnas y ahorrando batería en pantallas OLED. |
-| 🎨 **Vector Identity** | **Adaptive Iconography**. New vector logo that adapts to your launcher theme (Monochrome/Themed Icons). Looks crisp and modern on any background. | **Identidad Vectorial**. Nuevo logo vectorial que se adapta al tema de tu launcher (Iconos con tema). Nítido y moderno sobre cualquier fondo. |
-| 🚨 **Circular UX** | **Stress-Free Alerts**. Replaced the static counter with a dynamic red circular indicator. It clearly shows if the trigger was an **Impact** or **Inactivity**, reducing anxiety during false alarms. | **Alertas Sin Estrés**. Nuevo indicador circular rojo dinámico. Muestra claramente si la causa fue **Impacto** o **Inactividad**, reduciendo la ansiedad ante falsas alarmas. |
-| 🔒 **Stability Core** | **Portrait Lock & GPS**. Interface is strictly locked to Portrait mode to prevent disorientation. Solved GPS timeout bugs to ensure battery status is always sent, even without a fix. | **Bloqueo Vertical y GPS**. La interfaz está fijada en Vertical para evitar desorientación. Corregidos bugs de GPS para asegurar que el nivel de batería se envía siempre. |
-| 🪫 **Dying Gasp** | **Last Breath Alert**. If battery drops below 5% while monitoring is active, an automatic SOS with location is sent before the phone dies. | **El Último Suspiro**. Si la batería baja del 5% con el monitor activo, envía un SOS automático con ubicación antes de apagarse. |
-| 📡 **Rich Telemetry** | **Enhanced SOS**. Messages now include Altitude, Battery %, and Accuracy to help rescuers gauge the context. | **Telemetría Avanzada**. Los mensajes incluyen Altitud, Batería % y Precisión para dar contexto al rescate. |
+| 🌍 **Global Core** | **8 Languages**. Full support added for **Italian, Dutch, and Swedish**, joining ES, EN, FR, PT, and DE. Automatic detection and cleaner selector UI. | **Núcleo Global**. 8 Idiomas. Soporte completo añadido para **Italiano, Neerlandés y Sueco**, uniéndose a ES, EN, FR, PT y DE. Detección automática y selector limpio. |
+| 🚥 **Visual Telemetry** | **G-Force Traffic Light**. The G-Force monitor now changes color dynamically (**Green/Yellow/Red**) to visualize movement intensity. Grey icon indicates privacy sensors blocked (GrapheneOS friendly). | **Semáforo de Fuerza G**. El monitor cambia de color dinámicamente (**Verde/Amarillo/Rojo**) para visualizar la intensidad. Icono gris indica sensores bloqueados (Compatible GrapheneOS). |
+| 🧠 **Smart Filters** | **Anti-Noise Algorithm**. New **0.15G threshold** filter to ignore engine vibrations or table bumps. Sylvia now only wakes up for real human movement. | **Filtros Inteligentes**. Nuevo filtro con **umbral de 0.15G** para ignorar vibraciones de motor o golpes en mesa. Sylvia solo despierta con movimiento humano real. |
+| 🎨 **Theme Identity** | **Android 13+ Ready**. Full support for **Monochrome / Themed Icons**. The app icon now adapts to your wallpaper color palette for a seamless home screen look. | **Integración Android 13+**. Soporte total para **Iconos con Tema / Monocromáticos**. El icono se adapta a la paleta de colores de tu fondo de pantalla. |
+| 🌑 **Native Dark Mode** | **Sleek & Tactical**. Fixed startup flashes. The interface uses pure blacks and high-contrast accents to reduce glare during night operations and save battery. | **Modo Oscuro Nativo**. Adiós a los parpadeos blancos. Interfaz de alto contraste y negros puros para operaciones nocturnas y ahorro de batería. |
+| 🚨 **Circular UX** | **Stress-Free Alerts**. Dynamic red circular indicator for alarms. It clearly shows if the trigger was an **Impact** or **Inactivity**, reducing anxiety during false alarms. | **Alertas Sin Estrés**. Indicador circular rojo dinámico. Muestra claramente si la causa fue **Impacto** o **Inactividad**, reduciendo la ansiedad ante falsas alarmas. |
 
 ---
 

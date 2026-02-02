@@ -9,7 +9,6 @@ import 'app_localizations_de.dart';
 import 'app_localizations_en.dart';
 import 'app_localizations_es.dart';
 import 'app_localizations_fr.dart';
-import 'app_localizations_it.dart';
 import 'app_localizations_nl.dart';
 import 'app_localizations_pt.dart';
 import 'app_localizations_sv.dart';
@@ -104,7 +103,6 @@ abstract class AppLocalizations {
     Locale('en'),
     Locale('es'),
     Locale('fr'),
-    Locale('it'),
     Locale('nl'),
     Locale('pt'),
     Locale('sv')
@@ -422,6 +420,12 @@ abstract class AppLocalizations {
   /// **'Android has restricted this permission because the app was installed manually (side-loaded).'**
   String get restrictedSettingsBody;
 
+  /// No description provided for @btnGoToSettings.
+  ///
+  /// In en, this message translates to:
+  /// **'GO TO SETTINGS'**
+  String get btnGoToSettings;
+
   /// No description provided for @contactsTitle.
   ///
   /// In en, this message translates to:
@@ -499,6 +503,12 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'⏱️ Every 2 hours'**
   String get track120;
+
+  /// No description provided for @contactMain.
+  ///
+  /// In en, this message translates to:
+  /// **'Primary (Tracking / Battery)'**
+  String get contactMain;
 
   /// No description provided for @inactivityTimeTitle.
   ///
@@ -668,12 +678,6 @@ abstract class AppLocalizations {
   /// **'Invalid or too short number'**
   String get invalidNumberWarning;
 
-  /// No description provided for @contactMain.
-  ///
-  /// In en, this message translates to:
-  /// **'Primary (Tracking / Battery)'**
-  String get contactMain;
-
   /// No description provided for @inactivitySubtitle.
   ///
   /// In en, this message translates to:
@@ -709,12 +713,6 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'4. Return to this app.'**
   String get dialogPermissionStep4;
-
-  /// No description provided for @btnGoToSettings.
-  ///
-  /// In en, this message translates to:
-  /// **'GO TO SETTINGS'**
-  String get btnGoToSettings;
 
   /// No description provided for @timerLabel.
   ///
@@ -816,7 +814,6 @@ class _AppLocalizationsDelegate
         'en',
         'es',
         'fr',
-        'it',
         'nl',
         'pt',
         'sv'
@@ -837,8 +834,6 @@ AppLocalizations lookupAppLocalizations(Locale locale) {
       return AppLocalizationsEs();
     case 'fr':
       return AppLocalizationsFr();
-    case 'it':
-      return AppLocalizationsIt();
     case 'nl':
       return AppLocalizationsNl();
     case 'pt':
