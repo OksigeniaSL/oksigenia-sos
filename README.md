@@ -1,4 +1,4 @@
-# Oksigenia SOS 🏔️ v3.9.3 (RC1)
+# Oksigenia SOS 🏔️ v3.9.3
 
 **Outdoor Emergency Assistant | FOSS | Privacy-First**
 
@@ -26,29 +26,29 @@
 
 ## 📸 Interface / Interfaz (v3.9.3)
 
-| Live Dashboard | Impact Alert | Settings | Menu |
-|:---:|:---:|:---:|:---:|
-| <img src="screenshots/main_en.jpg" width="185" alt="Main Dashboard Telemetry" /> | <img src="screenshots/impact_en.jpg" width="185" alt="Impact Alert Red" /> | <img src="screenshots/settings_en.jpg" width="185" alt="Settings Screen" /> | <img src="screenshots/menu_en.jpg" width="185" alt="Navigation Drawer" /> |
+| Dashboard | Impact Alert | Inactivity Alert |
+|:---:|:---:|:---:|
+| <img src="screenshots/main_en.jpg" width="220" alt="Main Dashboard Dark Mode" /> | <img src="screenshots/impact_en.jpg" width="220" alt="Impact Alert Red" /> | <img src="screenshots/inactivity_en.jpg" width="220" alt="Inactivity Alert" /> |
 
-| Inactivity Alert | Test Mode | Languages | About / Legal |
-|:---:|:---:|:---:|:---:|
-| <img src="screenshots/inactivity_en.jpg" width="185" alt="Inactivity Alert" /> | <img src="screenshots/main_testmode_en.jpg" width="185" alt="Test Mode Warning" /> | <img src="screenshots/lang_en.jpg" width="185" alt="Language Selector" /> | <img src="screenshots/About_en.jpg" width="185" alt="About Screen" /> |
+| Test Mode | Languages | Settings |
+|:---:|:---:|:---:|
+| <img src="screenshots/main_testmode_en.jpg" width="220" alt="Test Mode Warning" /> | <img src="screenshots/lang_en.jpg" width="220" alt="Language Selector" /> | <img src="screenshots/settings_en.jpg" width="220" alt="Settings Screen" /> |
 
 ---
 
-## 🚀 The 3.9.x Saga: Stability & Power
+## 🚀 The 3.9.x Saga: Engineering Excellence
 
-**New in v3.9.3 (The Stability Update):**
-This version introduces a complete architectural rewrite using **Provider**, eliminating "ghost screens" and ensuring lifecycle shielding.
+This release is the culmination of the 3.9 cycle. It combines the mathematical precision of 3.9.0 with the "Granite" stability of 3.9.3. We built this to save lives, not just to look good.
 
 | Feature | English | Español |
 |:---|:---|:---|
-| 🛡️ **Core Shielding** | **Unbreakable Logic**. The timer and sensors are now "shielded" against lifecycle restarts. The alarm won't freeze or reset even if you switch apps or turn the screen off during an emergency. | **Blindaje de Núcleo**. Temporizadores y sensores "blindados" contra reinicios. La alarma no se congela ni reinicia aunque cambies de app o apagues la pantalla en una emergencia. |
-| 🎮 **Hold-to-SOS** | **No more false clicks**. The main SOS button now requires a **3-second hold** with a visual loading ring and haptic feedback to prevent accidental triggers in your pocket. | **Adiós toques falsos**. El botón SOS ahora requiere **mantener pulsado 3s** con un anillo de carga visual y vibración para evitar disparos accidentales en el bolsillo. |
-| 📡 **Live Telemetry** | **Real-Time Dashboard**. New icons on the home screen show live **G-Force, Battery %, and GPS Accuracy**. Monitor your sensor health at a glance before starting your activity. | **Telemetría en Vivo**. Nuevos iconos en el home muestran **Fuerza G, Batería % y Precisión GPS** en tiempo real. Verifica la salud de tus sensores antes de iniciar la actividad. |
-| 🔊 **Smart Siren** | **Sync & Silence**. The alarm siren automatically cuts off the exact millisecond the SMS is successfully sent, giving instant auditory confirmation of help request. | **Sirena Sincronizada**. La sirena de alarma se corta automáticamente en el milisegundo exacto en que el SMS se envía, confirmando auditivamente la petición de ayuda. |
-| 🌍 **Global Reach** | **9 Languages**. Full native support for **ES, EN, FR, PT, DE, IT, NL, SV** and regional languages like **Galician & Catalan**. | **9 Idiomas**. Soporte nativo completo para **ES, EN, FR, PT, DE, IT, NL, SV** y lenguas regionales como **Gallego y Catalán**. |
-| 🌑 **Native Dark Mode** | **Tactical UI**. High-contrast interface with pure blacks to reduce battery consumption and glare during night operations. | **Interfaz Táctica**. Alto contraste con negros puros para reducir el consumo de batería y el deslumbramiento en operaciones nocturnas. |
+| 📐 **Math Precision** | **3D Vector Calculation**. We don't just use the accelerometer; we calculate the **3D G-Force Vector**. This filters out "backpack noise" and hiking vibrations, triggering only on real, hard impacts (>12G). No more false alarms when jumping or running. | **Cálculo Vectorial 3D**. No usamos solo el acelerómetro; calculamos el **Vector de Fuerza G en 3D**. Esto filtra el "ruido de mochila" y vibraciones al andar, disparándose solo en impactos reales (>12G). Adiós a las falsas alarmas por saltar o correr. |
+| 🛡️ **System Integrity** | **Granite Core**. Complete rewrite of the background service. We eliminated "zombie processes" and **shielded the timers** against screen-off events. The app now survives Android's aggressive battery saving modes. | **Núcleo de Granito**. Reescritura del servicio en segundo plano. Eliminados los "procesos zombie" y **blindados los temporizadores** contra apagados de pantalla. La app sobrevive al ahorro de batería agresivo de Android. |
+| 🧤 **Extreme UX** | **"Fat Finger" Design**. Buttons, sliders, and cancel logic are designed for **gloved or frozen hands**. We increased touch targets and simplified the cancellation flow to avoid stress errors during false alarms. | **Diseño "Dedos Fríos"**. Botones, deslizadores y lógica de cancelación diseñados para **guantes o manos entumecidas**. Aumentamos las áreas táctiles y simplificamos la cancelación para evitar errores por estrés. |
+| 🌑 **Tactical Mode** | **Native Dark Mode**. Enforced pure dark theme. This eliminates white flashes at startup (preserving your night vision in the dark) and drastically reduces battery consumption on AMOLED screens. | **Modo Táctico**. Tema oscuro puro forzado. Elimina los parpadeos blancos al inicio (preservando tu visión nocturna en la oscuridad) y reduce drásticamente el consumo en pantallas AMOLED. |
+| 💬 **Smart Feedback** | **Haptic Language**. The app "talks" to you through vibration. Buttons buzz if contacts are missing. The SOS button vibrates progressively as you hold it. You know what's happening without looking at the screen. | **Lenguaje Háptico**. La app te "habla" mediante vibración. Los botones avisan si faltan contactos. El botón SOS vibra progresivamente al pulsarlo. Sabes lo que pasa sin mirar la pantalla. |
+| 🚨 **Hold-to-Activate** | **Safety Trigger**. The SOS button now features a **3-second hold** with a visual loading ring. This prevents accidental triggers inside your pocket or backpack while leaning. | **Disparador Seguro**. El botón SOS ahora requiere **mantener 3 segundos** con un anillo de carga visual. Esto evita disparos accidentales dentro del bolsillo o la mochila al apoyarte. |
+| 🌍 **Global Reach** | **8 Languages**. Full native support for **NL, SV, IT, ES, EN, FR, PT, DE**. Includes contextual help dialogs that explain technical details (GPS, SMS) in your local language. | **8 Idiomas**. Soporte nativo completo para **NL, SV, IT, ES, EN, FR, PT, DE**. Incluye diálogos de ayuda contextual que explican detalles técnicos (GPS, SMS) en tu idioma local. |
 
 ---
 
@@ -82,7 +82,7 @@ This version introduces a complete architectural rewrite using **Provider**, eli
 Check the **[Releases Section](https://github.com/OksigeniaSL/oksigenia-sos/releases)** for the latest signed APKs.
 
 ### 💻 Build from source
-This project uses **Flutter 3.x** and `Provider` for state management.
+This project uses **Flutter 3.x** and `Provider`.
 
 ```bash
 git clone [https://github.com/OksigeniaSL/oksigenia-sos.git](https://github.com/OksigeniaSL/oksigenia-sos.git)
