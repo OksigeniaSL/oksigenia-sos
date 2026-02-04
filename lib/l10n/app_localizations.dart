@@ -791,13 +791,13 @@ abstract class AppLocalizations {
   /// No description provided for @gpsHelpTitle.
   ///
   /// In en, this message translates to:
-  /// **'GPS'**
+  /// **'About GPS'**
   String get gpsHelpTitle;
 
   /// No description provided for @gpsHelpBody.
   ///
   /// In en, this message translates to:
-  /// **'GPS depends on the physical chip and visibility.'**
+  /// **'Accuracy depends on your phone\'s physical chip and direct sky visibility.\n\nIndoors, in garages, or tunnels, satellite signal is blocked, and location may be approximate or null.\n\nOksigenia will always try to triangulate the best possible position.'**
   String get gpsHelpBody;
 
   /// No description provided for @holdToCancel.

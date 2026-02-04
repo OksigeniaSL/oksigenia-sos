@@ -112,7 +112,7 @@
     "permDialogTitle": "Permission Requise",
     "permSmsHelpTitle": "Aide SMS",
     "permGoSettings": "Aller aux Paramètres",
-    "gpsHelpTitle": "GPS",
-    "gpsHelpBody": "Le GPS dépend de la puce physique et de la visibilité.",
+    "gpsHelpTitle": "À propos du GPS",
+    "gpsHelpBody": "La précision dépend de la puce physique de votre téléphone et d'une vue directe sur le ciel.\n\nÀ l'intérieur, dans les garages ou les tunnels, le signal satellite ne passe pas et la localisation peut être approximative ou nulle.\n\nOksigenia essaiera toujours de trianguler la meilleure position possible.",
     "holdToCancel": "Maintenir pour annuler"
 }

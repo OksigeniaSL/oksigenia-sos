@@ -15,15 +15,20 @@ class AlarmScreen extends StatefulWidget {
 class _AlarmScreenState extends State<AlarmScreen> with TickerProviderStateMixin {
   late AnimationController _countdownController;
   late AnimationController _holdController;
+  
+  VoidCallback? _statusListener;
+  late SOSLogic _logic; 
 
   @override
   void initState() {
     super.initState();
-    final logic = context.read<SOSLogic>();
     
+    _logic = context.read<SOSLogic>();
+    
+    // Círculo visual (decorativo)
     _countdownController = AnimationController(
       vsync: this,
-      duration: Duration(seconds: logic.currentCountdownSeconds),
+      duration: Duration(seconds: _logic.currentCountdownSeconds),
     )..reverse(from: 1.0);
 
     _holdController = AnimationController(
@@ -31,13 +36,27 @@ class _AlarmScreenState extends State<AlarmScreen> with TickerProviderStateMixin
       duration: const Duration(seconds: 2), 
     );
 
+    // Cancelar
     _holdController.addStatusListener((status) {
       if (status == AnimationStatus.completed) {
         _triggerSuccessHaptic();
-        logic.cancelSOS();
-        if (mounted) Navigator.of(context).pop(); 
+        _logic.cancelSOS();
       }
     });
+
+    // Cerrar automáticamente si se envía o se cancela
+    _statusListener = () {
+      if (!mounted) return;
+      final currentStatus = _logic.status;
+      
+      if (currentStatus == SOSStatus.sent || currentStatus == SOSStatus.ready) {
+        if (Navigator.canPop(context)) {
+          Navigator.pop(context);
+        }
+      }
+    };
+    
+    _logic.addListener(_statusListener!);
   }
 
   Future<void> _triggerSuccessHaptic() async {
@@ -48,6 +67,9 @@ class _AlarmScreenState extends State<AlarmScreen> with TickerProviderStateMixin
 
   @override
   void dispose() {
+    if (_statusListener != null) {
+      _logic.removeListener(_statusListener!);
+    }
     _countdownController.dispose();
     _holdController.dispose();
     super.dispose();
@@ -55,6 +77,7 @@ class _AlarmScreenState extends State<AlarmScreen> with TickerProviderStateMixin
 
   @override
   Widget build(BuildContext context) {
+    // Escuchamos actualizaciones de segundos
     final logic = context.watch<SOSLogic>();
     final l10n = AppLocalizations.of(context)!;
     
@@ -80,7 +103,6 @@ class _AlarmScreenState extends State<AlarmScreen> with TickerProviderStateMixin
         child: SafeArea(
           child: Center(
             child: SingleChildScrollView(
-              // Bloqueamos el scroll manual para que no interfiera con el botón "mantener"
               physics: const NeverScrollableScrollPhysics(),
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
@@ -136,32 +158,23 @@ class _AlarmScreenState extends State<AlarmScreen> with TickerProviderStateMixin
                           },
                         ),
                       ),
-                      AnimatedBuilder(
-                        animation: _countdownController,
-                        builder: (context, child) {
-                          int secs = (logic.currentCountdownSeconds * _countdownController.value).ceil();
-                          return Text(
-                            '$secs',
-                            style: TextStyle(
-                              fontSize: 70,
-                              fontWeight: FontWeight.bold,
-                              color: textColor,
-                            ),
-                          );
-                        },
+                      // TEXTO DIRECTO DE LA LÓGICA
+                      Text(
+                        '${logic.currentCountdownSeconds}',
+                        style: TextStyle(
+                          fontSize: 70,
+                          fontWeight: FontWeight.bold,
+                          color: textColor,
+                        ),
                       ),
                     ],
                   ),
                   
                   const SizedBox(height: 40),
 
-                  // --- BOTÓN DE SEGURIDAD MEJORADO (ANTI-TEMBLOR) ---
+                  // BOTÓN DE SEGURIDAD
                   GestureDetector(
-                    // 1. Usamos 'HitTestBehavior.opaque' para que detecte toques incluso en los huecos vacíos del contenedor
                     behavior: HitTestBehavior.opaque,
-                    
-                    // 2. Usamos 'onPan' (Arrastre) en vez de 'onTap' (Toque).
-                    // 'onPan' tolera que muevas el dedo sin cancelar la acción.
                     onPanDown: (_) => _holdController.forward(),
                     onPanEnd: (_) {
                       if (_holdController.status != AnimationStatus.completed) {
@@ -171,15 +184,13 @@ class _AlarmScreenState extends State<AlarmScreen> with TickerProviderStateMixin
                     onPanCancel: () => _holdController.reverse(),
                     
                     child: Container(
-                      // 3. Área Invisible Gigante: 200x200 píxeles de "zona segura" para acertar con guantes
                       width: 200,
-                      color: Colors.transparent, // Invisible pero tocable
+                      color: Colors.transparent,
                       child: Column(
                         children: [
                           Stack(
                             alignment: Alignment.center,
                             children: [
-                              // A. Anillo de progreso "HALO"
                               SizedBox(
                                 width: 150,
                                 height: 150,
@@ -195,8 +206,6 @@ class _AlarmScreenState extends State<AlarmScreen> with TickerProviderStateMixin
                                   },
                                 ),
                               ),
-                              
-                              // B. El Botón Físico
                               Container(
                                 width: 80,
                                 height: 80,

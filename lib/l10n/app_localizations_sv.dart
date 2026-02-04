@@ -365,10 +365,11 @@ class AppLocalizationsSv extends AppLocalizations {
   String get permGoSettings => 'Gå till Inställningar';
 
   @override
-  String get gpsHelpTitle => 'GPS';
+  String get gpsHelpTitle => 'Om GPS';
 
   @override
-  String get gpsHelpBody => 'GPS beror på det fysiska chippet och sikten.';
+  String get gpsHelpBody =>
+      'Noggrannheten beror på telefonens fysiska chip och fri sikt mot himlen.\n\nInomhus, i garage eller tunnlar blockeras satellitsignalen och platsen kan vara ungefärlig eller saknas.\n\nOksigenia kommer alltid att försöka triangulera bästa möjliga position.';
 
   @override
   String get holdToCancel => 'Håll intryckt för att avbryta';

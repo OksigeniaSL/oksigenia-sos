@@ -363,11 +363,11 @@ class AppLocalizationsFr extends AppLocalizations {
   String get permGoSettings => 'Aller aux Paramètres';
 
   @override
-  String get gpsHelpTitle => 'GPS';
+  String get gpsHelpTitle => 'À propos du GPS';
 
   @override
   String get gpsHelpBody =>
-      'Le GPS dépend de la puce physique et de la visibilité.';
+      'La précision dépend de la puce physique de votre téléphone et d\'une vue directe sur le ciel.\n\nÀ l\'intérieur, dans les garages ou les tunnels, le signal satellite ne passe pas et la localisation peut être approximative ou nulle.\n\nOksigenia essaiera toujours de trianguler la meilleure position possible.';
 
   @override
   String get holdToCancel => 'Maintenir pour annuler';

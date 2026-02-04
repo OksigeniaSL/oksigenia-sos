@@ -364,10 +364,11 @@ class AppLocalizationsEn extends AppLocalizations {
   String get permGoSettings => 'Go to Settings';
 
   @override
-  String get gpsHelpTitle => 'GPS';
+  String get gpsHelpTitle => 'About GPS';
 
   @override
-  String get gpsHelpBody => 'GPS depends on the physical chip and visibility.';
+  String get gpsHelpBody =>
+      'Accuracy depends on your phone\'s physical chip and direct sky visibility.\n\nIndoors, in garages, or tunnels, satellite signal is blocked, and location may be approximate or null.\n\nOksigenia will always try to triangulate the best possible position.';
 
   @override
   String get holdToCancel => 'Hold to cancel';

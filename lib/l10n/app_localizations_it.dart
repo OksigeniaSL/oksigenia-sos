@@ -370,11 +370,11 @@ class AppLocalizationsIt extends AppLocalizations {
   String get permGoSettings => 'Vai alle Impostaciones';
 
   @override
-  String get gpsHelpTitle => 'GPS';
+  String get gpsHelpTitle => 'Info sul GPS';
 
   @override
   String get gpsHelpBody =>
-      'Il GPS dipende dal chip fisico e dalla visibilità del cielo.';
+      'La precisione dipende dal chip fisico del telefono e dalla visuale diretta del cielo.\n\nAl chiuso, in garage o in galleria, il segnale satellitare non arriva e la posizione può essere approssimativa o nulla.\n\nOksigenia cercherà sempre di triangolare la migliore posizione possibile.';
 
   @override
   String get holdToCancel => 'Tieni premuto per annullare';

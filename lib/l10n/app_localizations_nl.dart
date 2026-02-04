@@ -367,11 +367,11 @@ class AppLocalizationsNl extends AppLocalizations {
   String get permGoSettings => 'Ga naar Instellingen';
 
   @override
-  String get gpsHelpTitle => 'GPS';
+  String get gpsHelpTitle => 'Over GPS';
 
   @override
   String get gpsHelpBody =>
-      'GPS is afhankelijk van de fysieke chip en zichtbaarheid.';
+      'De nauwkeurigheid hangt af van de fysieke chip in uw telefoon en direct zicht op de hemel.\n\nBinnenshuis, in garages of tunnels wordt het satellietsignaal geblokkeerd en kan de locatie onnauwkeurig of niet beschikbaar zijn.\n\nOksigenia zal altijd proberen de best mogelijke positie te bepalen.';
 
   @override
   String get holdToCancel => 'Ingedrukt houden om te annuleren';

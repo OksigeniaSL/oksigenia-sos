@@ -112,7 +112,7 @@
     "permDialogTitle": "Behörighet krävs",
     "permSmsHelpTitle": "SMS Hjälp",
     "permGoSettings": "Gå till Inställningar",
-    "gpsHelpTitle": "GPS",
-    "gpsHelpBody": "GPS beror på det fysiska chippet och sikten.",
+    "gpsHelpTitle": "Om GPS",
+    "gpsHelpBody": "Noggrannheten beror på telefonens fysiska chip och fri sikt mot himlen.\n\nInomhus, i garage eller tunnlar blockeras satellitsignalen och platsen kan vara ungefärlig eller saknas.\n\nOksigenia kommer alltid att försöka triangulera bästa möjliga position.",
     "holdToCancel": "Håll intryckt för att avbryta"
 }

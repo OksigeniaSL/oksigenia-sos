@@ -58,8 +58,10 @@ class SOSLogic extends ChangeNotifier with WidgetsBindingObserver {
   Timer? _preAlertTimer;
   int _countdownSeconds = 30; 
   
+  // Getter real
+  int get currentCountdownSeconds => _countdownSeconds; 
+  
   AudioPlayer? _audioPlayer; 
-  double _currentVolume = 0.2;
   
   final Battery _battery = Battery();
 
@@ -67,7 +69,6 @@ class SOSLogic extends ChangeNotifier with WidgetsBindingObserver {
   String get errorMessage => _errorMessage;
   bool get isFallDetectionActive => _isFallDetectionActive;
   bool get isInactivityMonitorActive => _isInactivityMonitorActive;
-  int get countdownSeconds => _countdownSeconds;
   
   double get currentGForce => _visualGForce;
   
@@ -77,10 +78,20 @@ class SOSLogic extends ChangeNotifier with WidgetsBindingObserver {
   }
 
   Future<void> init() async {
-    WidgetsBinding.instance.addObserver(this);
-    await _loadSettings();
+    // 🛡️ BLINDAJE LÓGICO:
+    if (_status == SOSStatus.preAlert || _status == SOSStatus.sent) {
+      debugPrint("LOGIC: 🛡️ Init solicitado, pero hay emergencia en curso. IGNORANDO.");
+      return; 
+    }
 
+    debugPrint("LOGIC: Inicializando lógica...");
+    
+    WidgetsBinding.instance.removeObserver(this);
+    WidgetsBinding.instance.addObserver(this);
+    
+    await _loadSettings();
     await _checkPermissions();
+    
     final service = FlutterBackgroundService();
     if (!(await service.isRunning())) {
       await service.startService();
@@ -123,10 +134,17 @@ class SOSLogic extends ChangeNotifier with WidgetsBindingObserver {
   @override
   void didChangeAppLifecycleState(AppLifecycleState state) {
     if (state == AppLifecycleState.resumed) {
+      // 🛡️ BLINDAJE LÓGICO AQUÍ TAMBIÉN:
+      if (_status == SOSStatus.preAlert || _status == SOSStatus.sent) {
+         debugPrint("LOGIC: 🛡️ App Resumed, pero hay alarma sonando. No tocamos sensores.");
+         return; 
+      }
+
       debugPrint("🔄 APP RESUMED: Reactivando sensores UI...");
       _startGForceMonitoring(); 
       _checkHealth();
       if (_status == SOSStatus.ready) _startPassiveGPS();
+      
     } else if (state == AppLifecycleState.paused) {
       if (!_isInactivityMonitorActive && !_isFallDetectionActive) {
          _accelerometerSubscription?.cancel();
@@ -140,16 +158,38 @@ class SOSLogic extends ChangeNotifier with WidgetsBindingObserver {
     final prefs = PreferencesService();
     _currentInactivityLimit = prefs.getInactivityTime();
     
-    bool savedFallState = prefs.getFallDetectionState();
-    bool savedInactivityState = prefs.getInactivityState();
+    bool hasContact = emergencyContact != null;
 
-    if (savedFallState && emergencyContact != null) {
+    // --- 1. DETECCIÓN DE CAÍDAS ---
+    bool savedFallState = prefs.getFallDetectionState();
+    
+    if (savedFallState && hasContact) {
       _isFallDetectionActive = true; 
+    } else {
+      _isFallDetectionActive = false;
+      if (savedFallState) prefs.saveFallDetectionState(false);
     }
     
-    if (savedInactivityState && emergencyContact != null) {
-      toggleInactivityMonitor(true); 
+    // --- 2. MONITOR DE INACTIVIDAD ---
+    bool savedInactivityState = prefs.getInactivityState();
+
+    if (savedInactivityState && hasContact) {
+      if (!_isInactivityMonitorActive) {
+        toggleInactivityMonitor(true); 
+      }
+    } else {
+      if (_isInactivityMonitorActive) {
+        toggleInactivityMonitor(false); 
+      }
+      if (savedInactivityState) prefs.saveInactivityState(false);
     }
+
+    if (_errorMessage == "NO_CONTACT") {
+       if (hasContact || (!_isFallDetectionActive && !_isInactivityMonitorActive)) {
+         _setStatus(SOSStatus.ready);
+       }
+    }
+
     notifyListeners();
   }
 
@@ -308,46 +348,54 @@ class SOSLogic extends ChangeNotifier with WidgetsBindingObserver {
     } else {
       _inactivityTimer?.cancel();
       if (_status == SOSStatus.preAlert && _lastTrigger == AlertCause.inactivity) {
-        cancelAlert();
+        cancelAlert(); 
       }
     }
     notifyListeners();
   }
 
   void _triggerPreAlert(AlertCause cause) async {
-    // 1. BLINDAMOS EL ESTADO PRIMERO (Para que la pantalla no se cierre sola)
-    _lastTrigger = cause;
-    _status = SOSStatus.preAlert; 
-    _countdownSeconds = 30;
-    notifyListeners();
+    if (_status == SOSStatus.preAlert || _status == SOSStatus.sent) return;
 
-    // 2. PAUSAMOS GPS Y ENCENDEMOS MOTORES
+    debugPrint("SYLVIA: 🚨 RECIBIDA ORDEN DE ALARMA -> ACTIVANDO SONIDO Y VIBRACIÓN");
+
+    _lastTrigger = cause;
+    _status = SOSStatus.preAlert;
+    _countdownSeconds = 30; 
+    notifyListeners(); 
+
     _gpsSubscription?.pause(); 
     
-    // 3. INVOCAMOS EL SONIDO (El alma)
     try {
        final service = FlutterBackgroundService();
        service.invoke("startAlarm"); 
+       Vibration.vibrate(pattern: [500, 1000, 500, 1000], repeat: 1);
     } catch (e) {
        debugPrint("Error servicio: $e");
     }
 
-    // 4. DESPERTAMOS LA PANTALLA (El cuerpo)
+    // EL MOTOR DEL TEMPORIZADOR
+    _preAlertTimer?.cancel();
+    _preAlertTimer = Timer.periodic(const Duration(seconds: 1), (timer) {
+      _countdownSeconds--;
+      notifyListeners(); // Actualiza la UI cada segundo
+
+      if (_countdownSeconds <= 0) {
+        timer.cancel();
+        sendSOS(); // Fuego al llegar a 0
+      }
+    });
+
     try { await platform.invokeMethod('bringToFront'); } catch(_) {}
 
-    // ⏳ ESPERA TÁCTICA: Damos 500ms a Android para que termine de encender la pantalla
-    // Si intentamos navegar mientras la pantalla está negra, Flutter falla.
     await Future.delayed(const Duration(milliseconds: 500));
 
-    // 5. ABRIMOS LA INTERFAZ
     if (oksigeniaNavigatorKey.currentState != null) {
       debugPrint("🚀 NUCLEAR: Lanzando AlarmScreen...");
-      
       await oksigeniaNavigatorKey.currentState!.pushAndRemoveUntil(
         MaterialPageRoute(builder: (_) => const AlarmScreen()),
         (route) => route.isFirst,
       );
-      
     } else {
       debugPrint("⚠️ No se pudo abrir UI, pero el sonido sigue.");
     }
@@ -387,12 +435,39 @@ class SOSLogic extends ChangeNotifier with WidgetsBindingObserver {
     }
   }
 
-  void cancelAlert() async {
-    _stopAllAlerts();
-    _status = SOSStatus.ready;
+  void cancelAlert() {
+    cancelSOS();
+  }
+
+  void cancelSOS() {
+    debugPrint("LOGIC: 🛑 Cancelado por usuario - Reiniciando sistema completo.");
+    
+    _preAlertTimer?.cancel();
+    _preAlertTimer = null;
+    
+    _audioPlayer?.stop(); 
+    try {
+      final service = FlutterBackgroundService();
+      service.invoke("stopAlarm");
+      Vibration.cancel(); 
+    } catch (e) {
+      debugPrint("Error parando servicio: $e");
+    }
+
+    if (_gpsSubscription != null && _gpsSubscription!.isPaused) {
+       _gpsSubscription!.resume();
+    }
+
     _lastMovementTime = DateTime.now();
-    if (_status == SOSStatus.ready) _startPassiveGPS();
-    try { await platform.invokeMethod('sleepScreen'); } catch(_) {}
+
+    _setStatus(SOSStatus.ready);
+    _countdownSeconds = 30; 
+    
+    if (_isInactivityMonitorActive) {
+      toggleInactivityMonitor(false); 
+      toggleInactivityMonitor(true);  
+    }
+    
     notifyListeners();
   }
 
@@ -403,7 +478,6 @@ class SOSLogic extends ChangeNotifier with WidgetsBindingObserver {
     try { Vibration.cancel(); } catch(_) {}
   }
 
-  // 🚨 AQUÍ ESTÁ LA CORRECCIÓN DE LA BATERÍA
   Future<void> sendSOS() async {
     final prefs = PreferencesService();
     final List<String> recipients = prefs.getContacts();
@@ -418,7 +492,6 @@ class SOSLogic extends ChangeNotifier with WidgetsBindingObserver {
     _inactivityTimer?.cancel();
     _gpsSubscription?.cancel();
     
-    // 1. OBTENEMOS BATERÍA ANTES QUE EL GPS
     int batteryLevel = await _battery.batteryLevel;
 
     String msgBody = "🆘 SOS OKSIGENIA";
@@ -436,19 +509,15 @@ class SOSLogic extends ChangeNotifier with WidgetsBindingObserver {
     }
     
     try {
-      // 2. INTENTAMOS OBTENER GPS
       final LocationSettings locationSettings = AndroidSettings(accuracy: LocationAccuracy.high, forceLocationManager: true, timeLimit: const Duration(seconds: 15));
       Position pos = await Geolocator.getCurrentPosition(locationSettings: locationSettings);
       _setStatus(SOSStatus.locationFixed);
       
       msgBody += "\nMaps: http://maps.google.com/?q=${pos.latitude},${pos.longitude}";
       msgBody += "\nOSM: https://www.openstreetmap.org/?mlat=${pos.latitude}&mlon=${pos.longitude}";
-      
-      // Añadimos telemetría completa
       msgBody += "\n\n🔋Bat: $batteryLevel% | 📡Alt: ${pos.altitude.toStringAsFixed(0)}m | 🎯Acc: ${pos.accuracy.toStringAsFixed(0)}m";
 
     } catch (e) {
-      // 3. SI FALLA GPS, AÑADIMOS ERROR + BATERÍA (Que ya leímos antes)
       msgBody += "\n(GPS Error/Timeout)";
       msgBody += "\n\n🔋Bat: $batteryLevel% (No Loc)";
     }
@@ -462,6 +531,15 @@ class SOSLogic extends ChangeNotifier with WidgetsBindingObserver {
     }
 
     if (successCount > 0) {
+      // 🛑 CORRECCIÓN FINAL: APAGAR SIRENA ANTES DEL SONIDO DE ÉXITO
+      try {
+        final service = FlutterBackgroundService();
+        service.invoke("stopAlarm");
+        Vibration.cancel(); 
+      } catch (e) {
+        debugPrint("Error parando alarma previa: $e");
+      }
+
       _setStatus(SOSStatus.sent);
       await platform.invokeMethod('sleepScreen');
       
@@ -527,33 +605,5 @@ class SOSLogic extends ChangeNotifier with WidgetsBindingObserver {
     _preAlertTimer?.cancel();
     _audioPlayer?.dispose();
     super.dispose();
-  }
-// =========================================================
-  // 🚑 PARCHE DE COMPATIBILIDAD V3.9.2
-  // =========================================================
-  int get currentCountdownSeconds => 30;
-
-  void cancelSOS() {
-    debugPrint("LOGIC: 🛑 Cancelado por usuario - Matando todo.");
-    
-    // 1. Matamos temporizadores internos
-    _preAlertTimer?.cancel();
-    
-    // 2. Apagamos el audio local (si hubiera)
-    _audioPlayer?.stop(); 
-    
-    // 3. ¡IMPORTANTE! Ordenamos a Sylvia (Servicio) que se calle
-    try {
-      FlutterBackgroundService().invoke("stopAlarm");
-      Vibration.cancel(); // Matamos la vibración aquí también por si acaso
-    } catch (e) {
-      debugPrint("Error parando servicio: $e");
-    }
-
-    // 4. Volvemos a estado Ready
-    _setStatus(SOSStatus.ready);
-    
-    // 5. Apagamos la pantalla para ahorrar batería (ya que el servicio no lo hará)
-    try { platform.invokeMethod('sleepScreen'); } catch(_) {}
   }
 }

@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart'; 
 import 'package:flutter_background_service/flutter_background_service.dart';
 import 'package:wakelock_plus/wakelock_plus.dart';
 import 'package:permission_handler/permission_handler.dart'; 
@@ -17,9 +18,8 @@ class HomeScreen extends StatefulWidget {
 }
 
 class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver, TickerProviderStateMixin {
-  final SOSLogic _sosLogic = SOSLogic();
+  late SOSLogic _sosLogic; 
   bool _hasShownWarning = false;
-  
   late AnimationController _sosHoldController;
 
   @override
@@ -27,6 +27,10 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver, Ti
     super.initState();
     WidgetsBinding.instance.addObserver(this); 
     
+    // 🧠 CONEXIÓN AL CEREBRO GLOBAL (PROVIDER)
+    _sosLogic = context.read<SOSLogic>();
+    
+    // Inicializamos lógica y wakelock
     _sosLogic.init();
     WakelockPlus.enable();
     
@@ -97,6 +101,14 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver, Ti
   @override
   void didChangeAppLifecycleState(AppLifecycleState state) {
     if (state == AppLifecycleState.resumed) {
+      // 🛡️ PROTECCIÓN CRÍTICA (EL BLINDAJE):
+      // Si estamos en medio de una ALARMA (preAlert) o ENVIADO (sent),
+      // NO reiniciamos la lógica. Dejamos que el proceso siga su curso.
+      if (_sosLogic.status == SOSStatus.preAlert || _sosLogic.status == SOSStatus.sent) {
+        print("🔄 APP RESUMED: Ignorando reinicio porque hay una EMERGENCIA en curso.");
+        return;
+      }
+
       print("🔄 APP RESUMED: Verificando servicio tras volver de ajustes...");
       FlutterBackgroundService().isRunning().then((isRunning) {
         if (!isRunning) {
@@ -105,6 +117,7 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver, Ti
            FlutterBackgroundService().invoke("updateLanguage");
         }
       });
+      // Aseguramos que la lógica está despierta (Solo si no hay emergencia)
       _sosLogic.init(); 
     }
   }
@@ -113,7 +126,6 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver, Ti
   void dispose() {
     WidgetsBinding.instance.removeObserver(this);
     _sosHoldController.dispose();
-    _sosLogic.dispose();
     super.dispose();
   }
 
@@ -197,6 +209,7 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver, Ti
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                 children: [
+                  // G-Force
                   Column(
                     children: [
                       Icon(Icons.speed, color: gForceColor, size: 48),
@@ -207,6 +220,8 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver, Ti
                       ),
                     ],
                   ),
+
+                  // Batería
                   Column(
                     children: [
                       Icon(
@@ -221,19 +236,44 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver, Ti
                       ),
                     ],
                   ),
-                  Column(
-                    children: [
-                      Icon(
-                        Icons.gps_fixed, 
-                        color: _sosLogic.gpsAccuracy > 0 ? Colors.green : Colors.grey, 
-                        size: 48
-                      ),
-                      const SizedBox(height: 6),
-                      Text(
-                        _sosLogic.gpsAccuracy > 0 ? "${_sosLogic.gpsAccuracy.toStringAsFixed(0)}m" : "--", 
-                        style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 14)
-                      ),
-                    ],
+
+                  // GPS (INTERACTIVO - MANTENIDO)
+                  GestureDetector(
+                    onTap: () {
+                      showDialog(
+                        context: context,
+                        builder: (ctx) => AlertDialog(
+                          title: Row(
+                            children: [
+                              const Icon(Icons.info_outline, color: Colors.blue),
+                              const SizedBox(width: 10),
+                              Text(l10n.gpsHelpTitle),
+                            ],
+                          ),
+                          content: Text(l10n.gpsHelpBody),
+                          actions: [
+                            TextButton(
+                              onPressed: () => Navigator.pop(ctx),
+                              child: const Text("OK"),
+                            )
+                          ],
+                        ),
+                      );
+                    },
+                    child: Column(
+                      children: [
+                        Icon(
+                          Icons.gps_fixed, 
+                          color: _sosLogic.gpsAccuracy > 0 ? Colors.green : Colors.grey, 
+                          size: 48
+                        ),
+                        const SizedBox(height: 6),
+                        Text(
+                          _sosLogic.gpsAccuracy > 0 ? "${_sosLogic.gpsAccuracy.toStringAsFixed(0)}m" : "--", 
+                          style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 14)
+                        ),
+                      ],
+                    ),
                   ),
                 ],
               ),
@@ -241,20 +281,13 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver, Ti
 
             const SizedBox(height: 25),
 
-            // ==========================================================
             // BOTÓN SOS
-            // ==========================================================
             GestureDetector(
               behavior: HitTestBehavior.opaque,
               onPanDown: (_) {
-                // 🛑 COMPROBACIÓN DE CONTACTO
                 if (_sosLogic.emergencyContact == null) {
                   _triggerErrorHaptic();
-                  
-                  // Limpiamos cualquier snackbar anterior para que no se acumulen
                   ScaffoldMessenger.of(context).clearSnackBars();
-                  
-                  // Mostramos el aviso MEJORADO
                   ScaffoldMessenger.of(context).showSnackBar(
                     SnackBar(
                       content: Row(
@@ -263,27 +296,22 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver, Ti
                           const SizedBox(width: 10),
                           Expanded(
                             child: Text(
-                              l10n.errorNoContact, // Usa la variable de localización
-                              style: const TextStyle(
-                                color: Colors.white, 
-                                fontWeight: FontWeight.bold, // Texto en negrita para mejor lectura
-                                fontSize: 15
-                              )
+                              l10n.errorNoContact,
+                              style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 15)
                             ),
                           ),
                         ],
                       ),
-                      backgroundColor: Colors.redAccent.shade700, // Rojo un poco más oscuro para contraste
-                      behavior: SnackBarBehavior.floating, // Flotante (no pegado abajo)
-                      margin: const EdgeInsets.all(16), // Margen alrededor
-                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)), // Redondeado
+                      backgroundColor: Colors.redAccent.shade700,
+                      behavior: SnackBarBehavior.floating,
+                      margin: const EdgeInsets.all(16),
+                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
                       duration: const Duration(seconds: 4),
                       action: SnackBarAction(
                         label: l10n.menuSettings.toUpperCase(),
                         textColor: Colors.white,
-                        backgroundColor: Colors.white24, // Fondo suave para el botón
+                        backgroundColor: Colors.white24,
                         onPressed: () {
-                          // Limpiamos el mensaje AL PULSAR para que no te persiga a la otra pantalla
                           ScaffoldMessenger.of(context).clearSnackBars();
                           _sosLogic.openSettings(context);
                         }
@@ -292,7 +320,6 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver, Ti
                   );
                   return; 
                 }
-
                 _sosHoldController.forward();
               },
               onPanEnd: (_) {
@@ -346,7 +373,6 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver, Ti
                 ],
               ),
             ),
-            // ==========================================================
 
             const SizedBox(height: 20),
             Text(
@@ -382,7 +408,7 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver, Ti
                 ),
               ),
 
-            // INTERRUPTORES MEJORADOS (Texto más grande y visible)
+            // INTERRUPTORES
             _buildQuickToggle(
               context, 
               l10n.autoModeLabel, 
@@ -413,7 +439,6 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver, Ti
                   : null
             ),
             
-            // MENSAJES DE ERROR
             if (_sosLogic.status == SOSStatus.error) ...[
                const SizedBox(height: 20),
                Padding(
@@ -446,23 +471,17 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver, Ti
   }
 
   Widget _buildQuickToggle(BuildContext context, String label, bool value, Function(bool) onChanged, IconData icon, {String? subtitle}) {
-    // Detectamos tema para mejorar contraste
     final isDark = Theme.of(context).brightness == Brightness.dark;
-    
     return Container(
       margin: const EdgeInsets.symmetric(horizontal: 30, vertical: 5),
       child: SwitchListTile(
-        title: Text(
-            label,
-            style: const TextStyle(fontWeight: FontWeight.w500) // Título un poco más fuerte
-        ), 
+        title: Text(label, style: const TextStyle(fontWeight: FontWeight.w500)), 
         subtitle: subtitle != null ? Text(
             subtitle, 
             style: TextStyle(
-                // Color más fuerte: Blanco en dark mode, Gris oscuro en light mode
                 color: isDark ? Colors.white70 : Colors.grey[800], 
-                fontSize: 14, // Aumentado de 12 a 14
-                fontWeight: FontWeight.bold // Negrita para la presbicia
+                fontSize: 14, 
+                fontWeight: FontWeight.bold
             )
         ) : null,
         secondary: Icon(icon, color: value ? Colors.redAccent : Colors.grey),

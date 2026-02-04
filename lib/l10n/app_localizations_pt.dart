@@ -360,10 +360,11 @@ class AppLocalizationsPt extends AppLocalizations {
   String get permGoSettings => 'Ir para Configurações';
 
   @override
-  String get gpsHelpTitle => 'GPS';
+  String get gpsHelpTitle => 'Sobre o GPS';
 
   @override
-  String get gpsHelpBody => 'O GPS depende do chip físico e da visibilidade.';
+  String get gpsHelpBody =>
+      'A precisão depende do chip físico do seu telemóvel e da visão direta do céu.\n\nEm interiores, garagens ou túneis, o sinal de satélite é bloqueado e a localização pode ser aproximada ou nula.\n\nOksigenia tentará sempre triangular a melhor posição possível.';
 
   @override
   String get holdToCancel => 'Segure para cancelar';

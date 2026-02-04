@@ -112,7 +112,7 @@
     "permDialogTitle": "Permissão Necessária",
     "permSmsHelpTitle": "Ajuda SMS",
     "permGoSettings": "Ir para Configurações",
-    "gpsHelpTitle": "GPS",
-    "gpsHelpBody": "O GPS depende do chip físico e da visibilidade.",
+    "gpsHelpTitle": "Sobre o GPS",
+    "gpsHelpBody": "A precisão depende do chip físico do seu telemóvel e da visão direta do céu.\n\nEm interiores, garagens ou túneis, o sinal de satélite é bloqueado e a localização pode ser aproximada ou nula.\n\nOksigenia tentará sempre triangular a melhor posição possível.",
     "holdToCancel": "Segure para cancelar"
 }
