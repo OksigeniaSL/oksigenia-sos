@@ -14,8 +14,8 @@ import 'package:flutter_background_service/flutter_background_service.dart';
 import 'package:battery_plus/battery_plus.dart';
 import 'package:oksigenia_sos/l10n/app_localizations.dart'; 
 import '../services/preferences_service.dart';
-import '../screens/settings_screen.dart'; 
-import '../screens/countdown_screen.dart'; 
+import '../screens/settings_screen.dart';  
+import '../screens/alarm_screen.dart';
 
 // 🔑 LLAVE MAESTRA DE NAVEGACIÓN
 final GlobalKey<NavigatorState> oksigeniaNavigatorKey = GlobalKey<NavigatorState>();
@@ -315,66 +315,41 @@ class SOSLogic extends ChangeNotifier with WidgetsBindingObserver {
   }
 
   void _triggerPreAlert(AlertCause cause) async {
+    // 1. BLINDAMOS EL ESTADO PRIMERO (Para que la pantalla no se cierre sola)
     _lastTrigger = cause;
-    _gpsSubscription?.pause(); 
-    try { await platform.invokeMethod('wakeScreen'); } catch(_) {}
-
-    _status = SOSStatus.preAlert;
-    _countdownSeconds = 30; 
-    _currentVolume = 0.2;
+    _status = SOSStatus.preAlert; 
+    _countdownSeconds = 30;
     notifyListeners();
 
-    try {
-        _audioPlayer?.dispose();
-        _audioPlayer = AudioPlayer();
-        await _audioPlayer!.setAudioContext(AudioContext(
-           android: AudioContextAndroid(isSpeakerphoneOn: true, stayAwake: true, contentType: AndroidContentType.sonification, usageType: AndroidUsageType.alarm, audioFocus: AndroidAudioFocus.gainTransient),
-           iOS: AudioContextIOS(category: AVAudioSessionCategory.playback)
-        ));
-        await _audioPlayer!.setReleaseMode(ReleaseMode.loop);
-        await _audioPlayer!.play(AssetSource('sounds/alarm.mp3'), volume: _currentVolume);
-    } catch(e) { debugPrint("Audio Panic: $e"); }
+    // 2. PAUSAMOS GPS Y ENCENDEMOS MOTORES
+    _gpsSubscription?.pause(); 
     
+    // 3. INVOCAMOS EL SONIDO (El alma)
     try {
-      if (await Vibration.hasVibrator() ?? false) {
-        Vibration.vibrate(pattern: [500, 1000, 500, 1000], repeat: 0);
-      }
-    } catch (e) { debugPrint("Vibration Error: $e"); }
+       final service = FlutterBackgroundService();
+       service.invoke("startAlarm"); 
+    } catch (e) {
+       debugPrint("Error servicio: $e");
+    }
 
-    // 🚀 ABRIMOS LA PANTALLA CON CAUSA
+    // 4. DESPERTAMOS LA PANTALLA (El cuerpo)
+    try { await platform.invokeMethod('bringToFront'); } catch(_) {}
+
+    // ⏳ ESPERA TÁCTICA: Damos 500ms a Android para que termine de encender la pantalla
+    // Si intentamos navegar mientras la pantalla está negra, Flutter falla.
+    await Future.delayed(const Duration(milliseconds: 500));
+
+    // 5. ABRIMOS LA INTERFAZ
     if (oksigeniaNavigatorKey.currentState != null) {
-      debugPrint("🚀 Lanzando UI de Círculo Regresivo...");
-      _preAlertTimer?.cancel();
-
-      final bool? confirmed = await oksigeniaNavigatorKey.currentState!.push(
-        MaterialPageRoute(builder: (_) => CountdownScreen(
-          duration: _countdownSeconds,
-          cause: cause, // 👈 Pasamos la causa (caída/inactividad)
-        ))
+      debugPrint("🚀 NUCLEAR: Lanzando AlarmScreen...");
+      
+      await oksigeniaNavigatorKey.currentState!.pushAndRemoveUntil(
+        MaterialPageRoute(builder: (_) => const AlarmScreen()),
+        (route) => route.isFirst,
       );
-
-      _stopAllAlerts();
-
-      if (confirmed == true) {
-        sendSOS();
-      } else {
-        cancelAlert();
-      }
+      
     } else {
-      debugPrint("⚠️ No se pudo abrir UI (Background), usando timer interno.");
-      _preAlertTimer = Timer.periodic(const Duration(seconds: 1), (timer) {
-        if (_countdownSeconds > 0) {
-          _countdownSeconds--;
-          if (_currentVolume < 1.0 && _audioPlayer != null) {
-            _currentVolume += 0.1;
-            _audioPlayer!.setVolume(_currentVolume).catchError((_){});
-          }
-          notifyListeners();
-        } else {
-          _stopAllAlerts();
-          sendSOS();                
-        }
-      });
+      debugPrint("⚠️ No se pudo abrir UI, pero el sonido sigue.");
     }
   }
 
@@ -559,9 +534,26 @@ class SOSLogic extends ChangeNotifier with WidgetsBindingObserver {
   int get currentCountdownSeconds => 30;
 
   void cancelSOS() {
-    debugPrint("LOGIC: Cancelado por usuario");
+    debugPrint("LOGIC: 🛑 Cancelado por usuario - Matando todo.");
+    
+    // 1. Matamos temporizadores internos
     _preAlertTimer?.cancel();
-    _audioPlayer?.stop(); // Si tienes audio
+    
+    // 2. Apagamos el audio local (si hubiera)
+    _audioPlayer?.stop(); 
+    
+    // 3. ¡IMPORTANTE! Ordenamos a Sylvia (Servicio) que se calle
+    try {
+      FlutterBackgroundService().invoke("stopAlarm");
+      Vibration.cancel(); // Matamos la vibración aquí también por si acaso
+    } catch (e) {
+      debugPrint("Error parando servicio: $e");
+    }
+
+    // 4. Volvemos a estado Ready
     _setStatus(SOSStatus.ready);
+    
+    // 5. Apagamos la pantalla para ahorrar batería (ya que el servicio no lo hará)
+    try { platform.invokeMethod('sleepScreen'); } catch(_) {}
   }
 }

@@ -113,5 +113,6 @@
     "permSmsHelpTitle": "SMS Hjälp",
     "permGoSettings": "Gå till Inställningar",
     "gpsHelpTitle": "GPS",
-    "gpsHelpBody": "GPS beror på det fysiska chippet och sikten."
+    "gpsHelpBody": "GPS beror på det fysiska chippet och sikten.",
+    "holdToCancel": "Håll intryckt för att avbryta"
 }

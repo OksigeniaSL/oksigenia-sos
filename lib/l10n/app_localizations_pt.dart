@@ -364,4 +364,7 @@ class AppLocalizationsPt extends AppLocalizations {
 
   @override
   String get gpsHelpBody => 'O GPS depende do chip físico e da visibilidade.';
+
+  @override
+  String get holdToCancel => 'Segure para cancelar';
 }

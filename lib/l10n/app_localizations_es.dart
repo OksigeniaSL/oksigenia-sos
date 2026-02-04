@@ -370,4 +370,7 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get gpsHelpBody => 'El GPS depende del chip físico...';
+
+  @override
+  String get holdToCancel => 'Mantén pulsado para cancelar';
 }

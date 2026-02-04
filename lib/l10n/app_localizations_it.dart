@@ -375,4 +375,7 @@ class AppLocalizationsIt extends AppLocalizations {
   @override
   String get gpsHelpBody =>
       'Il GPS dipende dal chip fisico e dalla visibilità del cielo.';
+
+  @override
+  String get holdToCancel => 'Tieni premuto per annullare';
 }

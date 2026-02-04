@@ -369,4 +369,7 @@ class AppLocalizationsSv extends AppLocalizations {
 
   @override
   String get gpsHelpBody => 'GPS beror på det fysiska chippet och sikten.';
+
+  @override
+  String get holdToCancel => 'Håll intryckt för att avbryta';
 }

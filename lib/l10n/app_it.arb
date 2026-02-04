@@ -113,5 +113,6 @@
     "permSmsHelpTitle": "Aiuto SMS",
     "permGoSettings": "Vai alle Impostaciones",
     "gpsHelpTitle": "GPS",
-    "gpsHelpBody": "Il GPS dipende dal chip fisico e dalla visibilità del cielo."
+    "gpsHelpBody": "Il GPS dipende dal chip fisico e dalla visibilità del cielo.",
+    "holdToCancel": "Tieni premuto per annullare"
 }

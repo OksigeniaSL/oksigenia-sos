@@ -799,6 +799,12 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'GPS depends on the physical chip and visibility.'**
   String get gpsHelpBody;
+
+  /// No description provided for @holdToCancel.
+  ///
+  /// In en, this message translates to:
+  /// **'Hold to cancel'**
+  String get holdToCancel;
 }
 
 class _AppLocalizationsDelegate

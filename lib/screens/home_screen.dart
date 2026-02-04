@@ -107,10 +107,6 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
   }
 
   Widget _buildBody(BuildContext context) {
-    // Pantallas de Emergencia (Colores Fijos SIEMPRE)
-    if (_sosLogic.status == SOSStatus.preAlert) {
-      return _buildPreAlertUI(context);
-    }
     
     if (_sosLogic.status == SOSStatus.sent) {
       return _buildSentUI(context);
@@ -308,7 +304,10 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
                    _hasShownWarning = true;
                 }
               },
-              Icons.accessibility_new
+              Icons.accessibility_new,
+              subtitle: _sosLogic.isInactivityMonitorActive 
+                  ? "${l10n.timerLabel}: ${_sosLogic.currentInactivityLimit < 60 ? '${_sosLogic.currentInactivityLimit} ${l10n.timerSeconds}' : '${_sosLogic.currentInactivityLimit ~/ 3600} h'}" 
+                  : null
             ),
             
             // MENSAJES DE ERROR
@@ -343,11 +342,13 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
     );
   }
 
-  Widget _buildQuickToggle(BuildContext context, String label, bool value, Function(bool) onChanged, IconData icon) {
+  Widget _buildQuickToggle(BuildContext context, String label, bool value, Function(bool) onChanged, IconData icon, {String? subtitle}) {
     return Container(
       margin: const EdgeInsets.symmetric(horizontal: 30, vertical: 5),
       child: SwitchListTile(
-        title: Text(label), // Texto sin estilo: hereda color del Theme
+        title: Text(label), 
+        // Aquí está el subtítulo opcional que añadimos
+        subtitle: subtitle != null ? Text(subtitle, style: const TextStyle(color: Colors.grey, fontSize: 12)) : null,
         secondary: Icon(icon, color: value ? Colors.redAccent : Colors.grey),
         value: value, 
         onChanged: (newValue) async {
@@ -392,51 +393,6 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
               child: const Text("IR A AJUSTES"),
             )
           ],
-        ),
-      ),
-    );
-  }
-
-  Widget _buildPreAlertUI(BuildContext context) {
-    final l10n = AppLocalizations.of(context)!;
-    String cause = _sosLogic.lastTrigger == AlertCause.fall 
-        ? l10n.alertFallDetected 
-        : l10n.alertInactivityDetected;
-
-    return Scaffold(
-      backgroundColor: const Color(0xFFB71C1C),
-      body: SafeArea(
-        child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 20.0),
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-            crossAxisAlignment: CrossAxisAlignment.center,
-            children: [
-              const Icon(Icons.warning_amber_rounded, size: 80, color: Colors.white),
-              Column(
-                children: [
-                  Text(cause, textAlign: TextAlign.center, style: const TextStyle(fontSize: 26, fontWeight: FontWeight.bold, color: Colors.white)),
-                  const SizedBox(height: 10),
-                  Text(l10n.alertSendingIn, textAlign: TextAlign.center, style: const TextStyle(color: Colors.white70, fontSize: 18)),
-                ],
-              ),
-              Text("${_sosLogic.countdownSeconds}", style: const TextStyle(fontSize: 90, fontWeight: FontWeight.bold, color: Colors.white)),
-              SizedBox(
-                width: double.infinity,
-                child: ElevatedButton.icon(
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: Colors.white,
-                    foregroundColor: const Color(0xFFB71C1C),
-                    padding: const EdgeInsets.symmetric(vertical: 20),
-                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(30))
-                  ),
-                  onPressed: _sosLogic.cancelAlert, 
-                  icon: const Icon(Icons.close, size: 30),
-                  label: Text(l10n.alertCancel, style: const TextStyle(fontSize: 22, fontWeight: FontWeight.bold))
-                ),
-              )
-            ],
-          ),
         ),
       ),
     );

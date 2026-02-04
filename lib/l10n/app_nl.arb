@@ -113,5 +113,6 @@
     "permSmsHelpTitle": "SMS Hulp",
     "permGoSettings": "Ga naar Instellingen",
     "gpsHelpTitle": "GPS",
-    "gpsHelpBody": "GPS is afhankelijk van de fysieke chip en zichtbaarheid."
+    "gpsHelpBody": "GPS is afhankelijk van de fysieke chip en zichtbaarheid.",
+    "holdToCancel": "Ingedrukt houden om te annuleren"
 }

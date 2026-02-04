@@ -3,9 +3,13 @@ import 'dart:ui';
 import 'package:flutter_background_service/flutter_background_service.dart';
 import 'package:flutter_background_service_android/flutter_background_service_android.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:audioplayers/audioplayers.dart'; // <--- NECESARIO PARA GRITAR
+import 'package:vibration/vibration.dart';       // <--- NECESARIO PARA VIBRAR
 
-// 🧠 MEMORIA DE SYLVIA (Variable global para el aislamiento)
+// 🧠 MEMORIA DE SYLVIA
 String? _lastContent;
+// 🔊 LAS CUERDAS VOCALES (Variable global del Isolate)
+final AudioPlayer _audioPlayer = AudioPlayer();
 
 Future<void> initializeService() async {
   final service = FlutterBackgroundService();
@@ -13,19 +17,15 @@ Future<void> initializeService() async {
   await service.configure(
     androidConfiguration: AndroidConfiguration(
       onStart: onStart,
-      
-      // Mantenemos esto en false como lo estaba (arranca con el toggle)
       autoStart: true, 
       isForegroundMode: false, 
-      
       notificationChannelId: 'oksigenia_sos_modular_v1',       
       initialNotificationTitle: 'OKSIGENIA SOS',
       initialNotificationContent: 'Iniciando...',
-      
-      // Mantiene los tipos de servicio (vital para GPS)
       foregroundServiceTypes: [
         AndroidForegroundType.location,
         AndroidForegroundType.dataSync,
+        AndroidForegroundType.mediaPlayback, // <--- Añadido para garantizar audio
       ],
     ),
     iosConfiguration: IosConfiguration(),
@@ -36,18 +36,66 @@ Future<void> initializeService() async {
 void onStart(ServiceInstance service) async {
   DartPluginRegistrant.ensureInitialized();
 
+  // Configuración inicial del Audio (Contexto de Alarma)
+  try {
+    await _audioPlayer.setAudioContext(AudioContext(
+      android: AudioContextAndroid(
+        isSpeakerphoneOn: true,
+        stayAwake: true,
+        contentType: AndroidContentType.sonification,
+        usageType: AndroidUsageType.alarm,
+        audioFocus: AndroidAudioFocus.gainTransient,
+      ),
+      iOS: AudioContextIOS(category: AVAudioSessionCategory.playback),
+    ));
+  } catch (e) {
+    print("SYLVIA: Error configurando audio context: $e");
+  }
+
   if (service is AndroidServiceInstance) {
     // 1. AUTO-PROMOCIÓN AL INICIO
     Timer(const Duration(seconds: 1), () async {
-      await _updateNotificationText(service, force: true); // Forzamos la primera vez
+      await _updateNotificationText(service, force: true); 
       service.setAsForegroundService();
       print("SYLVIA: Uniforme puesto al arrancar.");
     });
 
-    // 2. ESCUCHA CAMBIOS DE IDIOMA
+    // --- 👂 OÍDOS DE SYLVIA (ESCUCHAR ÓRDENES) ---
+
+    // A. ORDEN DE GRITAR (ALARMA)
+    service.on('startAlarm').listen((event) async {
+      print("SYLVIA: 🚨 RECIBIDA ORDEN DE ALARMA -> ACTIVANDO SONIDO Y VIBRACIÓN");
+      try {
+        // Aseguramos que es Foreground para tener prioridad de CPU
+        service.setAsForegroundService();
+        
+        // Loop de sonido
+        await _audioPlayer.setReleaseMode(ReleaseMode.loop);
+        await _audioPlayer.play(AssetSource('sounds/alarm.mp3'), volume: 1.0);
+        
+        // Loop de vibración (SOS agresivo)
+        if (await Vibration.hasVibrator() ?? false) {
+           Vibration.vibrate(pattern: [500, 1000, 500, 1000], repeat: 0);
+        }
+      } catch (e) {
+        print("SYLVIA: ❌ Error crítico activando alarma: $e");
+      }
+    });
+
+    // B. ORDEN DE CALLAR (STOP)
+    service.on('stopAlarm').listen((event) async {
+      print("SYLVIA: 🔇 RECIBIDA ORDEN DE SILENCIO");
+      try {
+        await _audioPlayer.stop();
+        Vibration.cancel();
+      } catch (e) {
+        print("SYLVIA: Error parando alarma: $e");
+      }
+    });
+
+    // C. CAMBIOS DE IDIOMA
     service.on('updateLanguage').listen((event) async {
       print("SYLVIA: Recibida orden de cambio de idioma.");
-      // Aquí forzamos actualización porque el idioma ha cambiado
       await _updateNotificationText(service, force: true);
     });
 
@@ -61,6 +109,7 @@ void onStart(ServiceInstance service) async {
   }
 
   service.on('stopService').listen((event) {
+    _audioPlayer.stop(); // Nos aseguramos de callar antes de morir
     service.stopSelf();
   });
 
@@ -68,15 +117,11 @@ void onStart(ServiceInstance service) async {
   Timer.periodic(const Duration(seconds: 60), (timer) async {
     if (service is AndroidServiceInstance) {
       bool isForeground = await service.isForegroundService();
-      // Solo 'debug print' si realmente pasa algo raro, para no ensuciar la consola
       if (!isForeground) {
         print("SYLVIA: Recuperando rango...");
         service.setAsForegroundService();
-        // Si hemos perdido el foreground, forzamos la notificación para recuperarlo
         await _updateNotificationText(service, force: true);
       } else {
-        // Si todo está bien, intentamos actualizar pero "sin molestar"
-        // (Solo actualizará si el texto cambió por alguna razón externa)
         await _updateNotificationText(service, force: false);
       }
     }
@@ -97,24 +142,21 @@ Future<void> _updateNotificationText(AndroidServiceInstance service, {bool force
     else if (langCode == 'fr') { content = "Protection active"; }
     else if (langCode == 'pt') { content = "Proteção ativa"; }
     else if (langCode == 'de') { content = "Schutz aktiv"; }
-    else if (langCode == 'it') { content = "Protezione attiva"; } // <--- Nuevo (ulipo)
-    else if (langCode == 'nl') { content = "Beveiliging actief"; } // <--- Nuevo
+    else if (langCode == 'it') { content = "Protezione attiva"; }
+    else if (langCode == 'nl') { content = "Beveiliging actief"; }
     else if (langCode == 'sv') { content = "Skydd aktivt"; }
 
-    // ✨ LA MAGIA: Si el texto es igual al anterior y no nos obligan, NO HACEMOS NADA.
-    // Esto evita que Android pite o parpadee innecesariamente.
     if (!force && content == _lastContent) {
       return; 
     }
 
-    // Si cambió o es forzado, actualizamos y guardamos en memoria
     _lastContent = content;
 
     service.setForegroundNotificationInfo(
       title: title,
       content: content,
     );
-    print("SYLVIA: Notificación actualizada a ($langCode)");
+    // print("SYLVIA: Notificación actualizada a ($langCode)"); // Comentado para no saturar log
     
   } catch (e) {
     print("SYLVIA ERROR al traducir: $e");

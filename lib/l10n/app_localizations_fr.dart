@@ -368,4 +368,7 @@ class AppLocalizationsFr extends AppLocalizations {
   @override
   String get gpsHelpBody =>
       'Le GPS dépend de la puce physique et de la visibilité.';
+
+  @override
+  String get holdToCancel => 'Maintenir pour annuler';
 }

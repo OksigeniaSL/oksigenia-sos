@@ -372,4 +372,7 @@ class AppLocalizationsNl extends AppLocalizations {
   @override
   String get gpsHelpBody =>
       'GPS is afhankelijk van de fysieke chip en zichtbaarheid.';
+
+  @override
+  String get holdToCancel => 'Ingedrukt houden om te annuleren';
 }

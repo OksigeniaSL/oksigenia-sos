@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:oksigenia_sos/logic/sos_logic.dart';
 import 'package:oksigenia_sos/l10n/app_localizations.dart';
-import 'package:vibration/vibration.dart'; 
+import 'package:vibration/vibration.dart';
 
 class AlarmScreen extends StatefulWidget {
   const AlarmScreen({super.key});
@@ -12,172 +12,228 @@ class AlarmScreen extends StatefulWidget {
   State<AlarmScreen> createState() => _AlarmScreenState();
 }
 
-class _AlarmScreenState extends State<AlarmScreen> with SingleTickerProviderStateMixin {
-  late AnimationController _controller;
-  Timer? _feedbackTimer;
+class _AlarmScreenState extends State<AlarmScreen> with TickerProviderStateMixin {
+  late AnimationController _countdownController;
+  late AnimationController _holdController;
 
   @override
   void initState() {
     super.initState();
     final logic = context.read<SOSLogic>();
     
-    _controller = AnimationController(
+    _countdownController = AnimationController(
       vsync: this,
-      duration: Duration(seconds: logic.currentCountdownSeconds), 
+      duration: Duration(seconds: logic.currentCountdownSeconds),
     )..reverse(from: 1.0);
 
-    _startAlarmFeedback();
-  }
+    _holdController = AnimationController(
+      vsync: this,
+      duration: const Duration(seconds: 2), 
+    );
 
-  void _startAlarmFeedback() {
-    _triggerFeedback();
-    _feedbackTimer = Timer.periodic(const Duration(seconds: 1), (timer) {
-      _triggerFeedback();
+    _holdController.addStatusListener((status) {
+      if (status == AnimationStatus.completed) {
+        _triggerSuccessHaptic();
+        logic.cancelSOS();
+        if (mounted) Navigator.of(context).pop(); 
+      }
     });
   }
 
-  Future<void> _triggerFeedback() async {
+  Future<void> _triggerSuccessHaptic() async {
     if (await Vibration.hasVibrator() ?? false) {
-      Vibration.vibrate(duration: 500);
+      Vibration.vibrate(pattern: [0, 50, 50, 50]); 
     }
   }
 
   @override
   void dispose() {
-    _controller.dispose();
-    _feedbackTimer?.cancel();
+    _countdownController.dispose();
+    _holdController.dispose();
     super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
-    // Usamos watch para reconstruir si cambia el estado
     final logic = context.watch<SOSLogic>();
     final l10n = AppLocalizations.of(context)!;
+    
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final Color bgColor = isDark ? Colors.black : const Color(0xFFB71C1C);
+    final Color textColor = Colors.white;
 
-    // Si se cancela, cerrar
-    if (logic.status == SOSStatus.ready) {
-      WidgetsBinding.instance.addPostFrameCallback((_) {
-        if (mounted) Navigator.of(context).pop();
-      });
-    }
-
-    // 1. DETERMINAR TEXTOS SEGÚN LA CAUSA (Sin hardcode)
-    String titleText;
-    String bodyText;
+    String titleText = "SOS";
+    String bodyText = l10n.alertSendingIn;
 
     if (logic.lastTrigger == AlertCause.fall) {
-      titleText = l10n.alertFallDetected; // "IMPACT DETECTED!"
-      bodyText = l10n.alertFallBody;      // "Severe fall detected..."
+      titleText = l10n.alertFallDetected;
+      bodyText = l10n.alertFallBody;
     } else if (logic.lastTrigger == AlertCause.inactivity) {
-      titleText = l10n.alertInactivityDetected; // "INACTIVITY DETECTED!"
-      bodyText = l10n.alertInactivityBody;      // "No movement detected..."
-    } else {
-      // Fallback para manual u otros
-      titleText = "SOS";
-      bodyText = l10n.alertSendingIn;
+      titleText = l10n.alertInactivityDetected;
+      bodyText = l10n.alertInactivityBody;
     }
 
     return Scaffold(
-      backgroundColor: Colors.redAccent, 
+      backgroundColor: bgColor,
       body: PopScope(
-        canPop: false, 
+        canPop: false,
         child: SafeArea(
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              // ICONO DE ALERTA
-              const Icon(Icons.warning_amber_rounded, size: 80, color: Colors.white),
-              const SizedBox(height: 20),
-
-              // 2. TÍTULO (Traducido)
-              Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 20),
-                child: Text(
-                  titleText,
-                  textAlign: TextAlign.center,
-                  style: const TextStyle(
-                    color: Colors.white,
-                    fontSize: 28,
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
-              ),
-              const SizedBox(height: 10),
-
-              // 3. CUERPO (Traducido)
-              Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 30),
-                child: Text(
-                  bodyText,
-                  textAlign: TextAlign.center,
-                  style: const TextStyle(
-                    color: Colors.white70,
-                    fontSize: 18,
-                  ),
-                ),
-              ),
-              const SizedBox(height: 40),
-
-              // CÍRCULO DE CUENTA ATRÁS
-              Stack(
-                alignment: Alignment.center,
+          child: Center(
+            child: SingleChildScrollView(
+              // Bloqueamos el scroll manual para que no interfiera con el botón "mantener"
+              physics: const NeverScrollableScrollPhysics(),
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                mainAxisSize: MainAxisSize.min,
                 children: [
-                  SizedBox(
-                    width: 200,
-                    height: 200,
-                    child: CircularProgressIndicator(
-                      value: _controller.value, 
-                      strokeWidth: 15,
-                      valueColor: const AlwaysStoppedAnimation<Color>(Colors.white),
-                      backgroundColor: Colors.black12,
+                  const SizedBox(height: 20),
+                  Icon(Icons.warning_amber_rounded, size: 60, color: textColor),
+                  const SizedBox(height: 15),
+
+                  Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 20),
+                    child: Text(
+                      titleText,
+                      textAlign: TextAlign.center,
+                      style: TextStyle(
+                        color: textColor,
+                        fontSize: 26,
+                        fontWeight: FontWeight.bold,
+                      ),
                     ),
                   ),
-                  AnimatedBuilder(
-                    animation: _controller,
-                    builder: (context, child) {
-                      int secs = (_controller.duration!.inSeconds * _controller.value).ceil();
-                      return Text(
-                        '$secs',
-                        style: const TextStyle(
-                          fontSize: 80,
-                          fontWeight: FontWeight.bold,
-                          color: Colors.white,
-                        ),
-                      );
-                    },
+                  const SizedBox(height: 10),
+
+                  Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 30),
+                    child: Text(
+                      bodyText,
+                      textAlign: TextAlign.center,
+                      style: TextStyle(
+                        color: textColor.withOpacity(0.8),
+                        fontSize: 16,
+                      ),
+                    ),
                   ),
+                  const SizedBox(height: 30),
+
+                  // RELOJ
+                  Stack(
+                    alignment: Alignment.center,
+                    children: [
+                      SizedBox(
+                        width: 180,
+                        height: 180,
+                        child: AnimatedBuilder(
+                          animation: _countdownController,
+                          builder: (context, child) {
+                            return CircularProgressIndicator(
+                              value: _countdownController.value,
+                              strokeWidth: 12,
+                              backgroundColor: Colors.white12,
+                              valueColor: const AlwaysStoppedAnimation<Color>(Colors.white),
+                            );
+                          },
+                        ),
+                      ),
+                      AnimatedBuilder(
+                        animation: _countdownController,
+                        builder: (context, child) {
+                          int secs = (logic.currentCountdownSeconds * _countdownController.value).ceil();
+                          return Text(
+                            '$secs',
+                            style: TextStyle(
+                              fontSize: 70,
+                              fontWeight: FontWeight.bold,
+                              color: textColor,
+                            ),
+                          );
+                        },
+                      ),
+                    ],
+                  ),
+                  
+                  const SizedBox(height: 40),
+
+                  // --- BOTÓN DE SEGURIDAD MEJORADO (ANTI-TEMBLOR) ---
+                  GestureDetector(
+                    // 1. Usamos 'HitTestBehavior.opaque' para que detecte toques incluso en los huecos vacíos del contenedor
+                    behavior: HitTestBehavior.opaque,
+                    
+                    // 2. Usamos 'onPan' (Arrastre) en vez de 'onTap' (Toque).
+                    // 'onPan' tolera que muevas el dedo sin cancelar la acción.
+                    onPanDown: (_) => _holdController.forward(),
+                    onPanEnd: (_) {
+                      if (_holdController.status != AnimationStatus.completed) {
+                        _holdController.reverse();
+                      }
+                    },
+                    onPanCancel: () => _holdController.reverse(),
+                    
+                    child: Container(
+                      // 3. Área Invisible Gigante: 200x200 píxeles de "zona segura" para acertar con guantes
+                      width: 200,
+                      color: Colors.transparent, // Invisible pero tocable
+                      child: Column(
+                        children: [
+                          Stack(
+                            alignment: Alignment.center,
+                            children: [
+                              // A. Anillo de progreso "HALO"
+                              SizedBox(
+                                width: 150,
+                                height: 150,
+                                child: AnimatedBuilder(
+                                  animation: _holdController,
+                                  builder: (context, child) {
+                                    return CircularProgressIndicator(
+                                      value: _holdController.value,
+                                      strokeWidth: 10,
+                                      backgroundColor: Colors.white10,
+                                      valueColor: const AlwaysStoppedAnimation<Color>(Colors.white),
+                                    );
+                                  },
+                                ),
+                              ),
+                              
+                              // B. El Botón Físico
+                              Container(
+                                width: 80,
+                                height: 80,
+                                decoration: BoxDecoration(
+                                  color: Colors.white,
+                                  shape: BoxShape.circle,
+                                  boxShadow: [
+                                    BoxShadow(
+                                      color: Colors.black.withOpacity(0.3), 
+                                      blurRadius: 15, 
+                                      spreadRadius: 2
+                                    )
+                                  ]
+                                ),
+                                child: Center(
+                                  child: Icon(Icons.stop_rounded, color: bgColor, size: 50),
+                                ),
+                              ),
+                            ],
+                          ),
+                          const SizedBox(height: 15),
+                          Text(
+                            l10n.alertCancel.toUpperCase(), 
+                            style: TextStyle(color: textColor, fontWeight: FontWeight.bold),
+                          ),
+                          Text(
+                            "(${l10n.holdToCancel})",
+                            style: TextStyle(color: textColor.withOpacity(0.7), fontSize: 12),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                  const SizedBox(height: 20),
                 ],
               ),
-              const SizedBox(height: 60),
-
-              // BOTÓN CANCELAR
-              SizedBox(
-                width: 200,
-                height: 60,
-                child: ElevatedButton(
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: Colors.white,
-                    foregroundColor: Colors.red,
-                    elevation: 5,
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(40),
-                    ),
-                  ),
-                  onPressed: () {
-                    logic.cancelSOS(); 
-                  },
-                  child: Text(
-                    l10n.alertCancel.toUpperCase(), 
-                    style: const TextStyle(
-                      fontSize: 20,
-                      fontWeight: FontWeight.bold,
-                      letterSpacing: 1.2,
-                    ),
-                  ),
-                ),
-              ),
-            ],
+            ),
           ),
         ),
       ),

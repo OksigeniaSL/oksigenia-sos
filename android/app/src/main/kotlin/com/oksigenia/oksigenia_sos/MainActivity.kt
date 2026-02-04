@@ -49,9 +49,12 @@ class MainActivity: FlutterActivity() {
                     sendSMS(phone, msg, result)
                 }
                 "bringToFront" -> {
-                    wakeUpScreen() 
+                    wakeUpScreen()
                     val intent = Intent(this, MainActivity::class.java)
-                    intent.addFlags(Intent.FLAG_ACTIVITY_REORDER_TO_FRONT)
+                    // ESTA ES LA COMBINACIÓN GANADORA:
+                    // SINGLE_TOP evita que se cree otra actividad si ya existe una.
+                    // NEW_TASK es obligatorio para llamar desde fuera.
+                    intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_SINGLE_TOP)
                     startActivity(intent)
                     result.success("OK")
                 }

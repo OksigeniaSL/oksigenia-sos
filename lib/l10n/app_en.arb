@@ -113,5 +113,6 @@
     "permSmsHelpTitle": "SMS Help",
     "permGoSettings": "Go to Settings",
     "gpsHelpTitle": "GPS",
-    "gpsHelpBody": "GPS depends on the physical chip and visibility."
+    "gpsHelpBody": "GPS depends on the physical chip and visibility.",
+    "holdToCancel": "Hold to cancel"
 }

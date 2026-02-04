@@ -9,7 +9,7 @@
     <uses-permission android:name="android.permission.WAKE_LOCK" />
     <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
-    
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE_MEDIA_PLAYBACK" />
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE_LOCATION" />
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE_DATA_SYNC" />
     
@@ -50,7 +50,10 @@
             android:theme="@style/LaunchTheme"
             android:configChanges="orientation|keyboardHidden|keyboard|screenSize|smallestScreenSize|locale|layoutDirection|fontScale|screenLayout|density|uiMode"
             android:hardwareAccelerated="true"
-            android:windowSoftInputMode="adjustResize">
+            android:windowSoftInputMode="adjustResize"
+            
+            android:showWhenLocked="true"
+            android:turnScreenOn="true">
             <meta-data
               android:name="io.flutter.embedding.android.NormalTheme"
               android:resource="@style/NormalTheme" />
@@ -62,13 +65,12 @@
 
         <service
             android:name="id.flutter.flutter_background_service.BackgroundService"
-            android:foregroundServiceType="location|dataSync"
+            android:foregroundServiceType="location|dataSync|mediaPlayback"
             android:enabled="true"
-            android:exported="false"
+            android:exported="true" 
             android:stopWithTask="true" 
             tools:replace="android:foregroundServiceType, android:exported, android:stopWithTask" />
-
-        <meta-data android:name="flutterEmbedding" android:value="2" />
+            <meta-data android:name="flutterEmbedding" android:value="2" />
 
         <meta-data
             android:name="com.google.firebase.messaging.default_notification_color"
