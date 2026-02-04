@@ -17,11 +17,10 @@ class _SentScreenState extends State<SentScreen> {
   @override
   void initState() {
     super.initState();
-    // Autocierre en 10 segundos para no bloquear el móvil eternamente
-    _autoCloseTimer = Timer(const Duration(seconds: 10), () {
+    // Autocierre en 15 segundos para ahorrar batería si el usuario no toca nada
+    _autoCloseTimer = Timer(const Duration(seconds: 15), () {
       if (mounted) {
-        final logic = context.read<SOSLogic>();
-        logic.imOkay(); // Vuelve a estado 'ready'
+        context.read<SOSLogic>().cancelAlert(); // Esto resetea todo limpiamente
       }
     });
   }
@@ -37,59 +36,80 @@ class _SentScreenState extends State<SentScreen> {
     final l10n = AppLocalizations.of(context)!;
     final logic = context.watch<SOSLogic>();
 
-    // Si el estado ya no es 'sent', cerramos esta pantalla
+    // Si la lógica dice que ya no estamos en "enviado" (ej: se canceló), cerramos
     if (logic.status != SOSStatus.sent) {
+      // Usamos un post-frame callback para evitar errores de renderizado
       WidgetsBinding.instance.addPostFrameCallback((_) {
-        if (mounted) Navigator.of(context).pop();
+        if (mounted && Navigator.canPop(context)) {
+          Navigator.pop(context);
+        }
       });
     }
 
     return Scaffold(
-      backgroundColor: Colors.green[700], // Verde Éxito
-      body: SafeArea(
-        child: Center(
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              // Icono gigante
-              const Icon(Icons.check_circle_outline, size: 120, color: Colors.white),
-              const SizedBox(height: 30),
-              
-              // Textos
-              Text(
-                l10n.statusSent, // "Alerta enviada"
-                style: const TextStyle(fontSize: 28, fontWeight: FontWeight.bold, color: Colors.white),
-                textAlign: TextAlign.center,
-              ),
-              const SizedBox(height: 10),
-              const Padding(
-                padding: EdgeInsets.symmetric(horizontal: 40),
-                child: Text(
-                  "SMS & GPS Coordinates Sent", 
-                  style: TextStyle(fontSize: 16, color: Colors.white70),
+      backgroundColor: const Color(0xFF121212), // Fondo Oscuro (Modo Táctico)
+      body: PopScope(
+        canPop: false, // Bloqueamos el botón atrás físico
+        child: SafeArea(
+          child: Container(
+            width: double.infinity,
+            padding: const EdgeInsets.all(30),
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                // Círculo de Éxito
+                Container(
+                  decoration: BoxDecoration(
+                    shape: BoxShape.circle,
+                    border: Border.all(color: Colors.greenAccent, width: 4),
+                  ),
+                  padding: const EdgeInsets.all(25),
+                  child: const Icon(Icons.check, size: 60, color: Colors.greenAccent),
+                ),
+                const SizedBox(height: 40),
+                
+                // Título
+                Text(
+                  l10n.statusSent, 
+                  textAlign: TextAlign.center, 
+                  style: const TextStyle(
+                    fontSize: 26, 
+                    fontWeight: FontWeight.bold, 
+                    color: Colors.white
+                  )
+                ),
+                const SizedBox(height: 20),
+                
+                // Subtítulos informativos (Ya traducidos)
+                Text(
+                  "${l10n.statusMonitorStopped}\n${l10n.statusScreenSleep}",
                   textAlign: TextAlign.center,
+                  style: const TextStyle(color: Colors.white54, fontSize: 16),
                 ),
-              ),
-              const SizedBox(height: 60),
-
-              // Botón "Estoy Bien"
-              ElevatedButton.icon(
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: Colors.white,
-                  foregroundColor: Colors.green[800],
-                  padding: const EdgeInsets.symmetric(horizontal: 40, vertical: 15),
-                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(30)),
+                
+                const Spacer(),
+                
+                // Botón Gigante de Reinicio
+                SizedBox(
+                  width: double.infinity,
+                  height: 60,
+                  child: ElevatedButton(
+                    onPressed: () => logic.cancelAlert(), 
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: Colors.white, 
+                      foregroundColor: Colors.black, 
+                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(30)),
+                      elevation: 5,
+                    ), 
+                    child: Text(
+                      l10n.btnRestartSystem, // "REINICIAR SISTEMA"
+                      style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold)
+                    )
+                  ),
                 ),
-                onPressed: () {
-                  logic.imOkay(); // Resetea el sistema
-                },
-                icon: const Icon(Icons.thumb_up),
-                label: Text(
-                  l10n.btnImOkay.toUpperCase(), // "ESTOY BIEN"
-                  style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-                ),
-              ),
-            ],
+                const SizedBox(height: 20),
+              ],
+            ),
           ),
         ),
       ),

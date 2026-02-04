@@ -372,4 +372,13 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get holdToCancel => 'Hold to cancel';
+
+  @override
+  String get statusMonitorStopped => 'Monitor stopped.';
+
+  @override
+  String get statusScreenSleep => 'Screen sleeping soon.';
+
+  @override
+  String get btnRestartSystem => 'RESTART SYSTEM';
 }

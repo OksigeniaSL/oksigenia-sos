@@ -114,5 +114,8 @@
     "permGoSettings": "Ir para Configurações",
     "gpsHelpTitle": "Sobre o GPS",
     "gpsHelpBody": "A precisão depende do chip físico do seu telemóvel e da visão direta do céu.\n\nEm interiores, garagens ou túneis, o sinal de satélite é bloqueado e a localização pode ser aproximada ou nula.\n\nOksigenia tentará sempre triangular a melhor posição possível.",
-    "holdToCancel": "Segure para cancelar"
+    "holdToCancel": "Segure para cancelar",
+    "statusMonitorStopped": "Monitor parado.",
+    "statusScreenSleep": "Ecrã a desligar...",
+    "btnRestartSystem": "REINICIAR SISTEMA"
 }

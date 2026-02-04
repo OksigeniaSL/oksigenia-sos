@@ -114,5 +114,8 @@
     "permGoSettings": "Ga naar Instellingen",
     "gpsHelpTitle": "Over GPS",
     "gpsHelpBody": "De nauwkeurigheid hangt af van de fysieke chip in uw telefoon en direct zicht op de hemel.\n\nBinnenshuis, in garages of tunnels wordt het satellietsignaal geblokkeerd en kan de locatie onnauwkeurig of niet beschikbaar zijn.\n\nOksigenia zal altijd proberen de best mogelijke positie te bepalen.",
-    "holdToCancel": "Ingedrukt houden om te annuleren"
+    "holdToCancel": "Ingedrukt houden om te annuleren",
+    "statusMonitorStopped": "Monitor gestopt.",
+    "statusScreenSleep": "Scherm gaat uit...",
+    "btnRestartSystem": "SYSTEEM HERSTARTEN"
 }

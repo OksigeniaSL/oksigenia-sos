@@ -114,5 +114,8 @@
     "permGoSettings": "Gå till Inställningar",
     "gpsHelpTitle": "Om GPS",
     "gpsHelpBody": "Noggrannheten beror på telefonens fysiska chip och fri sikt mot himlen.\n\nInomhus, i garage eller tunnlar blockeras satellitsignalen och platsen kan vara ungefärlig eller saknas.\n\nOksigenia kommer alltid att försöka triangulera bästa möjliga position.",
-    "holdToCancel": "Håll intryckt för att avbryta"
+    "holdToCancel": "Håll intryckt för att avbryta",
+    "statusMonitorStopped": "Övervakning stoppad.",
+    "statusScreenSleep": "Skärmen släcks snart...",
+    "btnRestartSystem": "STARTA OM SYSTEMET"
 }

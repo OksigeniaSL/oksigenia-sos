@@ -371,4 +371,13 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get holdToCancel => 'Maintenir pour annuler';
+
+  @override
+  String get statusMonitorStopped => 'Surveillance arrêtée.';
+
+  @override
+  String get statusScreenSleep => 'Extinction de l\'écran...';
+
+  @override
+  String get btnRestartSystem => 'REDÉMARRER SYSTÈME';
 }

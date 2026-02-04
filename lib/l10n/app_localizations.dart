@@ -805,6 +805,24 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Hold to cancel'**
   String get holdToCancel;
+
+  /// No description provided for @statusMonitorStopped.
+  ///
+  /// In en, this message translates to:
+  /// **'Monitor stopped.'**
+  String get statusMonitorStopped;
+
+  /// No description provided for @statusScreenSleep.
+  ///
+  /// In en, this message translates to:
+  /// **'Screen sleeping soon.'**
+  String get statusScreenSleep;
+
+  /// No description provided for @btnRestartSystem.
+  ///
+  /// In en, this message translates to:
+  /// **'RESTART SYSTEM'**
+  String get btnRestartSystem;
 }
 
 class _AppLocalizationsDelegate

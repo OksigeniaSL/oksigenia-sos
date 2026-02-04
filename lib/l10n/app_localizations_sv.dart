@@ -373,4 +373,13 @@ class AppLocalizationsSv extends AppLocalizations {
 
   @override
   String get holdToCancel => 'Håll intryckt för att avbryta';
+
+  @override
+  String get statusMonitorStopped => 'Övervakning stoppad.';
+
+  @override
+  String get statusScreenSleep => 'Skärmen släcks snart...';
+
+  @override
+  String get btnRestartSystem => 'STARTA OM SYSTEMET';
 }

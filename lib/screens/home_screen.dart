@@ -9,6 +9,7 @@ import 'package:oksigenia_sos/logic/sos_logic.dart';
 import 'package:oksigenia_sos/widgets/main_drawer.dart';
 import 'package:oksigenia_sos/services/remote_config_service.dart';
 import 'package:oksigenia_sos/screens/update_screen.dart';
+import 'package:oksigenia_sos/screens/sent_screen.dart';
 import 'package:vibration/vibration.dart';
 
 class HomeScreen extends StatefulWidget {
@@ -149,7 +150,7 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver, Ti
 
   Widget _buildBody(BuildContext context) {
     if (_sosLogic.status == SOSStatus.sent) {
-      return _buildSentUI(context);
+      return SentScreen();
     }
 
     final l10n = AppLocalizations.of(context)!;
@@ -528,72 +529,6 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver, Ti
               child: const Text("IR A AJUSTES"),
             )
           ],
-        ),
-      ),
-    );
-  }
-
-  Widget _buildSentUI(BuildContext context) {
-    final l10n = AppLocalizations.of(context)!;
-    return Scaffold(
-      backgroundColor: const Color(0xFF2196F3), 
-      body: SafeArea(
-        child: Container(
-          width: double.infinity,
-          padding: const EdgeInsets.all(30),
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              Container(
-                decoration: BoxDecoration(
-                  shape: BoxShape.circle,
-                  border: Border.all(color: Colors.white, width: 4),
-                ),
-                padding: const EdgeInsets.all(20),
-                child: const Icon(Icons.check, size: 60, color: Colors.white),
-              ),
-              const SizedBox(height: 40),
-              
-              Text(
-                l10n.statusSent, 
-                textAlign: TextAlign.center, 
-                style: const TextStyle(
-                  fontSize: 26, 
-                  fontWeight: FontWeight.bold, 
-                  color: Colors.white
-                )
-              ),
-              
-              const SizedBox(height: 20),
-              
-              const Text(
-                "Monitor detenido / Monitor stopped.\nPantalla apagada en breve / Screen sleeping soon.",
-                textAlign: TextAlign.center,
-                style: TextStyle(color: Colors.white70, fontSize: 16),
-              ),
-              
-              const Spacer(),
-              
-              SizedBox(
-                width: double.infinity,
-                child: ElevatedButton(
-                  onPressed: _sosLogic.cancelAlert, 
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: Colors.white, 
-                    foregroundColor: const Color(0xFF1976D2), 
-                    padding: const EdgeInsets.symmetric(vertical: 18),
-                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(30)),
-                    elevation: 5,
-                  ), 
-                  child: const Text(
-                    "REINICIAR SISTEMA", 
-                    style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)
-                  )
-                ),
-              ),
-              const SizedBox(height: 20),
-            ],
-          ),
         ),
       ),
     );

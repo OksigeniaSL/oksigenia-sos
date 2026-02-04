@@ -368,4 +368,13 @@ class AppLocalizationsDe extends AppLocalizations {
 
   @override
   String get holdToCancel => 'Gedrückt halten zum Abbrechen';
+
+  @override
+  String get statusMonitorStopped => 'Überwachung gestoppt.';
+
+  @override
+  String get statusScreenSleep => 'Bildschirm schaltet ab...';
+
+  @override
+  String get btnRestartSystem => 'SYSTEM NEUSTARTEN';
 }

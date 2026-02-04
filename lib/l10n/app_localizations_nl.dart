@@ -375,4 +375,13 @@ class AppLocalizationsNl extends AppLocalizations {
 
   @override
   String get holdToCancel => 'Ingedrukt houden om te annuleren';
+
+  @override
+  String get statusMonitorStopped => 'Monitor gestopt.';
+
+  @override
+  String get statusScreenSleep => 'Scherm gaat uit...';
+
+  @override
+  String get btnRestartSystem => 'SYSTEEM HERSTARTEN';
 }
