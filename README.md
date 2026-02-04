@@ -1,4 +1,4 @@
-# Oksigenia SOS 🏔️ v3.9.2
+# Oksigenia SOS 🏔️ v3.9.3 (RC1)
 
 **Outdoor Emergency Assistant | FOSS | Privacy-First**
 
@@ -24,11 +24,11 @@
 
 ---
 
-## 📸 Interface / Interfaz (v3.9.x)
+## 📸 Interface / Interfaz (v3.9.3)
 
-| Dashboard | Impact Alert | Settings | Menu |
+| Live Dashboard | Impact Alert | Settings | Menu |
 |:---:|:---:|:---:|:---:|
-| <img src="screenshots/main_en.jpg" width="185" alt="Main Dashboard Dark Mode" /> | <img src="screenshots/impact_en.jpg" width="185" alt="Impact Alert Red" /> | <img src="screenshots/settings_en.jpg" width="185" alt="Settings Star Contact" /> | <img src="screenshots/menu_en.jpg" width="185" alt="Navigation Drawer" /> |
+| <img src="screenshots/main_en.jpg" width="185" alt="Main Dashboard Telemetry" /> | <img src="screenshots/impact_en.jpg" width="185" alt="Impact Alert Red" /> | <img src="screenshots/settings_en.jpg" width="185" alt="Settings Screen" /> | <img src="screenshots/menu_en.jpg" width="185" alt="Navigation Drawer" /> |
 
 | Inactivity Alert | Test Mode | Languages | About / Legal |
 |:---:|:---:|:---:|:---:|
@@ -36,16 +36,19 @@
 
 ---
 
-## 🚀 Evolution v3.9.2 (Stability & Expansion)
+## 🚀 The 3.9.x Saga: Stability & Power
+
+**New in v3.9.3 (The Stability Update):**
+This version introduces a complete architectural rewrite using **Provider**, eliminating "ghost screens" and ensuring lifecycle shielding.
 
 | Feature | English | Español |
 |:---|:---|:---|
-| 🌍 **Global Core** | **8 Languages**. Full support added for **Italian, Dutch, and Swedish**, joining ES, EN, FR, PT, and DE. Automatic detection and cleaner selector UI. | **Núcleo Global**. 8 Idiomas. Soporte completo añadido para **Italiano, Neerlandés y Sueco**, uniéndose a ES, EN, FR, PT y DE. Detección automática y selector limpio. |
-| 🚥 **Visual Telemetry** | **G-Force Traffic Light**. The G-Force monitor now changes color dynamically (**Green/Yellow/Red**) to visualize movement intensity. Grey icon indicates privacy sensors blocked (GrapheneOS friendly). | **Semáforo de Fuerza G**. El monitor cambia de color dinámicamente (**Verde/Amarillo/Rojo**) para visualizar la intensidad. Icono gris indica sensores bloqueados (Compatible GrapheneOS). |
-| 🧠 **Smart Filters** | **Anti-Noise Algorithm**. New **0.15G threshold** filter to ignore engine vibrations or table bumps. Sylvia now only wakes up for real human movement. | **Filtros Inteligentes**. Nuevo filtro con **umbral de 0.15G** para ignorar vibraciones de motor o golpes en mesa. Sylvia solo despierta con movimiento humano real. |
-| 🎨 **Theme Identity** | **Android 13+ Ready**. Full support for **Monochrome / Themed Icons**. The app icon now adapts to your wallpaper color palette for a seamless home screen look. | **Integración Android 13+**. Soporte total para **Iconos con Tema / Monocromáticos**. El icono se adapta a la paleta de colores de tu fondo de pantalla. |
-| 🌑 **Native Dark Mode** | **Sleek & Tactical**. Fixed startup flashes. The interface uses pure blacks and high-contrast accents to reduce glare during night operations and save battery. | **Modo Oscuro Nativo**. Adiós a los parpadeos blancos. Interfaz de alto contraste y negros puros para operaciones nocturnas y ahorro de batería. |
-| 🚨 **Circular UX** | **Stress-Free Alerts**. Dynamic red circular indicator for alarms. It clearly shows if the trigger was an **Impact** or **Inactivity**, reducing anxiety during false alarms. | **Alertas Sin Estrés**. Indicador circular rojo dinámico. Muestra claramente si la causa fue **Impacto** o **Inactividad**, reduciendo la ansiedad ante falsas alarmas. |
+| 🛡️ **Core Shielding** | **Unbreakable Logic**. The timer and sensors are now "shielded" against lifecycle restarts. The alarm won't freeze or reset even if you switch apps or turn the screen off during an emergency. | **Blindaje de Núcleo**. Temporizadores y sensores "blindados" contra reinicios. La alarma no se congela ni reinicia aunque cambies de app o apagues la pantalla en una emergencia. |
+| 🎮 **Hold-to-SOS** | **No more false clicks**. The main SOS button now requires a **3-second hold** with a visual loading ring and haptic feedback to prevent accidental triggers in your pocket. | **Adiós toques falsos**. El botón SOS ahora requiere **mantener pulsado 3s** con un anillo de carga visual y vibración para evitar disparos accidentales en el bolsillo. |
+| 📡 **Live Telemetry** | **Real-Time Dashboard**. New icons on the home screen show live **G-Force, Battery %, and GPS Accuracy**. Monitor your sensor health at a glance before starting your activity. | **Telemetría en Vivo**. Nuevos iconos en el home muestran **Fuerza G, Batería % y Precisión GPS** en tiempo real. Verifica la salud de tus sensores antes de iniciar la actividad. |
+| 🔊 **Smart Siren** | **Sync & Silence**. The alarm siren automatically cuts off the exact millisecond the SMS is successfully sent, giving instant auditory confirmation of help request. | **Sirena Sincronizada**. La sirena de alarma se corta automáticamente en el milisegundo exacto en que el SMS se envía, confirmando auditivamente la petición de ayuda. |
+| 🌍 **Global Reach** | **9 Languages**. Full native support for **ES, EN, FR, PT, DE, IT, NL, SV** and regional languages like **Galician & Catalan**. | **9 Idiomas**. Soporte nativo completo para **ES, EN, FR, PT, DE, IT, NL, SV** y lenguas regionales como **Gallego y Catalán**. |
+| 🌑 **Native Dark Mode** | **Tactical UI**. High-contrast interface with pure blacks to reduce battery consumption and glare during night operations. | **Interfaz Táctica**. Alto contraste con negros puros para reducir el consumo de batería y el deslumbramiento en operaciones nocturnas. |
 
 ---
 
@@ -79,6 +82,8 @@
 Check the **[Releases Section](https://github.com/OksigeniaSL/oksigenia-sos/releases)** for the latest signed APKs.
 
 ### 💻 Build from source
+This project uses **Flutter 3.x** and `Provider` for state management.
+
 ```bash
 git clone [https://github.com/OksigeniaSL/oksigenia-sos.git](https://github.com/OksigeniaSL/oksigenia-sos.git)
 cd oksigenia-sos
