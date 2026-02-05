@@ -38,7 +38,7 @@
 
 ## 🚀 The 3.9.x Saga: Engineering Excellence
 
-This release is the culmination of the 3.9 cycle. It combines the mathematical precision of 3.9.0 with the "Granite" stability of 3.9.3. We built this to save lives, not just to look good.
+This version establishes the Granite Foundation of the 3.9 cycle. It locks down core stability to prepare for upcoming visual features.
 
 | Feature | English | Español |
 |:---|:---|:---|
