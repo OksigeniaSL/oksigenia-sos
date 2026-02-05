@@ -16,6 +16,8 @@ import 'package:oksigenia_sos/l10n/app_localizations.dart';
 import '../services/preferences_service.dart';
 import '../screens/settings_screen.dart';  
 import '../screens/alarm_screen.dart';
+import '../screens/sent_screen.dart';  
+import '../screens/home_screen.dart'; 
 
 // 🔑 LLAVE MAESTRA DE NAVEGACIÓN
 final GlobalKey<NavigatorState> oksigeniaNavigatorKey = GlobalKey<NavigatorState>();
@@ -100,6 +102,9 @@ class SOSLogic extends ChangeNotifier with WidgetsBindingObserver {
     _startGForceMonitoring();
     _startHealthMonitor(); 
     _startPassiveGPS();
+    
+    // INYECTADO: Actualizar notificación al arrancar
+    _updateSylviaStatus();
   }
 
   Future<bool> arePermissionsRestricted() async {
@@ -194,7 +199,10 @@ class SOSLogic extends ChangeNotifier with WidgetsBindingObserver {
   }
 
   Future<void> refreshConfig() async {
+    // INYECTADO: Delay para asegurar guardado en disco y refresco visual
+    await Future.delayed(const Duration(milliseconds: 200)); 
     await _loadSettings();
+    _updateSylviaStatus();
   }
 
   void _startPassiveGPS() async {
@@ -300,6 +308,7 @@ class SOSLogic extends ChangeNotifier with WidgetsBindingObserver {
       _setStatus(SOSStatus.error, "NO_CONTACT"); 
       _isFallDetectionActive = false;
       notifyListeners();
+      _updateSylviaStatus(); // INYECTADO
       return;
     }
     _isFallDetectionActive = value;
@@ -309,6 +318,9 @@ class SOSLogic extends ChangeNotifier with WidgetsBindingObserver {
       if (!(await service.isRunning())) service.startService();
     }
     PreferencesService().saveFallDetectionState(value);
+    
+    _updateSylviaStatus(); // INYECTADO
+    
     notifyListeners();
   }
 
@@ -317,6 +329,7 @@ class SOSLogic extends ChangeNotifier with WidgetsBindingObserver {
       _setStatus(SOSStatus.error, "NO_CONTACT");
       _isInactivityMonitorActive = false;
       notifyListeners();
+      _updateSylviaStatus(); // INYECTADO
       return;
     }
     _isInactivityMonitorActive = value;
@@ -328,6 +341,8 @@ class SOSLogic extends ChangeNotifier with WidgetsBindingObserver {
     }
     
     PreferencesService().saveInactivityState(value);
+    
+    _updateSylviaStatus(); // INYECTADO
 
     if (value) {
       _lastMovementTime = DateTime.now();
@@ -362,6 +377,9 @@ class SOSLogic extends ChangeNotifier with WidgetsBindingObserver {
     _lastTrigger = cause;
     _status = SOSStatus.preAlert;
     _countdownSeconds = 30; 
+    
+    _updateSylviaStatus(); // INYECTADO
+    
     notifyListeners(); 
 
     _gpsSubscription?.pause(); 
@@ -468,6 +486,7 @@ class SOSLogic extends ChangeNotifier with WidgetsBindingObserver {
       toggleInactivityMonitor(true);  
     }
     
+    _updateSylviaStatus(); // INYECTADO
     notifyListeners();
   }
 
@@ -605,5 +624,55 @@ class SOSLogic extends ChangeNotifier with WidgetsBindingObserver {
     _preAlertTimer?.cancel();
     _audioPlayer?.dispose();
     super.dispose();
+  }
+
+  // ==============================================================
+  // 🔥 LÓGICA DE TEXTOS CON TUS .ARB (INYECTADO)
+  // ==============================================================
+  void _updateSylviaStatus() async {
+    final service = FlutterBackgroundService();
+    if (await service.isRunning()) {
+      bool isActive = _isFallDetectionActive || _isInactivityMonitorActive;
+      
+      final prefs = await SharedPreferences.getInstance(); 
+      String lang = prefs.getString('language_code') ?? 'en';
+      
+      // 1. Cargamos TU fichero de traducciones real
+      final t = await AppLocalizations.delegate.load(Locale(lang));
+
+      String title = "";
+      String content = "";
+      String statusIcon = "active"; 
+
+      // 2. Elegimos qué texto mostrar usando las claves de TU arb
+      if (_status == SOSStatus.preAlert) {
+        statusIcon = "alarm";
+        title = "🚨 SOS"; 
+        content = t.alertFallDetected; 
+      } 
+      else if (!isActive) {
+        statusIcon = "paused";
+        // Usamos statusMonitorStopped ("Monitor stopped.")
+        title = t.statusMonitorStopped; 
+        content = "---"; 
+      } 
+      else {
+        // MODO ACTIVO
+        title = t.statusReady; // "Oksigenia System Ready."
+        
+        List<String> activeModes = [];
+        if (_isFallDetectionActive) activeModes.add(t.autoModeLabel); // "Fall Detection"
+        if (_isInactivityMonitorActive) activeModes.add(t.inactivityModeLabel); // "Inactivity Monitor"
+        
+        content = activeModes.join(" + ");
+      }
+
+      // 3. Enviamos al servicio
+      service.invoke("updateNotification", {
+        "status": statusIcon,
+        "title": title,    
+        "content": content 
+      });
+    }
   }
 }
