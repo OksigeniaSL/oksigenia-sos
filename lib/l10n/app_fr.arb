@@ -117,5 +117,11 @@
     "holdToCancel": "Maintenir pour annuler",
     "statusMonitorStopped": "Surveillance arrêtée.",
     "statusScreenSleep": "Extinction de l'écran...",
-    "btnRestartSystem": "REDÉMARRER SYSTÈME"
+    "btnRestartSystem": "REDÉMARRER SYSTÈME",
+    "smsDyingGasp": "⚠️ BATTERIE <5%. Arrêt système. Loc:",
+    "smsHelpMessage": "À L'AIDE ! J'ai besoin d'assistance.",
+    "batteryDialogTitle": "Restriction Batterie",
+    "btnDisableBatterySaver": "DÉSACTIVER ÉCO",
+    "batteryDialogBody": "The system is restricting this app's battery. For SOS to work in the background, you must select 'Unrestricted' or 'Don't Optimize'.",
+    "permLocMissing": "Permission localisation manquante"
 }

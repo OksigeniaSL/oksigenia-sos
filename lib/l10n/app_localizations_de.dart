@@ -377,4 +377,23 @@ class AppLocalizationsDe extends AppLocalizations {
 
   @override
   String get btnRestartSystem => 'SYSTEM NEUSTARTEN';
+
+  @override
+  String get smsDyingGasp => '⚠️ AKKU <5%. System schaltet ab. Standort:';
+
+  @override
+  String get smsHelpMessage => 'HILFE! Ich brauche dringend Unterstützung.';
+
+  @override
+  String get batteryDialogTitle => 'Akku-Einschränkung';
+
+  @override
+  String get btnDisableBatterySaver => 'SPARMODUS AUS';
+
+  @override
+  String get batteryDialogBody =>
+      'Das System schränkt den Akku ein. Damit SOS im Hintergrund läuft, wählen Sie \'Keine Einschränkung\' oder \'Nicht optimieren\'.';
+
+  @override
+  String get permLocMissing => 'Standortberechtigung fehlt';
 }

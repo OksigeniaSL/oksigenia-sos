@@ -823,6 +823,42 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'RESTART SYSTEM'**
   String get btnRestartSystem;
+
+  /// No description provided for @smsDyingGasp.
+  ///
+  /// In en, this message translates to:
+  /// **'⚠️ BATTERY <5%. System shutting down. Loc:'**
+  String get smsDyingGasp;
+
+  /// No description provided for @smsHelpMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'HELP! I need assistance.'**
+  String get smsHelpMessage;
+
+  /// No description provided for @batteryDialogTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Battery Restriction'**
+  String get batteryDialogTitle;
+
+  /// No description provided for @btnDisableBatterySaver.
+  ///
+  /// In en, this message translates to:
+  /// **'DISABLE SAVER'**
+  String get btnDisableBatterySaver;
+
+  /// No description provided for @batteryDialogBody.
+  ///
+  /// In en, this message translates to:
+  /// **'The system is restricting this app\'s battery. For SOS to work in the background, you must select \'Unrestricted\' or \'Don\'t Optimize\'.'**
+  String get batteryDialogBody;
+
+  /// No description provided for @permLocMissing.
+  ///
+  /// In en, this message translates to:
+  /// **'Missing Location Permission'**
+  String get permLocMissing;
 }
 
 class _AppLocalizationsDelegate

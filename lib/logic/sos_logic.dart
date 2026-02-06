@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'dart:math';
+import 'dart:io'; 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart'; 
 import 'package:geolocator/geolocator.dart';
@@ -19,7 +20,6 @@ import '../screens/alarm_screen.dart';
 import '../screens/sent_screen.dart';  
 import '../screens/home_screen.dart'; 
 
-// 🔑 LLAVE MAESTRA DE NAVEGACIÓN
 final GlobalKey<NavigatorState> oksigeniaNavigatorKey = GlobalKey<NavigatorState>();
 
 enum SOSStatus { ready, scanning, locationFixed, preAlert, sent, error }
@@ -45,6 +45,9 @@ class SOSLogic extends ChangeNotifier with WidgetsBindingObserver {
   double _visualGForce = 1.0;
   DateTime _lastMovementTime = DateTime.now();
   
+  DateTime _lastSensorPacket = DateTime.now();
+  bool _isWarmingUp = false;
+
   Timer? _inactivityTimer;
   Timer? _periodicUpdateTimer;
   StreamSubscription? _accelerometerSubscription;
@@ -54,17 +57,24 @@ class SOSLogic extends ChangeNotifier with WidgetsBindingObserver {
   double _gpsAccuracy = 0.0;
   Timer? _healthCheckTimer;
   
+  bool _sensorsPermissionOk = true;
+  bool _batteryOptimizationOk = true;
+  
+  bool _smsPermissionOk = true;
+  bool _notificationPermissionOk = true;
+  
   int get batteryLevel => _batteryLevel;
   double get gpsAccuracy => _gpsAccuracy;
+  bool get sensorsPermissionOk => _sensorsPermissionOk;
+  bool get batteryOptimizationOk => _batteryOptimizationOk;
+  bool get smsPermissionOk => _smsPermissionOk;
+  bool get notificationPermissionOk => _notificationPermissionOk;
 
   Timer? _preAlertTimer;
   int _countdownSeconds = 30; 
-  
-  // Getter real
   int get currentCountdownSeconds => _countdownSeconds; 
   
   AudioPlayer? _audioPlayer; 
-  
   final Battery _battery = Battery();
 
   SOSStatus get status => _status;
@@ -80,19 +90,15 @@ class SOSLogic extends ChangeNotifier with WidgetsBindingObserver {
   }
 
   Future<void> init() async {
-    // 🛡️ BLINDAJE LÓGICO:
     if (_status == SOSStatus.preAlert || _status == SOSStatus.sent) {
-      debugPrint("LOGIC: 🛡️ Init solicitado, pero hay emergencia en curso. IGNORANDO.");
       return; 
     }
 
-    debugPrint("LOGIC: Inicializando lógica...");
-    
     WidgetsBinding.instance.removeObserver(this);
     WidgetsBinding.instance.addObserver(this);
     
     await _loadSettings();
-    await _checkPermissions();
+    await _checkPermissions(); 
     
     final service = FlutterBackgroundService();
     if (!(await service.isRunning())) {
@@ -102,8 +108,6 @@ class SOSLogic extends ChangeNotifier with WidgetsBindingObserver {
     _startGForceMonitoring();
     _startHealthMonitor(); 
     _startPassiveGPS();
-    
-    // INYECTADO: Actualizar notificación al arrancar
     _updateSylviaStatus();
   }
 
@@ -115,37 +119,60 @@ class SOSLogic extends ChangeNotifier with WidgetsBindingObserver {
 
   void _startHealthMonitor() {
     _checkHealth();
-    _healthCheckTimer = Timer.periodic(const Duration(seconds: 10), (_) => _checkHealth());
+    _healthCheckTimer = Timer.periodic(const Duration(seconds: 5), (_) => _checkHealth());
   }
 
   Future<void> _checkHealth() async {
     try {
       _batteryLevel = await _battery.batteryLevel;
       
-      bool isSystemArmed = _isFallDetectionActive || _isInactivityMonitorActive;
+      _smsPermissionOk = await Permission.sms.isGranted;
+      _notificationPermissionOk = await Permission.notification.isGranted;
 
-      // DYING GASP (5% real)
+      if (_isWarmingUp) {
+        _sensorsPermissionOk = true;
+      } else {
+        bool permActivity = await Permission.activityRecognition.isGranted;
+        if (!permActivity) {
+           _sensorsPermissionOk = false;
+        } else {
+           if (_isFallDetectionActive || _isInactivityMonitorActive) {
+              bool isSensorAlive = DateTime.now().difference(_lastSensorPacket).inSeconds < 5;
+              _sensorsPermissionOk = isSensorAlive;
+           } else {
+              _sensorsPermissionOk = true; 
+           }
+        }
+      }
+
+      _batteryOptimizationOk = await Permission.ignoreBatteryOptimizations.isGranted;
+
+      if (_status != SOSStatus.locationFixed) _gpsAccuracy = 0.0;
+      
+      bool isSystemArmed = _isFallDetectionActive || _isInactivityMonitorActive;
       if (_batteryLevel <= 5 && !_isDyingGaspSent && emergencyContact != null && isSystemArmed) {
         _triggerDyingGasp();
       }
 
-      if (_status != SOSStatus.locationFixed) {
-         _gpsAccuracy = 0.0;
-      }
       notifyListeners();
     } catch(e) { debugPrint("Health Check Error: $e"); }
+  }
+
+  Future<void> requestBatteryOptimizationIgnore() async {
+     var status = await Permission.ignoreBatteryOptimizations.request();
+     if (status.isGranted) {
+       _batteryOptimizationOk = true;
+       notifyListeners();
+     } else {
+       openAppSettings();
+     }
   }
 
   @override
   void didChangeAppLifecycleState(AppLifecycleState state) {
     if (state == AppLifecycleState.resumed) {
-      // 🛡️ BLINDAJE LÓGICO AQUÍ TAMBIÉN:
-      if (_status == SOSStatus.preAlert || _status == SOSStatus.sent) {
-         debugPrint("LOGIC: 🛡️ App Resumed, pero hay alarma sonando. No tocamos sensores.");
-         return; 
-      }
-
-      debugPrint("🔄 APP RESUMED: Reactivando sensores UI...");
+      if (_status == SOSStatus.preAlert || _status == SOSStatus.sent) return;
+      
       _startGForceMonitoring(); 
       _checkHealth();
       if (_status == SOSStatus.ready) _startPassiveGPS();
@@ -153,9 +180,22 @@ class SOSLogic extends ChangeNotifier with WidgetsBindingObserver {
     } else if (state == AppLifecycleState.paused) {
       if (!_isInactivityMonitorActive && !_isFallDetectionActive) {
          _accelerometerSubscription?.cancel();
-      } else {
-         debugPrint("🛡️ Manteniendo sensores activos en segundo plano/bolsillo.");
       }
+    } else if (state == AppLifecycleState.detached) {
+      // 🧟 ZOMBIE KILLER: Secuencia blindada
+      
+      // 1. Matamos servicio
+      try {
+        final service = FlutterBackgroundService();
+        service.invoke("stopService");
+      } catch (_) {}
+      
+      // 2. Liberamos recursos locales con seguridad
+      try { _gpsSubscription?.cancel(); } catch(_) {}
+      try { _accelerometerSubscription?.cancel(); } catch(_) {}
+      try { _inactivityTimer?.cancel(); } catch(_) {}
+      try { _healthCheckTimer?.cancel(); } catch(_) {}
+      try { WakelockPlus.disable(); } catch(_) {}
     }
   }
 
@@ -164,8 +204,6 @@ class SOSLogic extends ChangeNotifier with WidgetsBindingObserver {
     _currentInactivityLimit = prefs.getInactivityTime();
     
     bool hasContact = emergencyContact != null;
-
-    // --- 1. DETECCIÓN DE CAÍDAS ---
     bool savedFallState = prefs.getFallDetectionState();
     
     if (savedFallState && hasContact) {
@@ -175,17 +213,11 @@ class SOSLogic extends ChangeNotifier with WidgetsBindingObserver {
       if (savedFallState) prefs.saveFallDetectionState(false);
     }
     
-    // --- 2. MONITOR DE INACTIVIDAD ---
     bool savedInactivityState = prefs.getInactivityState();
-
     if (savedInactivityState && hasContact) {
-      if (!_isInactivityMonitorActive) {
-        toggleInactivityMonitor(true); 
-      }
+      if (!_isInactivityMonitorActive) toggleInactivityMonitor(true); 
     } else {
-      if (_isInactivityMonitorActive) {
-        toggleInactivityMonitor(false); 
-      }
+      if (_isInactivityMonitorActive) toggleInactivityMonitor(false); 
       if (savedInactivityState) prefs.saveInactivityState(false);
     }
 
@@ -194,12 +226,10 @@ class SOSLogic extends ChangeNotifier with WidgetsBindingObserver {
          _setStatus(SOSStatus.ready);
        }
     }
-
     notifyListeners();
   }
 
   Future<void> refreshConfig() async {
-    // INYECTADO: Delay para asegurar guardado en disco y refresco visual
     await Future.delayed(const Duration(milliseconds: 200)); 
     await _loadSettings();
     _updateSylviaStatus();
@@ -235,6 +265,9 @@ class SOSLogic extends ChangeNotifier with WidgetsBindingObserver {
     try {
       _accelerometerSubscription = accelerometerEventStream(samplingPeriod: SensorInterval.gameInterval)
         .listen((AccelerometerEvent event) {
+          
+          _lastSensorPacket = DateTime.now(); 
+
           double rawMagnitude = sqrt(event.x * event.x + event.y * event.y + event.z * event.z);
           double instantG = rawMagnitude / 9.81;
 
@@ -247,24 +280,26 @@ class SOSLogic extends ChangeNotifier with WidgetsBindingObserver {
           double delta = (instantG - lastG).abs();
           lastG = instantG;
 
-          bool isSignificantMovement = delta > 0.15 || instantG > 1.15 || instantG < 0.85;
-
-          if (isSignificantMovement) {
+          if (delta > 0.15 || instantG > 1.15 || instantG < 0.85) {
              _lastMovementTime = DateTime.now();
           }
 
           if (_isFallDetectionActive && instantG > _impactThreshold && (_status == SOSStatus.ready || _status == SOSStatus.locationFixed)) {
-            debugPrint("💥 IMPACTO DURO: ${instantG.toStringAsFixed(2)} G");
+            debugPrint("💥 IMPACTO: ${instantG.toStringAsFixed(2)} G");
             _triggerPreAlert(AlertCause.fall);
           }
-          
           notifyListeners();
         }, onError: (e) => debugPrint("Sensor Error: $e"));
-    } catch (e) { debugPrint("Error iniciando acelerómetro: $e"); }
+    } catch (e) { debugPrint("Error acelerómetro: $e"); }
   }
 
   Future<void> _checkPermissions() async {
-    await [Permission.location, Permission.sms, Permission.notification].request();
+    await [
+      Permission.location, 
+      Permission.sms, 
+      Permission.notification,
+      Permission.activityRecognition 
+    ].request();
   }
 
   void openSettings(BuildContext context) {
@@ -308,19 +343,27 @@ class SOSLogic extends ChangeNotifier with WidgetsBindingObserver {
       _setStatus(SOSStatus.error, "NO_CONTACT"); 
       _isFallDetectionActive = false;
       notifyListeners();
-      _updateSylviaStatus(); // INYECTADO
+      _updateSylviaStatus(); 
       return;
     }
     _isFallDetectionActive = value;
     if (value && _errorMessage == "NO_CONTACT") _setStatus(SOSStatus.ready); 
+    
     if (value) {
+      _isWarmingUp = true;
+      _lastSensorPacket = DateTime.now(); 
+      _sensorsPermissionOk = true; 
+      
+      Future.delayed(const Duration(seconds: 3), () {
+        _isWarmingUp = false;
+        notifyListeners();
+      });
+
       final service = FlutterBackgroundService();
       if (!(await service.isRunning())) service.startService();
     }
     PreferencesService().saveFallDetectionState(value);
-    
-    _updateSylviaStatus(); // INYECTADO
-    
+    _updateSylviaStatus(); 
     notifyListeners();
   }
 
@@ -329,7 +372,7 @@ class SOSLogic extends ChangeNotifier with WidgetsBindingObserver {
       _setStatus(SOSStatus.error, "NO_CONTACT");
       _isInactivityMonitorActive = false;
       notifyListeners();
-      _updateSylviaStatus(); // INYECTADO
+      _updateSylviaStatus(); 
       return;
     }
     _isInactivityMonitorActive = value;
@@ -341,18 +384,25 @@ class SOSLogic extends ChangeNotifier with WidgetsBindingObserver {
     }
     
     PreferencesService().saveInactivityState(value);
-    
-    _updateSylviaStatus(); // INYECTADO
+    _updateSylviaStatus(); 
 
     if (value) {
+      _isWarmingUp = true;
+      _lastSensorPacket = DateTime.now(); 
+      _sensorsPermissionOk = true;
       _lastMovementTime = DateTime.now();
+
+      Future.delayed(const Duration(seconds: 3), () {
+        _isWarmingUp = false;
+        notifyListeners();
+      });
+      
       _inactivityTimer?.cancel(); 
       _inactivityTimer = Timer.periodic(const Duration(seconds: 2), (timer) {
         if (!_isInactivityMonitorActive) {
            timer.cancel();
            return;
         }
-
         if (_status != SOSStatus.ready && _status != SOSStatus.locationFixed) return;
         
         if (DateTime.now().difference(_lastMovementTime).inSeconds > _currentInactivityLimit) {
@@ -372,14 +422,11 @@ class SOSLogic extends ChangeNotifier with WidgetsBindingObserver {
   void _triggerPreAlert(AlertCause cause) async {
     if (_status == SOSStatus.preAlert || _status == SOSStatus.sent) return;
 
-    debugPrint("SYLVIA: 🚨 RECIBIDA ORDEN DE ALARMA -> ACTIVANDO SONIDO Y VIBRACIÓN");
-
+    debugPrint("SYLVIA: 🚨 ALARMA ACTIVADA");
     _lastTrigger = cause;
     _status = SOSStatus.preAlert;
     _countdownSeconds = 30; 
-    
-    _updateSylviaStatus(); // INYECTADO
-    
+    _updateSylviaStatus(); 
     notifyListeners(); 
 
     _gpsSubscription?.pause(); 
@@ -388,96 +435,71 @@ class SOSLogic extends ChangeNotifier with WidgetsBindingObserver {
        final service = FlutterBackgroundService();
        service.invoke("startAlarm"); 
        Vibration.vibrate(pattern: [500, 1000, 500, 1000], repeat: 1);
-    } catch (e) {
-       debugPrint("Error servicio: $e");
-    }
+    } catch (e) { debugPrint("Error servicio: $e"); }
 
-    // EL MOTOR DEL TEMPORIZADOR
     _preAlertTimer?.cancel();
     _preAlertTimer = Timer.periodic(const Duration(seconds: 1), (timer) {
       _countdownSeconds--;
-      notifyListeners(); // Actualiza la UI cada segundo
-
+      notifyListeners(); 
       if (_countdownSeconds <= 0) {
         timer.cancel();
-        sendSOS(); // Fuego al llegar a 0
+        sendSOS(); 
       }
     });
 
     try { await platform.invokeMethod('bringToFront'); } catch(_) {}
 
     await Future.delayed(const Duration(milliseconds: 500));
-
     if (oksigeniaNavigatorKey.currentState != null) {
-      debugPrint("🚀 NUCLEAR: Lanzando AlarmScreen...");
       await oksigeniaNavigatorKey.currentState!.pushAndRemoveUntil(
         MaterialPageRoute(builder: (_) => const AlarmScreen()),
         (route) => route.isFirst,
       );
-    } else {
-      debugPrint("⚠️ No se pudo abrir UI, pero el sonido sigue.");
     }
   }
 
   Future<void> _triggerDyingGasp() async {
     _isDyingGaspSent = true; 
-    debugPrint("🪫 DYING GASP ACTIVADO: Batería crítica");
+    debugPrint("🪫 DYING GASP ACTIVADO");
 
     final prefs = PreferencesService();
     final List<String> recipients = prefs.getContacts();
     if (recipients.isEmpty) return;
 
     final sharedPrefs = await SharedPreferences.getInstance();
-    String lang = sharedPrefs.getString('language_code') ?? 'en';
+    String langCode = sharedPrefs.getString('language_code') ?? 'en';
+    final t = await AppLocalizations.delegate.load(Locale(langCode));
     
-    String msg = "⚠️ LOW BATTERY (<5%). System shutting down. Last known loc:";
-    if (lang == 'es') msg = "⚠️ BATERÍA CRÍTICA (<5%). Me apago. Última ubicación:";
-    else if (lang == 'fr') msg = "⚠️ BATTERIE FAIBLE (<5%). Arrêt système. Loc:";
-    else if (lang == 'de') msg = "⚠️ AKKU LEER (<5%). System schaltet ab. Standort:";
-    else if (lang == 'pt') msg = "⚠️ BATERIA FRACA (<5%). O sistema desliga-se. Loc:";
-    
+    String msg = t.smsDyingGasp; 
+    if (msg.isEmpty) msg = "⚠️ BATT <5%. Bye. Loc:"; 
+
     try {
-      Position pos = await Geolocator.getCurrentPosition(
-        timeLimit: const Duration(seconds: 5)
-      ).catchError((_) async {
-        return await Geolocator.getLastKnownPosition() ?? Position(longitude: 0, latitude: 0, timestamp: DateTime.now(), accuracy: 0, altitude: 0, heading: 0, speed: 0, speedAccuracy: 0, altitudeAccuracy: 0, headingAccuracy: 0); 
-      });
+      Position pos = await Geolocator.getCurrentPosition(timeLimit: const Duration(seconds: 5))
+        .catchError((_) async => await Geolocator.getLastKnownPosition() ?? Position(longitude: 0, latitude: 0, timestamp: DateTime.now(), accuracy: 0, altitude: 0, heading: 0, speed: 0, speedAccuracy: 0, altitudeAccuracy: 0, headingAccuracy: 0));
 
       msg += "\nhttp://maps.google.com/?q=${pos.latitude},${pos.longitude}";
       
       for (String number in recipients) {
         await platform.invokeMethod('sendSMS', {"phone": number, "msg": msg});
       }
-    } catch (e) {
-      debugPrint("❌ Fallo en Dying Gasp: $e");
-    }
+    } catch (e) { debugPrint("❌ Fallo Dying Gasp: $e"); }
   }
 
-  void cancelAlert() {
-    cancelSOS();
-  }
+  void cancelAlert() => cancelSOS();
 
   void cancelSOS() {
-    debugPrint("LOGIC: 🛑 Cancelado por usuario - Reiniciando sistema completo.");
-    
+    debugPrint("LOGIC: 🛑 Cancelado por usuario.");
     _preAlertTimer?.cancel();
     _preAlertTimer = null;
-    
     _audioPlayer?.stop(); 
     try {
       final service = FlutterBackgroundService();
       service.invoke("stopAlarm");
       Vibration.cancel(); 
-    } catch (e) {
-      debugPrint("Error parando servicio: $e");
-    }
+    } catch (e) { debugPrint("Error servicio: $e"); }
 
-    if (_gpsSubscription != null && _gpsSubscription!.isPaused) {
-       _gpsSubscription!.resume();
-    }
-
+    if (_gpsSubscription != null && _gpsSubscription!.isPaused) _gpsSubscription!.resume();
     _lastMovementTime = DateTime.now();
-
     _setStatus(SOSStatus.ready);
     _countdownSeconds = 30; 
     
@@ -485,8 +507,7 @@ class SOSLogic extends ChangeNotifier with WidgetsBindingObserver {
       toggleInactivityMonitor(false); 
       toggleInactivityMonitor(true);  
     }
-    
-    _updateSylviaStatus(); // INYECTADO
+    _updateSylviaStatus(); 
     notifyListeners();
   }
 
@@ -510,7 +531,6 @@ class SOSLogic extends ChangeNotifier with WidgetsBindingObserver {
     _setStatus(SOSStatus.scanning);
     _inactivityTimer?.cancel();
     _gpsSubscription?.cancel();
-    
     int batteryLevel = await _battery.batteryLevel;
 
     String msgBody = "🆘 SOS OKSIGENIA";
@@ -518,12 +538,10 @@ class SOSLogic extends ChangeNotifier with WidgetsBindingObserver {
       msgBody += "\n$customNote"; 
     } else {
       final sharedPrefs = await SharedPreferences.getInstance();
-      String lang = sharedPrefs.getString('language_code') ?? 'en';
-      String helpText = "HELP!";
-      if (lang == 'es') helpText = "¡AYUDA!";
-      else if (lang == 'fr') helpText = "AIDEZ-MOI !";
-      else if (lang == 'pt') helpText = "AJUDA!";
-      else if (lang == 'de') helpText = "HILFE!";
+      String langCode = sharedPrefs.getString('language_code') ?? 'en';
+      final t = await AppLocalizations.delegate.load(Locale(langCode));
+      String helpText = t.smsHelpMessage; 
+      if (helpText.isEmpty) helpText = "HELP!"; 
       msgBody += "\n$helpText"; 
     }
     
@@ -531,11 +549,9 @@ class SOSLogic extends ChangeNotifier with WidgetsBindingObserver {
       final LocationSettings locationSettings = AndroidSettings(accuracy: LocationAccuracy.high, forceLocationManager: true, timeLimit: const Duration(seconds: 15));
       Position pos = await Geolocator.getCurrentPosition(locationSettings: locationSettings);
       _setStatus(SOSStatus.locationFixed);
-      
       msgBody += "\nMaps: http://maps.google.com/?q=${pos.latitude},${pos.longitude}";
       msgBody += "\nOSM: https://www.openstreetmap.org/?mlat=${pos.latitude}&mlon=${pos.longitude}";
       msgBody += "\n\n🔋Bat: $batteryLevel% | 📡Alt: ${pos.altitude.toStringAsFixed(0)}m | 🎯Acc: ${pos.accuracy.toStringAsFixed(0)}m";
-
     } catch (e) {
       msgBody += "\n(GPS Error/Timeout)";
       msgBody += "\n\n🔋Bat: $batteryLevel% (No Loc)";
@@ -550,14 +566,11 @@ class SOSLogic extends ChangeNotifier with WidgetsBindingObserver {
     }
 
     if (successCount > 0) {
-      // 🛑 CORRECCIÓN FINAL: APAGAR SIRENA ANTES DEL SONIDO DE ÉXITO
       try {
         final service = FlutterBackgroundService();
         service.invoke("stopAlarm");
         Vibration.cancel(); 
-      } catch (e) {
-        debugPrint("Error parando alarma previa: $e");
-      }
+      } catch (e) {}
 
       _setStatus(SOSStatus.sent);
       await platform.invokeMethod('sleepScreen');
@@ -566,17 +579,13 @@ class SOSLogic extends ChangeNotifier with WidgetsBindingObserver {
         _audioPlayer = AudioPlayer();
         await _audioPlayer!.setAudioContext(AudioContext(
            android: AudioContextAndroid(
-               isSpeakerphoneOn: true, 
-               stayAwake: false, 
-               contentType: AndroidContentType.sonification, 
-               usageType: AndroidUsageType.media,
-               audioFocus: AndroidAudioFocus.gainTransient
+               isSpeakerphoneOn: true, stayAwake: false, contentType: AndroidContentType.sonification, usageType: AndroidUsageType.media, audioFocus: AndroidAudioFocus.gainTransient
            ),
            iOS: AudioContextIOS(category: AVAudioSessionCategory.playback)
         ));
         await _audioPlayer!.setVolume(1.0); 
         await _audioPlayer!.play(AssetSource('sounds/send.mp3'));
-      } catch(e) { debugPrint("Error beep send: $e"); }
+      } catch(e) {}
 
       int interval = prefs.getUpdateInterval();
       if (interval > 0) _startPeriodicUpdates(interval, recipients);
@@ -593,13 +602,10 @@ class SOSLogic extends ChangeNotifier with WidgetsBindingObserver {
       try {
         Position pos = await Geolocator.getCurrentPosition(timeLimit: const Duration(seconds: 20));
         String updateMsg = "📍 SEGUIMIENTO Oksigenia: Sigo en ruta / Still moving.";
-        
         updateMsg += "\nMaps: http://maps.google.com/?q=${pos.latitude},${pos.longitude}";
         updateMsg += "\nOSM: https://www.openstreetmap.org/?mlat=${pos.latitude}&mlon=${pos.longitude}";
-        
         await platform.invokeMethod('sendSMS', {"phone": target, "msg": updateMsg});
-        
-      } catch (e) { debugPrint("❌ Fallo update: $e"); }
+      } catch (e) {}
     });
   }
 
@@ -623,56 +629,54 @@ class SOSLogic extends ChangeNotifier with WidgetsBindingObserver {
     _healthCheckTimer?.cancel();
     _preAlertTimer?.cancel();
     _audioPlayer?.dispose();
+    
+    // ZOMBIE KILLER EXTRA
+    try {
+      final service = FlutterBackgroundService();
+      service.invoke("stopService"); 
+    } catch (_) {}
+    
     super.dispose();
   }
 
-  // ==============================================================
-  // 🔥 LÓGICA DE TEXTOS CON TUS .ARB (INYECTADO)
-  // ==============================================================
   void _updateSylviaStatus() async {
-    final service = FlutterBackgroundService();
-    if (await service.isRunning()) {
-      bool isActive = _isFallDetectionActive || _isInactivityMonitorActive;
-      
-      final prefs = await SharedPreferences.getInstance(); 
-      String lang = prefs.getString('language_code') ?? 'en';
-      
-      // 1. Cargamos TU fichero de traducciones real
-      final t = await AppLocalizations.delegate.load(Locale(lang));
+    try {
+      final service = FlutterBackgroundService();
+      if (await service.isRunning()) {
+        bool isActive = _isFallDetectionActive || _isInactivityMonitorActive;
+        final prefs = await SharedPreferences.getInstance(); 
+        String lang = prefs.getString('language_code') ?? 'en';
+        final t = await AppLocalizations.delegate.load(Locale(lang));
 
-      String title = "";
-      String content = "";
-      String statusIcon = "active"; 
+        String title = "";
+        String content = "";
+        String statusIcon = "active"; // Por defecto activo
 
-      // 2. Elegimos qué texto mostrar usando las claves de TU arb
-      if (_status == SOSStatus.preAlert) {
-        statusIcon = "alarm";
-        title = "🚨 SOS"; 
-        content = t.alertFallDetected; 
-      } 
-      else if (!isActive) {
-        statusIcon = "paused";
-        // Usamos statusMonitorStopped ("Monitor stopped.")
-        title = t.statusMonitorStopped; 
-        content = "---"; 
-      } 
-      else {
-        // MODO ACTIVO
-        title = t.statusReady; // "Oksigenia System Ready."
-        
-        List<String> activeModes = [];
-        if (_isFallDetectionActive) activeModes.add(t.autoModeLabel); // "Fall Detection"
-        if (_isInactivityMonitorActive) activeModes.add(t.inactivityModeLabel); // "Inactivity Monitor"
-        
-        content = activeModes.join(" + ");
+        if (_status == SOSStatus.preAlert) {
+          statusIcon = "alarm";
+          title = "🚨 SOS"; 
+          content = t.alertFallDetected; 
+        } else if (!isActive) {
+          // Si no hay nada activo, ponemos el icono de pausa
+          statusIcon = "paused";
+          title = t.statusMonitorStopped; 
+          content = "---"; 
+        } else {
+          title = t.statusReady; 
+          List<String> activeModes = [];
+          if (_isFallDetectionActive) activeModes.add(t.autoModeLabel); 
+          if (_isInactivityMonitorActive) activeModes.add(t.inactivityModeLabel); 
+          content = activeModes.join(" + ");
+        }
+
+        service.invoke("updateNotification", {
+          "status": statusIcon,
+          "title": title,    
+          "content": content 
+        });
       }
-
-      // 3. Enviamos al servicio
-      service.invoke("updateNotification", {
-        "status": statusIcon,
-        "title": title,    
-        "content": content 
-      });
+    } catch (_) {
+      // Silenciamos error si se llama desde un isolate muerto
     }
   }
 }

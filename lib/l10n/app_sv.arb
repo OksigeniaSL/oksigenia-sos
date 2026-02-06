@@ -117,5 +117,11 @@
     "holdToCancel": "Håll intryckt för att avbryta",
     "statusMonitorStopped": "Övervakning stoppad.",
     "statusScreenSleep": "Skärmen släcks snart...",
-    "btnRestartSystem": "STARTA OM SYSTEMET"
+    "btnRestartSystem": "STARTA OM SYSTEMET",
+    "smsDyingGasp": "⚠️ BATTERI <5%. Systemet stängs av. Plats:",
+    "smsHelpMessage": "HJÄLP! Jag behöver assistans.",
+    "batteryDialogTitle": "Batteribegränsning",
+    "btnDisableBatterySaver": "INAKTIVERA SPARLÄGE",
+    "batteryDialogBody": "Systemet begränsar batteriet. För att SOS ska fungera i bakgrunden, välj 'Ingen begränsning' eller 'Optimera inte'.",
+    "permLocMissing": "Platsbehörighet saknas"
 }

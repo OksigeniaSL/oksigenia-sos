@@ -117,5 +117,13 @@
     "holdToCancel": "Ingedrukt houden om te annuleren",
     "statusMonitorStopped": "Monitor gestopt.",
     "statusScreenSleep": "Scherm gaat uit...",
-    "btnRestartSystem": "SYSTEEM HERSTARTEN"
+    "btnRestartSystem": "SYSTEEM HERSTARTEN",
+    "smsDyingGasp": "⚠️ BATTERIJ <5%. Systeem sluit af. Loc:",
+    "smsHelpMessage": "HELP! Ik heb dringend hulp nodig.",
+    "batteryDialogTitle": "Restrizione Batteria",
+    "btnDisableBatterySaver": "DISATTIVA RIST.",
+    "batteryDialogTitle": "Batterij Beperking",
+    "btnDisableBatterySaver": "BESPARING UIT",
+    "batteryDialogBody": "Het systeem beperkt de batterij. Om SOS op de achtergrond te laten werken, selecteer 'Onbeperkt' of 'Niet optimaliseren'.",
+    "permLocMissing": "Locatietoestemming ontbreekt"
 }

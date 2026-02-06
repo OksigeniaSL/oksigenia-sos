@@ -18,7 +18,7 @@ Future<void> initializeService() async {
     channelId,
     'Oksigenia SOS - Active Monitor',
     description: 'Monitorización activa de seguridad',
-    importance: Importance.high, // 🔥 High para icono visible
+    importance: Importance.high, 
     playSound: false,
     enableVibration: false,
   );
@@ -34,21 +34,19 @@ Future<void> initializeService() async {
   await service.configure(
     androidConfiguration: AndroidConfiguration(
       onStart: onStart,
-      autoStart: true, 
+      autoStart: false, 
       isForegroundMode: true,
-      
       notificationChannelId: channelId,
       initialNotificationTitle: 'Oksigenia SOS',
       initialNotificationContent: 'System Ready',
       foregroundServiceNotificationId: notificationId,
-      
       foregroundServiceTypes: [
         AndroidForegroundType.location,
         AndroidForegroundType.dataSync,
       ],
     ),
     iosConfiguration: IosConfiguration(
-      autoStart: true,
+      autoStart: false,
       onForeground: onStart,
     ),
   );
@@ -64,11 +62,13 @@ void onStart(ServiceInstance service) async {
   const AndroidInitializationSettings initializationSettingsAndroid =
       AndroidInitializationSettings('ic_stat_protected'); 
   
+  const InitializationSettings initializationSettings =
+      InitializationSettings(android: initializationSettingsAndroid);
+  
   await flutterLocalNotificationsPlugin.initialize(
-    settings: InitializationSettings(android: initializationSettingsAndroid),
+    settings: initializationSettings,
   );
 
-  // --- AUDIO ---
   try {
     await _audioPlayer.setAudioContext(AudioContext(
       android: AudioContextAndroid(
@@ -93,6 +93,13 @@ void onStart(ServiceInstance service) async {
       service.setAsBackgroundService();
     });
 
+    service.on('stopService').listen((event) {
+        print("SYLVIA: 💀 Recibida orden de apagado. Bye.");
+        _audioPlayer.stop();
+        _audioPlayer.dispose();
+        service.stopSelf();
+    });
+
     service.on('startAlarm').listen((event) async {
       try {
         service.setAsForegroundService();
@@ -110,13 +117,7 @@ void onStart(ServiceInstance service) async {
         Vibration.cancel();
       } catch (e) { print("Error stop: $e"); }
     });
-  
-    service.on('stopService').listen((event) {
-        _audioPlayer.stop();
-        service.stopSelf();
-    });
 
-    // --- LISTENER ACTUALIZADO (Con sintaxis corregida) ---
     service.on('updateNotification').listen((event) async {
       if (event == null) return;
 
@@ -124,9 +125,21 @@ void onStart(ServiceInstance service) async {
       String title = event['title'] ?? 'Oksigenia SOS';
       String content = event['content'] ?? 'Active Monitor';
 
-      String iconName = 'ic_stat_protected';
+      // 🟢 ICONOS REALES
+      String iconName = 'ic_stat_protected'; 
+      
       if (status == 'paused') {
-        iconName = 'ic_stat_paused';
+        iconName = 'ic_stat_paused'; 
+      } else if (status == 'alarm') {
+        iconName = 'ic_stat_protected'; 
+      }
+
+      // 🟢 ZOMBIE KILLER: 
+      // ongoing = false permite al sistema matar la notificación al cerrar la app.
+      bool isOngoing = false; 
+
+      if (status == 'alarm') {
+        isOngoing = true; // Solo fija en emergencia
       }
 
       try {
@@ -139,10 +152,10 @@ void onStart(ServiceInstance service) async {
               channelId,
               'Oksigenia SOS - Active Monitor',
               icon: iconName,
-              ongoing: true,
-              importance: Importance.high, // 🔥 ASEGURA ICONO
+              ongoing: isOngoing, 
+              importance: Importance.high,
               priority: Priority.high,
-              onlyAlertOnce: true, // 🔥 EVITA QUE SALTE LA CORTINILLA
+              onlyAlertOnce: true, 
               playSound: false,
               enableVibration: false,
               showWhen: false,
@@ -151,7 +164,7 @@ void onStart(ServiceInstance service) async {
           ),
         );
       } catch (e) {
-        print("SYLVIA ERROR: No se pudo actualizar la notificación: $e");
+        print("SYLVIA ERROR: Fallo notificación: $e");
       }
     });
   }

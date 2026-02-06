@@ -381,4 +381,23 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get btnRestartSystem => 'RESTART SYSTEM';
+
+  @override
+  String get smsDyingGasp => '⚠️ BATTERY <5%. System shutting down. Loc:';
+
+  @override
+  String get smsHelpMessage => 'HELP! I need assistance.';
+
+  @override
+  String get batteryDialogTitle => 'Battery Restriction';
+
+  @override
+  String get btnDisableBatterySaver => 'DISABLE SAVER';
+
+  @override
+  String get batteryDialogBody =>
+      'The system is restricting this app\'s battery. For SOS to work in the background, you must select \'Unrestricted\' or \'Don\'t Optimize\'.';
+
+  @override
+  String get permLocMissing => 'Missing Location Permission';
 }

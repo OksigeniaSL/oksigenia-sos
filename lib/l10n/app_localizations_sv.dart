@@ -382,4 +382,23 @@ class AppLocalizationsSv extends AppLocalizations {
 
   @override
   String get btnRestartSystem => 'STARTA OM SYSTEMET';
+
+  @override
+  String get smsDyingGasp => '⚠️ BATTERI <5%. Systemet stängs av. Plats:';
+
+  @override
+  String get smsHelpMessage => 'HJÄLP! Jag behöver assistans.';
+
+  @override
+  String get batteryDialogTitle => 'Batteribegränsning';
+
+  @override
+  String get btnDisableBatterySaver => 'INAKTIVERA SPARLÄGE';
+
+  @override
+  String get batteryDialogBody =>
+      'Systemet begränsar batteriet. För att SOS ska fungera i bakgrunden, välj \'Ingen begränsning\' eller \'Optimera inte\'.';
+
+  @override
+  String get permLocMissing => 'Platsbehörighet saknas';
 }

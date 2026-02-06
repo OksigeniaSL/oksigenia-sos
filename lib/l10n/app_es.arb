@@ -69,7 +69,7 @@
     "ina30s": "🧪 30 seg (Modo TEST)",
     "ina1h": "⏱️ 1 hora (Recomendado)",
     "ina2h": "⏱️ 2 horas (Pausa larga)",
-    "testModeWarning": "⚠️ MODO TEST ACTIVADO: La alerta saltará en 30s.",
+    "testModeWarning": "⚠️ MODO TEST: La alerta saltará en 30s.",
     "toastHoldToSOS": "Mantén pulsado para SOS",
     "donateDialogTitle": "💎 Apoya el Proyecto",
     "donateDialogBody": "Esta app es Software Libre y Gratuito. Si te da seguridad, invítanos a un café para mantener los servidores.",
@@ -117,5 +117,11 @@
     "holdToCancel": "Mantén pulsado para cancelar",
     "statusMonitorStopped": "Monitor detenido.",
     "statusScreenSleep": "Apagando pantalla...",
-    "btnRestartSystem": "REINICIAR SISTEMA"
+    "btnRestartSystem": "REINICIAR SISTEMA",
+    "smsDyingGasp": "⚠️ BATERÍA <5%. Me apago. Loc:",
+    "smsHelpMessage": "¡AYUDA! Necesito asistencia.",
+    "batteryDialogTitle": "Restricción de Batería",
+    "btnDisableBatterySaver": "DESACTIVAR AHORRO",
+    "batteryDialogBody": "El sistema está restringiendo la batería de esta app. Para que SOS funcione en segundo plano, debes seleccionar 'Sin Restricciones' o 'No Optimizar'.",
+    "permLocMissing": "Falta Permiso de Ubicación"
 }
