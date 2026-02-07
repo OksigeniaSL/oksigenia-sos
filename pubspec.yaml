@@ -13,12 +13,13 @@ dependencies:
   flutter_localizations:
     sdk: flutter
   
-  # Core Logic & Background (MOVIDO AQUÍ)
+  # Core Logic & Background
   flutter_background_service: ^5.0.0
   geolocator: ^14.0.2
   url_launcher: ^6.3.1
   permission_handler: ^12.0.1
   wakelock_plus: ^1.2.8
+  telephony: ^0.2.0  # 🟢 EL ÚNICO QUE FUNCIONA CON FLUTTER 3.x
   
   # Sensors & Audio
   sensors_plus: ^7.0.0       
@@ -54,7 +55,5 @@ flutter_launcher_icons:
   min_sdk_android: 21
   adaptive_icon_background: "assets/icon/ic_background.png"
   adaptive_icon_foreground: "assets/icon/ic_foreground.png"
-
-  # 👇 ESTAS LÍNEAS TIENEN QUE ESTAR ACTIVAS (SIN #) 👇
   notification_icon: "ic_stat_oksigenia"
   image_path_android: "assets/images/logo_white.png"

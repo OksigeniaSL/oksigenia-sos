@@ -25,11 +25,14 @@ class _AlarmScreenState extends State<AlarmScreen> with TickerProviderStateMixin
     
     _logic = context.read<SOSLogic>();
     
-    // Círculo visual (decorativo)
+    double totalSeconds = 30.0; 
+    double remaining = _logic.currentCountdownSeconds.toDouble();
+    double startValue = (remaining / totalSeconds).clamp(0.0, 1.0);
+
     _countdownController = AnimationController(
       vsync: this,
-      duration: Duration(seconds: _logic.currentCountdownSeconds),
-    )..reverse(from: 1.0);
+      duration: Duration(seconds: totalSeconds.toInt()),
+    )..reverse(from: startValue); 
 
     _holdController = AnimationController(
       vsync: this,
@@ -39,6 +42,7 @@ class _AlarmScreenState extends State<AlarmScreen> with TickerProviderStateMixin
     // Cancelar
     _holdController.addStatusListener((status) {
       if (status == AnimationStatus.completed) {
+        debugPrint("ALARM SCREEN: Botón completado. Cancelando...");
         _triggerSuccessHaptic();
         _logic.cancelSOS();
       }
@@ -60,8 +64,12 @@ class _AlarmScreenState extends State<AlarmScreen> with TickerProviderStateMixin
   }
 
   Future<void> _triggerSuccessHaptic() async {
-    if (await Vibration.hasVibrator() ?? false) {
-      Vibration.vibrate(pattern: [0, 50, 50, 50]); 
+    try {
+      if (await Vibration.hasVibrator() ?? false) {
+        Vibration.vibrate(pattern: [0, 50, 50, 50]); 
+      }
+    } catch (e) {
+      debugPrint("Error vibración: $e");
     }
   }
 
@@ -77,7 +85,6 @@ class _AlarmScreenState extends State<AlarmScreen> with TickerProviderStateMixin
 
   @override
   Widget build(BuildContext context) {
-    // Escuchamos actualizaciones de segundos
     final logic = context.watch<SOSLogic>();
     final l10n = AppLocalizations.of(context)!;
     
@@ -175,13 +182,20 @@ class _AlarmScreenState extends State<AlarmScreen> with TickerProviderStateMixin
                   // BOTÓN DE SEGURIDAD
                   GestureDetector(
                     behavior: HitTestBehavior.opaque,
-                    onPanDown: (_) => _holdController.forward(),
+                    onPanDown: (_) {
+                      debugPrint("ALARM SCREEN: Botón presionado");
+                      _holdController.forward();
+                    },
                     onPanEnd: (_) {
                       if (_holdController.status != AnimationStatus.completed) {
+                        debugPrint("ALARM SCREEN: Botón soltado antes de tiempo");
                         _holdController.reverse();
                       }
                     },
-                    onPanCancel: () => _holdController.reverse(),
+                    onPanCancel: () {
+                      debugPrint("ALARM SCREEN: Gesto cancelado");
+                      _holdController.reverse();
+                    },
                     
                     child: Container(
                       width: 200,
