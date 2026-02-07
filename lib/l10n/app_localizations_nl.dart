@@ -403,4 +403,7 @@ class AppLocalizationsNl extends AppLocalizations {
 
   @override
   String get permLocMissing => 'Locatietoestemming ontbreekt';
+
+  @override
+  String get slideStopSystem => 'VEEG OM TE STOPPEN';
 }

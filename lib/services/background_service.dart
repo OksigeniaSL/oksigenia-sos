@@ -11,7 +11,7 @@ import 'package:vibration/vibration.dart';
 import 'package:sensors_plus/sensors_plus.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:geolocator/geolocator.dart';
-import 'package:telephony/telephony.dart';
+import 'package:telephony/telephony.dart'; // 🟢 USAMOS TELEPHONY (SÍ COMPILA)
 import 'package:battery_plus/battery_plus.dart';
 
 const String channelId = 'my_foreground';
@@ -63,8 +63,8 @@ Future<void> initializeService() async {
       isForegroundMode: true,
       notificationChannelId: 'my_foreground',
       foregroundServiceNotificationId: 888,
-      autoStart: false, 
-      autoStartOnBoot: false, 
+      autoStart: true, 
+      autoStartOnBoot: true, 
     ),
     iosConfiguration: IosConfiguration(
       autoStart: false,
@@ -124,7 +124,7 @@ void onStart(ServiceInstance service) async {
   }
 
   Future<void> _enviarSMSZombie() async {
-    print("SYLVIA SERVICE: 🧟 TIEMPO AGOTADO. Ejecutando protocolo de emergencia autónomo...");
+    print("SYLVIA SERVICE: 🧟 TIEMPO AGOTADO. Ejecutando protocolo...");
 
     if (_recipients.isEmpty) {
       final prefs = await SharedPreferences.getInstance();
@@ -164,6 +164,7 @@ void onStart(ServiceInstance service) async {
 
     for (String number in _recipients) {
       try {
+        // Telephony maneja multipart automáticamente
         await _telephony.sendSms(
           to: number,
           message: msgBody,
@@ -175,7 +176,7 @@ void onStart(ServiceInstance service) async {
       }
     }
     
-    // 🟢 SONIDO DE CONFIRMACIÓN EN BACKGROUND
+    // 🟢 SONIDO DE CONFIRMACIÓN
     try {
       await _audioPlayer.setReleaseMode(ReleaseMode.stop);
       await _audioPlayer.setVolume(1.0); 

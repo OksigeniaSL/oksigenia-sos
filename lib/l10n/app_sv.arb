@@ -123,5 +123,6 @@
     "batteryDialogTitle": "Batteribegränsning",
     "btnDisableBatterySaver": "INAKTIVERA SPARLÄGE",
     "batteryDialogBody": "Systemet begränsar batteriet. För att SOS ska fungera i bakgrunden, välj 'Ingen begränsning' eller 'Optimera inte'.",
-    "permLocMissing": "Platsbehörighet saknas"
+    "permLocMissing": "Platsbehörighet saknas",
+    "slideStopSystem": "DRA FÖR ATT STOPPA"
 }

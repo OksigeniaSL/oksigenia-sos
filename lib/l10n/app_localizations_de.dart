@@ -396,4 +396,7 @@ class AppLocalizationsDe extends AppLocalizations {
 
   @override
   String get permLocMissing => 'Standortberechtigung fehlt';
+
+  @override
+  String get slideStopSystem => 'WISCHEN ZUM STOPPEN';
 }

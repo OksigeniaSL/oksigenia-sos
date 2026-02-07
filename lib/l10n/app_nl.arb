@@ -125,5 +125,6 @@
     "batteryDialogTitle": "Batterij Beperking",
     "btnDisableBatterySaver": "BESPARING UIT",
     "batteryDialogBody": "Het systeem beperkt de batterij. Om SOS op de achtergrond te laten werken, selecteer 'Onbeperkt' of 'Niet optimaliseren'.",
-    "permLocMissing": "Locatietoestemming ontbreekt"
+    "permLocMissing": "Locatietoestemming ontbreekt",
+    "slideStopSystem": "VEEG OM TE STOPPEN"
 }

@@ -123,5 +123,6 @@
     "batteryDialogTitle": "Akku-Einschränkung",
     "btnDisableBatterySaver": "SPARMODUS AUS",
     "batteryDialogBody": "Das System schränkt den Akku ein. Damit SOS im Hintergrund läuft, wählen Sie 'Keine Einschränkung' oder 'Nicht optimieren'.",
-    "permLocMissing": "Standortberechtigung fehlt"
+    "permLocMissing": "Standortberechtigung fehlt",
+    "slideStopSystem": "WISCHEN ZUM STOPPEN"
 }

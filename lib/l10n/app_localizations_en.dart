@@ -400,4 +400,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get permLocMissing => 'Missing Location Permission';
+
+  @override
+  String get slideStopSystem => 'SLIDE TO STOP SYSTEM';
 }

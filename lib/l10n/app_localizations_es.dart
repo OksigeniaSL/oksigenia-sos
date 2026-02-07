@@ -401,4 +401,7 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get permLocMissing => 'Falta Permiso de Ubicación';
+
+  @override
+  String get slideStopSystem => 'DESLIZA PARA APAGAR';
 }

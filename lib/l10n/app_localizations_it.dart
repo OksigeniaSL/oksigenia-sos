@@ -406,4 +406,7 @@ class AppLocalizationsIt extends AppLocalizations {
 
   @override
   String get permLocMissing => 'Permesso posizione mancante';
+
+  @override
+  String get slideStopSystem => 'SCORRI PER SPEGNERE';
 }

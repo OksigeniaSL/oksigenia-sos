@@ -1,4 +1,4 @@
-# Oksigenia SOS 🏔️ v3.9.4 "Advanced Dashboard"
+# Oksigenia SOS 🏔️ v3.9.5 "Immortal Sentinel"
 
 **The Ultimate Outdoor Guardian | FOSS | Privacy-First | Autonomous**
 
@@ -24,9 +24,9 @@ It is an **autonomous bio-telemetry system** designed to detect life-threatening
 
 ---
 
-## 📸 Visual Tour (v3.9.4)
+## 📸 Visual Tour
 
-The new **v3.9.4** interface has been redesigned for high-stress situations. High contrast, large touch targets for gloved hands, and clear status indicators.
+The interface is designed for high-stress situations. High contrast, large touch targets for gloved hands, and clear status indicators.
 
 | **Flight Deck** | **Fall Detected** | **Inactivity Alert** | **Configuration** |
 |:---:|:---:|:---:|:---:|
@@ -40,20 +40,37 @@ The new **v3.9.4** interface has been redesigned for high-stress situations. Hig
 
 ---
 
-## 🚀 The v3.9.x Saga: Engineering Excellence
+## 🚀 The v3.9.5 Saga: The Immortal Update
 
-This version represents a massive leap in stability and sensor fusion logic. We call it the **"Granite Core"** update.
+This version is not just an update; it is a complete re-engineering of the app's lifecycle. We have achieved **Total Decoupling** between the User Interface and the Sentinel Logic.
 
-### 🧠 Core Features
+### 🏗️ Phase 1: Modernization
+We have migrated the entire codebase to **Flutter 3.27+**.
+* **Zero Technical Debt:** All deprecated libraries have been replaced.
+* **Linter Compliance:** The code is clean, strict, and optimized for the latest Android runtimes.
+
+### 💔 Phase 2: The "Great Decoupling"
+Previously, the logic lived inside the screen. Now, they are divorced.
+* **Headless Architecture:** The UI is now just a "Remote Control".
+* **Service Independence:** If you close the UI, **the Service DOES NOT DIE**. It continues monitoring acceleration and inactivity in a separate Isolate.
+* **Smart Reconnection:** When you open the app, it asks: *"Is a service already running?"* If yes, it connects to the live stream. If no, it initializes the system.
+
+### 🧛 Phase 3: Deep Sleep Immunity (Wakelock)
+We fought against Android's "Doze Mode" and won.
+* **CPU Wakelock:** We implemented `wakelock_plus` logic within the background service. This forces the CPU to stay awake to process sensor data even when the screen is black and the phone is in deep sleep.
+* **Zombie Recovery:** If an alarm triggers while the phone is locked, unlocking the screen instantly restores the `AlarmScreen` with the correct remaining time, synchronized with the background service. No more race conditions.
+
+---
+
+## 🧠 Core Features
 
 | Feature | Technical Detail |
 |:---|:---|
-| **📊 Live Telemetry** | The footer now displays real-time sensor data. **G-Force Meter** visualizes acceleration vector sum. **Battery Voltage** monitoring ensures you don't run dry. **GPS Accuracy** lets you know if satellites are locked. |
-| **📐 Vector Physics** | We moved from simple threshold detection to **3D Vector Magnitude Calculation** ($\sqrt{x^2+y^2+z^2}$). This filters out running, jumping, or backpack noise, triggering only on genuine, high-energy impacts (>12G). |
-| **🧟 Zombie Killer** | Complete rewrite of the background service architecture. The app now handles Android's lifecycle aggressively, ensuring the background monitor starts when needed and **dies completely** when closed, saving battery. |
-| **🛡️ Permission Semaphores** | A new "Traffic Light" header instantly shows if you are safe. **Green:** Systems Go. **Red:** Critical permission missing (SMS, GPS). Clicking a red icon guides you directly to the specific Android setting to fix it. |
-| **🌑 Tactical Dark Mode** | Enforced pure dark theme (OLED friendly). This preserves your night vision during night treks and maximizes battery life in cold environments. |
-| **💬 Haptic Language** | The app communicates via vibration patterns. You can "feel" the state of the app (countdown, activation, error) without taking your phone out of your pocket. |
+| **📊 Live Telemetry** | The footer displays real-time sensor data. **G-Force Meter** visualizes acceleration vector sum. **Battery Voltage** monitoring ensures you don't run dry. |
+| **📐 Vector Physics** | We utilize **3D Vector Magnitude Calculation** ($\sqrt{x^2+y^2+z^2}$). This triggers only on genuine, high-energy impacts (>12G), filtering out running or jumping. |
+| **🛡️ Permission Semaphores** | Instantly shows if you are safe. **Green:** Systems Go. **Red:** Critical permission missing. Clicking a red icon guides you to the specific Android setting. |
+| **🌑 Dictatorship of Dark Mode** | Enforced pure dark theme (OLED friendly). Preserves night vision and maximizes battery life. Light mode is dead. |
+| **🧟 Inactivity Monitor** | Now runs fully in the background. The service tracks micro-movements even with the screen off. If you stop moving for the configured time, the alarm triggers. |
 
 ---
 
@@ -90,10 +107,10 @@ Oksigenia SOS is fully localized by native speakers:
 We believe safety tools should be open and auditable.
 
 ### 📦 Download
-Get the latest signed APKs from the **[Releases Section](https://github.com/OksigeniaSL/oksigenia-sos/releases)** or via **IzzyOnDroid**.
+Get the latest signed APKs from the **[Releases Section](https://github.com/OksigeniaSL/oksigenia-sos/releases)**.
 
 ### 💻 Build from Source
-Requirements: **Flutter 3.x**
+Requirements: **Flutter 3.27+**
 
 ```bash
 git clone [https://github.com/OksigeniaSL/oksigenia-sos.git](https://github.com/OksigeniaSL/oksigenia-sos.git)

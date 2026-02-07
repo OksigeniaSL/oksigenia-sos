@@ -19,7 +19,7 @@ dependencies:
   url_launcher: ^6.3.1
   permission_handler: ^12.0.1
   wakelock_plus: ^1.2.8
-  telephony: ^0.2.0  # 🟢 EL ÚNICO QUE FUNCIONA CON FLUTTER 3.x
+  telephony: ^0.2.0  # 🟢 ÚNICA OPCIÓN VIABLE PARA BACKGROUND SMS
   
   # Sensors & Audio
   sensors_plus: ^7.0.0       
@@ -34,6 +34,7 @@ dependencies:
   package_info_plus: ^9.0.0
   provider: ^6.1.5+1
   flutter_local_notifications: ^20.0.0
+  slide_to_act: ^2.0.2 # 🟢 BOTÓN DESLIZANTE MODERNO Y COMPATIBLE
 
 dev_dependencies:
   flutter_test:

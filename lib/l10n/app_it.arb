@@ -123,5 +123,6 @@
     "batteryDialogTitle": "Restrizione Batteria",
     "btnDisableBatterySaver": "DISATTIVA RISPARMIO",
     "batteryDialogBody": "Il sistema sta limitando la batteria. Affinché SOS funzioni in background, seleziona 'Nessuna restrizione' o 'Non ottimizzare'.",
-    "permLocMissing": "Permesso posizione mancante"
+    "permLocMissing": "Permesso posizione mancante",
+    "slideStopSystem": "SCORRI PER SPEGNERE"
 }

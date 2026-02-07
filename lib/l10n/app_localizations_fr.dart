@@ -399,4 +399,7 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get permLocMissing => 'Permission localisation manquante';
+
+  @override
+  String get slideStopSystem => 'GLISSER POUR ARRÊTER';
 }

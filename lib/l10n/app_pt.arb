@@ -123,5 +123,6 @@
     "batteryDialogTitle": "Restrição de Bateria",
     "btnDisableBatterySaver": "DESATIVAR POUPANÇA",
     "batteryDialogBody": "O sistema restringe a bateria desta app. Para o SOS funcionar em segundo plano, selecione 'Sem restrições' ou 'Não otimizar'.",
-    "permLocMissing": "Falta Permissão Localização"
+    "permLocMissing": "Falta Permissão Localização",
+    "slideStopSystem": "DESLIZE P/ PARAR"
 }

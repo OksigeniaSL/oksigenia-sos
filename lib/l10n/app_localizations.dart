@@ -859,6 +859,12 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Missing Location Permission'**
   String get permLocMissing;
+
+  /// No description provided for @slideStopSystem.
+  ///
+  /// In en, this message translates to:
+  /// **'SLIDE TO STOP SYSTEM'**
+  String get slideStopSystem;
 }
 
 class _AppLocalizationsDelegate

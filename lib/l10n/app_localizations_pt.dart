@@ -396,4 +396,7 @@ class AppLocalizationsPt extends AppLocalizations {
 
   @override
   String get permLocMissing => 'Falta Permissão Localização';
+
+  @override
+  String get slideStopSystem => 'DESLIZE P/ PARAR';
 }

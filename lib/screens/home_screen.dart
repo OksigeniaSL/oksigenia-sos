@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:provider/provider.dart'; 
 import 'package:flutter_background_service/flutter_background_service.dart';
 import 'package:wakelock_plus/wakelock_plus.dart';
@@ -11,6 +12,7 @@ import 'package:oksigenia_sos/services/remote_config_service.dart';
 import 'package:oksigenia_sos/screens/update_screen.dart';
 import 'package:oksigenia_sos/screens/sent_screen.dart';
 import 'package:vibration/vibration.dart';
+import 'package:slide_to_act/slide_to_act.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -123,10 +125,14 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver, Ti
       animation: _sosLogic,
       builder: (context, child) {
         return Scaffold(
+          backgroundColor: Colors.black, // 🟢 FONDO NEGRO TOTAL
           appBar: AppBar(
             title: Text(AppLocalizations.of(context)!.appTitle),
             centerTitle: true,
             elevation: 0,
+            backgroundColor: Colors.black, // 🟢 ENCABEZADO NEGRO
+            iconTheme: const IconThemeData(color: Colors.white), // Icono menú blanco
+            titleTextStyle: const TextStyle(color: Colors.white, fontSize: 20, fontWeight: FontWeight.bold), // Texto blanco
           ),
           drawer: MainDrawer(sosLogic: _sosLogic),
           body: _buildBody(context),
@@ -178,13 +184,14 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver, Ti
 
     return Center(
       child: SingleChildScrollView(
+        padding: const EdgeInsets.only(bottom: 100),
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
             
             // 🚥 SEMÁFORO DE PERMISOS
             Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 40, vertical: 10),
+              padding: const EdgeInsets.symmetric(horizontal: 40, vertical: 5),
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                 children: [
@@ -224,7 +231,7 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver, Ti
               ),
             ),
 
-            const SizedBox(height: 15),
+            const SizedBox(height: 10),
 
             // STATUS PILL
             Container(
@@ -253,7 +260,7 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver, Ti
               ),
             ),
             
-            const SizedBox(height: 25),
+            const SizedBox(height: 15),
 
             // DASHBOARD INFERIOR
             Padding(
@@ -272,7 +279,7 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver, Ti
                         const SizedBox(height: 6),
                         Text(
                           gForceText,
-                          style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 14)
+                          style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 14, color: Colors.white)
                         ),
                       ],
                     ),
@@ -289,7 +296,7 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver, Ti
                         const SizedBox(height: 6),
                         Text(
                           "${_sosLogic.batteryLevel}%", 
-                          style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 14)
+                          style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 14, color: Colors.white)
                         ),
                       ],
                     ),
@@ -328,7 +335,7 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver, Ti
                         const SizedBox(height: 6),
                         Text(
                           _sosLogic.gpsAccuracy > 0 ? "${_sosLogic.gpsAccuracy.toStringAsFixed(0)}m" : "--", 
-                          style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 14)
+                          style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 14, color: Colors.white)
                         ),
                       ],
                     ),
@@ -337,7 +344,7 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver, Ti
               ),
             ),
 
-            const SizedBox(height: 25),
+            const SizedBox(height: 20),
 
             // BOTÓN SOS
             GestureDetector(
@@ -393,8 +400,8 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver, Ti
                 alignment: Alignment.center,
                 children: [
                   Container(
-                    width: 220,
-                    height: 220,
+                    width: 200, 
+                    height: 200,
                     decoration: BoxDecoration(
                       shape: BoxShape.circle,
                       gradient: const LinearGradient(
@@ -409,8 +416,8 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver, Ti
                   ),
 
                   SizedBox(
-                    width: 220,
-                    height: 220,
+                    width: 200,
+                    height: 200,
                     child: AnimatedBuilder(
                       animation: _sosHoldController,
                       builder: (context, child) {
@@ -427,22 +434,22 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver, Ti
                   Center(
                     child: Text(
                       l10n.sosButton,
-                      style: const TextStyle(fontSize: 48, fontWeight: FontWeight.bold, color: Colors.white),
+                      style: const TextStyle(fontSize: 42, fontWeight: FontWeight.bold, color: Colors.white),
                     ),
                   ),
                 ],
               ),
             ),
 
-            const SizedBox(height: 20),
+            const SizedBox(height: 15),
             Text(
               "${l10n.toastHoldToSOS} (3s)", 
               style: const TextStyle(color: Colors.grey)
             ),
             
-            // 🟢 RESTAURADO: Banner de Modo Test
+            // Banner de Modo Test
             if (_sosLogic.currentInactivityLimit < 60) ...[
-              const SizedBox(height: 20),
+              const SizedBox(height: 15),
               Container(
                 margin: const EdgeInsets.symmetric(horizontal: 30),
                 padding: const EdgeInsets.all(12),
@@ -457,7 +464,6 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver, Ti
                     const SizedBox(width: 10),
                     Expanded(
                       child: Text(
-                        // Usamos fallback por seguridad
                         l10n.testModeWarning, 
                         style: TextStyle(
                           color: Colors.orange.shade900, 
@@ -471,7 +477,7 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver, Ti
               ),
             ],
             
-            const SizedBox(height: 30),
+            const SizedBox(height: 20),
 
             // INTERRUPTORES
             _buildQuickToggle(
@@ -507,12 +513,34 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver, Ti
                 }
               },
               Icons.airline_seat_flat, 
-              // 🟢 ARREGLADO: Subtítulo con valor real
               subtitle: _sosLogic.isInactivityMonitorActive 
                   ? "${l10n.timerLabel}: ${_sosLogic.currentInactivityLimit < 60 ? '${_sosLogic.currentInactivityLimit} ${l10n.timerSeconds}' : '${_sosLogic.currentInactivityLimit ~/ 3600} h'}" 
                   : null
             ),
             
+            // 🟢 SLIDE TO STOP
+            const SizedBox(height: 20),
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 30, vertical: 10),
+              child: SlideAction(
+                borderRadius: 12,
+                elevation: 0,
+                innerColor: Colors.redAccent,
+                outerColor: Colors.white10,
+                sliderButtonIcon: const Icon(Icons.power_settings_new, color: Colors.white),
+                text: l10n.slideStopSystem ?? "SLIDE TO STOP", 
+                textStyle: const TextStyle(color: Colors.white, fontSize: 16, fontWeight: FontWeight.bold),
+                onSubmit: () async {
+                  await _sosLogic.stopSystem();
+                  await Future.delayed(const Duration(milliseconds: 500));
+                  SystemNavigator.pop();
+                  return null;
+                },
+              ),
+            ),
+            
+            const SizedBox(height: 20),
+
             if (_sosLogic.status == SOSStatus.error) ...[
                const SizedBox(height: 20),
                Padding(
@@ -549,11 +577,11 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver, Ti
     return Container(
       margin: const EdgeInsets.symmetric(horizontal: 30, vertical: 5),
       child: SwitchListTile(
-        title: Text(label, style: const TextStyle(fontWeight: FontWeight.w500)), 
+        title: Text(label, style: const TextStyle(fontWeight: FontWeight.w500, color: Colors.white)), 
         subtitle: subtitle != null ? Text(
             subtitle, 
             style: TextStyle(
-                color: isDark ? Colors.white70 : Colors.grey[800], 
+                color: Colors.white70, 
                 fontSize: 14, 
                 fontWeight: FontWeight.bold
             )

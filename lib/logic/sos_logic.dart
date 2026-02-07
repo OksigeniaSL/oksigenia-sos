@@ -14,7 +14,7 @@ import 'package:vibration/vibration.dart';
 import 'package:flutter_background_service/flutter_background_service.dart';
 import 'package:battery_plus/battery_plus.dart';
 import 'package:oksigenia_sos/l10n/app_localizations.dart'; 
-import 'package:telephony/telephony.dart'; 
+import 'package:telephony/telephony.dart'; // 🟢 USAMOS TELEPHONY
 import '../services/preferences_service.dart';
 import '../screens/settings_screen.dart';  
 import '../screens/alarm_screen.dart';
@@ -256,7 +256,7 @@ class SOSLogic extends ChangeNotifier with WidgetsBindingObserver {
       if (savedInactivityState) prefs.saveInactivityState(false);
     }
 
-    // 🟢 FIX: Enviar configuración al servicio AL FINAL, cuando ya sabemos los estados reales
+    // 🟢 FIX: Enviar configuración al servicio AL FINAL
     final service = FlutterBackgroundService();
     if (await service.isRunning()) {
        service.invoke("setMonitoring", {
@@ -342,6 +342,18 @@ class SOSLogic extends ChangeNotifier with WidgetsBindingObserver {
     
     await platform.invokeMethod('sleepScreen');
     
+    try {
+      _audioPlayer = AudioPlayer();
+      await _audioPlayer!.setAudioContext(AudioContext(
+         android: AudioContextAndroid(
+             isSpeakerphoneOn: true, stayAwake: false, contentType: AndroidContentType.sonification, usageType: AndroidUsageType.media, audioFocus: AndroidAudioFocus.gainTransient
+         ),
+         iOS: AudioContextIOS(category: AVAudioSessionCategory.playback)
+      ));
+      await _audioPlayer!.setVolume(1.0); 
+      await _audioPlayer!.play(AssetSource('sounds/send.mp3'));
+    } catch(e) {}
+
     if (oksigeniaNavigatorKey.currentState != null) {
        oksigeniaNavigatorKey.currentState!.pushReplacement(
           MaterialPageRoute(builder: (context) => const SentScreen())
@@ -527,7 +539,6 @@ class SOSLogic extends ChangeNotifier with WidgetsBindingObserver {
     PreferencesService().saveInactivityState(value);
     _updateSylviaStatus(); 
     
-    // 🟢 FIX: Enviar explícitamente el estado de inactividad
     service.invoke("setMonitoring", {
       "active": _isFallDetectionActive,
       "inactivity_limit": _currentInactivityLimit,
@@ -612,6 +623,24 @@ class SOSLogic extends ChangeNotifier with WidgetsBindingObserver {
         (route) => route.isFirst,
       );
     }
+  }
+
+  // 🟢 NUEVO: Función para APAGAR TOTALMENTE EL SISTEMA
+  Future<void> stopSystem() async {
+    final service = FlutterBackgroundService();
+    if (await service.isRunning()) {
+      service.invoke("stopService"); 
+    }
+    
+    final prefs = PreferencesService();
+    prefs.saveFallDetectionState(false);
+    prefs.saveInactivityState(false);
+    
+    _isFallDetectionActive = false;
+    _isInactivityMonitorActive = false;
+    _setStatus(SOSStatus.ready);
+    
+    notifyListeners();
   }
 
   Future<void> _triggerDyingGasp() async {
