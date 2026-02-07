@@ -1,7 +1,7 @@
 name: oksigenia_sos
 description: "Outdoor Emergency Assistant"
 publish_to: 'none'
-version: 3.9.4+30904
+version: 3.9.5+30905
 
 environment:
   sdk: '>=3.2.0 <4.0.0'
@@ -15,13 +15,13 @@ dependencies:
   
   # Core Logic & Background (MOVIDO AQUÍ)
   flutter_background_service: ^5.0.0
-  geolocator: ^13.0.1
+  geolocator: ^14.0.2
   url_launcher: ^6.3.1
   permission_handler: ^12.0.1
   wakelock_plus: ^1.2.8
   
   # Sensors & Audio
-  sensors_plus: ^6.1.0       
+  sensors_plus: ^7.0.0       
   audioplayers: ^6.0.0       
   vibration: ^3.1.5          
 
@@ -37,8 +37,8 @@ dependencies:
 dev_dependencies:
   flutter_test:
     sdk: flutter
-  flutter_lints: ^5.0.0
-  flutter_launcher_icons: ^0.13.1
+  flutter_lints: ^6.0.0
+  flutter_launcher_icons: ^0.14.4
 
 flutter:
   uses-material-design: true
