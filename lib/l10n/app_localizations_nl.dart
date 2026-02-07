@@ -231,7 +231,7 @@ class AppLocalizationsNl extends AppLocalizations {
   String get ina2h => '⏱️ 2 uur (Lange pauze)';
 
   @override
-  String get testModeWarning => '⚠️ TESTMODUS AAN: Alarm gaat af in 30s.';
+  String get testModeWarning => 'TESTMODUS AAN: Alarm gaat af in 30s.';
 
   @override
   String get toastHoldToSOS => 'Houd knop ingedrukt voor SOS';
@@ -384,4 +384,23 @@ class AppLocalizationsNl extends AppLocalizations {
 
   @override
   String get btnRestartSystem => 'SYSTEEM HERSTARTEN';
+
+  @override
+  String get smsDyingGasp => '⚠️ BATTERIJ <5%. Systeem sluit af. Loc:';
+
+  @override
+  String get smsHelpMessage => 'HELP! Ik heb dringend hulp nodig.';
+
+  @override
+  String get batteryDialogTitle => 'Batterij Beperking';
+
+  @override
+  String get btnDisableBatterySaver => 'BESPARING UIT';
+
+  @override
+  String get batteryDialogBody =>
+      'Het systeem beperkt de batterij. Om SOS op de achtergrond te laten werken, selecteer \'Onbeperkt\' of \'Niet optimaliseren\'.';
+
+  @override
+  String get permLocMissing => 'Locatietoestemming ontbreekt';
 }

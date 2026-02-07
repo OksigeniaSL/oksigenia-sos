@@ -234,7 +234,7 @@ class AppLocalizationsIt extends AppLocalizations {
   String get ina2h => '⏱️ 2 ore (Pausa lunga)';
 
   @override
-  String get testModeWarning => '⚠️ MODO TEST ATTIVO: Allarme tra 30s.';
+  String get testModeWarning => 'MODO TEST ATTIVO: Allarme tra 30s.';
 
   @override
   String get toastHoldToSOS => 'Tieni premuto per SOS';
@@ -387,4 +387,23 @@ class AppLocalizationsIt extends AppLocalizations {
 
   @override
   String get btnRestartSystem => 'RIAVVIA SISTEMA';
+
+  @override
+  String get smsDyingGasp => '⚠️ BATTERIA <5%. Sistema in arresto. Pos:';
+
+  @override
+  String get smsHelpMessage => 'AIUTO! Ho bisogno di assistenza urgente.';
+
+  @override
+  String get batteryDialogTitle => 'Restrizione Batteria';
+
+  @override
+  String get btnDisableBatterySaver => 'DISATTIVA RISPARMIO';
+
+  @override
+  String get batteryDialogBody =>
+      'Il sistema sta limitando la batteria. Affinché SOS funzioni in background, seleziona \'Nessuna restrizione\' o \'Non ottimizzare\'.';
+
+  @override
+  String get permLocMissing => 'Permesso posizione mancante';
 }

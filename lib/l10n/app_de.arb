@@ -69,7 +69,7 @@
     "ina30s": "🧪 30 Sek.",
     "ina1h": "⏱️ 1 Std.",
     "ina2h": "⏱️ 2 Std.",
-    "testModeWarning": "⚠️ TESTMODUS: 30s.",
+    "testModeWarning": "TESTMODUS: 30s.",
     "toastHoldToSOS": "Gedrückt halten",
     "donateDialogTitle": "💎 Unterstützung",
     "donateDialogBody": "Kaffee spendieren.",
@@ -117,5 +117,11 @@
     "holdToCancel": "Gedrückt halten zum Abbrechen",
     "statusMonitorStopped": "Überwachung gestoppt.",
     "statusScreenSleep": "Bildschirm schaltet ab...",
-    "btnRestartSystem": "SYSTEM NEUSTARTEN"
+    "btnRestartSystem": "SYSTEM NEUSTARTEN",
+    "smsDyingGasp": "⚠️ AKKU <5%. System schaltet ab. Standort:",
+    "smsHelpMessage": "HILFE! Ich brauche dringend Unterstützung.",
+    "batteryDialogTitle": "Akku-Einschränkung",
+    "btnDisableBatterySaver": "SPARMODUS AUS",
+    "batteryDialogBody": "Das System schränkt den Akku ein. Damit SOS im Hintergrund läuft, wählen Sie 'Keine Einschränkung' oder 'Nicht optimieren'.",
+    "permLocMissing": "Standortberechtigung fehlt"
 }

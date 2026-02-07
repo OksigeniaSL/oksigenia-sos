@@ -69,7 +69,7 @@
     "ina30s": "🧪 30 sec",
     "ina1h": "⏱️ 1 heure",
     "ina2h": "⏱️ 2 heures",
-    "testModeWarning": "⚠️ MODE TEST ACTIVÉ : 30s.",
+    "testModeWarning": "MODE TEST ACTIVÉ : 30s.",
     "toastHoldToSOS": "Maintenez pour SOS",
     "donateDialogTitle": "💎 Soutenez-nous",
     "donateDialogBody": "Offrez-nous un café.",
@@ -117,5 +117,11 @@
     "holdToCancel": "Maintenir pour annuler",
     "statusMonitorStopped": "Surveillance arrêtée.",
     "statusScreenSleep": "Extinction de l'écran...",
-    "btnRestartSystem": "REDÉMARRER SYSTÈME"
+    "btnRestartSystem": "REDÉMARRER SYSTÈME",
+    "smsDyingGasp": "⚠️ BATTERIE <5%. Arrêt système. Loc:",
+    "smsHelpMessage": "À L'AIDE ! J'ai besoin d'assistance.",
+    "batteryDialogTitle": "Restriction Batterie",
+    "btnDisableBatterySaver": "DÉSACTIVER ÉCO",
+    "batteryDialogBody": "The system is restricting this app's battery. For SOS to work in the background, you must select 'Unrestricted' or 'Don't Optimize'.",
+    "permLocMissing": "Permission localisation manquante"
 }

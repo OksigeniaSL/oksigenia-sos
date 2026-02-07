@@ -2,33 +2,53 @@ import 'dart:async';
 import 'dart:ui';
 import 'package:flutter_background_service/flutter_background_service.dart';
 import 'package:flutter_background_service_android/flutter_background_service_android.dart';
-import 'package:shared_preferences/shared_preferences.dart';
-import 'package:audioplayers/audioplayers.dart'; // <--- NECESARIO PARA GRITAR
-import 'package:vibration/vibration.dart';       // <--- NECESARIO PARA VIBRAR
+import 'package:flutter_local_notifications/flutter_local_notifications.dart';
+import 'package:audioplayers/audioplayers.dart'; 
+import 'package:vibration/vibration.dart'; 
 
-// 🧠 MEMORIA DE SYLVIA
-String? _lastContent;
-// 🔊 LAS CUERDAS VOCALES (Variable global del Isolate)
+const String channelId = 'my_foreground'; 
+const int notificationId = 888;
+
 final AudioPlayer _audioPlayer = AudioPlayer();
 
 Future<void> initializeService() async {
   final service = FlutterBackgroundService();
 
+  const AndroidNotificationChannel channel = AndroidNotificationChannel(
+    channelId,
+    'Oksigenia SOS - Active Monitor',
+    description: 'Monitorización activa de seguridad',
+    importance: Importance.high, 
+    playSound: false,
+    enableVibration: false,
+  );
+
+  final FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin =
+      FlutterLocalNotificationsPlugin();
+
+  await flutterLocalNotificationsPlugin
+      .resolvePlatformSpecificImplementation<
+          AndroidFlutterLocalNotificationsPlugin>()
+      ?.createNotificationChannel(channel);
+
   await service.configure(
     androidConfiguration: AndroidConfiguration(
       onStart: onStart,
-      autoStart: true, 
-      isForegroundMode: false, 
-      notificationChannelId: 'oksigenia_sos_modular_v1',       
-      initialNotificationTitle: 'OKSIGENIA SOS',
-      initialNotificationContent: 'Iniciando...',
+      autoStart: false, 
+      isForegroundMode: true,
+      notificationChannelId: channelId,
+      initialNotificationTitle: 'Oksigenia SOS',
+      initialNotificationContent: 'System Ready',
+      foregroundServiceNotificationId: notificationId,
       foregroundServiceTypes: [
         AndroidForegroundType.location,
         AndroidForegroundType.dataSync,
-        AndroidForegroundType.mediaPlayback, // <--- Añadido para garantizar audio
       ],
     ),
-    iosConfiguration: IosConfiguration(),
+    iosConfiguration: IosConfiguration(
+      autoStart: false,
+      onForeground: onStart,
+    ),
   );
 }
 
@@ -36,7 +56,19 @@ Future<void> initializeService() async {
 void onStart(ServiceInstance service) async {
   DartPluginRegistrant.ensureInitialized();
 
-  // Configuración inicial del Audio (Contexto de Alarma)
+  final FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin =
+      FlutterLocalNotificationsPlugin();
+
+  const AndroidInitializationSettings initializationSettingsAndroid =
+      AndroidInitializationSettings('ic_stat_protected'); 
+  
+  const InitializationSettings initializationSettings =
+      InitializationSettings(android: initializationSettingsAndroid);
+  
+  await flutterLocalNotificationsPlugin.initialize(
+    settings: initializationSettings,
+  );
+
   try {
     await _audioPlayer.setAudioContext(AudioContext(
       android: AudioContextAndroid(
@@ -49,56 +81,10 @@ void onStart(ServiceInstance service) async {
       iOS: AudioContextIOS(category: AVAudioSessionCategory.playback),
     ));
   } catch (e) {
-    print("SYLVIA: Error configurando audio context: $e");
+    print("SYLVIA: Error audio context: $e");
   }
 
   if (service is AndroidServiceInstance) {
-    // 1. AUTO-PROMOCIÓN AL INICIO
-    Timer(const Duration(seconds: 1), () async {
-      await _updateNotificationText(service, force: true); 
-      service.setAsForegroundService();
-      print("SYLVIA: Uniforme puesto al arrancar.");
-    });
-
-    // --- 👂 OÍDOS DE SYLVIA (ESCUCHAR ÓRDENES) ---
-
-    // A. ORDEN DE GRITAR (ALARMA)
-    service.on('startAlarm').listen((event) async {
-      print("SYLVIA: 🚨 RECIBIDA ORDEN DE ALARMA -> ACTIVANDO SONIDO Y VIBRACIÓN");
-      try {
-        // Aseguramos que es Foreground para tener prioridad de CPU
-        service.setAsForegroundService();
-        
-        // Loop de sonido
-        await _audioPlayer.setReleaseMode(ReleaseMode.loop);
-        await _audioPlayer.play(AssetSource('sounds/alarm.mp3'), volume: 1.0);
-        
-        // Loop de vibración (SOS agresivo)
-        if (await Vibration.hasVibrator() ?? false) {
-           Vibration.vibrate(pattern: [500, 1000, 500, 1000], repeat: 0);
-        }
-      } catch (e) {
-        print("SYLVIA: ❌ Error crítico activando alarma: $e");
-      }
-    });
-
-    // B. ORDEN DE CALLAR (STOP)
-    service.on('stopAlarm').listen((event) async {
-      print("SYLVIA: 🔇 RECIBIDA ORDEN DE SILENCIO");
-      try {
-        await _audioPlayer.stop();
-        Vibration.cancel();
-      } catch (e) {
-        print("SYLVIA: Error parando alarma: $e");
-      }
-    });
-
-    // C. CAMBIOS DE IDIOMA
-    service.on('updateLanguage').listen((event) async {
-      print("SYLVIA: Recibida orden de cambio de idioma.");
-      await _updateNotificationText(service, force: true);
-    });
-
     service.on('setAsForeground').listen((event) {
       service.setAsForegroundService();
     });
@@ -106,59 +92,80 @@ void onStart(ServiceInstance service) async {
     service.on('setAsBackground').listen((event) {
       service.setAsBackgroundService();
     });
-  }
 
-  service.on('stopService').listen((event) {
-    _audioPlayer.stop(); // Nos aseguramos de callar antes de morir
-    service.stopSelf();
-  });
+    service.on('stopService').listen((event) {
+        print("SYLVIA: 💀 Recibida orden de apagado. Bye.");
+        _audioPlayer.stop();
+        _audioPlayer.dispose();
+        service.stopSelf();
+    });
 
-  // 3. PULSO CARDÍACO (60s)
-  Timer.periodic(const Duration(seconds: 60), (timer) async {
-    if (service is AndroidServiceInstance) {
-      bool isForeground = await service.isForegroundService();
-      if (!isForeground) {
-        print("SYLVIA: Recuperando rango...");
+    service.on('startAlarm').listen((event) async {
+      try {
         service.setAsForegroundService();
-        await _updateNotificationText(service, force: true);
-      } else {
-        await _updateNotificationText(service, force: false);
+        await _audioPlayer.setReleaseMode(ReleaseMode.loop);
+        await _audioPlayer.play(AssetSource('sounds/alarm.mp3'), volume: 1.0);
+        if (await Vibration.hasVibrator() ?? false) {
+           Vibration.vibrate(pattern: [500, 1000, 500, 1000], repeat: 0);
+        }
+      } catch (e) { print("Error alarma: $e"); }
+    });
+
+    service.on('stopAlarm').listen((event) async {
+      try {
+        await _audioPlayer.stop();
+        Vibration.cancel();
+      } catch (e) { print("Error stop: $e"); }
+    });
+
+    service.on('updateNotification').listen((event) async {
+      if (event == null) return;
+
+      String status = event['status'] ?? 'active';
+      String title = event['title'] ?? 'Oksigenia SOS';
+      String content = event['content'] ?? 'Active Monitor';
+
+      // 🟢 ICONOS REALES
+      String iconName = 'ic_stat_protected'; 
+      
+      if (status == 'paused') {
+        iconName = 'ic_stat_paused'; 
+      } else if (status == 'alarm') {
+        iconName = 'ic_stat_protected'; 
       }
-    }
-  });
-}
 
-// 🧠 FUNCIÓN OPTIMIZADA: Solo notifica si hay cambios
-Future<void> _updateNotificationText(AndroidServiceInstance service, {bool force = false}) async {
-  try {
-    final prefs = await SharedPreferences.getInstance();
-    await prefs.reload(); 
-    final langCode = prefs.getString('language_code') ?? 'es';
-    
-    String title = "Oksigenia SOS";
-    String content = "Protección activada"; 
+      // 🟢 ZOMBIE KILLER: 
+      // ongoing = false permite al sistema matar la notificación al cerrar la app.
+      bool isOngoing = false; 
 
-    if (langCode == 'en') { content = "Protection active"; }
-    else if (langCode == 'fr') { content = "Protection active"; }
-    else if (langCode == 'pt') { content = "Proteção ativa"; }
-    else if (langCode == 'de') { content = "Schutz aktiv"; }
-    else if (langCode == 'it') { content = "Protezione attiva"; }
-    else if (langCode == 'nl') { content = "Beveiliging actief"; }
-    else if (langCode == 'sv') { content = "Skydd aktivt"; }
+      if (status == 'alarm') {
+        isOngoing = true; // Solo fija en emergencia
+      }
 
-    if (!force && content == _lastContent) {
-      return; 
-    }
-
-    _lastContent = content;
-
-    service.setForegroundNotificationInfo(
-      title: title,
-      content: content,
-    );
-    // print("SYLVIA: Notificación actualizada a ($langCode)"); // Comentado para no saturar log
-    
-  } catch (e) {
-    print("SYLVIA ERROR al traducir: $e");
+      try {
+        await flutterLocalNotificationsPlugin.show(
+          id: notificationId,
+          title: title,       
+          body: content,      
+          notificationDetails: NotificationDetails(
+            android: AndroidNotificationDetails(
+              channelId,
+              'Oksigenia SOS - Active Monitor',
+              icon: iconName,
+              ongoing: isOngoing, 
+              importance: Importance.high,
+              priority: Priority.high,
+              onlyAlertOnce: true, 
+              playSound: false,
+              enableVibration: false,
+              showWhen: false,
+              autoCancel: false,
+            ),
+          ),
+        );
+      } catch (e) {
+        print("SYLVIA ERROR: Fallo notificación: $e");
+      }
+    });
   }
 }

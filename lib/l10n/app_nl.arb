@@ -70,7 +70,7 @@
     "ina30s": "🧪 30 sec (TEST Modus)",
     "ina1h": "⏱️ 1 uur (Aanbevolen)",
     "ina2h": "⏱️ 2 uur (Lange pauze)",
-    "testModeWarning": "⚠️ TESTMODUS AAN: Alarm gaat af in 30s.",
+    "testModeWarning": "TESTMODUS AAN: Alarm gaat af in 30s.",
     "toastHoldToSOS": "Houd knop ingedrukt voor SOS",
     "donateDialogTitle": "💎 Steun het Project",
     "donateDialogBody": "Deze app is gratis en open source. Als het je veilig houdt, koop een koffie voor ons.",
@@ -117,5 +117,13 @@
     "holdToCancel": "Ingedrukt houden om te annuleren",
     "statusMonitorStopped": "Monitor gestopt.",
     "statusScreenSleep": "Scherm gaat uit...",
-    "btnRestartSystem": "SYSTEEM HERSTARTEN"
+    "btnRestartSystem": "SYSTEEM HERSTARTEN",
+    "smsDyingGasp": "⚠️ BATTERIJ <5%. Systeem sluit af. Loc:",
+    "smsHelpMessage": "HELP! Ik heb dringend hulp nodig.",
+    "batteryDialogTitle": "Restrizione Batteria",
+    "btnDisableBatterySaver": "DISATTIVA RIST.",
+    "batteryDialogTitle": "Batterij Beperking",
+    "btnDisableBatterySaver": "BESPARING UIT",
+    "batteryDialogBody": "Het systeem beperkt de batterij. Om SOS op de achtergrond te laten werken, selecteer 'Onbeperkt' of 'Niet optimaliseren'.",
+    "permLocMissing": "Locatietoestemming ontbreekt"
 }

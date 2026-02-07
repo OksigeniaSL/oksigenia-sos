@@ -70,7 +70,7 @@
     "ina30s": "🧪 30 sek (TEST-läge)",
     "ina1h": "⏱️ 1 timme (Rekommenderas)",
     "ina2h": "⏱️ 2 timmar (Lång paus)",
-    "testModeWarning": "⚠️ TESTLÄGE PÅ: Larm utlöses om 30s.",
+    "testModeWarning": "TESTLÄGE PÅ: Larm utlöses om 30s.",
     "toastHoldToSOS": "Håll knappen för SOS",
     "donateDialogTitle": "💎 Stöd Projektet",
     "donateDialogBody": "Denna app är fri och öppen källkod. Om den håller dig säker, köp oss en kaffe.",
@@ -117,5 +117,11 @@
     "holdToCancel": "Håll intryckt för att avbryta",
     "statusMonitorStopped": "Övervakning stoppad.",
     "statusScreenSleep": "Skärmen släcks snart...",
-    "btnRestartSystem": "STARTA OM SYSTEMET"
+    "btnRestartSystem": "STARTA OM SYSTEMET",
+    "smsDyingGasp": "⚠️ BATTERI <5%. Systemet stängs av. Plats:",
+    "smsHelpMessage": "HJÄLP! Jag behöver assistans.",
+    "batteryDialogTitle": "Batteribegränsning",
+    "btnDisableBatterySaver": "INAKTIVERA SPARLÄGE",
+    "batteryDialogBody": "Systemet begränsar batteriet. För att SOS ska fungera i bakgrunden, välj 'Ingen begränsning' eller 'Optimera inte'.",
+    "permLocMissing": "Platsbehörighet saknas"
 }
