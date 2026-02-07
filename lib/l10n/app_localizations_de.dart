@@ -226,7 +226,7 @@ class AppLocalizationsDe extends AppLocalizations {
   String get ina2h => '⏱️ 2 Std.';
 
   @override
-  String get testModeWarning => '⚠️ TESTMODUS: 30s.';
+  String get testModeWarning => 'TESTMODUS: 30s.';
 
   @override
   String get toastHoldToSOS => 'Gedrückt halten';

@@ -70,7 +70,7 @@
     "ina30s": "🧪 30 sec (TEST Modus)",
     "ina1h": "⏱️ 1 uur (Aanbevolen)",
     "ina2h": "⏱️ 2 uur (Lange pauze)",
-    "testModeWarning": "⚠️ TESTMODUS AAN: Alarm gaat af in 30s.",
+    "testModeWarning": "TESTMODUS AAN: Alarm gaat af in 30s.",
     "toastHoldToSOS": "Houd knop ingedrukt voor SOS",
     "donateDialogTitle": "💎 Steun het Project",
     "donateDialogBody": "Deze app is gratis en open source. Als het je veilig houdt, koop een koffie voor ons.",

@@ -477,7 +477,7 @@ class SOSLogic extends ChangeNotifier with WidgetsBindingObserver {
       Position pos = await Geolocator.getCurrentPosition(timeLimit: const Duration(seconds: 5))
         .catchError((_) async => await Geolocator.getLastKnownPosition() ?? Position(longitude: 0, latitude: 0, timestamp: DateTime.now(), accuracy: 0, altitude: 0, heading: 0, speed: 0, speedAccuracy: 0, altitudeAccuracy: 0, headingAccuracy: 0));
 
-      msg += "\nhttp://maps.google.com/?q=${pos.latitude},${pos.longitude}";
+      msg += "\nhttps://maps.google.com/?q=${pos.latitude},${pos.longitude}";
       
       for (String number in recipients) {
         await platform.invokeMethod('sendSMS', {"phone": number, "msg": msg});
@@ -549,7 +549,7 @@ class SOSLogic extends ChangeNotifier with WidgetsBindingObserver {
       final LocationSettings locationSettings = AndroidSettings(accuracy: LocationAccuracy.high, forceLocationManager: true, timeLimit: const Duration(seconds: 15));
       Position pos = await Geolocator.getCurrentPosition(locationSettings: locationSettings);
       _setStatus(SOSStatus.locationFixed);
-      msgBody += "\nMaps: http://maps.google.com/?q=${pos.latitude},${pos.longitude}";
+      msgBody += "\nMaps: https://maps.google.com/?q=${pos.latitude},${pos.longitude}";
       msgBody += "\nOSM: https://www.openstreetmap.org/?mlat=${pos.latitude}&mlon=${pos.longitude}";
       msgBody += "\n\n🔋Bat: $batteryLevel% | 📡Alt: ${pos.altitude.toStringAsFixed(0)}m | 🎯Acc: ${pos.accuracy.toStringAsFixed(0)}m";
     } catch (e) {
@@ -602,7 +602,7 @@ class SOSLogic extends ChangeNotifier with WidgetsBindingObserver {
       try {
         Position pos = await Geolocator.getCurrentPosition(timeLimit: const Duration(seconds: 20));
         String updateMsg = "📍 SEGUIMIENTO Oksigenia: Sigo en ruta / Still moving.";
-        updateMsg += "\nMaps: http://maps.google.com/?q=${pos.latitude},${pos.longitude}";
+        updateMsg += "\nMaps: https://maps.google.com/?q=${pos.latitude},${pos.longitude}";
         updateMsg += "\nOSM: https://www.openstreetmap.org/?mlat=${pos.latitude}&mlon=${pos.longitude}";
         await platform.invokeMethod('sendSMS', {"phone": target, "msg": updateMsg});
       } catch (e) {}

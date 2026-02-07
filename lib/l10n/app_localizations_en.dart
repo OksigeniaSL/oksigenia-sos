@@ -229,7 +229,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get ina2h => '⏱️ 2 hours (Long break)';
 
   @override
-  String get testModeWarning => '⚠️ TEST MODE ON: Alert will trigger in 30s.';
+  String get testModeWarning => 'TEST MODE ON: Alert will trigger in 30s.';
 
   @override
   String get toastHoldToSOS => 'Hold button to SOS';

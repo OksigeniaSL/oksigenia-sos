@@ -69,7 +69,7 @@
     "ina30s": "🧪 30 seg",
     "ina1h": "⏱️ 1 hora",
     "ina2h": "⏱️ 2 horas",
-    "testModeWarning": "⚠️ MODO TEST ATIVO: 30s.",
+    "testModeWarning": "MODO TEST ATIVO: 30s.",
     "toastHoldToSOS": "Segure para SOS",
     "donateDialogTitle": "💎 Apoie o Projeto",
     "donateDialogBody": "Pague-nos um café.",

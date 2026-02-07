@@ -231,7 +231,7 @@ class AppLocalizationsNl extends AppLocalizations {
   String get ina2h => '⏱️ 2 uur (Lange pauze)';
 
   @override
-  String get testModeWarning => '⚠️ TESTMODUS AAN: Alarm gaat af in 30s.';
+  String get testModeWarning => 'TESTMODUS AAN: Alarm gaat af in 30s.';
 
   @override
   String get toastHoldToSOS => 'Houd knop ingedrukt voor SOS';

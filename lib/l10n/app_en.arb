@@ -69,7 +69,7 @@
     "ina30s": "🧪 30 sec (TEST Mode)",
     "ina1h": "⏱️ 1 hour (Recommended)",
     "ina2h": "⏱️ 2 hours (Long break)",
-    "testModeWarning": "⚠️ TEST MODE ON: Alert will trigger in 30s.",
+    "testModeWarning": "TEST MODE ON: Alert will trigger in 30s.",
     "toastHoldToSOS": "Hold button to SOS",
     "donateDialogTitle": "💎 Support the Project",
     "donateDialogBody": "This app is Free & Open Source Software. If it keeps you safe, buy us a coffee.",

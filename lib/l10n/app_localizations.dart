@@ -533,7 +533,7 @@ abstract class AppLocalizations {
   /// No description provided for @testModeWarning.
   ///
   /// In en, this message translates to:
-  /// **'⚠️ TEST MODE ON: Alert will trigger in 30s.'**
+  /// **'TEST MODE ON: Alert will trigger in 30s.'**
   String get testModeWarning;
 
   /// No description provided for @toastHoldToSOS.

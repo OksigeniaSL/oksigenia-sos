@@ -228,7 +228,7 @@ class AppLocalizationsFr extends AppLocalizations {
   String get ina2h => '⏱️ 2 heures';
 
   @override
-  String get testModeWarning => '⚠️ MODE TEST ACTIVÉ : 30s.';
+  String get testModeWarning => 'MODE TEST ACTIVÉ : 30s.';
 
   @override
   String get toastHoldToSOS => 'Maintenez pour SOS';

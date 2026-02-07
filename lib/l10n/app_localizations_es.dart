@@ -47,7 +47,7 @@ class AppLocalizationsEs extends AppLocalizations {
   String get menuPrivacy => 'Privacidad y Legal';
 
   @override
-  String get menuDonate => 'Donar / Donate';
+  String get menuDonate => 'Donar';
 
   @override
   String get menuX => 'X (Twitter)';
@@ -60,7 +60,7 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String panicMessage(Object link) {
-    return '🆘 *ALERTA OKSIGENIA* 🆘\n\nNecesito ayuda urgente.\n📍 Ubicación: $link\n\nRespira > Inspira > Crece;';
+    return '🆘 *ALERTA OKSIGENIA* 🆘\n\nNecesito ayuda urgente.\n📍 Ubicación: $link';
   }
 
   @override
@@ -230,7 +230,7 @@ class AppLocalizationsEs extends AppLocalizations {
   String get ina2h => '⏱️ 2 horas (Pausa larga)';
 
   @override
-  String get testModeWarning => '⚠️ MODO TEST: La alerta saltará en 30s.';
+  String get testModeWarning => 'MODO TEST: La alerta saltará en 30s.';
 
   @override
   String get toastHoldToSOS => 'Mantén pulsado para SOS';

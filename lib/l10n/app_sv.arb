@@ -70,7 +70,7 @@
     "ina30s": "🧪 30 sek (TEST-läge)",
     "ina1h": "⏱️ 1 timme (Rekommenderas)",
     "ina2h": "⏱️ 2 timmar (Lång paus)",
-    "testModeWarning": "⚠️ TESTLÄGE PÅ: Larm utlöses om 30s.",
+    "testModeWarning": "TESTLÄGE PÅ: Larm utlöses om 30s.",
     "toastHoldToSOS": "Håll knappen för SOS",
     "donateDialogTitle": "💎 Stöd Projektet",
     "donateDialogBody": "Denna app är fri och öppen källkod. Om den håller dig säker, köp oss en kaffe.",

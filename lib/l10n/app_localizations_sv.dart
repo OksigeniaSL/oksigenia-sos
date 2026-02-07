@@ -230,7 +230,7 @@ class AppLocalizationsSv extends AppLocalizations {
   String get ina2h => '⏱️ 2 timmar (Lång paus)';
 
   @override
-  String get testModeWarning => '⚠️ TESTLÄGE PÅ: Larm utlöses om 30s.';
+  String get testModeWarning => 'TESTLÄGE PÅ: Larm utlöses om 30s.';
 
   @override
   String get toastHoldToSOS => 'Håll knappen för SOS';
