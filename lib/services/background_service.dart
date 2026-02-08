@@ -11,13 +11,14 @@ import 'package:vibration/vibration.dart';
 import 'package:sensors_plus/sensors_plus.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:geolocator/geolocator.dart';
-import 'package:telephony/telephony.dart'; // 🟢 USAMOS TELEPHONY (SÍ COMPILA)
+import 'package:telephony/telephony.dart';
 import 'package:battery_plus/battery_plus.dart';
 
 const String channelId = 'my_foreground';
 const int notificationId = 888;
 
-final AudioPlayer _audioPlayer = AudioPlayer();
+// 🟢 CAMBIO: AudioPlayer ahora es dinámico, no estático
+AudioPlayer? _audioPlayer;
 final Telephony _telephony = Telephony.instance;
 final Battery _battery = Battery();
 
@@ -34,7 +35,7 @@ Map<String, String> _texts = {
   'smsDyingGasp': 'BATTERY CRITICAL. Bye.'
 };
 
-// 🟢 VARIABLES GLOBALES
+// Variables Globales
 Timer? _zombieTimer;
 DateTime _lastStopTimestamp = DateTime.fromMillisecondsSinceEpoch(0);
 
@@ -63,6 +64,8 @@ Future<void> initializeService() async {
       isForegroundMode: true,
       notificationChannelId: 'my_foreground',
       foregroundServiceNotificationId: 888,
+      initialNotificationTitle: 'Oksigenia SOS',
+      initialNotificationContent: 'System Initializing...',
       autoStart: true, 
       autoStartOnBoot: true, 
     ),
@@ -96,6 +99,9 @@ void onStart(ServiceInstance service) async {
   bool _sensorCooldown = false;
   const double _impactThreshold = 12.0;
   double _lastG = 1.0;
+  
+  // 🟢 FIX: Marca de tiempo al iniciar el servicio
+  final DateTime serviceStartupTime = DateTime.now();
 
   const AndroidInitializationSettings initializationSettingsAndroid =
       AndroidInitializationSettings('ic_stat_protected');
@@ -103,19 +109,58 @@ void onStart(ServiceInstance service) async {
       InitializationSettings(android: initializationSettingsAndroid);
   await flutterLocalNotificationsPlugin.initialize(settings: initializationSettings);
 
-  try {
-    await _audioPlayer.setAudioContext(AudioContext(
-      android: AudioContextAndroid(
-          isSpeakerphoneOn: true,
-          stayAwake: true,
-          contentType: AndroidContentType.sonification,
-          usageType: AndroidUsageType.alarm,
-          audioFocus: AndroidAudioFocus.gainTransient),
-      iOS: AudioContextIOS(category: AVAudioSessionCategory.playback),
-    ));
-  } catch (e) {
-    print("SYLVIA ERROR: Audio init failed: $e");
+  // ---------------------------------------------------------------------------
+  // 1. GESTIÓN DE AUDIO ROBUSTA (Crear y Destruir)
+  // ---------------------------------------------------------------------------
+  
+  Future<void> _reproducirSonidoAlarma() async {
+    try {
+      // Matar anterior si existe
+      await _audioPlayer?.stop();
+      await _audioPlayer?.dispose();
+      _audioPlayer = null;
+
+      // Crear nuevo fresco
+      _audioPlayer = AudioPlayer();
+      
+      await _audioPlayer!.setAudioContext(AudioContext(
+        android: AudioContextAndroid(
+            isSpeakerphoneOn: true,
+            stayAwake: true,
+            contentType: AndroidContentType.music,
+            usageType: AndroidUsageType.alarm,
+            audioFocus: AndroidAudioFocus.gainTransient),
+        iOS: AudioContextIOS(category: AVAudioSessionCategory.playback),
+      ));
+      
+      await _audioPlayer!.setVolume(1.0);
+      await _audioPlayer!.setReleaseMode(ReleaseMode.loop);
+      await _audioPlayer!.play(AssetSource('sounds/alarm.mp3'));
+    } catch (e) {
+      print("SYLVIA AUDIO ERROR: $e");
+    }
   }
+
+  Future<void> _detenerSonido() async {
+    try {
+      await _audioPlayer?.stop();
+      await _audioPlayer?.dispose();
+      _audioPlayer = null;
+    } catch (_) {}
+  }
+
+  Future<void> _reproducirConfirmacion() async {
+    try {
+      await _audioPlayer?.stop();
+      _audioPlayer = AudioPlayer(); // Nuevo player para el beep
+      await _audioPlayer!.setVolume(1.0);
+      await _audioPlayer!.play(AssetSource('sounds/send.mp3'));
+    } catch (_) {}
+  }
+
+  // ---------------------------------------------------------------------------
+  // 2. FUNCIONES AUXILIARES
+  // ---------------------------------------------------------------------------
 
   void _activarEscudo({int segundos = 3}) {
     print("SYLVIA SERVICE: 🛡️ Activando escudo por $segundos segundos...");
@@ -164,7 +209,6 @@ void onStart(ServiceInstance service) async {
 
     for (String number in _recipients) {
       try {
-        // Telephony maneja multipart automáticamente
         await _telephony.sendSms(
           to: number,
           message: msgBody,
@@ -176,12 +220,7 @@ void onStart(ServiceInstance service) async {
       }
     }
     
-    // 🟢 SONIDO DE CONFIRMACIÓN
-    try {
-      await _audioPlayer.setReleaseMode(ReleaseMode.stop);
-      await _audioPlayer.setVolume(1.0); 
-      await _audioPlayer.play(AssetSource('sounds/send.mp3'));
-    } catch (_) {}
+    await _reproducirConfirmacion();
   }
 
   Future<void> _lanzarAlarma() async {
@@ -199,8 +238,8 @@ void onStart(ServiceInstance service) async {
       if (service is AndroidServiceInstance) service.setAsForegroundService();
       service.invoke("onAlarmTriggered");
 
-      await _audioPlayer.setReleaseMode(ReleaseMode.loop);
-      await _audioPlayer.play(AssetSource('sounds/alarm.mp3'), volume: 1.0);
+      // 🟢 USAR EL NUEVO MÉTODO DE AUDIO ROBUSTO
+      await _reproducirSonidoAlarma();
 
       if (await Vibration.hasVibrator() ?? false) {
         Vibration.vibrate(pattern: [500, 1000, 500, 1000], repeat: 0);
@@ -212,7 +251,7 @@ void onStart(ServiceInstance service) async {
         if (!_isAlarmActive) {
            print("SYLVIA SERVICE: 🛑 Alarma cancelada detectada dentro del timer. Abortando.");
            timer.cancel();
-           _audioPlayer.stop();
+           await _detenerSonido();
            Vibration.cancel();
            return;
         }
@@ -238,15 +277,13 @@ void onStart(ServiceInstance service) async {
 
         if (_zombieCountdown <= 0) {
           timer.cancel();
-          _audioPlayer.stop();
+          await _detenerSonido();
           Vibration.cancel();
           
           await _enviarSMSZombie();
 
           await prefs.setBool('sos_sent_recently', true);
 
-          // 🟢 FIX CRÍTICO: RESETEAR RELOJ DE INACTIVIDAD
-          // Esto evita que la alarma salte de nuevo inmediatamente
           _lastMovementTime = DateTime.now().add(const Duration(seconds: 60));
 
           flutterLocalNotificationsPlugin.show(
@@ -277,6 +314,11 @@ void onStart(ServiceInstance service) async {
     _accSub = accelerometerEventStream(samplingPeriod: SensorInterval.gameInterval)
         .listen((event) {
       
+      // 🟢 FIX: Ignorar los primeros 3 segundos de vida del servicio
+      if (DateTime.now().difference(serviceStartupTime).inSeconds < 3) {
+        return;
+      }
+
       if (DateTime.now().difference(_lastStopTimestamp).inSeconds < 10) {
         return;
       }
@@ -324,17 +366,60 @@ void onStart(ServiceInstance service) async {
     });
   }
 
+  // ---------------------------------------------------------------------------
+  // 3. CARGA DE CONFIGURACIÓN
+  // ---------------------------------------------------------------------------
+
+  Future<void> _loadConfigFromDisk() async {
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      _recipients = prefs.getStringList('contacts') ?? [];
+      _customMessage = prefs.getString('sos_message') ?? "";
+      
+      bool savedFall = prefs.getBool('fall_detection_enabled') ?? false;
+      bool savedInactivity = prefs.getBool('inactivity_monitor_enabled') ?? false;
+      _inactivityLimitSeconds = prefs.getInt('inactivity_time') ?? 3600;
+
+      print("SYLVIA BOOT: Contactos: ${_recipients.length}, Fall: $savedFall, Inactivity: $savedInactivity");
+
+      flutterLocalNotificationsPlugin.show(
+          id: notificationId,
+          title: 'Oksigenia SOS',
+          body: 'System Ready',
+          notificationDetails: const NotificationDetails(
+              android: AndroidNotificationDetails(
+                  channelId, 'Oksigenia SOS - Active Monitor',
+                  icon: 'ic_stat_protected',
+                  ongoing: true,
+                  importance: Importance.high,
+                  priority: Priority.high))
+      );
+
+      if (savedFall || savedInactivity) {
+        _isMonitoringImpact = savedFall;
+        _isMonitoringInactivity = savedInactivity;
+        _startSensorListener();
+        if (_isMonitoringInactivity) _startInactivityChecker();
+      }
+    } catch (e) {
+      print("SYLVIA BOOT ERROR: $e");
+    }
+  }
+
+  // ---------------------------------------------------------------------------
+  // 4. LISTENERS DEL SERVICIO
+  // ---------------------------------------------------------------------------
+
   if (service is AndroidServiceInstance) {
     service.on('setAsForeground').listen((event) => service.setAsForegroundService());
     service.on('setAsBackground').listen((event) => service.setAsBackgroundService());
 
-    service.on('stopService').listen((event) {
+    service.on('stopService').listen((event) async {
       print("SYLVIA: 💀 Recibida orden de apagado.");
       _accSub?.cancel();
       _inactivityCheckTimer?.cancel();
       _zombieTimer?.cancel();
-      _audioPlayer.stop();
-      _audioPlayer.dispose();
+      await _detenerSonido();
       service.stopSelf();
     });
 
@@ -406,7 +491,7 @@ void onStart(ServiceInstance service) async {
       try {
         final prefs = await SharedPreferences.getInstance();
         await prefs.setBool('is_alarm_active', false);
-        await _audioPlayer.stop();
+        await _detenerSonido();
         Vibration.cancel();
         
         flutterLocalNotificationsPlugin.show(
@@ -453,6 +538,8 @@ void onStart(ServiceInstance service) async {
       } catch (e) {}
     });
   }
+  
+  await _loadConfigFromDisk();
 }
 
 @pragma('vm:entry-point')

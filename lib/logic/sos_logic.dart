@@ -14,7 +14,7 @@ import 'package:vibration/vibration.dart';
 import 'package:flutter_background_service/flutter_background_service.dart';
 import 'package:battery_plus/battery_plus.dart';
 import 'package:oksigenia_sos/l10n/app_localizations.dart'; 
-import 'package:telephony/telephony.dart'; // 🟢 USAMOS TELEPHONY
+import 'package:telephony/telephony.dart'; 
 import '../services/preferences_service.dart';
 import '../screens/settings_screen.dart';  
 import '../screens/alarm_screen.dart';
@@ -39,6 +39,8 @@ class SOSLogic extends ChangeNotifier with WidgetsBindingObserver {
   bool _isInactivityMonitorActive = false;
   
   bool _uiCooldown = false; 
+  // 🟢 Bandera de ignorar sensores activada por defecto
+  bool _ignoreSensors = true; 
   
   AlertCause _lastTrigger = AlertCause.manual;
   AlertCause get lastTrigger => _lastTrigger;
@@ -145,6 +147,12 @@ class SOSLogic extends ChangeNotifier with WidgetsBindingObserver {
 
     WidgetsBinding.instance.removeObserver(this);
     WidgetsBinding.instance.addObserver(this);
+    
+    // 🟢 FIX: Limpieza de buffer. Forzamos 1.0G visualmente al inicio.
+    _visualGForce = 1.0;
+    _ignoreSensors = true;
+    // Aumentado a 4 segundos para asegurar purga completa
+    Future.delayed(const Duration(seconds: 4), () => _ignoreSensors = false);
     
     await _loadSettings();
     await _checkPermissions(); 
@@ -256,7 +264,6 @@ class SOSLogic extends ChangeNotifier with WidgetsBindingObserver {
       if (savedInactivityState) prefs.saveInactivityState(false);
     }
 
-    // 🟢 FIX: Enviar configuración al servicio AL FINAL
     final service = FlutterBackgroundService();
     if (await service.isRunning()) {
        service.invoke("setMonitoring", {
@@ -399,7 +406,11 @@ class SOSLogic extends ChangeNotifier with WidgetsBindingObserver {
       _accelerometerSubscription = accelerometerEventStream(samplingPeriod: SensorInterval.gameInterval)
         .listen((AccelerometerEvent event) {
           
-          if (_uiCooldown) return;
+          // 🟢 FIX CRÍTICO: Bloqueo TOTAL al principio.
+          // Si _ignoreSensors es true, NO PROCESAMOS NADA.
+          if (_ignoreSensors) {
+            return;
+          }
 
           _lastSensorPacket = DateTime.now(); 
 
@@ -411,6 +422,11 @@ class SOSLogic extends ChangeNotifier with WidgetsBindingObserver {
           } else {
             _visualGForce = (_visualGForce * 0.90) + (instantG * 0.10); 
           }
+          
+          notifyListeners();
+
+          if (_uiCooldown) return;
+          if (_status == SOSStatus.sent) return;
 
           double delta = (instantG - lastG).abs();
           lastG = instantG;
@@ -429,7 +445,6 @@ class SOSLogic extends ChangeNotifier with WidgetsBindingObserver {
             Future.delayed(const Duration(seconds: 5), () => _uiCooldown = false);
             _triggerPreAlert(AlertCause.fall);
           }
-          notifyListeners();
         }, onError: (e) => debugPrint("Sensor Error: $e"));
     } catch (e) { debugPrint("Error acelerómetro: $e"); }
   }
@@ -625,24 +640,6 @@ class SOSLogic extends ChangeNotifier with WidgetsBindingObserver {
     }
   }
 
-  // 🟢 NUEVO: Función para APAGAR TOTALMENTE EL SISTEMA
-  Future<void> stopSystem() async {
-    final service = FlutterBackgroundService();
-    if (await service.isRunning()) {
-      service.invoke("stopService"); 
-    }
-    
-    final prefs = PreferencesService();
-    prefs.saveFallDetectionState(false);
-    prefs.saveInactivityState(false);
-    
-    _isFallDetectionActive = false;
-    _isInactivityMonitorActive = false;
-    _setStatus(SOSStatus.ready);
-    
-    notifyListeners();
-  }
-
   Future<void> _triggerDyingGasp() async {
     _isDyingGaspSent = true; 
     debugPrint("🪫 DYING GASP ACTIVADO");
@@ -728,6 +725,23 @@ class SOSLogic extends ChangeNotifier with WidgetsBindingObserver {
         (route) => false
       );
     }
+    notifyListeners();
+  }
+
+  Future<void> stopSystem() async {
+    final service = FlutterBackgroundService();
+    if (await service.isRunning()) {
+      service.invoke("stopService"); 
+    }
+    
+    final prefs = PreferencesService();
+    prefs.saveFallDetectionState(false);
+    prefs.saveInactivityState(false);
+    
+    _isFallDetectionActive = false;
+    _isInactivityMonitorActive = false;
+    _setStatus(SOSStatus.ready);
+    
     notifyListeners();
   }
 

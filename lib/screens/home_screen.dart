@@ -400,8 +400,8 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver, Ti
                 alignment: Alignment.center,
                 children: [
                   Container(
-                    width: 200, 
-                    height: 200,
+                    width: 195, 
+                    height: 195,
                     decoration: BoxDecoration(
                       shape: BoxShape.circle,
                       gradient: const LinearGradient(
