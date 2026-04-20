@@ -131,9 +131,9 @@ void onStart(ServiceInstance service) async {
         android: AudioContextAndroid(
             isSpeakerphoneOn: true,
             stayAwake: true,
-            contentType: AndroidContentType.music,
+            contentType: AndroidContentType.sonification,
             usageType: AndroidUsageType.alarm,
-            audioFocus: AndroidAudioFocus.gainTransient),
+            audioFocus: AndroidAudioFocus.gain),
         iOS: AudioContextIOS(category: AVAudioSessionCategory.playback),
       ));
       
