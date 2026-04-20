@@ -330,6 +330,7 @@ void onStart(ServiceInstance service) async {
     _sentinelYellow = false;
     _yellowTimer?.cancel();
     _yellowCountdown = 60;
+    _gBuffer.clear();
   }
 
   bool _isRhythmicMovement() {
