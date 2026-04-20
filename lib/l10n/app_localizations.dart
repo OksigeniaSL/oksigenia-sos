@@ -191,7 +191,7 @@ abstract class AppLocalizations {
   /// No description provided for @menuX.
   ///
   /// In en, this message translates to:
-  /// **'X (Twitter)'**
+  /// **'𝕏 (Twitter)'**
   String get menuX;
 
   /// No description provided for @menuInsta.

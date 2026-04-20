@@ -97,10 +97,14 @@ void onStart(ServiceInstance service) async {
   Timer? _inactivityCheckTimer;
 
   bool _sensorCooldown = false;
-  const double _impactThreshold = 12.0;
+  const double _yellowThreshold = 3.5;
   double _lastG = 1.0;
-  
-  // 🟢 FIX: Marca de tiempo al iniciar el servicio
+  final List<double> _gBuffer = [];
+  bool _sentinelYellow = false;
+  int _yellowCountdown = 60;
+  Timer? _yellowTimer;
+  Timer? _shieldTimer;
+
   final DateTime serviceStartupTime = DateTime.now();
 
   const AndroidInitializationSettings initializationSettingsAndroid =
@@ -142,17 +146,19 @@ void onStart(ServiceInstance service) async {
   }
 
   Future<void> _detenerSonido() async {
-    try {
-      await _audioPlayer?.stop();
-      await _audioPlayer?.dispose();
-      _audioPlayer = null;
-    } catch (_) {}
+    final player = _audioPlayer;
+    _audioPlayer = null;
+    try { await player?.stop(); } catch (_) {}
+    try { await player?.dispose(); } catch (_) {}
   }
 
   Future<void> _reproducirConfirmacion() async {
+    final old = _audioPlayer;
+    _audioPlayer = null;
+    try { await old?.stop(); } catch (_) {}
+    try { await old?.dispose(); } catch (_) {}
     try {
-      await _audioPlayer?.stop();
-      _audioPlayer = AudioPlayer(); // Nuevo player para el beep
+      _audioPlayer = AudioPlayer();
       await _audioPlayer!.setVolume(1.0);
       await _audioPlayer!.play(AssetSource('sounds/send.mp3'));
     } catch (_) {}
@@ -163,9 +169,9 @@ void onStart(ServiceInstance service) async {
   // ---------------------------------------------------------------------------
 
   void _activarEscudo({int segundos = 3}) {
-    print("SYLVIA SERVICE: 🛡️ Activando escudo por $segundos segundos...");
     _sensorCooldown = true;
-    Future.delayed(Duration(seconds: segundos), () => _sensorCooldown = false);
+    _shieldTimer?.cancel();
+    _shieldTimer = Timer(Duration(seconds: segundos), () => _sensorCooldown = false);
   }
 
   Future<void> _enviarSMSZombie() async {
@@ -193,14 +199,22 @@ void onStart(ServiceInstance service) async {
     } catch (_) {}
 
     try {
-      print("SYLVIA: Obteniendo posición GPS crítica...");
-      Position pos = await Geolocator.getCurrentPosition(
-          locationSettings: const LocationSettings(
-              accuracy: LocationAccuracy.high, timeLimit: Duration(seconds: 15)));
-      
-      msgBody += "\nMaps: https://maps.google.com/?q=${pos.latitude},${pos.longitude}";
-      msgBody += "\nOSM: https://www.openstreetmap.org/?mlat=${pos.latitude}&mlon=${pos.longitude}";
-      msgBody += "\n\n🔋Bat: $batteryLevel% | 📡Alt: ${pos.altitude.toStringAsFixed(0)}m | 🎯Acc: ${pos.accuracy.toStringAsFixed(0)}m";
+      Position? pos;
+      try {
+        pos = await Geolocator.getCurrentPosition(
+            locationSettings: const LocationSettings(
+                accuracy: LocationAccuracy.high, timeLimit: Duration(seconds: 5)));
+      } catch (_) {
+        pos = await Geolocator.getLastKnownPosition();
+      }
+      if (pos != null) {
+        msgBody += "\nMaps: https://maps.google.com/?q=${pos.latitude},${pos.longitude}";
+        msgBody += "\nOSM: https://www.openstreetmap.org/?mlat=${pos.latitude}&mlon=${pos.longitude}";
+        msgBody += "\n\n🔋Bat: $batteryLevel% | 📡Alt: ${pos.altitude.toStringAsFixed(0)}m | 🎯Acc: ${pos.accuracy.toStringAsFixed(0)}m";
+      } else {
+        msgBody += "\n(GPS Error/Timeout)";
+        msgBody += "\n\n🔋Bat: $batteryLevel% (No Loc)";
+      }
     } catch (e) {
       print("SYLVIA ERROR: GPS Falló ($e). Enviando sin loc.");
       msgBody += "\n(GPS Error/Timeout)";
@@ -307,6 +321,60 @@ void onStart(ServiceInstance service) async {
     }
   }
 
+  // ---------------------------------------------------------------------------
+  // Smart Sentinel — ordered after _lanzarAlarma (Dart requires declaration before use)
+  // ---------------------------------------------------------------------------
+
+  void _returnToGreen() {
+    _sentinelYellow = false;
+    _yellowTimer?.cancel();
+    _yellowCountdown = 60;
+  }
+
+  bool _isRhythmicMovement() {
+    if (_gBuffer.length < 30) return false;
+    final recent = _gBuffer.length > 60
+        ? _gBuffer.sublist(_gBuffer.length - 60)
+        : List<double>.from(_gBuffer);
+    int crossings = 0;
+    bool aboveOne = recent[0] > 1.0;
+    for (int i = 1; i < recent.length; i++) {
+      final bool curr = recent[i] > 1.0;
+      if (curr != aboveOne) {
+        crossings++;
+        aboveOne = curr;
+      }
+    }
+    // Walking/running generates ~2 steps/sec → ≥3 crossings in ~1 second of data
+    return crossings >= 3;
+  }
+
+  void _enterYellowState() {
+    if (_sentinelYellow || _isAlarmActive) return;
+    print("SYLVIA SERVICE: 🟡 Impacto detectado. Análisis Smart Sentinel ($_yellowCountdown s)...");
+    _sentinelYellow = true;
+    _yellowCountdown = 60;
+    _yellowTimer?.cancel();
+    _yellowTimer = Timer.periodic(const Duration(seconds: 2), (timer) {
+      _yellowCountdown -= 2;
+      if (_isRhythmicMovement()) {
+        print("SYLVIA SERVICE: ✅ Movimiento rítmico. Falso positivo.");
+        _returnToGreen();
+        timer.cancel();
+        return;
+      }
+      if (_yellowCountdown <= 0) {
+        timer.cancel();
+        _returnToGreen();
+        if (!_isAlarmActive) {
+          print("SYLVIA SERVICE: 🔴 Sin movimiento tras 60s. ACTIVANDO ALARMA.");
+          _isAlarmActive = true;
+          _lanzarAlarma();
+        }
+      }
+    });
+  }
+
   void _startSensorListener() {
     if (_accSub != null) return;
     print("SYLVIA SERVICE: Iniciando escucha de sensores...");
@@ -328,12 +396,15 @@ void onStart(ServiceInstance service) async {
       double rawMagnitude = sqrt(event.x * event.x + event.y * event.y + event.z * event.z);
       double instantG = rawMagnitude / 9.81;
 
-      if (_isMonitoringImpact && instantG > _impactThreshold) {
-        print("SYLVIA BACKGROUND: 💥 CAÍDA DETECTADA ($instantG G)");
-        _activarEscudo(segundos: 5);
-        _isAlarmActive = true;
-        _lanzarAlarma();
-        return;
+      if (_isMonitoringImpact) {
+        _gBuffer.add(instantG);
+        if (_gBuffer.length > 150) _gBuffer.removeAt(0);
+
+        if (instantG > _yellowThreshold && !_sentinelYellow) {
+          print("SYLVIA BACKGROUND: ⚡ Impacto ${instantG.toStringAsFixed(1)}G → Smart Sentinel");
+          _activarEscudo(segundos: 3);
+          _enterYellowState();
+        }
       }
 
       if (_isMonitoringInactivity) {
@@ -419,6 +490,8 @@ void onStart(ServiceInstance service) async {
       _accSub?.cancel();
       _inactivityCheckTimer?.cancel();
       _zombieTimer?.cancel();
+      _yellowTimer?.cancel();
+      _shieldTimer?.cancel();
       await _detenerSonido();
       service.stopSelf();
     });
@@ -483,6 +556,7 @@ void onStart(ServiceInstance service) async {
       _lastStopTimestamp = DateTime.now();
       
       _isAlarmActive = false;
+      _returnToGreen();
       _activarEscudo(segundos: 4);
       _zombieTimer?.cancel();
       

@@ -1,6 +1,5 @@
 import 'dart:async';
 import 'dart:math';
-import 'dart:io'; 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart'; 
 import 'package:geolocator/geolocator.dart';
@@ -9,7 +8,6 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:audioplayers/audioplayers.dart';
 import 'package:sensors_plus/sensors_plus.dart';
 import 'package:url_launcher/url_launcher.dart';
-import 'package:wakelock_plus/wakelock_plus.dart';
 import 'package:vibration/vibration.dart';
 import 'package:flutter_background_service/flutter_background_service.dart';
 import 'package:battery_plus/battery_plus.dart';
@@ -451,10 +449,10 @@ class SOSLogic extends ChangeNotifier with WidgetsBindingObserver {
 
   Future<void> _checkPermissions() async {
     await [
-      Permission.location, 
-      Permission.sms, 
-      Permission.notification, 
-      Permission.activityRecognition 
+      Permission.location,
+      Permission.sms,
+      Permission.notification,
+      Permission.activityRecognition,
     ].request();
   }
 
@@ -780,12 +778,25 @@ class SOSLogic extends ChangeNotifier with WidgetsBindingObserver {
     }
     
     try {
-      final LocationSettings locationSettings = AndroidSettings(accuracy: LocationAccuracy.high, forceLocationManager: true, timeLimit: const Duration(seconds: 15));
-      Position pos = await Geolocator.getCurrentPosition(locationSettings: locationSettings);
-      _setStatus(SOSStatus.locationFixed);
-      msgBody += "\nMaps: https://maps.google.com/?q=${pos.latitude},${pos.longitude}";
-      msgBody += "\nOSM: https://www.openstreetmap.org/?mlat=${pos.latitude}&mlon=${pos.longitude}";
-      msgBody += "\n\n🔋Bat: $batteryLevel% | 📡Alt: ${pos.altitude.toStringAsFixed(0)}m | 🎯Acc: ${pos.accuracy.toStringAsFixed(0)}m";
+      Position? pos;
+      try {
+        final LocationSettings locationSettings = AndroidSettings(
+            accuracy: LocationAccuracy.high,
+            forceLocationManager: true,
+            timeLimit: const Duration(seconds: 5));
+        pos = await Geolocator.getCurrentPosition(locationSettings: locationSettings);
+      } catch (_) {
+        pos = await Geolocator.getLastKnownPosition();
+      }
+      if (pos != null) {
+        _setStatus(SOSStatus.locationFixed);
+        msgBody += "\nMaps: https://maps.google.com/?q=${pos.latitude},${pos.longitude}";
+        msgBody += "\nOSM: https://www.openstreetmap.org/?mlat=${pos.latitude}&mlon=${pos.longitude}";
+        msgBody += "\n\n🔋Bat: $batteryLevel% | 📡Alt: ${pos.altitude.toStringAsFixed(0)}m | 🎯Acc: ${pos.accuracy.toStringAsFixed(0)}m";
+      } else {
+        msgBody += "\n(GPS Error/Timeout)";
+        msgBody += "\n\n🔋Bat: $batteryLevel% (No Loc)";
+      }
     } catch (e) {
       msgBody += "\n(GPS Error/Timeout)";
       msgBody += "\n\n🔋Bat: $batteryLevel% (No Loc)";

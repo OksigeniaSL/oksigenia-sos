@@ -50,7 +50,7 @@ class AppLocalizationsIt extends AppLocalizations {
   String get menuDonate => 'Dona / Donate';
 
   @override
-  String get menuX => 'X (Twitter)';
+  String get menuX => '𝕏 (Twitter)';
 
   @override
   String get menuInsta => 'Instagram';
