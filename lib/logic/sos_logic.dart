@@ -729,17 +729,18 @@ class SOSLogic extends ChangeNotifier with WidgetsBindingObserver {
   Future<void> stopSystem() async {
     final service = FlutterBackgroundService();
     if (await service.isRunning()) {
-      service.invoke("stopService"); 
+      service.invoke("stopService");
+      await Future.delayed(const Duration(milliseconds: 600));
     }
-    
+
     final prefs = PreferencesService();
     prefs.saveFallDetectionState(false);
     prefs.saveInactivityState(false);
-    
+
     _isFallDetectionActive = false;
     _isInactivityMonitorActive = false;
     _setStatus(SOSStatus.ready);
-    
+
     notifyListeners();
   }
 

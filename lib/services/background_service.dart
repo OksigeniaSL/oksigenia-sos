@@ -495,7 +495,11 @@ void onStart(ServiceInstance service) async {
       _zombieTimer?.cancel();
       _yellowTimer?.cancel();
       _shieldTimer?.cancel();
-      await _detenerSonido();
+      try { await _detenerSonido(); } catch (_) {}
+      try { await flutterLocalNotificationsPlugin.cancel(notificationId); } catch (_) {}
+      if (service is AndroidServiceInstance) {
+        try { await service.setAsBackgroundService(); } catch (_) {}
+      }
       service.stopSelf();
     });
 
