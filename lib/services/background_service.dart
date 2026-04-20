@@ -239,6 +239,7 @@ void onStart(ServiceInstance service) async {
 
   Future<void> _lanzarAlarma() async {
     print("SYLVIA SERVICE: 🚨 EJECUTANDO PROTOCOLO DE ALARMA");
+    _isAlarmActive = true;
     try {
       final prefs = await SharedPreferences.getInstance();
       await prefs.setBool('is_alarm_active', true);
