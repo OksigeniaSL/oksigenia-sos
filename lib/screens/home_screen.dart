@@ -12,7 +12,6 @@ import 'package:oksigenia_sos/services/remote_config_service.dart';
 import 'package:oksigenia_sos/screens/update_screen.dart';
 import 'package:oksigenia_sos/screens/sent_screen.dart';
 import 'package:vibration/vibration.dart';
-import 'package:slide_to_act/slide_to_act.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -24,6 +23,7 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver, Ti
   late SOSLogic _sosLogic; 
   bool _hasShownWarning = false;
   late AnimationController _sosHoldController;
+  late AnimationController _stopHoldController;
 
   @override
   void initState() {
@@ -44,6 +44,18 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver, Ti
         _triggerHaptic();
         _sosHoldController.reset();
         _sosLogic.sendSOS();
+      }
+    });
+
+    _stopHoldController = AnimationController(
+      vsync: this,
+      duration: const Duration(seconds: 2),
+    );
+    _stopHoldController.addStatusListener((status) async {
+      if (status == AnimationStatus.completed) {
+        _triggerHaptic();
+        await _sosLogic.stopSystem();
+        if (mounted) SystemNavigator.pop();
       }
     });
     
@@ -115,7 +127,8 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver, Ti
   void dispose() {
     WidgetsBinding.instance.removeObserver(this);
     _sosHoldController.dispose();
-    WakelockPlus.disable(); 
+    _stopHoldController.dispose();
+    WakelockPlus.disable();
     super.dispose();
   }
 
@@ -518,24 +531,56 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver, Ti
                   : null
             ),
             
-            // 🟢 SLIDE TO STOP
+            // HOLD TO STOP
             const SizedBox(height: 20),
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 30, vertical: 10),
-              child: SlideAction(
-                borderRadius: 12,
-                elevation: 0,
-                innerColor: Colors.redAccent,
-                outerColor: Colors.white10,
-                sliderButtonIcon: const Icon(Icons.power_settings_new, color: Colors.white),
-                text: l10n.slideStopSystem ?? "SLIDE TO STOP", 
-                textStyle: const TextStyle(color: Colors.white, fontSize: 16, fontWeight: FontWeight.bold),
-                onSubmit: () async {
-                  await _sosLogic.stopSystem();
-                  await Future.delayed(const Duration(milliseconds: 500));
-                  SystemNavigator.pop();
-                  return null;
+              child: GestureDetector(
+                behavior: HitTestBehavior.opaque,
+                onPanDown: (_) => _stopHoldController.forward(),
+                onPanEnd: (_) {
+                  if (_stopHoldController.status != AnimationStatus.completed) {
+                    _stopHoldController.reverse();
+                  }
                 },
+                onPanCancel: () => _stopHoldController.reverse(),
+                child: ClipRRect(
+                  borderRadius: BorderRadius.circular(12),
+                  child: SizedBox(
+                    height: 54,
+                    child: AnimatedBuilder(
+                      animation: _stopHoldController,
+                      builder: (context, child) {
+                        return Stack(
+                          children: [
+                            Container(color: Colors.white10),
+                            FractionallySizedBox(
+                              widthFactor: _stopHoldController.value,
+                              child: Container(color: Colors.redAccent),
+                            ),
+                            Center(
+                              child: Row(
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                children: [
+                                  const Icon(Icons.power_settings_new, color: Colors.white, size: 20),
+                                  const SizedBox(width: 10),
+                                  Text(
+                                    l10n.slideStopSystem,
+                                    style: const TextStyle(
+                                      color: Colors.white,
+                                      fontSize: 15,
+                                      fontWeight: FontWeight.bold,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ],
+                        );
+                      },
+                    ),
+                  ),
+                ),
               ),
             ),
             

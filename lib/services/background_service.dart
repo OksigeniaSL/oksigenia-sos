@@ -46,7 +46,7 @@ Future<void> initializeService() async {
     'my_foreground',
     'Oksigenia SOS Service',
     description: 'Running in background monitoring sensors',
-    importance: Importance.high,
+    importance: Importance.low,
   );
 
   final FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin =
@@ -462,8 +462,11 @@ void onStart(ServiceInstance service) async {
                   channelId, 'Oksigenia SOS - Active Monitor',
                   icon: 'ic_stat_protected',
                   ongoing: true,
-                  importance: Importance.high,
-                  priority: Priority.high))
+                  importance: Importance.low,
+                  priority: Priority.low,
+                  onlyAlertOnce: true,
+                  playSound: false,
+                  enableVibration: false))
       );
 
       if (savedFall || savedInactivity) {
@@ -572,13 +575,16 @@ void onStart(ServiceInstance service) async {
             id: notificationId,
             title: "Oksigenia SOS",
             body: _texts['statusReady'],
-            notificationDetails: NotificationDetails(
+            notificationDetails: const NotificationDetails(
                 android: AndroidNotificationDetails(
                     channelId, 'Oksigenia SOS - Active Monitor',
                     icon: 'ic_stat_protected',
                     ongoing: true,
-                    importance: Importance.high,
-                    priority: Priority.high)));
+                    importance: Importance.low,
+                    priority: Priority.low,
+                    onlyAlertOnce: true,
+                    playSound: false,
+                    enableVibration: false)));
       } catch (e) {
         print("Error stop: $e");
       }
