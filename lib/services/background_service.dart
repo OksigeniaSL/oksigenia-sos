@@ -46,7 +46,7 @@ Future<void> initializeService() async {
     'my_foreground',
     'Oksigenia SOS Service',
     description: 'Running in background monitoring sensors',
-    importance: Importance.low,
+    importance: Importance.defaultImportance,
   );
 
   final FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin =
