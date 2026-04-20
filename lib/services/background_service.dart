@@ -108,7 +108,7 @@ void onStart(ServiceInstance service) async {
   final DateTime serviceStartupTime = DateTime.now();
 
   const AndroidInitializationSettings initializationSettingsAndroid =
-      AndroidInitializationSettings('ic_launcher_monochrome');
+      AndroidInitializationSettings('ic_stat_oksigenia');
   const InitializationSettings initializationSettings =
       InitializationSettings(android: initializationSettingsAndroid);
   await flutterLocalNotificationsPlugin.initialize(settings: initializationSettings);
@@ -279,7 +279,7 @@ void onStart(ServiceInstance service) async {
           notificationDetails: NotificationDetails(
               android: AndroidNotificationDetails(
                   channelId, 'Oksigenia SOS - Active Monitor',
-                  icon: 'ic_launcher_monochrome',
+                  icon: 'ic_stat_oksigenia',
                   ongoing: true,
                   importance: Importance.max,
                   priority: Priority.max,
@@ -307,7 +307,7 @@ void onStart(ServiceInstance service) async {
             notificationDetails: const NotificationDetails(
                 android: AndroidNotificationDetails(
                     channelId, 'Oksigenia SOS',
-                    icon: 'ic_launcher_monochrome',
+                    icon: 'ic_stat_oksigenia',
                     importance: Importance.high)),
           );
           await prefs.setBool('is_alarm_active', false);
@@ -460,7 +460,7 @@ void onStart(ServiceInstance service) async {
           notificationDetails: const NotificationDetails(
               android: AndroidNotificationDetails(
                   channelId, 'Oksigenia SOS - Active Monitor',
-                  icon: 'ic_launcher_monochrome',
+                  icon: 'ic_stat_oksigenia',
                   ongoing: true,
                   importance: Importance.low,
                   priority: Priority.low,
@@ -582,7 +582,7 @@ void onStart(ServiceInstance service) async {
             notificationDetails: const NotificationDetails(
                 android: AndroidNotificationDetails(
                     channelId, 'Oksigenia SOS - Active Monitor',
-                    icon: 'ic_launcher_monochrome',
+                    icon: 'ic_stat_oksigenia',
                     ongoing: true,
                     importance: Importance.low,
                     priority: Priority.low,
