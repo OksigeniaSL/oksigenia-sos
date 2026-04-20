@@ -108,7 +108,7 @@ void onStart(ServiceInstance service) async {
   final DateTime serviceStartupTime = DateTime.now();
 
   const AndroidInitializationSettings initializationSettingsAndroid =
-      AndroidInitializationSettings('ic_stat_protected');
+      AndroidInitializationSettings('ic_launcher_monochrome');
   const InitializationSettings initializationSettings =
       InitializationSettings(android: initializationSettingsAndroid);
   await flutterLocalNotificationsPlugin.initialize(settings: initializationSettings);
@@ -279,7 +279,7 @@ void onStart(ServiceInstance service) async {
           notificationDetails: NotificationDetails(
               android: AndroidNotificationDetails(
                   channelId, 'Oksigenia SOS - Active Monitor',
-                  icon: 'ic_stat_protected',
+                  icon: 'ic_launcher_monochrome',
                   ongoing: true,
                   importance: Importance.max,
                   priority: Priority.max,
@@ -307,7 +307,7 @@ void onStart(ServiceInstance service) async {
             notificationDetails: const NotificationDetails(
                 android: AndroidNotificationDetails(
                     channelId, 'Oksigenia SOS',
-                    icon: 'ic_stat_protected',
+                    icon: 'ic_launcher_monochrome',
                     importance: Importance.high)),
           );
           await prefs.setBool('is_alarm_active', false);
@@ -460,7 +460,7 @@ void onStart(ServiceInstance service) async {
           notificationDetails: const NotificationDetails(
               android: AndroidNotificationDetails(
                   channelId, 'Oksigenia SOS - Active Monitor',
-                  icon: 'ic_stat_protected',
+                  icon: 'ic_launcher_monochrome',
                   ongoing: true,
                   importance: Importance.low,
                   priority: Priority.low,
@@ -582,7 +582,7 @@ void onStart(ServiceInstance service) async {
             notificationDetails: const NotificationDetails(
                 android: AndroidNotificationDetails(
                     channelId, 'Oksigenia SOS - Active Monitor',
-                    icon: 'ic_stat_protected',
+                    icon: 'ic_launcher_monochrome',
                     ongoing: true,
                     importance: Importance.low,
                     priority: Priority.low,
@@ -599,9 +599,7 @@ void onStart(ServiceInstance service) async {
       String status = event['status'] ?? 'active';
       String title = event['title'] ?? 'Oksigenia SOS';
       String content = event['content'] ?? 'Active Monitor';
-      String iconName = 'ic_stat_protected';
-      if (status == 'paused') iconName = 'ic_stat_paused';
-      if (status == 'alarm') iconName = 'ic_stat_protected';
+      const String iconName = 'ic_launcher_monochrome';
 
       try {
         await flutterLocalNotificationsPlugin.show(

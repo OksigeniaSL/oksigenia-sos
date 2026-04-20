@@ -55,7 +55,7 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver, Ti
       if (status == AnimationStatus.completed) {
         _triggerHaptic();
         await _sosLogic.stopSystem();
-        if (mounted) SystemNavigator.pop();
+        if (mounted) _stopHoldController.reset();
       }
     });
     
