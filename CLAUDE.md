@@ -59,7 +59,7 @@ if (_isAlarmActive || _sensorCooldown) return;
 
 ## Notification icon
 
-Must be white-on-transparent. Use `ic_stat_oksigenia` (PNG, all density folders under `drawable-{mdpi→xxxhdpi}/`). The XML vector icons (`ic_stat_protected.xml`, `ic_stat_paused.xml`) exist but are legacy. `ic_launcher_monochrome.png` is a 40KB launcher asset — do not use it as a notification icon.
+Must be white-on-transparent. Use `ic_stat_oksigenia` (PNG, all density folders under `drawable-{mdpi→xxxhdpi}/` plus `drawable/` fallback). These were regenerated from `ic_launcher_monochrome.png` (432×432 source) using PIL at the correct densities (mdpi=24, hdpi=36, xhdpi=48, xxhdpi=72, xxxhdpi=96). The previous `ic_stat_oksigenia.png` files were white rectangles — if the icon looks like a white square, regenerate them. The XML vector icons (`ic_stat_protected.xml`, `ic_stat_paused.xml`) exist but are legacy.
 
 The service notification channel (`my_foreground`) must be `Importance.defaultImportance` so it appears outside the "silent notifications" group on strict Android (GrapheneOS). Individual notification calls use `playSound: false, enableVibration: false` to stay quiet.
 

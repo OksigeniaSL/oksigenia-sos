@@ -658,7 +658,12 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver, Ti
             bool restricted = await _sosLogic.arePermissionsRestricted();
             if (restricted) {
                if (mounted) _showRestrictedPermissionGuide(context, l10n.permDialogTitle);
-               return; 
+               return;
+            }
+
+            if (!_sosLogic.batteryOptimizationOk) {
+               if (mounted) _showBatteryDialog(context, l10n);
+               return;
             }
           }
           onChanged(newValue);

@@ -283,7 +283,8 @@ class SOSLogic extends ChangeNotifier with WidgetsBindingObserver {
 
     if (isZombieAlarming) {
        debugPrint("LOGIC: 🧟 ¡Detectada alarma zombie!");
-       
+       try { await platform.invokeMethod('wakeScreen'); } catch (_) {}
+
        int startTime = rawPrefs.getInt('alarm_start_timestamp') ?? 0;
        int now = DateTime.now().millisecondsSinceEpoch;
        int elapsedSeconds = ((now - startTime) / 1000).floor();
@@ -669,6 +670,7 @@ class SOSLogic extends ChangeNotifier with WidgetsBindingObserver {
 
   void cancelSOS() async {
     debugPrint("LOGIC: 🛑 Cancelado por usuario.");
+    try { await platform.invokeMethod('sleepScreen'); } catch (_) {}
     
     _uiCooldown = true;
     Future.delayed(const Duration(seconds: 10), () => _uiCooldown = false);

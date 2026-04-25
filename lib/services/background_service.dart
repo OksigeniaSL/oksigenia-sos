@@ -245,10 +245,28 @@ void onStart(ServiceInstance service) async {
       await prefs.setBool('is_alarm_active', true);
       await prefs.setInt('alarm_start_timestamp', DateTime.now().millisecondsSinceEpoch);
 
-      try {
-        await platform.invokeMethod('wakeScreen');
-        await platform.invokeMethod('bringToFront'); 
-      } catch (_) {}
+      // fullScreenIntent: Android launches the Activity over the lock screen automatically.
+      // This is the only reliable mechanism from the service isolate — MethodChannel calls
+      // to 'com.oksigenia.sos/sms' fail silently here because that channel is registered
+      // on the UI engine, not the background engine.
+      await flutterLocalNotificationsPlugin.show(
+        id: notificationId,
+        title: "🚨 ${_texts['alertFallDetected']}",
+        body: _texts['holdToCancel'],
+        notificationDetails: const NotificationDetails(
+          android: AndroidNotificationDetails(
+            channelId, 'Oksigenia SOS - Active Monitor',
+            icon: 'ic_stat_oksigenia',
+            ongoing: true,
+            importance: Importance.max,
+            priority: Priority.max,
+            fullScreenIntent: true,
+            color: Color(0xFFFF0000),
+            playSound: false,
+            enableVibration: false,
+          ),
+        ),
+      );
 
       if (service is AndroidServiceInstance) service.setAsForegroundService();
       service.invoke("onAlarmTriggered");
@@ -601,7 +619,7 @@ void onStart(ServiceInstance service) async {
       String status = event['status'] ?? 'active';
       String title = event['title'] ?? 'Oksigenia SOS';
       String content = event['content'] ?? 'Active Monitor';
-      const String iconName = 'ic_launcher_monochrome';
+      const String iconName = 'ic_stat_oksigenia';
 
       try {
         await flutterLocalNotificationsPlugin.show(
