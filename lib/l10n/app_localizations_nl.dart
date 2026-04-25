@@ -406,4 +406,39 @@ class AppLocalizationsNl extends AppLocalizations {
 
   @override
   String get slideStopSystem => 'VEEG OM TE STOPPEN';
+
+  @override
+  String get onboardingTitle => 'Configureer uw veiligheidssysteem';
+
+  @override
+  String get onboardingSubtitle =>
+      'Deze toestemmingen zijn essentieel om u te beschermen in het veld.';
+
+  @override
+  String get onboardingGrant => 'VERLENEN';
+
+  @override
+  String get onboardingGranted => 'VERLEEND ✓';
+
+  @override
+  String get onboardingNext => 'DOORGAAN';
+
+  @override
+  String get onboardingFinish => 'KLAAR — MONITORING STARTEN';
+
+  @override
+  String get onboardingMandatory => 'Vereist om monitoring te activeren';
+
+  @override
+  String get onboardingSkip => 'Overslaan';
+
+  @override
+  String get fullScreenIntentTitle => 'Alarm op vergrendeld scherm';
+
+  @override
+  String get fullScreenIntentBody =>
+      'Hiermee kan het alarm boven het vergrendelscherm verschijnen. Zonder dit klinkt het alarm maar wordt het scherm niet gewekt. Op Android 14+: Instellingen → Apps → Oksigenia SOS → Volledig scherm meldingen.';
+
+  @override
+  String get btnEnableFullScreenIntent => 'INSCHAKELEN';
 }

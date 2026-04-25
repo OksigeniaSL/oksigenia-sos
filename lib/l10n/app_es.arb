@@ -124,5 +124,16 @@
     "btnDisableBatterySaver": "DESACTIVAR AHORRO",
     "batteryDialogBody": "El sistema está restringiendo la batería de esta app. Para que SOS funcione en segundo plano, debes seleccionar 'Sin Restricciones' o 'No Optimizar'.",
     "permLocMissing": "Falta Permiso de Ubicación",
-    "slideStopSystem": "DESLIZA PARA APAGAR"
+    "slideStopSystem": "DESLIZA PARA APAGAR",
+    "onboardingTitle": "Configura tu sistema de seguridad",
+    "onboardingSubtitle": "Estos permisos son esenciales para que Oksigenia SOS pueda protegerte en el campo.",
+    "onboardingGrant": "CONCEDER",
+    "onboardingGranted": "CONCEDIDO ✓",
+    "onboardingNext": "CONTINUAR",
+    "onboardingFinish": "LISTO — INICIAR MONITORIZACIÓN",
+    "onboardingMandatory": "Necesario para activar la monitorización",
+    "onboardingSkip": "Omitir",
+    "fullScreenIntentTitle": "Alarma en Pantalla Bloqueada",
+    "fullScreenIntentBody": "Permite que la alarma aparezca sobre la pantalla bloqueada. Sin esto, la alarma suena pero la pantalla no se enciende. En Android 14+: Ajustes → Apps → Oksigenia SOS → Notificaciones en pantalla completa.",
+    "btnEnableFullScreenIntent": "ACTIVAR"
 }

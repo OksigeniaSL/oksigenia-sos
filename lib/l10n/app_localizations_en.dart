@@ -403,4 +403,39 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get slideStopSystem => 'SLIDE TO STOP SYSTEM';
+
+  @override
+  String get onboardingTitle => 'Configure your safety system';
+
+  @override
+  String get onboardingSubtitle =>
+      'These permissions are essential for Oksigenia SOS to protect you in the field.';
+
+  @override
+  String get onboardingGrant => 'GRANT';
+
+  @override
+  String get onboardingGranted => 'GRANTED ✓';
+
+  @override
+  String get onboardingNext => 'CONTINUE';
+
+  @override
+  String get onboardingFinish => 'ALL SET — START MONITORING';
+
+  @override
+  String get onboardingMandatory => 'Required to activate monitoring';
+
+  @override
+  String get onboardingSkip => 'Skip';
+
+  @override
+  String get fullScreenIntentTitle => 'Lock Screen Alarm';
+
+  @override
+  String get fullScreenIntentBody =>
+      'Allows the alarm to appear on top of the lock screen. Without this, the alarm sounds but the screen does not wake. On Android 14+: Settings → Apps → Oksigenia SOS → Full-screen notifications.';
+
+  @override
+  String get btnEnableFullScreenIntent => 'ENABLE';
 }

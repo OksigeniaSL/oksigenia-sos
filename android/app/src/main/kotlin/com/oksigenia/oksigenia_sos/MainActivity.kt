@@ -4,8 +4,10 @@ import android.app.NotificationChannel
 import android.app.NotificationManager
 import android.content.Context
 import android.content.Intent
+import android.net.Uri
 import android.os.Build
 import android.os.Bundle
+import android.provider.Settings
 import android.view.WindowManager
 import androidx.annotation.NonNull
 import io.flutter.embedding.android.FlutterActivity
@@ -55,6 +57,24 @@ class MainActivity: FlutterActivity() {
                 }
                 "sleepScreen" -> {
                     allowScreenSleep()
+                    result.success("OK")
+                }
+                "canUseFullScreenIntent" -> {
+                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.UPSIDE_DOWN_CAKE) {
+                        val nm = getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
+                        result.success(nm.canUseFullScreenIntent())
+                    } else {
+                        result.success(true)
+                    }
+                }
+                "requestFullScreenIntentPermission" -> {
+                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.UPSIDE_DOWN_CAKE) {
+                        val intent = Intent(
+                            Settings.ACTION_MANAGE_APP_USE_FULL_SCREEN_INTENT,
+                            Uri.parse("package:$packageName")
+                        )
+                        startActivity(intent)
+                    }
                     result.success("OK")
                 }
                 else -> result.notImplemented()

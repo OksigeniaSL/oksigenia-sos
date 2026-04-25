@@ -124,5 +124,16 @@
     "btnDisableBatterySaver": "DISATTIVA RISPARMIO",
     "batteryDialogBody": "Il sistema sta limitando la batteria. Affinché SOS funzioni in background, seleziona 'Nessuna restrizione' o 'Non ottimizzare'.",
     "permLocMissing": "Permesso posizione mancante",
-    "slideStopSystem": "SCORRI PER SPEGNERE"
+    "slideStopSystem": "SCORRI PER SPEGNERE",
+    "onboardingTitle": "Configura il tuo sistema di sicurezza",
+    "onboardingSubtitle": "Questi permessi sono essenziali affinché Oksigenia SOS possa proteggerti sul campo.",
+    "onboardingGrant": "CONCEDI",
+    "onboardingGranted": "CONCESSO ✓",
+    "onboardingNext": "CONTINUA",
+    "onboardingFinish": "PRONTO — AVVIA MONITORAGGIO",
+    "onboardingMandatory": "Necessario per attivare il monitoraggio",
+    "onboardingSkip": "Salta",
+    "fullScreenIntentTitle": "Allarme su Schermo Bloccato",
+    "fullScreenIntentBody": "Permette all'allarme di apparire sopra lo schermo bloccato. Senza questo, l'allarme suona ma lo schermo non si accende. Su Android 14+: Impostazioni → App → Oksigenia SOS → Notifiche a schermo intero.",
+    "btnEnableFullScreenIntent": "ATTIVA"
 }

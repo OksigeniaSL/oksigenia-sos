@@ -404,4 +404,39 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get slideStopSystem => 'DESLIZA PARA APAGAR';
+
+  @override
+  String get onboardingTitle => 'Configura tu sistema de seguridad';
+
+  @override
+  String get onboardingSubtitle =>
+      'Estos permisos son esenciales para que Oksigenia SOS pueda protegerte en el campo.';
+
+  @override
+  String get onboardingGrant => 'CONCEDER';
+
+  @override
+  String get onboardingGranted => 'CONCEDIDO ✓';
+
+  @override
+  String get onboardingNext => 'CONTINUAR';
+
+  @override
+  String get onboardingFinish => 'LISTO — INICIAR MONITORIZACIÓN';
+
+  @override
+  String get onboardingMandatory => 'Necesario para activar la monitorización';
+
+  @override
+  String get onboardingSkip => 'Omitir';
+
+  @override
+  String get fullScreenIntentTitle => 'Alarma en Pantalla Bloqueada';
+
+  @override
+  String get fullScreenIntentBody =>
+      'Permite que la alarma aparezca sobre la pantalla bloqueada. Sin esto, la alarma suena pero la pantalla no se enciende. En Android 14+: Ajustes → Apps → Oksigenia SOS → Notificaciones en pantalla completa.';
+
+  @override
+  String get btnEnableFullScreenIntent => 'ACTIVAR';
 }

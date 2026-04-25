@@ -126,5 +126,16 @@
     "btnDisableBatterySaver": "BESPARING UIT",
     "batteryDialogBody": "Het systeem beperkt de batterij. Om SOS op de achtergrond te laten werken, selecteer 'Onbeperkt' of 'Niet optimaliseren'.",
     "permLocMissing": "Locatietoestemming ontbreekt",
-    "slideStopSystem": "VEEG OM TE STOPPEN"
+    "slideStopSystem": "VEEG OM TE STOPPEN",
+    "onboardingTitle": "Configureer uw veiligheidssysteem",
+    "onboardingSubtitle": "Deze toestemmingen zijn essentieel om u te beschermen in het veld.",
+    "onboardingGrant": "VERLENEN",
+    "onboardingGranted": "VERLEEND ✓",
+    "onboardingNext": "DOORGAAN",
+    "onboardingFinish": "KLAAR — MONITORING STARTEN",
+    "onboardingMandatory": "Vereist om monitoring te activeren",
+    "onboardingSkip": "Overslaan",
+    "fullScreenIntentTitle": "Alarm op vergrendeld scherm",
+    "fullScreenIntentBody": "Hiermee kan het alarm boven het vergrendelscherm verschijnen. Zonder dit klinkt het alarm maar wordt het scherm niet gewekt. Op Android 14+: Instellingen → Apps → Oksigenia SOS → Volledig scherm meldingen.",
+    "btnEnableFullScreenIntent": "INSCHAKELEN"
 }

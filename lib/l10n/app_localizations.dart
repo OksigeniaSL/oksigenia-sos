@@ -865,6 +865,72 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'SLIDE TO STOP SYSTEM'**
   String get slideStopSystem;
+
+  /// No description provided for @onboardingTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Configure your safety system'**
+  String get onboardingTitle;
+
+  /// No description provided for @onboardingSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'These permissions are essential for Oksigenia SOS to protect you in the field.'**
+  String get onboardingSubtitle;
+
+  /// No description provided for @onboardingGrant.
+  ///
+  /// In en, this message translates to:
+  /// **'GRANT'**
+  String get onboardingGrant;
+
+  /// No description provided for @onboardingGranted.
+  ///
+  /// In en, this message translates to:
+  /// **'GRANTED ✓'**
+  String get onboardingGranted;
+
+  /// No description provided for @onboardingNext.
+  ///
+  /// In en, this message translates to:
+  /// **'CONTINUE'**
+  String get onboardingNext;
+
+  /// No description provided for @onboardingFinish.
+  ///
+  /// In en, this message translates to:
+  /// **'ALL SET — START MONITORING'**
+  String get onboardingFinish;
+
+  /// No description provided for @onboardingMandatory.
+  ///
+  /// In en, this message translates to:
+  /// **'Required to activate monitoring'**
+  String get onboardingMandatory;
+
+  /// No description provided for @onboardingSkip.
+  ///
+  /// In en, this message translates to:
+  /// **'Skip'**
+  String get onboardingSkip;
+
+  /// No description provided for @fullScreenIntentTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Lock Screen Alarm'**
+  String get fullScreenIntentTitle;
+
+  /// No description provided for @fullScreenIntentBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Allows the alarm to appear on top of the lock screen. Without this, the alarm sounds but the screen does not wake. On Android 14+: Settings → Apps → Oksigenia SOS → Full-screen notifications.'**
+  String get fullScreenIntentBody;
+
+  /// No description provided for @btnEnableFullScreenIntent.
+  ///
+  /// In en, this message translates to:
+  /// **'ENABLE'**
+  String get btnEnableFullScreenIntent;
 }
 
 class _AppLocalizationsDelegate

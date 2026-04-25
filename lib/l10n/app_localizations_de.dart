@@ -399,4 +399,39 @@ class AppLocalizationsDe extends AppLocalizations {
 
   @override
   String get slideStopSystem => 'WISCHEN ZUM STOPPEN';
+
+  @override
+  String get onboardingTitle => 'Sicherheitssystem einrichten';
+
+  @override
+  String get onboardingSubtitle =>
+      'Diese Berechtigungen sind notwendig, damit Oksigenia SOS Sie schützen kann.';
+
+  @override
+  String get onboardingGrant => 'ERLAUBEN';
+
+  @override
+  String get onboardingGranted => 'ERLAUBT ✓';
+
+  @override
+  String get onboardingNext => 'WEITER';
+
+  @override
+  String get onboardingFinish => 'BEREIT — ÜBERWACHUNG STARTEN';
+
+  @override
+  String get onboardingMandatory => 'Erforderlich zur Aktivierung';
+
+  @override
+  String get onboardingSkip => 'Überspringen';
+
+  @override
+  String get fullScreenIntentTitle => 'Sperrbildschirm-Alarm';
+
+  @override
+  String get fullScreenIntentBody =>
+      'Ermöglicht die Anzeige des Alarms auf dem Sperrbildschirm. Ohne diese Berechtigung ertönt der Alarm, aber der Bildschirm wacht nicht auf. Ab Android 14: Einstellungen → Apps → Oksigenia SOS → Vollbild-Benachrichtigungen.';
+
+  @override
+  String get btnEnableFullScreenIntent => 'AKTIVIEREN';
 }

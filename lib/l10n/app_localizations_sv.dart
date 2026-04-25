@@ -404,4 +404,39 @@ class AppLocalizationsSv extends AppLocalizations {
 
   @override
   String get slideStopSystem => 'DRA FÖR ATT STOPPA';
+
+  @override
+  String get onboardingTitle => 'Konfigurera ditt säkerhetssystem';
+
+  @override
+  String get onboardingSubtitle =>
+      'Dessa behörigheter är nödvändiga för att Oksigenia SOS ska kunna skydda dig i fält.';
+
+  @override
+  String get onboardingGrant => 'BEVILJA';
+
+  @override
+  String get onboardingGranted => 'BEVILJAD ✓';
+
+  @override
+  String get onboardingNext => 'FORTSÄTT';
+
+  @override
+  String get onboardingFinish => 'KLART — STARTA ÖVERVAKNING';
+
+  @override
+  String get onboardingMandatory => 'Krävs för att aktivera övervakning';
+
+  @override
+  String get onboardingSkip => 'Hoppa över';
+
+  @override
+  String get fullScreenIntentTitle => 'Larm på låsskärmen';
+
+  @override
+  String get fullScreenIntentBody =>
+      'Tillåter larmet att visas ovanpå låsskärmen. Utan detta låter larmet men skärmen vaknar inte. På Android 14+: Inställningar → Appar → Oksigenia SOS → Helskärmsaviseringar.';
+
+  @override
+  String get btnEnableFullScreenIntent => 'AKTIVERA';
 }

@@ -246,32 +246,8 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver, Ti
 
             const SizedBox(height: 10),
 
-            // STATUS PILL
-            Container(
-              padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 8),
-              decoration: BoxDecoration(
-                color: _sosLogic.status == SOSStatus.locationFixed 
-                    ? Colors.green.withOpacity(0.1) 
-                    : Colors.grey.withOpacity(0.15),
-                borderRadius: BorderRadius.circular(20),
-                border: Border.all(
-                  color: _sosLogic.status == SOSStatus.locationFixed 
-                      ? Colors.green 
-                      : Colors.grey
-                )
-              ),
-              child: Text(
-                _sosLogic.status == SOSStatus.locationFixed 
-                    ? l10n.statusLocationFixed 
-                    : (_sosLogic.status == SOSStatus.scanning 
-                        ? l10n.statusConnecting 
-                        : l10n.statusReady),
-                style: TextStyle(
-                  color: _sosLogic.status == SOSStatus.locationFixed ? Colors.green : Colors.grey,
-                  fontWeight: FontWeight.bold
-                ),
-              ),
-            ),
+            // STATUS PILL — enriched priority display
+            _buildStatusPill(l10n),
             
             const SizedBox(height: 15),
 
@@ -511,9 +487,9 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver, Ti
               Icons.health_and_safety 
             ),
             _buildQuickToggle(
-              context, 
-              l10n.inactivityModeLabel, 
-              _sosLogic.isInactivityMonitorActive, 
+              context,
+              l10n.inactivityModeLabel,
+              _sosLogic.isInactivityMonitorActive,
               (v) {
                 if (v && !_sosLogic.smsPermissionOk) {
                    _showSmsRequiredError(context, l10n);
@@ -525,12 +501,10 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver, Ti
                    _hasShownWarning = true;
                 }
               },
-              Icons.airline_seat_flat, 
-              subtitle: _sosLogic.isInactivityMonitorActive 
-                  ? "${l10n.timerLabel}: ${_sosLogic.currentInactivityLimit < 60 ? '${_sosLogic.currentInactivityLimit} ${l10n.timerSeconds}' : '${_sosLogic.currentInactivityLimit ~/ 3600} h'}" 
-                  : null
+              Icons.airline_seat_flat,
             ),
-            
+            _buildTelemetryPanel(l10n),
+
             // HOLD TO STOP
             const SizedBox(height: 20),
             Padding(
@@ -618,7 +592,6 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver, Ti
   }
 
   Widget _buildQuickToggle(BuildContext context, String label, bool value, Function(bool) onChanged, IconData icon, {String? subtitle}) {
-    final isDark = Theme.of(context).brightness == Brightness.dark;
     return Container(
       margin: const EdgeInsets.symmetric(horizontal: 30, vertical: 5),
       child: SwitchListTile(
@@ -665,10 +638,112 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver, Ti
                if (mounted) _showBatteryDialog(context, l10n);
                return;
             }
+
+            if (!_sosLogic.fullScreenIntentOk) {
+               if (mounted) _showFullScreenIntentDialog(context, l10n);
+               return;
+            }
           }
           onChanged(newValue);
         },
         activeColor: Colors.redAccent,
+      ),
+    );
+  }
+
+  Widget _buildStatusPill(AppLocalizations l10n) {
+    String text;
+    Color color;
+    bool monitoring = _sosLogic.isFallDetectionActive || _sosLogic.isInactivityMonitorActive;
+
+    if (!_sosLogic.batteryOptimizationOk) {
+      text = "⚡ ${l10n.batteryDialogTitle}";
+      color = Colors.orange;
+    } else if (!_sosLogic.smsPermissionOk) {
+      text = "⚠ ${l10n.permSmsMissing}";
+      color = Colors.red;
+    } else if (!_sosLogic.fullScreenIntentOk) {
+      text = "⚠ ${l10n.fullScreenIntentTitle}";
+      color = Colors.orange;
+    } else if (_sosLogic.status == SOSStatus.preAlert) {
+      text = "🚨 SOS";
+      color = Colors.red;
+    } else if (monitoring && _sosLogic.status == SOSStatus.locationFixed) {
+      text = "✓ ${l10n.statusLocationFixed}";
+      color = Colors.green;
+    } else if (monitoring) {
+      text = "⏳ ${l10n.statusConnecting}";
+      color = Colors.yellow;
+    } else if (_sosLogic.status == SOSStatus.locationFixed) {
+      text = l10n.statusLocationFixed;
+      color = Colors.green;
+    } else if (_sosLogic.status == SOSStatus.scanning) {
+      text = l10n.statusConnecting;
+      color = Colors.grey;
+    } else {
+      text = l10n.statusReady;
+      color = Colors.grey;
+    }
+
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 8),
+      decoration: BoxDecoration(
+        color: color.withOpacity(0.1),
+        borderRadius: BorderRadius.circular(20),
+        border: Border.all(color: color),
+      ),
+      child: Text(
+        text,
+        style: TextStyle(color: color, fontWeight: FontWeight.bold),
+      ),
+    );
+  }
+
+  Widget _buildTelemetryPanel(AppLocalizations l10n) {
+    if (!_sosLogic.isInactivityMonitorActive) return const SizedBox.shrink();
+
+    final elapsed = _sosLogic.inactivityElapsedSeconds;
+    final limit = _sosLogic.currentInactivityLimit;
+    final progress = (elapsed / limit).clamp(0.0, 1.0);
+
+    String fmt(int s) {
+      if (s < 60) return "$s ${l10n.timerSeconds}";
+      if (s < 3600) return "${s ~/ 60} min";
+      return "${s ~/ 3600} h";
+    }
+
+    return Container(
+      margin: const EdgeInsets.symmetric(horizontal: 30, vertical: 4),
+      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+      decoration: BoxDecoration(
+        color: Colors.grey[900],
+        borderRadius: BorderRadius.circular(8),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Text(l10n.inactivityTitle,
+                  style: const TextStyle(color: Colors.white70, fontSize: 12)),
+              Text("${fmt(elapsed)} / ${fmt(limit)}",
+                  style: const TextStyle(
+                      color: Colors.white, fontWeight: FontWeight.bold, fontSize: 12)),
+            ],
+          ),
+          const SizedBox(height: 6),
+          ClipRRect(
+            borderRadius: BorderRadius.circular(4),
+            child: LinearProgressIndicator(
+              value: progress,
+              minHeight: 6,
+              backgroundColor: Colors.grey[800],
+              valueColor: AlwaysStoppedAnimation<Color>(
+                  progress > 0.8 ? Colors.orange : Colors.blueAccent),
+            ),
+          ),
+        ],
       ),
     );
   }
@@ -740,6 +815,17 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver, Ti
     showDialog(context: context, builder: (ctx) => AlertDialog(
         title: Row(children: [const Icon(Icons.battery_alert, color: Colors.orange), const SizedBox(width: 10), Expanded(child: Text(l10n.batteryDialogTitle))]),
         content: Text(l10n.batteryDialogBody), actions: [TextButton(onPressed: () => Navigator.pop(ctx), child: const Text("OK")), ElevatedButton(onPressed: () { Navigator.pop(ctx); _sosLogic.requestBatteryOptimizationIgnore(); }, child: Text(l10n.btnDisableBatterySaver))]
+      ));
+  }
+
+  void _showFullScreenIntentDialog(BuildContext context, AppLocalizations l10n) {
+    showDialog(context: context, builder: (ctx) => AlertDialog(
+        title: Row(children: [const Icon(Icons.lock_open, color: Colors.orange), const SizedBox(width: 10), Expanded(child: Text(l10n.fullScreenIntentTitle))]),
+        content: SingleChildScrollView(child: Text(l10n.fullScreenIntentBody)),
+        actions: [
+          TextButton(onPressed: () => Navigator.pop(ctx), child: const Text("OK")),
+          ElevatedButton(onPressed: () { Navigator.pop(ctx); _sosLogic.requestFullScreenIntentPermission(); }, child: Text(l10n.btnEnableFullScreenIntent)),
+        ]
       ));
   }
 

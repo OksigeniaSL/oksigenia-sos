@@ -124,5 +124,16 @@
     "btnDisableBatterySaver": "INAKTIVERA SPARLÄGE",
     "batteryDialogBody": "Systemet begränsar batteriet. För att SOS ska fungera i bakgrunden, välj 'Ingen begränsning' eller 'Optimera inte'.",
     "permLocMissing": "Platsbehörighet saknas",
-    "slideStopSystem": "DRA FÖR ATT STOPPA"
+    "slideStopSystem": "DRA FÖR ATT STOPPA",
+    "onboardingTitle": "Konfigurera ditt säkerhetssystem",
+    "onboardingSubtitle": "Dessa behörigheter är nödvändiga för att Oksigenia SOS ska kunna skydda dig i fält.",
+    "onboardingGrant": "BEVILJA",
+    "onboardingGranted": "BEVILJAD ✓",
+    "onboardingNext": "FORTSÄTT",
+    "onboardingFinish": "KLART — STARTA ÖVERVAKNING",
+    "onboardingMandatory": "Krävs för att aktivera övervakning",
+    "onboardingSkip": "Hoppa över",
+    "fullScreenIntentTitle": "Larm på låsskärmen",
+    "fullScreenIntentBody": "Tillåter larmet att visas ovanpå låsskärmen. Utan detta låter larmet men skärmen vaknar inte. På Android 14+: Inställningar → Appar → Oksigenia SOS → Helskärmsaviseringar.",
+    "btnEnableFullScreenIntent": "AKTIVERA"
 }

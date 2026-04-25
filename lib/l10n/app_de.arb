@@ -124,5 +124,16 @@
     "btnDisableBatterySaver": "SPARMODUS AUS",
     "batteryDialogBody": "Das System schränkt den Akku ein. Damit SOS im Hintergrund läuft, wählen Sie 'Keine Einschränkung' oder 'Nicht optimieren'.",
     "permLocMissing": "Standortberechtigung fehlt",
-    "slideStopSystem": "WISCHEN ZUM STOPPEN"
+    "slideStopSystem": "WISCHEN ZUM STOPPEN",
+    "onboardingTitle": "Sicherheitssystem einrichten",
+    "onboardingSubtitle": "Diese Berechtigungen sind notwendig, damit Oksigenia SOS Sie schützen kann.",
+    "onboardingGrant": "ERLAUBEN",
+    "onboardingGranted": "ERLAUBT ✓",
+    "onboardingNext": "WEITER",
+    "onboardingFinish": "BEREIT — ÜBERWACHUNG STARTEN",
+    "onboardingMandatory": "Erforderlich zur Aktivierung",
+    "onboardingSkip": "Überspringen",
+    "fullScreenIntentTitle": "Sperrbildschirm-Alarm",
+    "fullScreenIntentBody": "Ermöglicht die Anzeige des Alarms auf dem Sperrbildschirm. Ohne diese Berechtigung ertönt der Alarm, aber der Bildschirm wacht nicht auf. Ab Android 14: Einstellungen → Apps → Oksigenia SOS → Vollbild-Benachrichtigungen.",
+    "btnEnableFullScreenIntent": "AKTIVIEREN"
 }

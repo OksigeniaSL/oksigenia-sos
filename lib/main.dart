@@ -9,7 +9,8 @@ import 'package:oksigenia_sos/services/preferences_service.dart';
 import 'package:oksigenia_sos/services/background_service.dart'; 
 import 'package:oksigenia_sos/screens/disclaimer_screen.dart';
 import 'package:oksigenia_sos/screens/home_screen.dart';
-import 'package:oksigenia_sos/logic/sos_logic.dart'; 
+import 'package:oksigenia_sos/screens/onboarding_screen.dart';
+import 'package:oksigenia_sos/logic/sos_logic.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -27,15 +28,16 @@ void main() async {
   await initializeService(); 
   
   final bool accepted = prefs.getBool('disclaimer_accepted') ?? false;
+  final bool onboardingDone = prefs.getBool('onboarding_completed') ?? false;
   final String? savedLang = prefs.getString('language_code');
 
   // 3. INICIALIZAR EL CEREBRO (Lógica SOS)
   final sosLogic = SOSLogic();
-  
-  // 🛑 CORRECCIÓN: Solo arrancamos la lógica (y pedimos permisos)
-  // si el usuario YA ha aceptado el disclaimer anteriormente.
-  // Si es nuevo, la lógica se iniciará cuando entre al HomeScreen.
-  if (accepted) {
+
+  // Only init if both disclaimer accepted and onboarding completed.
+  // New users pass through DisclaimerScreen → OnboardingScreen → HomeScreen,
+  // which triggers init() via HomeScreen.initState().
+  if (accepted && onboardingDone) {
     await sosLogic.init();
   }
 
@@ -46,6 +48,7 @@ void main() async {
       ],
       child: OksigeniaApp(
         initialAccepted: accepted,
+        onboardingDone: onboardingDone,
         savedLanguage: savedLang,
       ),
     ),
@@ -54,12 +57,14 @@ void main() async {
 
 class OksigeniaApp extends StatefulWidget {
   final bool initialAccepted;
+  final bool onboardingDone;
   final String? savedLanguage;
 
   const OksigeniaApp({
-    super.key, 
+    super.key,
     required this.initialAccepted,
-    this.savedLanguage
+    required this.onboardingDone,
+    this.savedLanguage,
   });
 
   @override
@@ -146,8 +151,8 @@ class _OksigeniaAppState extends State<OksigeniaApp> {
         GlobalCupertinoLocalizations.delegate,
       ],
       
-      home: widget.initialAccepted 
-          ? const HomeScreen() 
+      home: widget.initialAccepted
+          ? (widget.onboardingDone ? const HomeScreen() : const OnboardingScreen())
           : const DisclaimerScreen(),
     );
   }

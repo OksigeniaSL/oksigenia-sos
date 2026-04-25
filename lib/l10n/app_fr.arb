@@ -124,5 +124,16 @@
     "btnDisableBatterySaver": "DÉSACTIVER ÉCO",
     "batteryDialogBody": "The system is restricting this app's battery. For SOS to work in the background, you must select 'Unrestricted' or 'Don't Optimize'.",
     "permLocMissing": "Permission localisation manquante",
-    "slideStopSystem": "GLISSER POUR ARRÊTER"
+    "slideStopSystem": "GLISSER POUR ARRÊTER",
+    "onboardingTitle": "Configurer votre système de sécurité",
+    "onboardingSubtitle": "Ces permissions sont essentielles pour qu'Oksigenia SOS puisse vous protéger sur le terrain.",
+    "onboardingGrant": "ACCORDER",
+    "onboardingGranted": "ACCORDÉ ✓",
+    "onboardingNext": "CONTINUER",
+    "onboardingFinish": "PRÊT — DÉMARRER LA SURVEILLANCE",
+    "onboardingMandatory": "Requis pour activer la surveillance",
+    "onboardingSkip": "Ignorer",
+    "fullScreenIntentTitle": "Alarme sur écran verrouillé",
+    "fullScreenIntentBody": "Permet à l'alarme d'apparaître sur l'écran verrouillé. Sans cela, l'alarme sonne mais l'écran ne s'allume pas. Sur Android 14+ : Paramètres → Applications → Oksigenia SOS → Notifications en plein écran.",
+    "btnEnableFullScreenIntent": "ACTIVER"
 }

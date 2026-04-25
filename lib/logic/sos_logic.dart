@@ -63,16 +63,19 @@ class SOSLogic extends ChangeNotifier with WidgetsBindingObserver {
   
   bool _sensorsPermissionOk = true;
   bool _batteryOptimizationOk = true;
-  
+  bool _fullScreenIntentOk = true;
+
   bool _smsPermissionOk = true;
   bool _notificationPermissionOk = true;
-  
+
   int get batteryLevel => _batteryLevel;
   double get gpsAccuracy => _gpsAccuracy;
   bool get sensorsPermissionOk => _sensorsPermissionOk;
   bool get batteryOptimizationOk => _batteryOptimizationOk;
+  bool get fullScreenIntentOk => _fullScreenIntentOk;
   bool get smsPermissionOk => _smsPermissionOk;
   bool get notificationPermissionOk => _notificationPermissionOk;
+  int get inactivityElapsedSeconds => DateTime.now().difference(_lastMovementTime).inSeconds;
 
   Timer? _preAlertTimer;
   int _countdownSeconds = 30; 
@@ -202,6 +205,9 @@ class SOSLogic extends ChangeNotifier with WidgetsBindingObserver {
       }
 
       _batteryOptimizationOk = await Permission.ignoreBatteryOptimizations.isGranted;
+      try {
+        _fullScreenIntentOk = await platform.invokeMethod('canUseFullScreenIntent') ?? true;
+      } catch (_) {}
       if (_status != SOSStatus.locationFixed) _gpsAccuracy = 0.0;
       
       bool isSystemArmed = _isFallDetectionActive || _isInactivityMonitorActive;
@@ -221,6 +227,15 @@ class SOSLogic extends ChangeNotifier with WidgetsBindingObserver {
      } else {
        openAppSettings();
      }
+  }
+
+  Future<void> requestFullScreenIntentPermission() async {
+    try {
+      await platform.invokeMethod('requestFullScreenIntentPermission');
+      await Future.delayed(const Duration(milliseconds: 500));
+      _fullScreenIntentOk = await platform.invokeMethod('canUseFullScreenIntent') ?? true;
+      notifyListeners();
+    } catch (_) {}
   }
 
   @override
