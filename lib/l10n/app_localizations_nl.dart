@@ -50,7 +50,7 @@ class AppLocalizationsNl extends AppLocalizations {
   String get menuDonate => 'Doneren';
 
   @override
-  String get menuX => 'X (Twitter)';
+  String get menuX => '𝕏 (Twitter)';
 
   @override
   String get menuInsta => 'Instagram';
@@ -403,4 +403,7 @@ class AppLocalizationsNl extends AppLocalizations {
 
   @override
   String get permLocMissing => 'Locatietoestemming ontbreekt';
+
+  @override
+  String get slideStopSystem => 'VEEG OM TE STOPPEN';
 }

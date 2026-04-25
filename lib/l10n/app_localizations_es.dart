@@ -32,7 +32,7 @@ class AppLocalizationsEs extends AppLocalizations {
   }
 
   @override
-  String get menuWeb => 'Web Oficial';
+  String get menuWeb => 'Sitio Web';
 
   @override
   String get menuSupport => 'Soporte Técnico';
@@ -50,7 +50,7 @@ class AppLocalizationsEs extends AppLocalizations {
   String get menuDonate => 'Donar';
 
   @override
-  String get menuX => 'X (Twitter)';
+  String get menuX => '𝕏 (Twitter)';
 
   @override
   String get menuInsta => 'Instagram';
@@ -67,7 +67,7 @@ class AppLocalizationsEs extends AppLocalizations {
   String get settingsTitle => 'Configuración SOS';
 
   @override
-  String get settingsLabel => 'Teléfono de Emergencia';
+  String get settingsLabel => 'Contacto Emergencia';
 
   @override
   String get settingsHint => 'Ej: +34 600 123 456';
@@ -82,7 +82,7 @@ class AppLocalizationsEs extends AppLocalizations {
   String get errorNoContact => '⚠️ ¡Configura un contacto primero!';
 
   @override
-  String get autoModeLabel => 'Detección de Caídas';
+  String get autoModeLabel => 'Detectar Caídas';
 
   @override
   String get autoModeDescription => 'Monitoriza impactos severos.';
@@ -401,4 +401,7 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get permLocMissing => 'Falta Permiso de Ubicación';
+
+  @override
+  String get slideStopSystem => 'DESLIZA PARA APAGAR';
 }

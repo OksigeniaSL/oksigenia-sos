@@ -191,7 +191,7 @@ abstract class AppLocalizations {
   /// No description provided for @menuX.
   ///
   /// In en, this message translates to:
-  /// **'X (Twitter)'**
+  /// **'𝕏 (Twitter)'**
   String get menuX;
 
   /// No description provided for @menuInsta.
@@ -859,6 +859,12 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Missing Location Permission'**
   String get permLocMissing;
+
+  /// No description provided for @slideStopSystem.
+  ///
+  /// In en, this message translates to:
+  /// **'SLIDE TO STOP SYSTEM'**
+  String get slideStopSystem;
 }
 
 class _AppLocalizationsDelegate

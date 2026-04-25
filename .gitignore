@@ -1,3 +1,6 @@
+# Claude Code
+.claude/settings.local.json
+
 # Miscellaneous
 *.class
 *.log
@@ -54,3 +57,4 @@ key.properties
 # Basura de informes
 problems-report.html
 /doc/api/
+SOS Oksigenia/

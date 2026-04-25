@@ -5,6 +5,7 @@
     <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
     <uses-permission android:name="android.permission.ACCESS_BACKGROUND_LOCATION" />
     <uses-permission android:name="android.permission.SEND_SMS" />
+    <uses-permission android:name="android.permission.READ_PHONE_STATE" />
     <uses-permission android:name="android.permission.VIBRATE" />
     <uses-permission android:name="android.permission.WAKE_LOCK" />
     <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
@@ -17,6 +18,7 @@
     <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
     <uses-permission android:name="android.permission.HIGH_SAMPLING_RATE_SENSORS"/>
     <uses-permission android:name="android.permission.INTERNET"/>
+    <uses-permission android:name="android.permission.USE_FULL_SCREEN_INTENT" />
 
     <queries>
         <intent>
@@ -39,10 +41,17 @@
         android:icon="@mipmap/launcher_icon"
         android:enableOnBackInvokedCallback="true">
 
+        <!-- 🟢 FIX CRÍTICO: AÑADIDO INTENT-FILTER PARA ESCUCHAR EL ARRANQUE -->
         <receiver
             android:name="id.flutter.flutter_background_service.BootReceiver"
             android:enabled="true"
-            android:exported="true" />
+            android:exported="true">
+            <intent-filter>
+                <action android:name="android.intent.action.BOOT_COMPLETED" />
+                <action android:name="android.intent.action.QUICKBOOT_POWERON" />
+                <action android:name="com.htc.intent.action.QUICKBOOT_POWERON" />
+            </intent-filter>
+        </receiver>
 
         <activity
             android:name=".MainActivity"
@@ -51,10 +60,7 @@
             android:theme="@style/LaunchTheme"
             android:configChanges="orientation|keyboardHidden|keyboard|screenSize|smallestScreenSize|locale|layoutDirection|fontScale|screenLayout|density|uiMode"
             android:hardwareAccelerated="true"
-            android:windowSoftInputMode="adjustResize"
-            
-            android:showWhenLocked="true"
-            android:turnScreenOn="true">
+            android:windowSoftInputMode="adjustResize">
             <meta-data
               android:name="io.flutter.embedding.android.NormalTheme"
               android:resource="@style/NormalTheme" />
@@ -69,7 +75,7 @@
             android:foregroundServiceType="location|dataSync|mediaPlayback"
             android:enabled="true"
             android:exported="true" 
-            android:stopWithTask="true" 
+            android:stopWithTask="false" 
             tools:replace="android:foregroundServiceType, android:exported, android:stopWithTask" />
             <meta-data android:name="flutterEmbedding" android:value="2" />
 

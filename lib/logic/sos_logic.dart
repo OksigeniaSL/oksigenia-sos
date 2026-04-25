@@ -1,6 +1,5 @@
 import 'dart:async';
 import 'dart:math';
-import 'dart:io'; 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart'; 
 import 'package:geolocator/geolocator.dart';
@@ -9,16 +8,16 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:audioplayers/audioplayers.dart';
 import 'package:sensors_plus/sensors_plus.dart';
 import 'package:url_launcher/url_launcher.dart';
-import 'package:wakelock_plus/wakelock_plus.dart';
 import 'package:vibration/vibration.dart';
 import 'package:flutter_background_service/flutter_background_service.dart';
 import 'package:battery_plus/battery_plus.dart';
 import 'package:oksigenia_sos/l10n/app_localizations.dart'; 
+import 'package:telephony/telephony.dart'; 
 import '../services/preferences_service.dart';
 import '../screens/settings_screen.dart';  
 import '../screens/alarm_screen.dart';
-import '../screens/sent_screen.dart';  
-import '../screens/home_screen.dart'; 
+import '../screens/sent_screen.dart';
+import '../screens/home_screen.dart';
 
 final GlobalKey<NavigatorState> oksigeniaNavigatorKey = GlobalKey<NavigatorState>();
 
@@ -29,12 +28,17 @@ class SOSLogic extends ChangeNotifier with WidgetsBindingObserver {
   SOSStatus _status = SOSStatus.ready;
   String _errorMessage = '';
   static const platform = MethodChannel('com.oksigenia.sos/sms');
+  final Telephony _telephony = Telephony.instance;
   
   static const double _impactThreshold = 12.0;
 
   bool _isFallDetectionActive = false;
   bool _isDyingGaspSent = false; 
   bool _isInactivityMonitorActive = false;
+  
+  bool _uiCooldown = false; 
+  // 🟢 Bandera de ignorar sensores activada por defecto
+  bool _ignoreSensors = true; 
   
   AlertCause _lastTrigger = AlertCause.manual;
   AlertCause get lastTrigger => _lastTrigger;
@@ -47,7 +51,7 @@ class SOSLogic extends ChangeNotifier with WidgetsBindingObserver {
   
   DateTime _lastSensorPacket = DateTime.now();
   bool _isWarmingUp = false;
-
+  DateTime _lastCancellationTime = DateTime.fromMillisecondsSinceEpoch(0);
   Timer? _inactivityTimer;
   Timer? _periodicUpdateTimer;
   StreamSubscription? _accelerometerSubscription;
@@ -89,6 +93,51 @@ class SOSLogic extends ChangeNotifier with WidgetsBindingObserver {
     return contacts.isNotEmpty ? contacts.first : null;
   }
 
+  Future<void> _syncConfigWithService() async {
+    final service = FlutterBackgroundService();
+    if (!(await service.isRunning())) return;
+
+    final prefs = PreferencesService();
+    
+    Map<String, String> texts = {};
+    
+    if (oksigeniaNavigatorKey.currentContext != null) {
+      final l10n = AppLocalizations.of(oksigeniaNavigatorKey.currentContext!);
+      if (l10n != null) {
+        texts = {
+          'alertFallDetected': l10n.alertFallDetected,
+          'holdToCancel': l10n.holdToCancel,
+          'alertSendingIn': l10n.alertSendingIn,
+          'statusSent': l10n.statusSent,
+          'statusReady': l10n.statusReady,
+          'smsHelpMessage': l10n.smsHelpMessage,
+          'smsDyingGasp': l10n.smsDyingGasp,
+        };
+      }
+    } else {
+      final sharedPrefs = await SharedPreferences.getInstance();
+      String langCode = sharedPrefs.getString('language_code') ?? 'en';
+      try {
+        final l10n = await AppLocalizations.delegate.load(Locale(langCode));
+        texts = {
+          'alertFallDetected': l10n.alertFallDetected,
+          'holdToCancel': l10n.holdToCancel,
+          'alertSendingIn': l10n.alertSendingIn,
+          'statusSent': l10n.statusSent,
+          'statusReady': l10n.statusReady,
+          'smsHelpMessage': l10n.smsHelpMessage,
+          'smsDyingGasp': l10n.smsDyingGasp,
+        };
+      } catch (_) {}
+    }
+
+    service.invoke("setConfig", {
+      "recipients": prefs.getContacts(),
+      "customMessage": prefs.getSosMessage(),
+      "texts": texts
+    });
+  }
+
   Future<void> init() async {
     if (_status == SOSStatus.preAlert || _status == SOSStatus.sent) {
       return; 
@@ -97,6 +146,12 @@ class SOSLogic extends ChangeNotifier with WidgetsBindingObserver {
     WidgetsBinding.instance.removeObserver(this);
     WidgetsBinding.instance.addObserver(this);
     
+    // 🟢 FIX: Limpieza de buffer. Forzamos 1.0G visualmente al inicio.
+    _visualGForce = 1.0;
+    _ignoreSensors = true;
+    // Aumentado a 4 segundos para asegurar purga completa
+    Future.delayed(const Duration(seconds: 4), () => _ignoreSensors = false);
+    
     await _loadSettings();
     await _checkPermissions(); 
     
@@ -104,6 +159,8 @@ class SOSLogic extends ChangeNotifier with WidgetsBindingObserver {
     if (!(await service.isRunning())) {
       await service.startService();
     }
+    
+    Future.delayed(const Duration(seconds: 1), () => _syncConfigWithService());
 
     _startGForceMonitoring();
     _startHealthMonitor(); 
@@ -125,7 +182,6 @@ class SOSLogic extends ChangeNotifier with WidgetsBindingObserver {
   Future<void> _checkHealth() async {
     try {
       _batteryLevel = await _battery.batteryLevel;
-      
       _smsPermissionOk = await Permission.sms.isGranted;
       _notificationPermissionOk = await Permission.notification.isGranted;
 
@@ -146,7 +202,6 @@ class SOSLogic extends ChangeNotifier with WidgetsBindingObserver {
       }
 
       _batteryOptimizationOk = await Permission.ignoreBatteryOptimizations.isGranted;
-
       if (_status != SOSStatus.locationFixed) _gpsAccuracy = 0.0;
       
       bool isSystemArmed = _isFallDetectionActive || _isInactivityMonitorActive;
@@ -176,27 +231,13 @@ class SOSLogic extends ChangeNotifier with WidgetsBindingObserver {
       _startGForceMonitoring(); 
       _checkHealth();
       if (_status == SOSStatus.ready) _startPassiveGPS();
+      _syncConfigWithService();
       
     } else if (state == AppLifecycleState.paused) {
       if (!_isInactivityMonitorActive && !_isFallDetectionActive) {
          _accelerometerSubscription?.cancel();
       }
-    } else if (state == AppLifecycleState.detached) {
-      // 🧟 ZOMBIE KILLER: Secuencia blindada
-      
-      // 1. Matamos servicio
-      try {
-        final service = FlutterBackgroundService();
-        service.invoke("stopService");
-      } catch (_) {}
-      
-      // 2. Liberamos recursos locales con seguridad
-      try { _gpsSubscription?.cancel(); } catch(_) {}
-      try { _accelerometerSubscription?.cancel(); } catch(_) {}
-      try { _inactivityTimer?.cancel(); } catch(_) {}
-      try { _healthCheckTimer?.cancel(); } catch(_) {}
-      try { WakelockPlus.disable(); } catch(_) {}
-    }
+    } 
   }
 
   Future<void> _loadSettings() async {
@@ -221,18 +262,116 @@ class SOSLogic extends ChangeNotifier with WidgetsBindingObserver {
       if (savedInactivityState) prefs.saveInactivityState(false);
     }
 
+    final service = FlutterBackgroundService();
+    if (await service.isRunning()) {
+       service.invoke("setMonitoring", {
+         "active": _isFallDetectionActive,
+         "inactivity_limit": _currentInactivityLimit,
+         "inactivity_enabled": _isInactivityMonitorActive
+       });
+    }
+
     if (_errorMessage == "NO_CONTACT") {
        if (hasContact || (!_isFallDetectionActive && !_isInactivityMonitorActive)) {
          _setStatus(SOSStatus.ready);
        }
     }
-    notifyListeners();
+
+    final rawPrefs = await SharedPreferences.getInstance();
+    
+    bool isZombieAlarming = rawPrefs.getBool('is_alarm_active') ?? false;
+
+    if (isZombieAlarming) {
+       debugPrint("LOGIC: 🧟 ¡Detectada alarma zombie!");
+       try { await platform.invokeMethod('wakeScreen'); } catch (_) {}
+
+       int startTime = rawPrefs.getInt('alarm_start_timestamp') ?? 0;
+       int now = DateTime.now().millisecondsSinceEpoch;
+       int elapsedSeconds = ((now - startTime) / 1000).floor();
+       int remaining = 30 - elapsedSeconds;
+
+       if (remaining > 0) {
+          _status = SOSStatus.preAlert;
+          _countdownSeconds = remaining; 
+          
+          Future.delayed(const Duration(milliseconds: 500), () {
+              if (oksigeniaNavigatorKey.currentState != null) {
+                oksigeniaNavigatorKey.currentState!.popUntil((route) => route.isFirst);
+                oksigeniaNavigatorKey.currentState!.push(
+                  MaterialPageRoute(builder: (context) => const AlarmScreen())
+                );
+              }
+          });
+          
+          _preAlertTimer?.cancel();
+          _preAlertTimer = Timer.periodic(const Duration(seconds: 1), (timer) {
+            _countdownSeconds--;
+            notifyListeners();
+            if (_countdownSeconds <= 0) {
+              timer.cancel();
+              if (_lastTrigger == AlertCause.manual) {
+                 sendSOS();
+              } else {
+                 _onAutoAlertSent();
+              }
+            }
+          });
+          notifyListeners();
+          return; 
+       } else {
+          debugPrint("LOGIC: 🧟 Tiempo agotado. Esperando confirmación de Sylvia...");
+          await rawPrefs.setBool('is_alarm_active', false);
+       }
+    }
+
+    bool sentRecently = rawPrefs.getBool('sos_sent_recently') ?? false;
+    if (sentRecently) {
+       _status = SOSStatus.sent;
+       await rawPrefs.setBool('sos_sent_recently', false); 
+       Future.delayed(const Duration(milliseconds: 500), () {
+          if (oksigeniaNavigatorKey.currentState != null) {
+             oksigeniaNavigatorKey.currentState!.popUntil((route) => route.isFirst);
+             oksigeniaNavigatorKey.currentState!.push(
+                MaterialPageRoute(builder: (context) => const SentScreen())
+             );
+          }
+       });
+       notifyListeners();
+    }
+  }
+
+  void _onAutoAlertSent() async {
+    _setStatus(SOSStatus.sent);
+    final sharedPrefs = await SharedPreferences.getInstance();
+    await sharedPrefs.setBool('sos_sent_recently', true);
+    await sharedPrefs.setBool('is_alarm_active', false);
+    
+    await platform.invokeMethod('sleepScreen');
+    
+    try {
+      _audioPlayer = AudioPlayer();
+      await _audioPlayer!.setAudioContext(AudioContext(
+         android: AudioContextAndroid(
+             isSpeakerphoneOn: true, stayAwake: false, contentType: AndroidContentType.sonification, usageType: AndroidUsageType.media, audioFocus: AndroidAudioFocus.gainTransient
+         ),
+         iOS: AudioContextIOS(category: AVAudioSessionCategory.playback)
+      ));
+      await _audioPlayer!.setVolume(1.0); 
+      await _audioPlayer!.play(AssetSource('sounds/send.mp3'));
+    } catch(e) {}
+
+    if (oksigeniaNavigatorKey.currentState != null) {
+       oksigeniaNavigatorKey.currentState!.pushReplacement(
+          MaterialPageRoute(builder: (context) => const SentScreen())
+       );
+    }
   }
 
   Future<void> refreshConfig() async {
     await Future.delayed(const Duration(milliseconds: 200)); 
     await _loadSettings();
     _updateSylviaStatus();
+    _syncConfigWithService();
   }
 
   void _startPassiveGPS() async {
@@ -266,6 +405,12 @@ class SOSLogic extends ChangeNotifier with WidgetsBindingObserver {
       _accelerometerSubscription = accelerometerEventStream(samplingPeriod: SensorInterval.gameInterval)
         .listen((AccelerometerEvent event) {
           
+          // 🟢 FIX CRÍTICO: Bloqueo TOTAL al principio.
+          // Si _ignoreSensors es true, NO PROCESAMOS NADA.
+          if (_ignoreSensors) {
+            return;
+          }
+
           _lastSensorPacket = DateTime.now(); 
 
           double rawMagnitude = sqrt(event.x * event.x + event.y * event.y + event.z * event.z);
@@ -276,6 +421,11 @@ class SOSLogic extends ChangeNotifier with WidgetsBindingObserver {
           } else {
             _visualGForce = (_visualGForce * 0.90) + (instantG * 0.10); 
           }
+          
+          notifyListeners();
+
+          if (_uiCooldown) return;
+          if (_status == SOSStatus.sent) return;
 
           double delta = (instantG - lastG).abs();
           lastG = instantG;
@@ -284,21 +434,26 @@ class SOSLogic extends ChangeNotifier with WidgetsBindingObserver {
              _lastMovementTime = DateTime.now();
           }
 
+          if (DateTime.now().difference(_lastCancellationTime).inSeconds < 3) {
+             return; 
+          }
+
           if (_isFallDetectionActive && instantG > _impactThreshold && (_status == SOSStatus.ready || _status == SOSStatus.locationFixed)) {
             debugPrint("💥 IMPACTO: ${instantG.toStringAsFixed(2)} G");
+            _uiCooldown = true;
+            Future.delayed(const Duration(seconds: 5), () => _uiCooldown = false);
             _triggerPreAlert(AlertCause.fall);
           }
-          notifyListeners();
         }, onError: (e) => debugPrint("Sensor Error: $e"));
     } catch (e) { debugPrint("Error acelerómetro: $e"); }
   }
 
   Future<void> _checkPermissions() async {
     await [
-      Permission.location, 
-      Permission.sms, 
+      Permission.location,
+      Permission.sms,
       Permission.notification,
-      Permission.activityRecognition 
+      Permission.activityRecognition,
     ].request();
   }
 
@@ -350,6 +505,9 @@ class SOSLogic extends ChangeNotifier with WidgetsBindingObserver {
     if (value && _errorMessage == "NO_CONTACT") _setStatus(SOSStatus.ready); 
     
     if (value) {
+      _uiCooldown = true;
+      Future.delayed(const Duration(seconds: 2), () => _uiCooldown = false);
+
       _isWarmingUp = true;
       _lastSensorPacket = DateTime.now(); 
       _sensorsPermissionOk = true; 
@@ -362,6 +520,15 @@ class SOSLogic extends ChangeNotifier with WidgetsBindingObserver {
       final service = FlutterBackgroundService();
       if (!(await service.isRunning())) service.startService();
     }
+
+    final service = FlutterBackgroundService();
+    service.invoke("setMonitoring", {
+      "active": value,
+      "inactivity_limit": _currentInactivityLimit,
+      "inactivity_enabled": _isInactivityMonitorActive
+    });
+    _syncConfigWithService(); 
+
     PreferencesService().saveFallDetectionState(value);
     _updateSylviaStatus(); 
     notifyListeners();
@@ -385,6 +552,13 @@ class SOSLogic extends ChangeNotifier with WidgetsBindingObserver {
     
     PreferencesService().saveInactivityState(value);
     _updateSylviaStatus(); 
+    
+    service.invoke("setMonitoring", {
+      "active": _isFallDetectionActive,
+      "inactivity_limit": _currentInactivityLimit,
+      "inactivity_enabled": value
+    });
+    _syncConfigWithService(); 
 
     if (value) {
       _isWarmingUp = true;
@@ -422,6 +596,9 @@ class SOSLogic extends ChangeNotifier with WidgetsBindingObserver {
   void _triggerPreAlert(AlertCause cause) async {
     if (_status == SOSStatus.preAlert || _status == SOSStatus.sent) return;
 
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.remove('alarm_start_timestamp');
+
     debugPrint("SYLVIA: 🚨 ALARMA ACTIVADA");
     _lastTrigger = cause;
     _status = SOSStatus.preAlert;
@@ -443,7 +620,11 @@ class SOSLogic extends ChangeNotifier with WidgetsBindingObserver {
       notifyListeners(); 
       if (_countdownSeconds <= 0) {
         timer.cancel();
-        sendSOS(); 
+        if (_lastTrigger == AlertCause.manual) {
+           sendSOS();
+        } else {
+           _onAutoAlertSent();
+        }
       }
     });
 
@@ -480,18 +661,30 @@ class SOSLogic extends ChangeNotifier with WidgetsBindingObserver {
       msg += "\nhttps://maps.google.com/?q=${pos.latitude},${pos.longitude}";
       
       for (String number in recipients) {
-        await platform.invokeMethod('sendSMS', {"phone": number, "msg": msg});
+        await _telephony.sendSms(to: number, message: msg);
       }
     } catch (e) { debugPrint("❌ Fallo Dying Gasp: $e"); }
   }
 
   void cancelAlert() => cancelSOS();
 
-  void cancelSOS() {
+  void cancelSOS() async {
     debugPrint("LOGIC: 🛑 Cancelado por usuario.");
+    try { await platform.invokeMethod('sleepScreen'); } catch (_) {}
+    
+    _uiCooldown = true;
+    Future.delayed(const Duration(seconds: 10), () => _uiCooldown = false);
+
+    _lastCancellationTime = DateTime.now(); 
+
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setBool('is_alarm_active', false);
+    await prefs.remove('alarm_start_timestamp');
+    await prefs.setBool('sos_sent_recently', false);
+
     _preAlertTimer?.cancel();
     _preAlertTimer = null;
-    _audioPlayer?.stop(); 
+    _audioPlayer?.stop();
     try {
       final service = FlutterBackgroundService();
       service.invoke("stopAlarm");
@@ -504,10 +697,52 @@ class SOSLogic extends ChangeNotifier with WidgetsBindingObserver {
     _countdownSeconds = 30; 
     
     if (_isInactivityMonitorActive) {
-      toggleInactivityMonitor(false); 
-      toggleInactivityMonitor(true);  
+      _lastMovementTime = DateTime.now();
     }
     _updateSylviaStatus(); 
+    
+    if (oksigeniaNavigatorKey.currentState != null) {
+      oksigeniaNavigatorKey.currentState!.pushAndRemoveUntil(
+        MaterialPageRoute(builder: (context) => const HomeScreen()),
+        (route) => false
+      );
+    }
+    
+    notifyListeners();
+  }
+
+  void resetSystem() async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setBool('sos_sent_recently', false);
+    await prefs.setBool('is_alarm_active', false);
+    
+    _setStatus(SOSStatus.ready);
+    _lastMovementTime = DateTime.now();
+    
+    if (oksigeniaNavigatorKey.currentState != null) {
+      oksigeniaNavigatorKey.currentState!.pushAndRemoveUntil(
+        MaterialPageRoute(builder: (context) => const HomeScreen()),
+        (route) => false
+      );
+    }
+    notifyListeners();
+  }
+
+  Future<void> stopSystem() async {
+    final service = FlutterBackgroundService();
+    if (await service.isRunning()) {
+      service.invoke("stopService");
+      await Future.delayed(const Duration(milliseconds: 600));
+    }
+
+    final prefs = PreferencesService();
+    prefs.saveFallDetectionState(false);
+    prefs.saveInactivityState(false);
+
+    _isFallDetectionActive = false;
+    _isInactivityMonitorActive = false;
+    _setStatus(SOSStatus.ready);
+
     notifyListeners();
   }
 
@@ -546,12 +781,25 @@ class SOSLogic extends ChangeNotifier with WidgetsBindingObserver {
     }
     
     try {
-      final LocationSettings locationSettings = AndroidSettings(accuracy: LocationAccuracy.high, forceLocationManager: true, timeLimit: const Duration(seconds: 15));
-      Position pos = await Geolocator.getCurrentPosition(locationSettings: locationSettings);
-      _setStatus(SOSStatus.locationFixed);
-      msgBody += "\nMaps: https://maps.google.com/?q=${pos.latitude},${pos.longitude}";
-      msgBody += "\nOSM: https://www.openstreetmap.org/?mlat=${pos.latitude}&mlon=${pos.longitude}";
-      msgBody += "\n\n🔋Bat: $batteryLevel% | 📡Alt: ${pos.altitude.toStringAsFixed(0)}m | 🎯Acc: ${pos.accuracy.toStringAsFixed(0)}m";
+      Position? pos;
+      try {
+        final LocationSettings locationSettings = AndroidSettings(
+            accuracy: LocationAccuracy.high,
+            forceLocationManager: true,
+            timeLimit: const Duration(seconds: 5));
+        pos = await Geolocator.getCurrentPosition(locationSettings: locationSettings);
+      } catch (_) {
+        pos = await Geolocator.getLastKnownPosition();
+      }
+      if (pos != null) {
+        _setStatus(SOSStatus.locationFixed);
+        msgBody += "\nMaps: https://maps.google.com/?q=${pos.latitude},${pos.longitude}";
+        msgBody += "\nOSM: https://www.openstreetmap.org/?mlat=${pos.latitude}&mlon=${pos.longitude}";
+        msgBody += "\n\n🔋Bat: $batteryLevel% | 📡Alt: ${pos.altitude.toStringAsFixed(0)}m | 🎯Acc: ${pos.accuracy.toStringAsFixed(0)}m";
+      } else {
+        msgBody += "\n(GPS Error/Timeout)";
+        msgBody += "\n\n🔋Bat: $batteryLevel% (No Loc)";
+      }
     } catch (e) {
       msgBody += "\n(GPS Error/Timeout)";
       msgBody += "\n\n🔋Bat: $batteryLevel% (No Loc)";
@@ -560,8 +808,12 @@ class SOSLogic extends ChangeNotifier with WidgetsBindingObserver {
     int successCount = 0;
     for (String number in recipients) {
       try {
-        final String result = await platform.invokeMethod('sendSMS', {"phone": number, "msg": msgBody});
-        if (result == "OK") successCount++;
+        await _telephony.sendSms(
+          to: number, 
+          message: msgBody,
+          isMultipart: true
+        );
+        successCount++;
       } catch (e) { debugPrint("Error enviando: $e"); }
     }
 
@@ -573,6 +825,11 @@ class SOSLogic extends ChangeNotifier with WidgetsBindingObserver {
       } catch (e) {}
 
       _setStatus(SOSStatus.sent);
+      
+      final sharedPrefs = await SharedPreferences.getInstance();
+      await sharedPrefs.setBool('sos_sent_recently', true);
+      await sharedPrefs.setBool('is_alarm_active', false);
+
       await platform.invokeMethod('sleepScreen');
       
       try {
@@ -604,7 +861,7 @@ class SOSLogic extends ChangeNotifier with WidgetsBindingObserver {
         String updateMsg = "📍 SEGUIMIENTO Oksigenia: Sigo en ruta / Still moving.";
         updateMsg += "\nMaps: https://maps.google.com/?q=${pos.latitude},${pos.longitude}";
         updateMsg += "\nOSM: https://www.openstreetmap.org/?mlat=${pos.latitude}&mlon=${pos.longitude}";
-        await platform.invokeMethod('sendSMS', {"phone": target, "msg": updateMsg});
+        await _telephony.sendSms(to: target, message: updateMsg);
       } catch (e) {}
     });
   }
@@ -630,12 +887,6 @@ class SOSLogic extends ChangeNotifier with WidgetsBindingObserver {
     _preAlertTimer?.cancel();
     _audioPlayer?.dispose();
     
-    // ZOMBIE KILLER EXTRA
-    try {
-      final service = FlutterBackgroundService();
-      service.invoke("stopService"); 
-    } catch (_) {}
-    
     super.dispose();
   }
 
@@ -650,14 +901,13 @@ class SOSLogic extends ChangeNotifier with WidgetsBindingObserver {
 
         String title = "";
         String content = "";
-        String statusIcon = "active"; // Por defecto activo
+        String statusIcon = "active"; 
 
         if (_status == SOSStatus.preAlert) {
           statusIcon = "alarm";
           title = "🚨 SOS"; 
           content = t.alertFallDetected; 
         } else if (!isActive) {
-          // Si no hay nada activo, ponemos el icono de pausa
           statusIcon = "paused";
           title = t.statusMonitorStopped; 
           content = "---"; 
@@ -676,7 +926,6 @@ class SOSLogic extends ChangeNotifier with WidgetsBindingObserver {
         });
       }
     } catch (_) {
-      // Silenciamos error si se llama desde un isolate muerto
     }
   }
 }

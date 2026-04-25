@@ -12,7 +12,7 @@
     "menuSettings": "Impostazioni",
     "menuPrivacy": "Privacy e Note Legali",
     "menuDonate": "Dona / Donate",
-    "menuX": "X (Twitter)",
+    "menuX": "𝕏 (Twitter)",
     "menuInsta": "Instagram",
     "motto": "Respira > Inspira > Cresci;",
     "panicMessage": "🆘 *ALLERTA OKSIGENIA* 🆘\n\nHo bisogno di aiuto urgente.\n📍 Posizione: {link}\n\nRespira > Inspira > Cresci;",
@@ -123,5 +123,6 @@
     "batteryDialogTitle": "Restrizione Batteria",
     "btnDisableBatterySaver": "DISATTIVA RISPARMIO",
     "batteryDialogBody": "Il sistema sta limitando la batteria. Affinché SOS funzioni in background, seleziona 'Nessuna restrizione' o 'Non ottimizzare'.",
-    "permLocMissing": "Permesso posizione mancante"
+    "permLocMissing": "Permesso posizione mancante",
+    "slideStopSystem": "SCORRI PER SPEGNERE"
 }

@@ -12,7 +12,7 @@
     "menuSettings": "Configurações",
     "menuPrivacy": "Privacidade e Legal",
     "menuDonate": "Donar / Donate",
-    "menuX": "X (Twitter)",
+    "menuX": "𝕏 (Twitter)",
     "menuInsta": "Instagram",
     "motto": "Respira > Inspira > Crece;",
     "panicMessage": "🆘 *ALERTA OKSIGENIA* 🆘\n\nPreciso de ajuda urgente.\n📍 Localização: {link}\n\nRespira > Inspira > Crece;",
@@ -123,5 +123,6 @@
     "batteryDialogTitle": "Restrição de Bateria",
     "btnDisableBatterySaver": "DESATIVAR POUPANÇA",
     "batteryDialogBody": "O sistema restringe a bateria desta app. Para o SOS funcionar em segundo plano, selecione 'Sem restrições' ou 'Não otimizar'.",
-    "permLocMissing": "Falta Permissão Localização"
+    "permLocMissing": "Falta Permissão Localização",
+    "slideStopSystem": "DESLIZE P/ PARAR"
 }
