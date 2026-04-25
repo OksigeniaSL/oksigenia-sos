@@ -34,6 +34,7 @@ dependencies:
   package_info_plus: ^9.0.0
   provider: ^6.1.5+1
   flutter_local_notifications: ^20.0.0
+  timezone: ^0.10.1
   slide_to_act: ^2.0.2 # 🟢 BOTÓN DESLIZANTE MODERNO Y COMPATIBLE
 
 dev_dependencies:

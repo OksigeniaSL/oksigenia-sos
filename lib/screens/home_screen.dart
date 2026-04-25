@@ -24,6 +24,7 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver, Ti
   bool _hasShownWarning = false;
   late AnimationController _sosHoldController;
   late AnimationController _stopHoldController;
+  late AnimationController _liveTrackingHoldController;
 
   @override
   void initState() {
@@ -56,6 +57,18 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver, Ti
         _triggerHaptic();
         await _sosLogic.stopSystem();
         if (mounted) SystemNavigator.pop();
+      }
+    });
+
+    _liveTrackingHoldController = AnimationController(
+      vsync: this,
+      duration: const Duration(seconds: 2),
+    );
+    _liveTrackingHoldController.addStatusListener((status) {
+      if (status == AnimationStatus.completed) {
+        _triggerHaptic();
+        _liveTrackingHoldController.reset();
+        _sosLogic.disableLiveTracking();
       }
     });
     
@@ -128,6 +141,7 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver, Ti
     WidgetsBinding.instance.removeObserver(this);
     _sosHoldController.dispose();
     _stopHoldController.dispose();
+    _liveTrackingHoldController.dispose();
     WakelockPlus.disable();
     super.dispose();
   }
@@ -189,67 +203,22 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver, Ti
        battIcon = Icons.battery_alert;
     }
 
-    // --- VISUAL SEMÁFOROS (HEADER) ---
-    bool hasContacts = _sosLogic.emergencyContact != null;
-    Color contactColor = hasContacts ? Colors.green : Colors.red;
-    Color smsColor = _sosLogic.smsPermissionOk ? Colors.green : Colors.red;
-    Color notifColor = _sosLogic.notificationPermissionOk ? Colors.green : Colors.red;
-
     return Center(
       child: SingleChildScrollView(
         padding: const EdgeInsets.only(bottom: 100),
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            
-            // 🚥 SEMÁFORO DE PERMISOS
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 40, vertical: 5),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                children: [
-                  // 1. SMS
-                  _buildStatusIcon(
-                    icon: Icons.sms, 
-                    color: smsColor, 
-                    onTap: _sosLogic.smsPermissionOk 
-                        ? () => _showSuccessToast(context, l10n.permSmsOk)
-                        : () => _showRestrictedPermissionGuide(context, l10n.permSmsMissing),
-                  ),
-                  // 2. NOTIFICACIONES
-                  _buildStatusIcon(
-                    icon: Icons.notifications_active, 
-                    color: notifColor, 
-                    onTap: _sosLogic.notificationPermissionOk 
-                        ? () => _showSuccessToast(context, l10n.permNotifOk)
-                        : () => _showSimplePermissionDialog(context, l10n.permNotifMissing),
-                  ),
-                  // 3. CONTACTOS
-                  _buildStatusIcon(
-                    icon: hasContacts ? Icons.people_alt : Icons.person_off, 
-                    color: contactColor, 
-                    onTap: hasContacts 
-                        ? () => _showSuccessToast(context, "${l10n.settingsLabel} OK")
-                        : () {
-                            ScaffoldMessenger.of(context).showSnackBar(
-                              SnackBar(
-                                content: Text(l10n.errorNoContact, style: const TextStyle(color: Colors.white)),
-                                backgroundColor: Colors.orange
-                              )
-                            );
-                            _sosLogic.openSettings(context);
-                          },
-                  ),
-                ],
-              ),
-            ),
 
             const SizedBox(height: 10),
 
             // STATUS PILL — enriched priority display
             _buildStatusPill(l10n),
-            
-            const SizedBox(height: 15),
+
+            // LIVE TRACKING CARD — arriba para separarlo del Stop y el SOS
+            _buildLiveTrackingCard(l10n),
+
+            const SizedBox(height: 8),
 
             // DASHBOARD INFERIOR
             Padding(
@@ -436,12 +405,12 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver, Ti
               style: const TextStyle(color: Colors.grey)
             ),
             
-            // Banner de Modo Test
+            // TEST MODE BANNER
             if (_sosLogic.currentInactivityLimit < 60) ...[
-              const SizedBox(height: 15),
+              const SizedBox(height: 10),
               Container(
                 margin: const EdgeInsets.symmetric(horizontal: 30),
-                padding: const EdgeInsets.all(12),
+                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
                 decoration: BoxDecoration(
                   color: Colors.amber.shade200,
                   borderRadius: BorderRadius.circular(8),
@@ -449,15 +418,15 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver, Ti
                 ),
                 child: Row(
                   children: [
-                    Icon(Icons.warning_amber, color: Colors.orange.shade900),
-                    const SizedBox(width: 10),
+                    Icon(Icons.warning_amber, color: Colors.orange.shade900, size: 16),
+                    const SizedBox(width: 6),
                     Expanded(
                       child: Text(
-                        l10n.testModeWarning, 
+                        l10n.testModeWarning,
                         style: TextStyle(
-                          color: Colors.orange.shade900, 
-                          fontWeight: FontWeight.bold, 
-                          fontSize: 13
+                          color: Colors.orange.shade900,
+                          fontWeight: FontWeight.bold,
+                          fontSize: 12,
                         ),
                       ),
                     ),
@@ -465,8 +434,8 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver, Ti
                 ),
               ),
             ],
-            
-            const SizedBox(height: 20),
+
+            const SizedBox(height: 12),
 
             // INTERRUPTORES
             _buildQuickToggle(
@@ -505,8 +474,8 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver, Ti
             ),
             _buildTelemetryPanel(l10n),
 
-            // HOLD TO STOP
-            const SizedBox(height: 20),
+            // HOLD TO STOP — separación generosa respecto a los interruptores
+            const SizedBox(height: 30),
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 30, vertical: 10),
               child: GestureDetector(
@@ -592,62 +561,146 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver, Ti
   }
 
   Widget _buildQuickToggle(BuildContext context, String label, bool value, Function(bool) onChanged, IconData icon, {String? subtitle}) {
-    return Container(
-      margin: const EdgeInsets.symmetric(horizontal: 30, vertical: 5),
-      child: SwitchListTile(
-        title: Text(label, style: const TextStyle(fontWeight: FontWeight.w500, color: Colors.white)), 
-        subtitle: subtitle != null ? Text(
-            subtitle, 
-            style: TextStyle(
-                color: Colors.white70, 
-                fontSize: 14, 
-                fontWeight: FontWeight.bold
-            )
-        ) : null,
-        secondary: Icon(icon, color: value ? Colors.redAccent : Colors.grey),
-        value: value, 
-        onChanged: (newValue) async {
-          if (newValue) {
-            final l10n = AppLocalizations.of(context)!;
+    final l10n = AppLocalizations.of(context)!;
+    final isPaused = value && _sosLogic.isMonitoringPaused;
 
-            bool smsGranted = await Permission.sms.isGranted;
-            if (!smsGranted) {
-               _showErrorSnackBar(context, l10n.permSmsMissing, 
-                  actionLabel: l10n.menuSettings.toUpperCase(),
-                  onAction: () => _showRestrictedPermissionGuide(context, l10n.permSmsMissing)
-               );
-               return; 
-            }
+    String? effectiveSubtitle = subtitle;
+    if (isPaused) {
+      final remaining = _sosLogic.pauseRemainingSeconds;
+      final mins = remaining ~/ 60;
+      final secs = (remaining % 60).toString().padLeft(2, '0');
+      effectiveSubtitle = l10n.pauseResumesIn("${mins}m ${secs}s");
+    } else if (value) {
+      effectiveSubtitle = l10n.pauseHoldHint;
+    }
 
-            bool locGranted = await Permission.location.isGranted;
-            if (!locGranted) {
-               _showErrorSnackBar(context, l10n.permLocMissing, 
-                  actionLabel: l10n.btnGoToSettings.toUpperCase(),
-                  onAction: () => openAppSettings()
-               );
-               return; 
+    return GestureDetector(
+      onLongPress: value ? () => _showPauseSheet(context, l10n) : null,
+      child: Container(
+        margin: const EdgeInsets.symmetric(horizontal: 30, vertical: 5),
+        child: SwitchListTile(
+          title: Text(label, style: const TextStyle(fontWeight: FontWeight.w500, color: Colors.white)),
+          subtitle: effectiveSubtitle != null
+              ? Text(
+                  effectiveSubtitle,
+                  style: TextStyle(
+                    color: isPaused ? Colors.orange : Colors.white70,
+                    fontSize: 13,
+                    fontWeight: FontWeight.bold,
+                  ),
+                )
+              : null,
+          secondary: Icon(
+            isPaused ? Icons.pause_circle_filled : icon,
+            color: isPaused ? Colors.orange : (value ? Colors.redAccent : Colors.grey),
+          ),
+          value: value,
+          onChanged: (newValue) async {
+            if (!newValue && isPaused) {
+              // Tapped while paused → resume
+              _sosLogic.resumeMonitoring();
+              if (mounted) {
+                ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+                  content: Text(l10n.pauseResumedMsg, style: const TextStyle(color: Colors.white)),
+                  backgroundColor: Colors.green[700],
+                  behavior: SnackBarBehavior.floating,
+                  duration: const Duration(seconds: 2),
+                ));
+              }
+              return;
             }
-
-            bool restricted = await _sosLogic.arePermissionsRestricted();
-            if (restricted) {
-               if (mounted) _showRestrictedPermissionGuide(context, l10n.permDialogTitle);
-               return;
+            if (newValue) {
+              bool smsGranted = await Permission.sms.isGranted;
+              if (!smsGranted) {
+                _showErrorSnackBar(context, l10n.permSmsMissing,
+                    actionLabel: l10n.menuSettings.toUpperCase(),
+                    onAction: () => _showRestrictedPermissionGuide(context, l10n.permSmsMissing));
+                return;
+              }
+              bool locGranted = await Permission.location.isGranted;
+              if (!locGranted) {
+                _showErrorSnackBar(context, l10n.permLocMissing,
+                    actionLabel: l10n.btnGoToSettings.toUpperCase(),
+                    onAction: () => openAppSettings());
+                return;
+              }
+              bool restricted = await _sosLogic.arePermissionsRestricted();
+              if (restricted) {
+                if (mounted) _showRestrictedPermissionGuide(context, l10n.permDialogTitle);
+                return;
+              }
+              if (!_sosLogic.batteryOptimizationOk) {
+                if (mounted) _showBatteryDialog(context, l10n);
+                return;
+              }
+              if (!_sosLogic.fullScreenIntentOk) {
+                if (mounted) _showFullScreenIntentDialog(context, l10n);
+                return;
+              }
             }
-
-            if (!_sosLogic.batteryOptimizationOk) {
-               if (mounted) _showBatteryDialog(context, l10n);
-               return;
-            }
-
-            if (!_sosLogic.fullScreenIntentOk) {
-               if (mounted) _showFullScreenIntentDialog(context, l10n);
-               return;
-            }
-          }
-          onChanged(newValue);
-        },
-        activeColor: Colors.redAccent,
+            onChanged(newValue);
+          },
+          activeColor: isPaused ? Colors.orange : Colors.redAccent,
+        ),
       ),
+    );
+  }
+
+  void _showPauseSheet(BuildContext context, AppLocalizations l10n) {
+    showModalBottomSheet(
+      context: context,
+      backgroundColor: Colors.grey[900],
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
+      ),
+      builder: (ctx) {
+        return SafeArea(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              const SizedBox(height: 12),
+              Container(
+                width: 40, height: 4,
+                decoration: BoxDecoration(color: Colors.grey[600], borderRadius: BorderRadius.circular(2)),
+              ),
+              const SizedBox(height: 16),
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 20),
+                child: Text(l10n.pauseMonitoringSheet,
+                    style: const TextStyle(color: Colors.white70, fontSize: 14)),
+              ),
+              const SizedBox(height: 8),
+              if (_sosLogic.currentInactivityLimit < 60)
+                _pauseOption(ctx, l10n, l10n.pauseSec5, const Duration(seconds: 5)),
+              _pauseOption(ctx, l10n, "15 min", const Duration(minutes: 15)),
+              _pauseOption(ctx, l10n, "30 min", const Duration(minutes: 30)),
+              _pauseOption(ctx, l10n, "1 h", const Duration(hours: 1)),
+              const SizedBox(height: 8),
+            ],
+          ),
+        );
+      },
+    );
+  }
+
+  Widget _pauseOption(BuildContext ctx, AppLocalizations l10n, String label, Duration duration) {
+    return ListTile(
+      leading: const Icon(Icons.pause_circle_outline, color: Colors.orange),
+      title: Text(label, style: const TextStyle(color: Colors.white, fontSize: 16)),
+      onTap: () {
+        Navigator.pop(ctx);
+        _sosLogic.pauseMonitoring(duration);
+        ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+          content: Row(children: [
+            const Icon(Icons.pause_circle_filled, color: Colors.white),
+            const SizedBox(width: 10),
+            Text("⏸ $label", style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
+          ]),
+          backgroundColor: Colors.orange[900],
+          behavior: SnackBarBehavior.floating,
+          duration: const Duration(seconds: 3),
+        ));
+      },
     );
   }
 
@@ -744,6 +797,128 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver, Ti
             ),
           ),
         ],
+      ),
+    );
+  }
+
+  Widget _buildLiveTrackingCard(AppLocalizations l10n) {
+    if (!_sosLogic.isLiveTrackingActive) return const SizedBox.shrink();
+
+    final nextSecs = _sosLogic.liveTrackingNextSendSeconds;
+    final mins = nextSecs ~/ 60;
+    final secs = (nextSecs % 60).toString().padLeft(2, '0');
+    final timeStr = "${mins}m ${secs}s";
+    final isTestMode = _sosLogic.liveTrackingIntervalMinutes <= 2;
+    final accentColor = isTestMode ? Colors.amber[700]! : Colors.blueAccent;
+
+    return GestureDetector(
+      behavior: HitTestBehavior.opaque,
+      onPanDown: (_) => _liveTrackingHoldController.forward(),
+      onPanEnd: (_) {
+        if (_liveTrackingHoldController.status != AnimationStatus.completed) {
+          _liveTrackingHoldController.reverse();
+        }
+      },
+      onPanCancel: () => _liveTrackingHoldController.reverse(),
+      child: AnimatedBuilder(
+        animation: _liveTrackingHoldController,
+        builder: (context, _) {
+          final isHolding = _liveTrackingHoldController.value > 0;
+          return Container(
+            margin: const EdgeInsets.symmetric(horizontal: 30, vertical: 4),
+            padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+            decoration: BoxDecoration(
+              color: isTestMode
+                  ? Colors.amber[900]!.withOpacity(0.25)
+                  : Colors.blue[900]!.withOpacity(0.4),
+              borderRadius: BorderRadius.circular(8),
+              border: Border.all(
+                color: isHolding
+                    ? Colors.redAccent.withOpacity(0.8)
+                    : isTestMode
+                        ? Colors.amber.withOpacity(0.7)
+                        : Colors.blueAccent.withOpacity(0.6),
+              ),
+            ),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                if (isTestMode)
+                  Padding(
+                    padding: const EdgeInsets.only(bottom: 6),
+                    child: Row(
+                      children: [
+                        Icon(Icons.science, color: accentColor, size: 13),
+                        const SizedBox(width: 4),
+                        Expanded(
+                          child: Text(
+                            l10n.liveTrackingTestWarning("${_sosLogic.liveTrackingIntervalMinutes} min"),
+                            style: TextStyle(color: accentColor, fontSize: 11, fontWeight: FontWeight.bold),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                Row(
+                  children: [
+                    Icon(Icons.my_location, color: accentColor, size: 16),
+                    const SizedBox(width: 6),
+                    Expanded(
+                      child: Text(
+                        l10n.liveTrackingCardTitle,
+                        style: TextStyle(color: accentColor, fontWeight: FontWeight.bold, fontSize: 13),
+                      ),
+                    ),
+                    GestureDetector(
+                      onTap: () {
+                        _liveTrackingHoldController.reset();
+                        _sosLogic.disableLiveTracking();
+                      },
+                      child: const Icon(Icons.stop_circle, color: Colors.redAccent, size: 22),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 6),
+                Row(
+                  children: [
+                    Expanded(
+                      child: Text(
+                        l10n.liveTrackingNextUpdate(timeStr),
+                        style: const TextStyle(color: Colors.white70, fontSize: 12),
+                      ),
+                    ),
+                    GestureDetector(
+                      onTap: () => _sosLogic.sendLiveCheckin(),
+                      child: Container(
+                        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                        decoration: BoxDecoration(
+                          color: Colors.green[700],
+                          borderRadius: BorderRadius.circular(6),
+                        ),
+                        child: Text(
+                          l10n.btnImOkay,
+                          style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 11),
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+                if (isHolding) ...[
+                  const SizedBox(height: 8),
+                  ClipRRect(
+                    borderRadius: BorderRadius.circular(2),
+                    child: LinearProgressIndicator(
+                      value: _liveTrackingHoldController.value,
+                      minHeight: 4,
+                      backgroundColor: Colors.white12,
+                      valueColor: const AlwaysStoppedAnimation<Color>(Colors.redAccent),
+                    ),
+                  ),
+                ],
+              ],
+            ),
+          );
+        },
       ),
     );
   }

@@ -21,6 +21,11 @@ class PreferencesService {
   static const String _keyLanguage = 'language_code';
   static const String _keyDarkMode = 'dark_mode';
 
+  // LIVE TRACKING
+  static const String _keyLiveTrackingEnabled = 'live_tracking_enabled';
+  static const String _keyLiveTrackingInterval = 'live_tracking_interval_minutes';
+  static const String _keyLiveTrackingShutdown = 'live_tracking_shutdown_minutes';
+
   Future<void> init() async {
     _prefs = await SharedPreferences.getInstance();
   }
@@ -134,4 +139,14 @@ class PreferencesService {
   Future<void> saveDarkMode(bool isDark) async {
     await _prefs?.setBool(_keyDarkMode, isDark);
   }
+
+  // --- LIVE TRACKING ---
+  bool getLiveTrackingEnabled() => _prefs?.getBool(_keyLiveTrackingEnabled) ?? false;
+  Future<void> setLiveTrackingEnabled(bool v) async => await _prefs?.setBool(_keyLiveTrackingEnabled, v);
+
+  int getLiveTrackingIntervalMinutes() => _prefs?.getInt(_keyLiveTrackingInterval) ?? 30;
+  Future<void> setLiveTrackingIntervalMinutes(int v) async => await _prefs?.setInt(_keyLiveTrackingInterval, v);
+
+  int getLiveTrackingShutdownMinutes() => _prefs?.getInt(_keyLiveTrackingShutdown) ?? 0;
+  Future<void> setLiveTrackingShutdownMinutes(int v) async => await _prefs?.setInt(_keyLiveTrackingShutdown, v);
 }

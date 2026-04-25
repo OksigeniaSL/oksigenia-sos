@@ -439,4 +439,90 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get btnEnableFullScreenIntent => 'ACTIVAR';
+
+  @override
+  String get pauseMonitoringSheet => 'Pausar monitorización durante...';
+
+  @override
+  String get pauseTitle => 'Monitorización pausada';
+
+  @override
+  String pauseResumesIn(Object time) {
+    return '⏸ Pausado · $time restantes';
+  }
+
+  @override
+  String get pauseResumeNow => 'Reanudar ahora';
+
+  @override
+  String get pauseResumedMsg => 'Monitorización reanudada';
+
+  @override
+  String get pauseHoldHint => 'Mantén para pausar';
+
+  @override
+  String get pauseSec5 => '5 segundos';
+
+  @override
+  String get liveTrackingTitle => 'Seguimiento en Vivo';
+
+  @override
+  String get liveTrackingSubtitle =>
+      'Envía tu posición GPS por SMS a intervalos regulares.';
+
+  @override
+  String get liveTrackingInterval => 'Intervalo de envío';
+
+  @override
+  String get liveTrackingShutdownReminder => 'Recordatorio de apagado';
+
+  @override
+  String get liveTrackingNoReminder => '❌ Sin recordatorio';
+
+  @override
+  String get liveTrackingReminder2h => '⏰ A las 2 horas';
+
+  @override
+  String get liveTrackingReminder3h => '⏰ A las 3 horas';
+
+  @override
+  String get liveTrackingReminder4h => '⏰ A las 4 horas';
+
+  @override
+  String get liveTrackingReminder5h => '⏰ A las 5 horas';
+
+  @override
+  String get liveTrackingLegalTitle => '⚠️ Costes de SMS';
+
+  @override
+  String get liveTrackingLegalBody =>
+      'El Seguimiento Vivo envía un SMS por intervalo a tu contacto principal. Se aplican las tarifas de tu operador. Eres el único responsable de los costes de mensajería.';
+
+  @override
+  String get liveTrackingActivate => 'ACTIVAR SEGUIMIENTO';
+
+  @override
+  String get liveTrackingDeactivate => 'DESACTIVAR';
+
+  @override
+  String liveTrackingNextUpdate(Object time) {
+    return 'Próximo envío en $time';
+  }
+
+  @override
+  String get liveTrackingCardTitle => 'Seguimiento en Vivo Activo';
+
+  @override
+  String get liveTrackingPausedSOS => 'Pausado — SOS activo';
+
+  @override
+  String get liveTrackingTest1m => '🧪 1 min (TEST)';
+
+  @override
+  String get liveTrackingTest2m => '🧪 2 min (TEST)';
+
+  @override
+  String liveTrackingTestWarning(Object time) {
+    return 'MODO TEST: Live Tracking enviará cada $time.';
+  }
 }

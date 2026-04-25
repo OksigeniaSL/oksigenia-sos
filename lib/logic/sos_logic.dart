@@ -33,8 +33,14 @@ class SOSLogic extends ChangeNotifier with WidgetsBindingObserver {
   static const double _impactThreshold = 12.0;
 
   bool _isFallDetectionActive = false;
-  bool _isDyingGaspSent = false; 
+  bool _isDyingGaspSent = false;
   bool _isInactivityMonitorActive = false;
+  DateTime? _pausedUntil;
+  int _pauseFrozenElapsed = 0;
+
+  bool _isLiveTrackingActive = false;
+  DateTime? _liveTrackingNextSend;
+  int _liveTrackingIntervalMinutes = 30;
   
   bool _uiCooldown = false; 
   // 🟢 Bandera de ignorar sensores activada por defecto
@@ -75,7 +81,9 @@ class SOSLogic extends ChangeNotifier with WidgetsBindingObserver {
   bool get fullScreenIntentOk => _fullScreenIntentOk;
   bool get smsPermissionOk => _smsPermissionOk;
   bool get notificationPermissionOk => _notificationPermissionOk;
-  int get inactivityElapsedSeconds => DateTime.now().difference(_lastMovementTime).inSeconds;
+  int get inactivityElapsedSeconds => isMonitoringPaused
+      ? _pauseFrozenElapsed
+      : DateTime.now().difference(_lastMovementTime).inSeconds;
 
   Timer? _preAlertTimer;
   int _countdownSeconds = 30; 
@@ -88,7 +96,15 @@ class SOSLogic extends ChangeNotifier with WidgetsBindingObserver {
   String get errorMessage => _errorMessage;
   bool get isFallDetectionActive => _isFallDetectionActive;
   bool get isInactivityMonitorActive => _isInactivityMonitorActive;
-  
+  bool get isMonitoringPaused => _pausedUntil != null && _pausedUntil!.isAfter(DateTime.now());
+  int get pauseRemainingSeconds => _pausedUntil != null ? max(0, _pausedUntil!.difference(DateTime.now()).inSeconds) : 0;
+
+  bool get isLiveTrackingActive => _isLiveTrackingActive;
+  int get liveTrackingIntervalMinutes => _liveTrackingIntervalMinutes;
+  int get liveTrackingNextSendSeconds => _liveTrackingNextSend != null
+      ? max(0, _liveTrackingNextSend!.difference(DateTime.now()).inSeconds)
+      : 0;
+
   double get currentGForce => _visualGForce;
   
   String? get emergencyContact {
@@ -115,6 +131,8 @@ class SOSLogic extends ChangeNotifier with WidgetsBindingObserver {
           'statusReady': l10n.statusReady,
           'smsHelpMessage': l10n.smsHelpMessage,
           'smsDyingGasp': l10n.smsDyingGasp,
+          'pauseTitle': l10n.pauseTitle,
+          'resumeNow': l10n.pauseResumeNow,
         };
       }
     } else {
@@ -130,6 +148,8 @@ class SOSLogic extends ChangeNotifier with WidgetsBindingObserver {
           'statusReady': l10n.statusReady,
           'smsHelpMessage': l10n.smsHelpMessage,
           'smsDyingGasp': l10n.smsDyingGasp,
+          'pauseTitle': l10n.pauseTitle,
+          'resumeNow': l10n.pauseResumeNow,
         };
       } catch (_) {}
     }
@@ -165,8 +185,22 @@ class SOSLogic extends ChangeNotifier with WidgetsBindingObserver {
     
     Future.delayed(const Duration(seconds: 1), () => _syncConfigWithService());
 
+    service.on("onPauseResumed").listen((_) {
+      _pausedUntil = null;
+      _lastMovementTime = DateTime.now();
+      _updateSylviaStatus();
+      notifyListeners();
+    });
+
+    service.on("onLiveTrackingSent").listen((_) async {
+      if (_isLiveTrackingActive) {
+        _liveTrackingNextSend = DateTime.now().add(Duration(minutes: _liveTrackingIntervalMinutes));
+      }
+      notifyListeners();
+    });
+
     _startGForceMonitoring();
-    _startHealthMonitor(); 
+    _startHealthMonitor();
     _startPassiveGPS();
     _updateSylviaStatus();
   }
@@ -258,6 +292,8 @@ class SOSLogic extends ChangeNotifier with WidgetsBindingObserver {
   Future<void> _loadSettings() async {
     final prefs = PreferencesService();
     _currentInactivityLimit = prefs.getInactivityTime();
+    _isLiveTrackingActive = prefs.getLiveTrackingEnabled();
+    _liveTrackingIntervalMinutes = prefs.getLiveTrackingIntervalMinutes();
     
     bool hasContact = emergencyContact != null;
     bool savedFallState = prefs.getFallDetectionState();
@@ -293,7 +329,19 @@ class SOSLogic extends ChangeNotifier with WidgetsBindingObserver {
     }
 
     final rawPrefs = await SharedPreferences.getInstance();
-    
+
+    // Check if inactivity AlarmClock fired during Doze (screen was off, Timer was frozen)
+    final int scheduledFor = rawPrefs.getInt('inactivity_alarm_scheduled_for') ?? 0;
+    final bool inactivityWasEnabled = rawPrefs.getBool('inactivity_monitor_enabled') ?? false;
+    if (scheduledFor > 0 &&
+        scheduledFor <= DateTime.now().millisecondsSinceEpoch &&
+        inactivityWasEnabled) {
+      debugPrint("LOGIC: ⏰ AlarmClock de inactividad disparado durante Doze. Activando zombie.");
+      await rawPrefs.setBool('is_alarm_active', true);
+      await rawPrefs.setInt('alarm_start_timestamp', scheduledFor);
+      await rawPrefs.setInt('inactivity_alarm_scheduled_for', 0);
+    }
+
     bool isZombieAlarming = rawPrefs.getBool('is_alarm_active') ?? false;
 
     if (isZombieAlarming) {
@@ -592,8 +640,9 @@ class SOSLogic extends ChangeNotifier with WidgetsBindingObserver {
            timer.cancel();
            return;
         }
+        if (isMonitoringPaused) return;
         if (_status != SOSStatus.ready && _status != SOSStatus.locationFixed) return;
-        
+
         if (DateTime.now().difference(_lastMovementTime).inSeconds > _currentInactivityLimit) {
           debugPrint("💤 ALERTA: Inactividad detectada");
           _triggerPreAlert(AlertCause.inactivity);
@@ -753,9 +802,12 @@ class SOSLogic extends ChangeNotifier with WidgetsBindingObserver {
     final prefs = PreferencesService();
     prefs.saveFallDetectionState(false);
     prefs.saveInactivityState(false);
+    prefs.setLiveTrackingEnabled(false);
 
     _isFallDetectionActive = false;
     _isInactivityMonitorActive = false;
+    _isLiveTrackingActive = false;
+    _liveTrackingNextSend = null;
     _setStatus(SOSStatus.ready);
 
     notifyListeners();
@@ -905,6 +957,70 @@ class SOSLogic extends ChangeNotifier with WidgetsBindingObserver {
     super.dispose();
   }
 
+  Future<void> pauseMonitoring(Duration duration) async {
+    _pauseFrozenElapsed = DateTime.now().difference(_lastMovementTime).inSeconds;
+    _pausedUntil = DateTime.now().add(duration);
+    final service = FlutterBackgroundService();
+    if (await service.isRunning()) {
+      service.invoke("setPaused", {"until": _pausedUntil!.millisecondsSinceEpoch});
+    }
+    _updateSylviaStatus();
+    notifyListeners();
+  }
+
+  Future<void> resumeMonitoring() async {
+    _pausedUntil = null;
+    _lastMovementTime = DateTime.now();
+    final service = FlutterBackgroundService();
+    if (await service.isRunning()) {
+      service.invoke("setPaused", {"until": 0});
+      service.invoke("setMonitoring", {
+        "active": _isFallDetectionActive,
+        "inactivity_limit": _currentInactivityLimit,
+        "inactivity_enabled": _isInactivityMonitorActive,
+      });
+    }
+    _updateSylviaStatus();
+    notifyListeners();
+  }
+
+  Future<void> enableLiveTracking(int intervalMinutes, int shutdownMinutes) async {
+    final prefs = PreferencesService();
+    _isLiveTrackingActive = true;
+    _liveTrackingIntervalMinutes = intervalMinutes;
+    _liveTrackingNextSend = DateTime.now().add(Duration(minutes: intervalMinutes));
+    await prefs.setLiveTrackingEnabled(true);
+    await prefs.setLiveTrackingIntervalMinutes(intervalMinutes);
+    await prefs.setLiveTrackingShutdownMinutes(shutdownMinutes);
+
+    final service = FlutterBackgroundService();
+    if (!(await service.isRunning())) await service.startService();
+    service.invoke("setLiveTracking", {
+      "active": true,
+      "interval_seconds": intervalMinutes * 60,
+      "shutdown_seconds": shutdownMinutes * 60,
+    });
+    notifyListeners();
+  }
+
+  Future<void> disableLiveTracking() async {
+    _isLiveTrackingActive = false;
+    _liveTrackingNextSend = null;
+    await PreferencesService().setLiveTrackingEnabled(false);
+    final service = FlutterBackgroundService();
+    if (await service.isRunning()) {
+      service.invoke("setLiveTracking", {"active": false});
+    }
+    notifyListeners();
+  }
+
+  Future<void> sendLiveCheckin() async {
+    final service = FlutterBackgroundService();
+    if (await service.isRunning()) {
+      service.invoke("sendLiveCheckin");
+    }
+  }
+
   void _updateSylviaStatus() async {
     try {
       final service = FlutterBackgroundService();
@@ -920,12 +1036,18 @@ class SOSLogic extends ChangeNotifier with WidgetsBindingObserver {
 
         if (_status == SOSStatus.preAlert) {
           statusIcon = "alarm";
-          title = "🚨 SOS"; 
-          content = t.alertFallDetected; 
+          title = "🚨 SOS";
+          content = t.alertFallDetected;
+        } else if (isActive && isMonitoringPaused) {
+          statusIcon = "paused";
+          final mins = pauseRemainingSeconds ~/ 60;
+          final secs = (pauseRemainingSeconds % 60).toString().padLeft(2, '0');
+          title = "⏸ ${t.pauseTitle}";
+          content = "${t.pauseResumeNow} — ${mins}m${secs}s";
         } else if (!isActive) {
           statusIcon = "paused";
-          title = t.statusMonitorStopped; 
-          content = "---"; 
+          title = t.statusMonitorStopped;
+          content = "---";
         } else {
           title = t.statusReady; 
           List<String> activeModes = [];

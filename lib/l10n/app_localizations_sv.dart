@@ -439,4 +439,90 @@ class AppLocalizationsSv extends AppLocalizations {
 
   @override
   String get btnEnableFullScreenIntent => 'AKTIVERA';
+
+  @override
+  String get pauseMonitoringSheet => 'Pausa övervakning i...';
+
+  @override
+  String get pauseTitle => 'Övervakning pausad';
+
+  @override
+  String pauseResumesIn(Object time) {
+    return '⏸ Pausad · återupptas om $time';
+  }
+
+  @override
+  String get pauseResumeNow => 'Återuppta nu';
+
+  @override
+  String get pauseResumedMsg => 'Övervakning återupptagen';
+
+  @override
+  String get pauseHoldHint => 'Håll för att pausa';
+
+  @override
+  String get pauseSec5 => '5 sekunder';
+
+  @override
+  String get liveTrackingTitle => 'Livespårning';
+
+  @override
+  String get liveTrackingSubtitle =>
+      'Skickar din GPS-position via SMS med jämna intervall.';
+
+  @override
+  String get liveTrackingInterval => 'Sändningsintervall';
+
+  @override
+  String get liveTrackingShutdownReminder => 'Avstängningspåminnelse';
+
+  @override
+  String get liveTrackingNoReminder => '❌ Ingen påminnelse';
+
+  @override
+  String get liveTrackingReminder2h => '⏰ Efter 2 timmar';
+
+  @override
+  String get liveTrackingReminder3h => '⏰ Efter 3 timmar';
+
+  @override
+  String get liveTrackingReminder4h => '⏰ Efter 4 timmar';
+
+  @override
+  String get liveTrackingReminder5h => '⏰ Efter 5 timmar';
+
+  @override
+  String get liveTrackingLegalTitle => '⚠️ SMS-kostnader';
+
+  @override
+  String get liveTrackingLegalBody =>
+      'Livespårning skickar ett SMS per intervall till din primära kontakt. Din operatörs taxor gäller. Du är ensam ansvarig för alla meddelandekostnader.';
+
+  @override
+  String get liveTrackingActivate => 'AKTIVERA SPÅRNING';
+
+  @override
+  String get liveTrackingDeactivate => 'INAKTIVERA';
+
+  @override
+  String liveTrackingNextUpdate(Object time) {
+    return 'Nästa uppdatering om $time';
+  }
+
+  @override
+  String get liveTrackingCardTitle => 'Livespårning Aktiv';
+
+  @override
+  String get liveTrackingPausedSOS => 'Pausad — SOS aktiv';
+
+  @override
+  String get liveTrackingTest1m => '🧪 1 min (TEST)';
+
+  @override
+  String get liveTrackingTest2m => '🧪 2 min (TEST)';
+
+  @override
+  String liveTrackingTestWarning(Object time) {
+    return 'TESTLÄGE: Livespårning skickar var $time.';
+  }
 }

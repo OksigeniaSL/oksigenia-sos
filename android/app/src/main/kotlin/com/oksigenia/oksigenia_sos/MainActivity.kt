@@ -77,6 +77,12 @@ class MainActivity: FlutterActivity() {
                     }
                     result.success("OK")
                 }
+                "getSimCountryIso" -> {
+                    val country = try {
+                        resources.configuration.locales[0].country.uppercase().trim()
+                    } catch (_: Exception) { "" }
+                    result.success(country)
+                }
                 else -> result.notImplemented()
             }
         }

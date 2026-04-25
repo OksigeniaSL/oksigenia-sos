@@ -931,6 +931,162 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'ENABLE'**
   String get btnEnableFullScreenIntent;
+
+  /// No description provided for @pauseMonitoringSheet.
+  ///
+  /// In en, this message translates to:
+  /// **'Pause monitoring for...'**
+  String get pauseMonitoringSheet;
+
+  /// No description provided for @pauseTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Monitoring paused'**
+  String get pauseTitle;
+
+  /// No description provided for @pauseResumesIn.
+  ///
+  /// In en, this message translates to:
+  /// **'⏸ Paused · {time} remaining'**
+  String pauseResumesIn(Object time);
+
+  /// No description provided for @pauseResumeNow.
+  ///
+  /// In en, this message translates to:
+  /// **'Resume now'**
+  String get pauseResumeNow;
+
+  /// No description provided for @pauseResumedMsg.
+  ///
+  /// In en, this message translates to:
+  /// **'Monitoring resumed'**
+  String get pauseResumedMsg;
+
+  /// No description provided for @pauseHoldHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Hold to pause'**
+  String get pauseHoldHint;
+
+  /// No description provided for @pauseSec5.
+  ///
+  /// In en, this message translates to:
+  /// **'5 seconds'**
+  String get pauseSec5;
+
+  /// No description provided for @liveTrackingTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Live Tracking'**
+  String get liveTrackingTitle;
+
+  /// No description provided for @liveTrackingSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Sends your GPS position by SMS at regular intervals.'**
+  String get liveTrackingSubtitle;
+
+  /// No description provided for @liveTrackingInterval.
+  ///
+  /// In en, this message translates to:
+  /// **'Send interval'**
+  String get liveTrackingInterval;
+
+  /// No description provided for @liveTrackingShutdownReminder.
+  ///
+  /// In en, this message translates to:
+  /// **'Shutdown reminder'**
+  String get liveTrackingShutdownReminder;
+
+  /// No description provided for @liveTrackingNoReminder.
+  ///
+  /// In en, this message translates to:
+  /// **'❌ No reminder'**
+  String get liveTrackingNoReminder;
+
+  /// No description provided for @liveTrackingReminder2h.
+  ///
+  /// In en, this message translates to:
+  /// **'⏰ After 2 hours'**
+  String get liveTrackingReminder2h;
+
+  /// No description provided for @liveTrackingReminder3h.
+  ///
+  /// In en, this message translates to:
+  /// **'⏰ After 3 hours'**
+  String get liveTrackingReminder3h;
+
+  /// No description provided for @liveTrackingReminder4h.
+  ///
+  /// In en, this message translates to:
+  /// **'⏰ After 4 hours'**
+  String get liveTrackingReminder4h;
+
+  /// No description provided for @liveTrackingReminder5h.
+  ///
+  /// In en, this message translates to:
+  /// **'⏰ After 5 hours'**
+  String get liveTrackingReminder5h;
+
+  /// No description provided for @liveTrackingLegalTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'⚠️ SMS Costs'**
+  String get liveTrackingLegalTitle;
+
+  /// No description provided for @liveTrackingLegalBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Live Tracking sends one SMS per interval to your primary contact. Your carrier\'s rates apply. You are solely responsible for all messaging costs.'**
+  String get liveTrackingLegalBody;
+
+  /// No description provided for @liveTrackingActivate.
+  ///
+  /// In en, this message translates to:
+  /// **'ACTIVATE TRACKING'**
+  String get liveTrackingActivate;
+
+  /// No description provided for @liveTrackingDeactivate.
+  ///
+  /// In en, this message translates to:
+  /// **'DEACTIVATE'**
+  String get liveTrackingDeactivate;
+
+  /// No description provided for @liveTrackingNextUpdate.
+  ///
+  /// In en, this message translates to:
+  /// **'Next update in {time}'**
+  String liveTrackingNextUpdate(Object time);
+
+  /// No description provided for @liveTrackingCardTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Live Tracking Active'**
+  String get liveTrackingCardTitle;
+
+  /// No description provided for @liveTrackingPausedSOS.
+  ///
+  /// In en, this message translates to:
+  /// **'Paused — SOS active'**
+  String get liveTrackingPausedSOS;
+
+  /// No description provided for @liveTrackingTest1m.
+  ///
+  /// In en, this message translates to:
+  /// **'🧪 1 min (TEST)'**
+  String get liveTrackingTest1m;
+
+  /// No description provided for @liveTrackingTest2m.
+  ///
+  /// In en, this message translates to:
+  /// **'🧪 2 min (TEST)'**
+  String get liveTrackingTest2m;
+
+  /// No description provided for @liveTrackingTestWarning.
+  ///
+  /// In en, this message translates to:
+  /// **'TEST MODE: Live Tracking will send every {time}.'**
+  String liveTrackingTestWarning(Object time);
 }
 
 class _AppLocalizationsDelegate

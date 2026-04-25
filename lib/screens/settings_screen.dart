@@ -1,8 +1,10 @@
-import 'dart:ui'; 
+import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:permission_handler/permission_handler.dart';
-import 'package:oksigenia_sos/l10n/app_localizations.dart'; 
+import 'package:provider/provider.dart';
+import 'package:oksigenia_sos/l10n/app_localizations.dart';
 import '../services/preferences_service.dart';
+import '../logic/sos_logic.dart';
 
 class SettingsScreen extends StatefulWidget {
   const SettingsScreen({super.key});
@@ -18,6 +20,9 @@ class _SettingsScreenState extends State<SettingsScreen> with WidgetsBindingObse
   int _selectedInterval = 0;
   int _selectedInactivity = 3600;
   bool _isSmsPermissionGranted = true;
+  bool _isLiveTrackingActive = false;
+  int _liveTrackingInterval = 30;
+  int _liveTrackingShutdown = 0;
 
   @override
   void initState() {
@@ -26,29 +31,24 @@ class _SettingsScreenState extends State<SettingsScreen> with WidgetsBindingObse
     _loadData();
     _checkPermissions();
     
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      _detectCountryPrefix();
-    });
+    WidgetsBinding.instance.addPostFrameCallback((_) => _detectCountryPrefix());
   }
 
   void _detectCountryPrefix() {
     if (_phoneController.text.isNotEmpty) return;
-    try {
-      final Locale deviceLocale = PlatformDispatcher.instance.locale;
-      final String countryCode = deviceLocale.countryCode ?? "ES";
-      
-      const Map<String, String> prefixes = {
-        'ES': '+34', 'FR': '+33', 'PT': '+351', 'DE': '+49', 'IT': '+39',
-        'UK': '+44', 'GB': '+44', 'US': '+1', 'CA': '+1', 'MX': '+52',
-        'AR': '+54', 'CO': '+57', 'CL': '+56', 'PE': '+51'
-      };
+    const Map<String, String> prefixes = {
+      'ES': '+34', 'FR': '+33', 'PT': '+351', 'DE': '+49', 'IT': '+39',
+      'GB': '+44', 'UK': '+44', 'US': '+1', 'CA': '+1', 'MX': '+52',
+      'AR': '+54', 'CO': '+57', 'CL': '+56', 'PE': '+51',
+      'NL': '+31', 'SE': '+46', 'NO': '+47', 'CH': '+41', 'AT': '+43',
+    };
 
-      if (prefixes.containsKey(countryCode)) {
-        setState(() {
-          _phoneController.text = prefixes[countryCode]!;
-        });
-      }
-    } catch (_) {}
+    final countryCode = (PlatformDispatcher.instance.locale.countryCode ?? '').toUpperCase();
+    if (prefixes.containsKey(countryCode)) {
+      setState(() {
+        _phoneController.text = prefixes[countryCode]!;
+      });
+    }
   }
 
   // 🛡️ VALIDADOR DE NÚMEROS
@@ -139,6 +139,9 @@ class _SettingsScreenState extends State<SettingsScreen> with WidgetsBindingObse
       _selectedInterval = prefs.getUpdateInterval();
       _selectedInactivity = prefs.getInactivityTime();
       _messageController.text = prefs.getSosMessage();
+      _isLiveTrackingActive = prefs.getLiveTrackingEnabled();
+      _liveTrackingInterval = prefs.getLiveTrackingIntervalMinutes();
+      _liveTrackingShutdown = prefs.getLiveTrackingShutdownMinutes();
     });
   }
 
@@ -204,6 +207,36 @@ class _SettingsScreenState extends State<SettingsScreen> with WidgetsBindingObse
 
   void _saveMessage(String value) {
     PreferencesService().setSosMessage(value);
+  }
+
+  void _toggleLiveTracking(BuildContext context, AppLocalizations l10n) {
+    final sosLogic = context.read<SOSLogic>();
+    if (_isLiveTrackingActive) {
+      sosLogic.disableLiveTracking();
+      setState(() => _isLiveTrackingActive = false);
+    } else {
+      showDialog(
+        context: context,
+        builder: (ctx) => AlertDialog(
+          title: Text(l10n.liveTrackingLegalTitle),
+          content: Text(l10n.liveTrackingLegalBody),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(ctx),
+              child: Text(l10n.btnDecline),
+            ),
+            ElevatedButton(
+              onPressed: () {
+                Navigator.pop(ctx);
+                sosLogic.enableLiveTracking(_liveTrackingInterval, _liveTrackingShutdown);
+                setState(() => _isLiveTrackingActive = true);
+              },
+              child: Text(l10n.liveTrackingActivate),
+            ),
+          ],
+        ),
+      );
+    }
   }
 
   @override
@@ -351,34 +384,81 @@ class _SettingsScreenState extends State<SettingsScreen> with WidgetsBindingObse
               ),
             ),
             
-            // 👇 BLOQUE RECUPERADO
-            /*
             const Divider(height: 40),
 
-            Text(l10n.trackingTitle, style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+            Text(l10n.liveTrackingTitle, style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
             const SizedBox(height: 5),
-            Text(l10n.trackingSubtitle, style: const TextStyle(fontSize: 12, color: Colors.grey)),
-            const SizedBox(height: 10),
+            Text(l10n.liveTrackingSubtitle, style: const TextStyle(fontSize: 12, color: Colors.grey)),
+            const SizedBox(height: 14),
+
+            // Interval selector
+            Text(l10n.liveTrackingInterval, style: const TextStyle(fontSize: 14, color: Colors.white70)),
+            const SizedBox(height: 6),
             Container(
               padding: const EdgeInsets.symmetric(horizontal: 12),
               decoration: BoxDecoration(border: Border.all(color: Colors.grey), borderRadius: BorderRadius.circular(4)),
               child: DropdownButtonHideUnderline(
                 child: DropdownButton<int>(
-                  value: _selectedInterval,
+                  value: _liveTrackingInterval,
                   isExpanded: true,
                   items: [
-                    DropdownMenuItem(value: 0, child: Text(l10n.trackOff)),
+                    DropdownMenuItem(value: 1, child: Text(l10n.liveTrackingTest1m, style: const TextStyle(color: Colors.deepOrange, fontWeight: FontWeight.bold))),
+                    DropdownMenuItem(value: 2, child: Text(l10n.liveTrackingTest2m, style: const TextStyle(color: Colors.deepOrange, fontWeight: FontWeight.bold))),
                     DropdownMenuItem(value: 30, child: Text(l10n.track30)),
                     DropdownMenuItem(value: 60, child: Text(l10n.track60)),
                     DropdownMenuItem(value: 120, child: Text(l10n.track120)),
                   ],
-                  onChanged: _updateInterval,
+                  onChanged: _isLiveTrackingActive ? null : (v) {
+                    if (v != null) setState(() => _liveTrackingInterval = v);
+                  },
                 ),
               ),
             ),
-            */
-            // 👆 FIN BLOQUE RECUPERADO
-            
+
+            const SizedBox(height: 14),
+
+            // Shutdown reminder selector
+            Text(l10n.liveTrackingShutdownReminder, style: const TextStyle(fontSize: 14, color: Colors.white70)),
+            const SizedBox(height: 6),
+            Container(
+              padding: const EdgeInsets.symmetric(horizontal: 12),
+              decoration: BoxDecoration(border: Border.all(color: Colors.grey), borderRadius: BorderRadius.circular(4)),
+              child: DropdownButtonHideUnderline(
+                child: DropdownButton<int>(
+                  value: _liveTrackingShutdown,
+                  isExpanded: true,
+                  items: [
+                    DropdownMenuItem(value: 0, child: Text(l10n.liveTrackingNoReminder)),
+                    DropdownMenuItem(value: 120, child: Text(l10n.liveTrackingReminder2h)),
+                    DropdownMenuItem(value: 180, child: Text(l10n.liveTrackingReminder3h)),
+                    DropdownMenuItem(value: 240, child: Text(l10n.liveTrackingReminder4h)),
+                    DropdownMenuItem(value: 300, child: Text(l10n.liveTrackingReminder5h)),
+                  ],
+                  onChanged: _isLiveTrackingActive ? null : (v) {
+                    if (v != null) setState(() => _liveTrackingShutdown = v);
+                  },
+                ),
+              ),
+            ),
+
+            const SizedBox(height: 16),
+
+            SizedBox(
+              width: double.infinity,
+              child: ElevatedButton.icon(
+                icon: Icon(_isLiveTrackingActive ? Icons.stop_circle : Icons.play_circle_filled),
+                label: Text(_isLiveTrackingActive ? l10n.liveTrackingDeactivate : l10n.liveTrackingActivate),
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: _isLiveTrackingActive ? Colors.red[700] : Colors.blueAccent,
+                  foregroundColor: Colors.white,
+                  padding: const EdgeInsets.symmetric(vertical: 14),
+                ),
+                onPressed: _contacts.isEmpty
+                    ? null
+                    : () => _toggleLiveTracking(context, l10n),
+              ),
+            ),
+
             const SizedBox(height: 50),
           ],
         ),
