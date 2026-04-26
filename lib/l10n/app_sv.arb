@@ -161,5 +161,14 @@
     "liveTrackingPausedSOS": "Pausad — SOS aktiv",
     "liveTrackingTest1m": "🧪 1 min (TEST)",
     "liveTrackingTest2m": "🧪 2 min (TEST)",
-    "liveTrackingTestWarning": "TESTLÄGE: Livespårning skickar var {time}."
+    "liveTrackingTestWarning": "TESTLÄGE: Livespårning skickar var {time}.",
+    "selectLanguage": "Välj språk",
+    "whyPermsTitle": "Varför dessa behörigheter?",
+    "whyPermsSms": "Skickar nödmeddelanden via SMS till dina kontakter. Fungerar utan internet.",
+    "whyPermsLocation": "Inkluderar GPS-koordinater i larmet så att räddare vet exakt var du är.",
+    "whyPermsNotifications": "Visar övervakningsstatus och låter dig avbryta falskt larm från låsskärmen.",
+    "whyPermsActivity": "Identifierar rörelsemönster för att undvika falsklarm vid gång eller löpning.",
+    "whyPermsSensors": "Läser accelerometern för att upptäcka G-kraften vid ett fall.",
+    "whyPermsBattery": "Hindrar Android från att avsluta appen under bakgrundsövervakning.",
+    "whyPermsFullScreen": "Visar larmet över låsskärmen så att du kan svara utan att låsa upp."
 }

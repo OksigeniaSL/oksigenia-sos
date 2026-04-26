@@ -1,0 +1,7 @@
+Live Tracking: automatic GPS SMS check-ins every 30/60/120 min with countdown timer, Pause/Resume, and manual "I'm OK" button.
+
+Doze Mode verified: AlarmManager.alarmClock survives 1h deep sleep on GrapheneOS. Alarm breaks through lock screen correctly.
+
+Onboarding overhaul: guided SMS permission flow for Android 13+ sideloaded apps (Allow restricted settings), automatic Motion Sensor detection, "Why permissions?" explanatory sheet, and in-screen language selector.
+
+Privacy fix: removed implicit READ_PHONE_STATE permission from transitive dependency.

@@ -525,4 +525,38 @@ class AppLocalizationsSv extends AppLocalizations {
   String liveTrackingTestWarning(Object time) {
     return 'TESTLÄGE: Livespårning skickar var $time.';
   }
+
+  @override
+  String get selectLanguage => 'Välj språk';
+
+  @override
+  String get whyPermsTitle => 'Varför dessa behörigheter?';
+
+  @override
+  String get whyPermsSms =>
+      'Skickar nödmeddelanden via SMS till dina kontakter. Fungerar utan internet.';
+
+  @override
+  String get whyPermsLocation =>
+      'Inkluderar GPS-koordinater i larmet så att räddare vet exakt var du är.';
+
+  @override
+  String get whyPermsNotifications =>
+      'Visar övervakningsstatus och låter dig avbryta falskt larm från låsskärmen.';
+
+  @override
+  String get whyPermsActivity =>
+      'Identifierar rörelsemönster för att undvika falsklarm vid gång eller löpning.';
+
+  @override
+  String get whyPermsSensors =>
+      'Läser accelerometern för att upptäcka G-kraften vid ett fall.';
+
+  @override
+  String get whyPermsBattery =>
+      'Hindrar Android från att avsluta appen under bakgrundsövervakning.';
+
+  @override
+  String get whyPermsFullScreen =>
+      'Visar larmet över låsskärmen så att du kan svara utan att låsa upp.';
 }

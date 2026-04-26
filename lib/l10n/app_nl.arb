@@ -161,5 +161,14 @@
     "liveTrackingPausedSOS": "Gepauzeerd — SOS actief",
     "liveTrackingTest1m": "🧪 1 min (TEST)",
     "liveTrackingTest2m": "🧪 2 min (TEST)",
-    "liveTrackingTestWarning": "TESTMODUS: Live Tracking verzendt elke {time}."
+    "liveTrackingTestWarning": "TESTMODUS: Live Tracking verzendt elke {time}.",
+    "selectLanguage": "Taal selecteren",
+    "whyPermsTitle": "Waarom deze machtigingen?",
+    "whyPermsSms": "Stuurt nood-SMS naar uw contacten. Werkt zonder internet.",
+    "whyPermsLocation": "Voegt GPS-coördinaten toe aan het alarm zodat hulpverleners precies weten waar u bent.",
+    "whyPermsNotifications": "Toont de bewakingsstatus en laat u een vals alarm annuleren vanaf het vergrendelingsscherm.",
+    "whyPermsActivity": "Detecteert bewegingspatronen om valse alarmen te voorkomen bij lopen of rennen.",
+    "whyPermsSensors": "Leest de versnellingsmeter om de G-kracht van een val te detecteren.",
+    "whyPermsBattery": "Voorkomt dat Android de app stopt tijdens achtergrondmonitoring.",
+    "whyPermsFullScreen": "Toont het alarm over het vergrendelingsscherm zodat u kunt reageren zonder te ontgrendelen."
 }

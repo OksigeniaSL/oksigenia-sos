@@ -1087,6 +1087,60 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'TEST MODE: Live Tracking will send every {time}.'**
   String liveTrackingTestWarning(Object time);
+
+  /// No description provided for @selectLanguage.
+  ///
+  /// In en, this message translates to:
+  /// **'Select language'**
+  String get selectLanguage;
+
+  /// No description provided for @whyPermsTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Why these permissions?'**
+  String get whyPermsTitle;
+
+  /// No description provided for @whyPermsSms.
+  ///
+  /// In en, this message translates to:
+  /// **'Sends emergency alerts by SMS to your contacts. Works without internet.'**
+  String get whyPermsSms;
+
+  /// No description provided for @whyPermsLocation.
+  ///
+  /// In en, this message translates to:
+  /// **'Includes GPS coordinates in the alert so rescuers know exactly where you are.'**
+  String get whyPermsLocation;
+
+  /// No description provided for @whyPermsNotifications.
+  ///
+  /// In en, this message translates to:
+  /// **'Shows monitoring status and lets you cancel a false alarm from the lock screen.'**
+  String get whyPermsNotifications;
+
+  /// No description provided for @whyPermsActivity.
+  ///
+  /// In en, this message translates to:
+  /// **'Detects movement patterns to avoid false alarms when walking or running.'**
+  String get whyPermsActivity;
+
+  /// No description provided for @whyPermsSensors.
+  ///
+  /// In en, this message translates to:
+  /// **'Reads the accelerometer to detect the G-force of a fall.'**
+  String get whyPermsSensors;
+
+  /// No description provided for @whyPermsBattery.
+  ///
+  /// In en, this message translates to:
+  /// **'Prevents Android from killing the app while it monitors in the background.'**
+  String get whyPermsBattery;
+
+  /// No description provided for @whyPermsFullScreen.
+  ///
+  /// In en, this message translates to:
+  /// **'Shows the alarm over the lock screen so you can respond without unlocking.'**
+  String get whyPermsFullScreen;
 }
 
 class _AppLocalizationsDelegate

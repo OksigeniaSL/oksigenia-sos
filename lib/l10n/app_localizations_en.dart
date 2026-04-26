@@ -524,4 +524,38 @@ class AppLocalizationsEn extends AppLocalizations {
   String liveTrackingTestWarning(Object time) {
     return 'TEST MODE: Live Tracking will send every $time.';
   }
+
+  @override
+  String get selectLanguage => 'Select language';
+
+  @override
+  String get whyPermsTitle => 'Why these permissions?';
+
+  @override
+  String get whyPermsSms =>
+      'Sends emergency alerts by SMS to your contacts. Works without internet.';
+
+  @override
+  String get whyPermsLocation =>
+      'Includes GPS coordinates in the alert so rescuers know exactly where you are.';
+
+  @override
+  String get whyPermsNotifications =>
+      'Shows monitoring status and lets you cancel a false alarm from the lock screen.';
+
+  @override
+  String get whyPermsActivity =>
+      'Detects movement patterns to avoid false alarms when walking or running.';
+
+  @override
+  String get whyPermsSensors =>
+      'Reads the accelerometer to detect the G-force of a fall.';
+
+  @override
+  String get whyPermsBattery =>
+      'Prevents Android from killing the app while it monitors in the background.';
+
+  @override
+  String get whyPermsFullScreen =>
+      'Shows the alarm over the lock screen so you can respond without unlocking.';
 }

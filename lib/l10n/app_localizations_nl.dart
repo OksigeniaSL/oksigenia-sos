@@ -527,4 +527,38 @@ class AppLocalizationsNl extends AppLocalizations {
   String liveTrackingTestWarning(Object time) {
     return 'TESTMODUS: Live Tracking verzendt elke $time.';
   }
+
+  @override
+  String get selectLanguage => 'Taal selecteren';
+
+  @override
+  String get whyPermsTitle => 'Waarom deze machtigingen?';
+
+  @override
+  String get whyPermsSms =>
+      'Stuurt nood-SMS naar uw contacten. Werkt zonder internet.';
+
+  @override
+  String get whyPermsLocation =>
+      'Voegt GPS-coördinaten toe aan het alarm zodat hulpverleners precies weten waar u bent.';
+
+  @override
+  String get whyPermsNotifications =>
+      'Toont de bewakingsstatus en laat u een vals alarm annuleren vanaf het vergrendelingsscherm.';
+
+  @override
+  String get whyPermsActivity =>
+      'Detecteert bewegingspatronen om valse alarmen te voorkomen bij lopen of rennen.';
+
+  @override
+  String get whyPermsSensors =>
+      'Leest de versnellingsmeter om de G-kracht van een val te detecteren.';
+
+  @override
+  String get whyPermsBattery =>
+      'Voorkomt dat Android de app stopt tijdens achtergrondmonitoring.';
+
+  @override
+  String get whyPermsFullScreen =>
+      'Toont het alarm over het vergrendelingsscherm zodat u kunt reageren zonder te ontgrendelen.';
 }

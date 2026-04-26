@@ -161,5 +161,14 @@
     "liveTrackingPausedSOS": "Pausiert — SOS aktiv",
     "liveTrackingTest1m": "🧪 1 Min. (TEST)",
     "liveTrackingTest2m": "🧪 2 Min. (TEST)",
-    "liveTrackingTestWarning": "TESTMODUS: Live-Tracking sendet alle {time}."
+    "liveTrackingTestWarning": "TESTMODUS: Live-Tracking sendet alle {time}.",
+    "selectLanguage": "Sprache auswählen",
+    "whyPermsTitle": "Warum diese Berechtigungen?",
+    "whyPermsSms": "Sendet Notfall-SMS an Ihre Kontakte. Funktioniert ohne Internet.",
+    "whyPermsLocation": "Fügt GPS-Koordinaten in die Meldung ein, damit Retter genau wissen, wo Sie sind.",
+    "whyPermsNotifications": "Zeigt den Überwachungsstatus und ermöglicht das Abbrechen eines Fehlalarms vom Sperrbildschirm.",
+    "whyPermsActivity": "Erkennt Bewegungsmuster, um Fehlalarme beim Gehen oder Laufen zu vermeiden.",
+    "whyPermsSensors": "Liest den Beschleunigungssensor, um die G-Kraft eines Sturzes zu erkennen.",
+    "whyPermsBattery": "Verhindert, dass Android die App während der Hintergrundüberwachung beendet.",
+    "whyPermsFullScreen": "Zeigt den Alarm über dem Sperrbildschirm, damit Sie reagieren können, ohne zu entsperren."
 }

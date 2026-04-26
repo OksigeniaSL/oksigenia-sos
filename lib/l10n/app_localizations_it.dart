@@ -530,4 +530,38 @@ class AppLocalizationsIt extends AppLocalizations {
   String liveTrackingTestWarning(Object time) {
     return 'MODALITÀ TEST: Tracciamento invierà ogni $time.';
   }
+
+  @override
+  String get selectLanguage => 'Seleziona lingua';
+
+  @override
+  String get whyPermsTitle => 'Perché queste autorizzazioni?';
+
+  @override
+  String get whyPermsSms =>
+      'Invia avvisi di emergenza via SMS ai tuoi contatti. Funziona senza internet.';
+
+  @override
+  String get whyPermsLocation =>
+      'Include le coordinate GPS nell\'avviso in modo che i soccorritori sappiano esattamente dove sei.';
+
+  @override
+  String get whyPermsNotifications =>
+      'Mostra lo stato di monitoraggio e consente di annullare un falso allarme dalla schermata di blocco.';
+
+  @override
+  String get whyPermsActivity =>
+      'Rileva i pattern di movimento per evitare falsi allarmi durante la camminata o la corsa.';
+
+  @override
+  String get whyPermsSensors =>
+      'Legge l\'accelerometro per rilevare la forza G di una caduta.';
+
+  @override
+  String get whyPermsBattery =>
+      'Impedisce ad Android di chiudere l\'app durante il monitoraggio in background.';
+
+  @override
+  String get whyPermsFullScreen =>
+      'Mostra l\'allarme sopra la schermata di blocco per rispondere senza sbloccare.';
 }

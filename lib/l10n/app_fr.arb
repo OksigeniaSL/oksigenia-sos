@@ -161,5 +161,14 @@
     "liveTrackingPausedSOS": "En pause — SOS actif",
     "liveTrackingTest1m": "🧪 1 min (TEST)",
     "liveTrackingTest2m": "🧪 2 min (TEST)",
-    "liveTrackingTestWarning": "MODE TEST : Suivi enverra toutes les {time}."
+    "liveTrackingTestWarning": "MODE TEST : Suivi enverra toutes les {time}.",
+    "selectLanguage": "Sélectionner la langue",
+    "whyPermsTitle": "Pourquoi ces permissions ?",
+    "whyPermsSms": "Envoie des alertes d'urgence par SMS à vos contacts. Fonctionne sans internet.",
+    "whyPermsLocation": "Inclut les coordonnées GPS dans l'alerte pour que les secours sachent exactement où vous êtes.",
+    "whyPermsNotifications": "Affiche le statut de surveillance et permet d'annuler une fausse alarme depuis l'écran verrouillé.",
+    "whyPermsActivity": "Détecte les schémas de mouvement pour éviter les fausses alarmes lors de la marche ou de la course.",
+    "whyPermsSensors": "Lit l'accéléromètre pour détecter la force G d'une chute.",
+    "whyPermsBattery": "Empêche Android de tuer l'application pendant la surveillance en arrière-plan.",
+    "whyPermsFullScreen": "Affiche l'alarme sur l'écran verrouillé pour répondre sans déverrouiller."
 }

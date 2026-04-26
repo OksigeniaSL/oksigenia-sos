@@ -42,7 +42,7 @@ jobs:
         echo "storeFile=upload-keystore.jks" >> android/key.properties
 
     - name: Build Split APKs
-      run: flutter build apk --release --split-per-abi --no-shrink
+      run: flutter build apk --release --split-per-abi
 
     - name: Create Release
       uses: softprops/action-gh-release@v1

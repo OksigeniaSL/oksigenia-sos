@@ -520,4 +520,38 @@ class AppLocalizationsDe extends AppLocalizations {
   String liveTrackingTestWarning(Object time) {
     return 'TESTMODUS: Live-Tracking sendet alle $time.';
   }
+
+  @override
+  String get selectLanguage => 'Sprache auswählen';
+
+  @override
+  String get whyPermsTitle => 'Warum diese Berechtigungen?';
+
+  @override
+  String get whyPermsSms =>
+      'Sendet Notfall-SMS an Ihre Kontakte. Funktioniert ohne Internet.';
+
+  @override
+  String get whyPermsLocation =>
+      'Fügt GPS-Koordinaten in die Meldung ein, damit Retter genau wissen, wo Sie sind.';
+
+  @override
+  String get whyPermsNotifications =>
+      'Zeigt den Überwachungsstatus und ermöglicht das Abbrechen eines Fehlalarms vom Sperrbildschirm.';
+
+  @override
+  String get whyPermsActivity =>
+      'Erkennt Bewegungsmuster, um Fehlalarme beim Gehen oder Laufen zu vermeiden.';
+
+  @override
+  String get whyPermsSensors =>
+      'Liest den Beschleunigungssensor, um die G-Kraft eines Sturzes zu erkennen.';
+
+  @override
+  String get whyPermsBattery =>
+      'Verhindert, dass Android die App während der Hintergrundüberwachung beendet.';
+
+  @override
+  String get whyPermsFullScreen =>
+      'Zeigt den Alarm über dem Sperrbildschirm, damit Sie reagieren können, ohne zu entsperren.';
 }

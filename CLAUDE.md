@@ -6,7 +6,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ```bash
 flutter run                          # Run debug on connected device
-flutter build apk --release --split-per-abi --no-shrink  # Production build (matches CI)
+flutter build apk --release --split-per-abi  # Production build (shrinking disabled in build.gradle.kts)
 flutter pub get                      # After pubspec.yaml changes
 flutter gen-l10n                     # Regenerate after editing any app_*.arb file
 ```

@@ -1,4 +1,4 @@
-# Oksigenia SOS 🏔️ v3.9.5 "Immortal Sentinel"
+# Oksigenia SOS 🏔️ v3.9.6 "The Trekking Update"
 
 **The Ultimate Outdoor Guardian | FOSS | Privacy-First | Autonomous**
 
@@ -37,6 +37,30 @@ The interface is designed for high-stress situations. High contrast, large touch
 |:---:|:---:|:---:|:---:|
 | <img src="screenshots/main_testmode_en.jpg" width="180" /> | <img src="screenshots/sent_en.jpg" width="180" /> | <img src="screenshots/sms_sos_en.png" width="180" /> | <img src="screenshots/lang_en.jpg" width="180" /> |
 | *Safe testing environment* | *Confirmation screen* | *Direct GPS coordinates* | *8 Native languages* |
+
+---
+
+## 🥾 What's New in v3.9.6: The Trekking Update
+
+### 📡 Live Tracking
+Stay connected with your emergency contact even when nothing goes wrong.
+* **Periodic SMS check-ins:** Send your GPS position automatically every 30, 60, or 120 minutes.
+* **Countdown timer:** "Next check-in in: MM:SS" visible in the status pill and telemetry panel.
+* **Pause / Resume:** Temporarily suspend check-ins (e.g. during a rest) without deactivating monitoring.
+* **"I'm OK" button:** Manual instant check-in that resets the countdown.
+* **Auto-Pause on SOS:** Check-ins suspend automatically when a fall alarm fires, and resume if the alarm is cancelled.
+
+### ⏰ Doze Mode — Verified
+After 1 hour of real-world sleep on a locked Pixel 8 running GrapheneOS, the alarm broke through the lock screen correctly. `AlarmManager.alarmClock` is used for scheduling instead of `Timer.periodic` (which freezes in deep Doze). The alarm fires, displays the full-screen countdown, and allows cancellation without unlocking.
+
+### 🧭 Onboarding Overhaul
+* **GrapheneOS SMS guide:** Step-by-step instructions for the Android 13+ "Allow restricted settings" flow. The app walks you through the required sequence (denied notice → ⋮ menu → PIN → permissions) that sideloaded apps must follow to gain SMS access.
+* **Motion Sensor detection:** Automatically detects if the device's sensor access is disabled (GrapheneOS "Sensors" toggle) and prompts you to enable it before monitoring begins.
+* **"Why these permissions?" panel:** Each permission has an explanation. Swipe up the bottom sheet to understand exactly what each permission is used for — and what happens if you deny it.
+* **Language selector:** Change the app language directly from the onboarding screen, without navigating to settings.
+
+### 🔒 Privacy Fix
+Removed implicit `READ_PHONE_STATE` permission that was being injected by a transitive dependency. The APK no longer requests or implies this permission.
 
 ---
 
@@ -138,5 +162,5 @@ git clone https://github.com/OksigeniaSL/oksigenia-sos.git
 cd oksigenia-sos
 flutter pub get
 # Note: You need your own key.properties for release builds
-flutter build apk --release --split-per-abi --no-shrink
+flutter build apk --release --split-per-abi
 ```

@@ -83,6 +83,11 @@ class MainActivity: FlutterActivity() {
                     } catch (_: Exception) { "" }
                     result.success(country)
                 }
+                "isSmsPermissionGranted" -> {
+                    val granted = checkSelfPermission(android.Manifest.permission.SEND_SMS) ==
+                        android.content.pm.PackageManager.PERMISSION_GRANTED
+                    result.success(granted)
+                }
                 else -> result.notImplemented()
             }
         }

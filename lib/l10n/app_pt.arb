@@ -161,5 +161,14 @@
     "liveTrackingPausedSOS": "Pausado — SOS ativo",
     "liveTrackingTest1m": "🧪 1 min (TESTE)",
     "liveTrackingTest2m": "🧪 2 min (TESTE)",
-    "liveTrackingTestWarning": "MODO TESTE: Rastreamento enviará a cada {time}."
+    "liveTrackingTestWarning": "MODO TESTE: Rastreamento enviará a cada {time}.",
+    "selectLanguage": "Selecionar idioma",
+    "whyPermsTitle": "Por que essas permissões?",
+    "whyPermsSms": "Envia alertas de emergência por SMS aos seus contatos. Funciona sem internet.",
+    "whyPermsLocation": "Inclui coordenadas GPS no alerta para que os socorristas saibam exatamente onde você está.",
+    "whyPermsNotifications": "Mostra o status de monitoramento e permite cancelar um alarme falso da tela de bloqueio.",
+    "whyPermsActivity": "Detecta padrões de movimento para evitar falsos alarmes ao caminhar ou correr.",
+    "whyPermsSensors": "Lê o acelerômetro para detectar a força G de uma queda.",
+    "whyPermsBattery": "Impede que o Android encerre o app durante o monitoramento em segundo plano.",
+    "whyPermsFullScreen": "Mostra o alarme sobre a tela de bloqueio para que você possa responder sem desbloquear."
 }
