@@ -5,7 +5,17 @@ Cuando algo va mal, envía un SMS de alerta con tus coordenadas GPS a tu contact
 
 Detección Inteligente de Caídas (Smart Sentinel)
 
-El acelerómetro te monitoriza continuamente a alta frecuencia. Un impacto brusco activa una ventana de observación de 60 segundos. Si se detecta movimiento rítmico de marcha durante ese tiempo, la alarma se cancela automáticamente — caídas del móvil o golpes normales no disparan el SOS. Si no hay movimiento rítmico, el SOS se envía.
+El acelerómetro te monitoriza continuamente a alta frecuencia. Un impacto brusco activa una ventana de observación. Si se detecta movimiento rítmico de marcha durante ese tiempo, la alarma se cancela automáticamente — caídas del móvil o golpes normales no disparan el SOS. Si no hay movimiento rítmico, el SOS se envía.
+
+
+Perfiles de actividad
+
+Elige el perfil que más se ajuste a lo que estás haciendo — el Smart Sentinel adapta su sensibilidad:
+- Trekking / Senderismo: ajuste equilibrado para caminar al aire libre.
+- Trail / MTB: umbral de impacto más alto para terrenos con vibración constante.
+- Alpinismo: ventana de observación más larga para recuperaciones lentas en terreno técnico.
+- Parapente / Kayak / Deportes acuáticos: la detección automática se desactiva (el sensor no interpreta de forma fiable maniobras de vuelo ni movimiento en el agua); el monitor de inactividad y el SOS manual siguen activos.
+- Profesional / Rescate: ventana de observación ampliada para uso operativo avanzado.
 
 
 Monitor de Inactividad (Dead Man's Switch)

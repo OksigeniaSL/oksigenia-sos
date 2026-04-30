@@ -174,5 +174,19 @@
     "sentinelGreen": "System aktivt",
     "sentinelYellow": "Stöt upptäckt · analyserar...",
     "sentinelOrange": "Larm omedelbart förestående!",
-    "sentinelRed": "LARM AKTIVT"
+    "sentinelRed": "LARM AKTIVT",
+    "activityProfileTitle": "Aktivitetsprofil",
+    "activityProfileSubtitle": "Anpassar Smart Sentinels detektering till din sport. Välj den närmast matchande — fel profil orsakar falska larm eller missar verkliga fall.",
+    "profileTrekking": "Trekking / Vandring",
+    "profileTrekkingDesc": "Standard. Vandring utomhus med telefonen i ficka eller ryggsäck. Balanserad känslighet.",
+    "profileTrailMtb": "Trail / MTB",
+    "profileTrailMtbDesc": "Högre tröskel för stötar och mer tolerant kadens — den ständiga vibrationen på ojämn terräng skulle annars utlösa falska larm.",
+    "profileMountaineering": "Bergsklättring",
+    "profileMountaineeringDesc": "Samma bas som trekking med ett förlängt observationsfönster på 90 sekunder för långsam återhämtning i teknisk terräng.",
+    "profileParagliding": "Skärmflygning",
+    "profileParaglidingDesc": "Automatisk falldetektering är AVSTÄNGD — accelerometern kan inte tillförlitligt skilja flygmanövrer från ett verkligt fall. Manuellt SOS och inaktivitetsmonitor förblir aktiva.",
+    "profileKayak": "Kajak / Vattensport",
+    "profileKayakDesc": "Automatisk falldetektering är AVSTÄNGD — vatten dämpar stötar och flytrörelser är inte informativa. Använd inaktivitetsmonitor och manuellt SOS.",
+    "profileProfessional": "Professionell / Räddning",
+    "profileProfessionalDesc": "Förlängt observationsfönster på 120 sekunder för avancerad operativ användning där återhämtning efter ett fall kan överskrida standardtidsgränserna."
 }

@@ -569,4 +569,53 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get sentinelRed => 'ALARME ACTIVE';
+
+  @override
+  String get activityProfileTitle => 'Profil d\'activité';
+
+  @override
+  String get activityProfileSubtitle =>
+      'Adapte la détection du Smart Sentinel à votre sport. Choisissez le plus proche — un mauvais profil provoque des fausses alarmes ou rate de vraies chutes.';
+
+  @override
+  String get profileTrekking => 'Randonnée';
+
+  @override
+  String get profileTrekkingDesc =>
+      'Par défaut. Marcher en plein air avec le téléphone en poche ou dans un sac à dos. Sensibilité équilibrée.';
+
+  @override
+  String get profileTrailMtb => 'Trail / VTT';
+
+  @override
+  String get profileTrailMtbDesc =>
+      'Seuil d\'impact plus élevé et cadence plus permissive — la vibration constante sur terrain accidenté provoquerait des fausses alarmes avec la configuration standard.';
+
+  @override
+  String get profileMountaineering => 'Alpinisme';
+
+  @override
+  String get profileMountaineeringDesc =>
+      'Même base que la randonnée avec une fenêtre d\'observation étendue à 90 secondes, pour des récupérations lentes en terrain technique.';
+
+  @override
+  String get profileParagliding => 'Parapente';
+
+  @override
+  String get profileParaglidingDesc =>
+      'La détection automatique de chute est DÉSACTIVÉE — l\'accéléromètre ne peut pas distinguer les manœuvres de vol d\'une vraie chute. Le SOS manuel et le moniteur d\'inactivité restent actifs.';
+
+  @override
+  String get profileKayak => 'Kayak / Sports nautiques';
+
+  @override
+  String get profileKayakDesc =>
+      'La détection automatique de chute est DÉSACTIVÉE — l\'eau amortit les impacts et le mouvement de flottaison n\'est pas informatif. Utilisez le moniteur d\'inactivité et le SOS manuel.';
+
+  @override
+  String get profileProfessional => 'Professionnel / Sauvetage';
+
+  @override
+  String get profileProfessionalDesc =>
+      'Fenêtre d\'observation étendue à 120 secondes pour un usage opérationnel avancé où la récupération après une chute peut dépasser les délais standards.';
 }

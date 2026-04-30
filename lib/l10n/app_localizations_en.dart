@@ -570,4 +570,53 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get sentinelRed => 'ALARM ACTIVE';
+
+  @override
+  String get activityProfileTitle => 'Activity profile';
+
+  @override
+  String get activityProfileSubtitle =>
+      'Tunes Smart Sentinel detection to your sport. Choose the closest match — wrong profiles cause false alarms or miss real falls.';
+
+  @override
+  String get profileTrekking => 'Trekking / Hiking';
+
+  @override
+  String get profileTrekkingDesc =>
+      'Default. Walking outdoors with the phone in a pocket or backpack. Balanced sensitivity.';
+
+  @override
+  String get profileTrailMtb => 'Trail running / MTB';
+
+  @override
+  String get profileTrailMtbDesc =>
+      'Higher impact threshold and more permissive cadence — constant vibration on uneven ground would otherwise trigger false alarms.';
+
+  @override
+  String get profileMountaineering => 'Mountaineering';
+
+  @override
+  String get profileMountaineeringDesc =>
+      'Same baseline as trekking with a longer 90-second observation window after impact, accounting for slow recoveries on technical terrain.';
+
+  @override
+  String get profileParagliding => 'Paragliding';
+
+  @override
+  String get profileParaglidingDesc =>
+      'Automatic fall detection is DISABLED — accelerometer cannot reliably distinguish flight manoeuvres from a fall. Manual SOS and inactivity monitor remain active.';
+
+  @override
+  String get profileKayak => 'Kayak / Watersports';
+
+  @override
+  String get profileKayakDesc =>
+      'Automatic fall detection is DISABLED — water absorbs impact and floating motion is not informative. Use the inactivity monitor and manual SOS.';
+
+  @override
+  String get profileProfessional => 'Professional / Rescue';
+
+  @override
+  String get profileProfessionalDesc =>
+      'Extended 120-second observation window for advanced operational use where recovery time after a fall may exceed standard timeouts.';
 }

@@ -566,4 +566,53 @@ class AppLocalizationsDe extends AppLocalizations {
 
   @override
   String get sentinelRed => 'ALARM AKTIV';
+
+  @override
+  String get activityProfileTitle => 'Aktivitätsprofil';
+
+  @override
+  String get activityProfileSubtitle =>
+      'Passt die Smart-Sentinel-Erkennung an deinen Sport an. Wähle das ähnlichste — falsches Profil verursacht Fehlalarme oder verpasst echte Stürze.';
+
+  @override
+  String get profileTrekking => 'Wandern / Trekking';
+
+  @override
+  String get profileTrekkingDesc =>
+      'Standard. Outdoor-Wandern mit dem Handy in Tasche oder Rucksack. Ausgewogene Empfindlichkeit.';
+
+  @override
+  String get profileTrailMtb => 'Trail / MTB';
+
+  @override
+  String get profileTrailMtbDesc =>
+      'Höhere Aufprallschwelle und tolerantere Kadenz — die ständige Vibration auf unebenem Gelände würde sonst Fehlalarme auslösen.';
+
+  @override
+  String get profileMountaineering => 'Bergsteigen';
+
+  @override
+  String get profileMountaineeringDesc =>
+      'Gleiche Basis wie Wandern mit verlängertem 90-Sekunden-Beobachtungsfenster für langsame Erholung in technischem Gelände.';
+
+  @override
+  String get profileParagliding => 'Gleitschirmfliegen';
+
+  @override
+  String get profileParaglidingDesc =>
+      'Automatische Sturzerkennung ist DEAKTIVIERT — der Beschleunigungssensor kann Flugmanöver nicht zuverlässig von einem Sturz unterscheiden. Manueller SOS und Inaktivitätsmonitor bleiben aktiv.';
+
+  @override
+  String get profileKayak => 'Kajak / Wassersport';
+
+  @override
+  String get profileKayakDesc =>
+      'Automatische Sturzerkennung ist DEAKTIVIERT — Wasser dämpft Aufprälle und Schwimmbewegung ist nicht aussagekräftig. Nutze den Inaktivitätsmonitor und manuellen SOS.';
+
+  @override
+  String get profileProfessional => 'Professionell / Rettung';
+
+  @override
+  String get profileProfessionalDesc =>
+      'Erweitertes 120-Sekunden-Beobachtungsfenster für fortgeschrittene Einsätze, bei denen die Erholungszeit nach einem Sturz die Standard-Timeouts überschreiten kann.';
 }

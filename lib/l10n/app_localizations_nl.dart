@@ -573,4 +573,53 @@ class AppLocalizationsNl extends AppLocalizations {
 
   @override
   String get sentinelRed => 'ALARM ACTIEF';
+
+  @override
+  String get activityProfileTitle => 'Activiteitsprofiel';
+
+  @override
+  String get activityProfileSubtitle =>
+      'Stemt Smart Sentinel-detectie af op je sport. Kies het meest passende — een verkeerd profiel veroorzaakt valse alarmen of mist echte vallen.';
+
+  @override
+  String get profileTrekking => 'Trekken / Wandelen';
+
+  @override
+  String get profileTrekkingDesc =>
+      'Standaard. Buiten wandelen met de telefoon in een zak of rugzak. Evenwichtige gevoeligheid.';
+
+  @override
+  String get profileTrailMtb => 'Trail / MTB';
+
+  @override
+  String get profileTrailMtbDesc =>
+      'Hogere impactdrempel en meer toegeeflijke cadans — constante trillingen op oneffen terrein zouden anders valse alarmen veroorzaken.';
+
+  @override
+  String get profileMountaineering => 'Bergbeklimmen';
+
+  @override
+  String get profileMountaineeringDesc =>
+      'Zelfde basis als trekken met een verlengd observatievenster van 90 seconden voor langzame herstellingen in technisch terrein.';
+
+  @override
+  String get profileParagliding => 'Paragliden';
+
+  @override
+  String get profileParaglidingDesc =>
+      'Automatische valdetectie is UITGESCHAKELD — de versnellingsmeter kan vluchtmanoeuvres niet betrouwbaar onderscheiden van een val. Handmatige SOS en inactiviteitsmonitor blijven actief.';
+
+  @override
+  String get profileKayak => 'Kajak / Watersport';
+
+  @override
+  String get profileKayakDesc =>
+      'Automatische valdetectie is UITGESCHAKELD — water dempt impact en drijvende beweging is niet informatief. Gebruik de inactiviteitsmonitor en handmatige SOS.';
+
+  @override
+  String get profileProfessional => 'Professioneel / Reddingsdienst';
+
+  @override
+  String get profileProfessionalDesc =>
+      'Verlengd observatievenster van 120 seconden voor geavanceerd operationeel gebruik waarbij herstel na een val de standaard time-outs kan overschrijden.';
 }

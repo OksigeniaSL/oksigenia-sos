@@ -174,5 +174,19 @@
     "sentinelGreen": "System active",
     "sentinelYellow": "Impact detected · analysing...",
     "sentinelOrange": "Alert imminent!",
-    "sentinelRed": "ALARM ACTIVE"
+    "sentinelRed": "ALARM ACTIVE",
+    "activityProfileTitle": "Activity profile",
+    "activityProfileSubtitle": "Tunes Smart Sentinel detection to your sport. Choose the closest match — wrong profiles cause false alarms or miss real falls.",
+    "profileTrekking": "Trekking / Hiking",
+    "profileTrekkingDesc": "Default. Walking outdoors with the phone in a pocket or backpack. Balanced sensitivity.",
+    "profileTrailMtb": "Trail running / MTB",
+    "profileTrailMtbDesc": "Higher impact threshold and more permissive cadence — constant vibration on uneven ground would otherwise trigger false alarms.",
+    "profileMountaineering": "Mountaineering",
+    "profileMountaineeringDesc": "Same baseline as trekking with a longer 90-second observation window after impact, accounting for slow recoveries on technical terrain.",
+    "profileParagliding": "Paragliding",
+    "profileParaglidingDesc": "Automatic fall detection is DISABLED — accelerometer cannot reliably distinguish flight manoeuvres from a fall. Manual SOS and inactivity monitor remain active.",
+    "profileKayak": "Kayak / Watersports",
+    "profileKayakDesc": "Automatic fall detection is DISABLED — water absorbs impact and floating motion is not informative. Use the inactivity monitor and manual SOS.",
+    "profileProfessional": "Professional / Rescue",
+    "profileProfessionalDesc": "Extended 120-second observation window for advanced operational use where recovery time after a fall may exceed standard timeouts."
 }

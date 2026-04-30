@@ -174,5 +174,19 @@
     "sentinelGreen": "System aktiv",
     "sentinelYellow": "Aufprall erkannt · wird analysiert...",
     "sentinelOrange": "Alarm unmittelbar bevorstehend!",
-    "sentinelRed": "ALARM AKTIV"
+    "sentinelRed": "ALARM AKTIV",
+    "activityProfileTitle": "Aktivitätsprofil",
+    "activityProfileSubtitle": "Passt die Smart-Sentinel-Erkennung an deinen Sport an. Wähle das ähnlichste — falsches Profil verursacht Fehlalarme oder verpasst echte Stürze.",
+    "profileTrekking": "Wandern / Trekking",
+    "profileTrekkingDesc": "Standard. Outdoor-Wandern mit dem Handy in Tasche oder Rucksack. Ausgewogene Empfindlichkeit.",
+    "profileTrailMtb": "Trail / MTB",
+    "profileTrailMtbDesc": "Höhere Aufprallschwelle und tolerantere Kadenz — die ständige Vibration auf unebenem Gelände würde sonst Fehlalarme auslösen.",
+    "profileMountaineering": "Bergsteigen",
+    "profileMountaineeringDesc": "Gleiche Basis wie Wandern mit verlängertem 90-Sekunden-Beobachtungsfenster für langsame Erholung in technischem Gelände.",
+    "profileParagliding": "Gleitschirmfliegen",
+    "profileParaglidingDesc": "Automatische Sturzerkennung ist DEAKTIVIERT — der Beschleunigungssensor kann Flugmanöver nicht zuverlässig von einem Sturz unterscheiden. Manueller SOS und Inaktivitätsmonitor bleiben aktiv.",
+    "profileKayak": "Kajak / Wassersport",
+    "profileKayakDesc": "Automatische Sturzerkennung ist DEAKTIVIERT — Wasser dämpft Aufprälle und Schwimmbewegung ist nicht aussagekräftig. Nutze den Inaktivitätsmonitor und manuellen SOS.",
+    "profileProfessional": "Professionell / Rettung",
+    "profileProfessionalDesc": "Erweitertes 120-Sekunden-Beobachtungsfenster für fortgeschrittene Einsätze, bei denen die Erholungszeit nach einem Sturz die Standard-Timeouts überschreiten kann."
 }

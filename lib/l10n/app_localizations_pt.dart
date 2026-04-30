@@ -566,4 +566,53 @@ class AppLocalizationsPt extends AppLocalizations {
 
   @override
   String get sentinelRed => 'ALARME ATIVO';
+
+  @override
+  String get activityProfileTitle => 'Perfil de atividade';
+
+  @override
+  String get activityProfileSubtitle =>
+      'Ajusta a deteção do Smart Sentinel ao teu desporto. Escolhe o mais próximo — um perfil errado provoca falsos alarmes ou perde quedas reais.';
+
+  @override
+  String get profileTrekking => 'Trekking / Caminhada';
+
+  @override
+  String get profileTrekkingDesc =>
+      'Predefinição. Caminhar ao ar livre com o telemóvel no bolso ou mochila. Sensibilidade equilibrada.';
+
+  @override
+  String get profileTrailMtb => 'Trail / BTT';
+
+  @override
+  String get profileTrailMtbDesc =>
+      'Limite de impacto mais alto e cadência mais permissiva — a vibração constante em terreno irregular provocaria falsos alarmes com a configuração padrão.';
+
+  @override
+  String get profileMountaineering => 'Alpinismo';
+
+  @override
+  String get profileMountaineeringDesc =>
+      'Mesma base do trekking com janela de observação alargada a 90 segundos, para recuperações lentas em terreno técnico.';
+
+  @override
+  String get profileParagliding => 'Parapente';
+
+  @override
+  String get profileParaglidingDesc =>
+      'A deteção automática de quedas está DESATIVADA — o acelerómetro não consegue distinguir manobras de voo de uma queda real. SOS manual e monitor de inatividade continuam ativos.';
+
+  @override
+  String get profileKayak => 'Caiaque / Desportos aquáticos';
+
+  @override
+  String get profileKayakDesc =>
+      'A deteção automática de quedas está DESATIVADA — a água amortece os impactos e o movimento de flutuação não é informativo. Usa o monitor de inatividade e o SOS manual.';
+
+  @override
+  String get profileProfessional => 'Profissional / Resgate';
+
+  @override
+  String get profileProfessionalDesc =>
+      'Janela de observação alargada a 120 segundos para uso operacional avançado onde a recuperação após uma queda pode exceder os tempos padrão.';
 }

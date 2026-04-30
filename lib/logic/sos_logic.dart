@@ -12,7 +12,8 @@ import 'package:vibration/vibration.dart';
 import 'package:flutter_background_service/flutter_background_service.dart';
 import 'package:battery_plus/battery_plus.dart';
 import 'package:oksigenia_sos/l10n/app_localizations.dart'; 
-import 'package:another_telephony/telephony.dart'; 
+import 'package:another_telephony/telephony.dart';
+import 'activity_profile.dart';
 import '../services/preferences_service.dart';
 import '../screens/settings_screen.dart';  
 import '../screens/alarm_screen.dart';
@@ -375,7 +376,8 @@ class SOSLogic extends ChangeNotifier with WidgetsBindingObserver {
          service.invoke("setMonitoring", {
            "active": _isFallDetectionActive,
            "inactivity_limit": _currentInactivityLimit,
-           "inactivity_enabled": _isInactivityMonitorActive
+           "inactivity_enabled": _isInactivityMonitorActive,
+           "profile": PreferencesService().getActivityProfile().name,
          });
       }
     }
@@ -672,9 +674,10 @@ class SOSLogic extends ChangeNotifier with WidgetsBindingObserver {
     service.invoke("setMonitoring", {
       "active": value,
       "inactivity_limit": _currentInactivityLimit,
-      "inactivity_enabled": _isInactivityMonitorActive
+      "inactivity_enabled": _isInactivityMonitorActive,
+      "profile": PreferencesService().getActivityProfile().name,
     });
-    _syncConfigWithService(); 
+    _syncConfigWithService();
 
     PreferencesService().saveFallDetectionState(value);
     _updateSylviaStatus(); 
@@ -703,9 +706,10 @@ class SOSLogic extends ChangeNotifier with WidgetsBindingObserver {
     service.invoke("setMonitoring", {
       "active": _isFallDetectionActive,
       "inactivity_limit": _currentInactivityLimit,
-      "inactivity_enabled": value
+      "inactivity_enabled": value,
+      "profile": PreferencesService().getActivityProfile().name,
     });
-    _syncConfigWithService(); 
+    _syncConfigWithService();
 
     if (value) {
       _isWarmingUp = true;
@@ -1054,6 +1058,20 @@ class SOSLogic extends ChangeNotifier with WidgetsBindingObserver {
     notifyListeners();
   }
 
+  /// Re-send the current monitoring configuration to Sylvia. Called when the
+  /// activity profile changes mid-session so the new parameters take effect
+  /// without requiring the user to toggle monitoring off/on.
+  Future<void> reapplyMonitoringConfig() async {
+    final service = FlutterBackgroundService();
+    if (!(await service.isRunning())) return;
+    service.invoke("setMonitoring", {
+      "active": _isFallDetectionActive,
+      "inactivity_limit": _currentInactivityLimit,
+      "inactivity_enabled": _isInactivityMonitorActive,
+      "profile": PreferencesService().getActivityProfile().name,
+    });
+  }
+
   Future<void> resumeMonitoring() async {
     _pausedUntil = null;
     _lastMovementTime = DateTime.now();
@@ -1064,6 +1082,7 @@ class SOSLogic extends ChangeNotifier with WidgetsBindingObserver {
         "active": _isFallDetectionActive,
         "inactivity_limit": _currentInactivityLimit,
         "inactivity_enabled": _isInactivityMonitorActive,
+        "profile": PreferencesService().getActivityProfile().name,
       });
     }
     _updateSylviaStatus();

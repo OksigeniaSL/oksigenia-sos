@@ -5,6 +5,7 @@ import 'package:provider/provider.dart';
 import 'package:oksigenia_sos/l10n/app_localizations.dart';
 import '../services/preferences_service.dart';
 import '../logic/sos_logic.dart';
+import '../logic/activity_profile.dart';
 
 class SettingsScreen extends StatefulWidget {
   const SettingsScreen({super.key});
@@ -23,6 +24,7 @@ class _SettingsScreenState extends State<SettingsScreen> with WidgetsBindingObse
   bool _isLiveTrackingActive = false;
   int _liveTrackingInterval = 30;
   int _liveTrackingShutdown = 0;
+  ActivityProfile _selectedProfile = ActivityProfile.trekking;
 
   @override
   void initState() {
@@ -142,7 +144,43 @@ class _SettingsScreenState extends State<SettingsScreen> with WidgetsBindingObse
       _isLiveTrackingActive = prefs.getLiveTrackingEnabled();
       _liveTrackingInterval = prefs.getLiveTrackingIntervalMinutes();
       _liveTrackingShutdown = prefs.getLiveTrackingShutdownMinutes();
+      _selectedProfile = prefs.getActivityProfile();
     });
+  }
+
+  Future<void> _updateActivityProfile(ActivityProfile? profile) async {
+    if (profile == null) return;
+    setState(() => _selectedProfile = profile);
+    await PreferencesService().saveActivityProfile(profile);
+    // Re-arm Sylvia with the new profile if monitoring is active.
+    if (mounted) {
+      final logic = Provider.of<SOSLogic>(context, listen: false);
+      if (logic.isFallDetectionActive || logic.isInactivityMonitorActive) {
+        logic.reapplyMonitoringConfig();
+      }
+    }
+  }
+
+  String _profileLabel(AppLocalizations l10n, ActivityProfile p) {
+    switch (p) {
+      case ActivityProfile.trekking: return l10n.profileTrekking;
+      case ActivityProfile.trailMtb: return l10n.profileTrailMtb;
+      case ActivityProfile.mountaineering: return l10n.profileMountaineering;
+      case ActivityProfile.paragliding: return l10n.profileParagliding;
+      case ActivityProfile.kayak: return l10n.profileKayak;
+      case ActivityProfile.professional: return l10n.profileProfessional;
+    }
+  }
+
+  String _profileDescription(AppLocalizations l10n, ActivityProfile p) {
+    switch (p) {
+      case ActivityProfile.trekking: return l10n.profileTrekkingDesc;
+      case ActivityProfile.trailMtb: return l10n.profileTrailMtbDesc;
+      case ActivityProfile.mountaineering: return l10n.profileMountaineeringDesc;
+      case ActivityProfile.paragliding: return l10n.profileParaglidingDesc;
+      case ActivityProfile.kayak: return l10n.profileKayakDesc;
+      case ActivityProfile.professional: return l10n.profileProfessionalDesc;
+    }
   }
 
   void _addContact() {
@@ -359,6 +397,33 @@ class _SettingsScreenState extends State<SettingsScreen> with WidgetsBindingObse
               ),
               onChanged: _saveMessage,
               maxLines: 3,
+            ),
+
+            const Divider(height: 40),
+
+            Text(l10n.activityProfileTitle, style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+            const SizedBox(height: 5),
+            Text(l10n.activityProfileSubtitle, style: const TextStyle(fontSize: 12, color: Colors.grey)),
+            const SizedBox(height: 10),
+            Container(
+              padding: const EdgeInsets.symmetric(horizontal: 12),
+              decoration: BoxDecoration(border: Border.all(color: Colors.grey), borderRadius: BorderRadius.circular(4)),
+              child: DropdownButtonHideUnderline(
+                child: DropdownButton<ActivityProfile>(
+                  value: _selectedProfile,
+                  isExpanded: true,
+                  items: ActivityProfile.values.map((p) => DropdownMenuItem(
+                    value: p,
+                    child: Text(_profileLabel(l10n, p)),
+                  )).toList(),
+                  onChanged: _updateActivityProfile,
+                ),
+              ),
+            ),
+            const SizedBox(height: 6),
+            Text(
+              _profileDescription(l10n, _selectedProfile),
+              style: const TextStyle(fontSize: 12, color: Colors.white70, fontStyle: FontStyle.italic),
             ),
 
             const Divider(height: 40),

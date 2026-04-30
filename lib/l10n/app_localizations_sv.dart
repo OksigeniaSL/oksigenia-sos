@@ -571,4 +571,53 @@ class AppLocalizationsSv extends AppLocalizations {
 
   @override
   String get sentinelRed => 'LARM AKTIVT';
+
+  @override
+  String get activityProfileTitle => 'Aktivitetsprofil';
+
+  @override
+  String get activityProfileSubtitle =>
+      'Anpassar Smart Sentinels detektering till din sport. Välj den närmast matchande — fel profil orsakar falska larm eller missar verkliga fall.';
+
+  @override
+  String get profileTrekking => 'Trekking / Vandring';
+
+  @override
+  String get profileTrekkingDesc =>
+      'Standard. Vandring utomhus med telefonen i ficka eller ryggsäck. Balanserad känslighet.';
+
+  @override
+  String get profileTrailMtb => 'Trail / MTB';
+
+  @override
+  String get profileTrailMtbDesc =>
+      'Högre tröskel för stötar och mer tolerant kadens — den ständiga vibrationen på ojämn terräng skulle annars utlösa falska larm.';
+
+  @override
+  String get profileMountaineering => 'Bergsklättring';
+
+  @override
+  String get profileMountaineeringDesc =>
+      'Samma bas som trekking med ett förlängt observationsfönster på 90 sekunder för långsam återhämtning i teknisk terräng.';
+
+  @override
+  String get profileParagliding => 'Skärmflygning';
+
+  @override
+  String get profileParaglidingDesc =>
+      'Automatisk falldetektering är AVSTÄNGD — accelerometern kan inte tillförlitligt skilja flygmanövrer från ett verkligt fall. Manuellt SOS och inaktivitetsmonitor förblir aktiva.';
+
+  @override
+  String get profileKayak => 'Kajak / Vattensport';
+
+  @override
+  String get profileKayakDesc =>
+      'Automatisk falldetektering är AVSTÄNGD — vatten dämpar stötar och flytrörelser är inte informativa. Använd inaktivitetsmonitor och manuellt SOS.';
+
+  @override
+  String get profileProfessional => 'Professionell / Räddning';
+
+  @override
+  String get profileProfessionalDesc =>
+      'Förlängt observationsfönster på 120 sekunder för avancerad operativ användning där återhämtning efter ett fall kan överskrida standardtidsgränserna.';
 }

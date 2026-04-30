@@ -14,6 +14,7 @@ import 'package:geolocator/geolocator.dart';
 import 'package:another_telephony/telephony.dart';
 import 'package:battery_plus/battery_plus.dart';
 import 'package:path_provider/path_provider.dart';
+import '../logic/activity_profile.dart';
 import 'package:timezone/data/latest_all.dart' as tz;
 import 'package:timezone/timezone.dart' as tz;
 
@@ -155,7 +156,13 @@ void onStart(ServiceInstance service) async {
   DateTime _liveTrackingNextSend = DateTime.fromMillisecondsSinceEpoch(0);
 
   bool _sensorCooldown = false;
-  const double _yellowThreshold = 6.0;
+  // Smart Sentinel runtime parameters (mutable — driven by activity profile).
+  // Defaults match the Trekking baseline; setMonitoring overrides on demand.
+  double _yellowThreshold = 6.0;
+  int _settlingSeconds = 5;
+  int _observationSeconds = 60;
+  double _cvUpperBound = 1.30;
+  bool _impactDetectionEnabled = true;
   double _lastG = 1.0;
   final List<double> _gBuffer = [];
   // Effective sample rate of the userAccelerometer stream. Android negotiates
@@ -635,7 +642,7 @@ void onStart(ServiceInstance service) async {
     final bool wasYellow = _sentinelYellow;
     _sentinelYellow = false;
     _yellowTimer?.cancel();
-    _yellowCountdown = 60;
+    _yellowCountdown = _observationSeconds;
     _gBuffer.clear();
     if (wasYellow) service.invoke("sentinelGreen");
   }
@@ -700,7 +707,7 @@ void onStart(ServiceInstance service) async {
       _logSentinel("SYLVIA RHYTHM: cross=$crossings f=${freqHz.toStringAsFixed(2)}Hz cv=${cv.toStringAsFixed(2)} → NO (freq<1.0)");
       return false;
     }
-    if (cv < 0.05 || cv > 1.30) {
+    if (cv < 0.05 || cv > _cvUpperBound) {
       _logSentinel("SYLVIA RHYTHM: cross=$crossings f=${freqHz.toStringAsFixed(2)}Hz cv=${cv.toStringAsFixed(2)} → NO (cv out of range)");
       return false;
     }
@@ -711,18 +718,19 @@ void onStart(ServiceInstance service) async {
 
   void _enterYellowState() {
     if (_sentinelYellow || _isAlarmActive) return;
+    _yellowCountdown = _observationSeconds;
     _logSentinel("SYLVIA SERVICE: 🟡 Impacto detectado. Análisis Smart Sentinel ($_yellowCountdown s)...");
     _sentinelYellow = true;
-    _yellowCountdown = 60;
     service.invoke("sentinelYellow");
 
     // Phased post-impact analysis (Bourke/Kangas/Musci-style):
-    // 1. Settling window (5s, per Musci 2021): movement ignored — could be tumbling,
+    // 1. Settling window (per Musci 2021): movement ignored — could be tumbling,
     //    rolling, failed recovery attempts, secondary impacts.
     // 2. Sustained rhythm check (post-settling): cancellation requires 3 consecutive
     //    2s checks of rhythmic movement (= 6s of cadence-CV-validated gait).
     // 3. Imminent-alert (last 10s): emit sentinelOrange so UI can warn the user.
-    const int settlingSeconds = 5;
+    final int totalObservation = _observationSeconds;
+    final int settlingSeconds = _settlingSeconds;
     const int sustainedRhythmChecks = 3;
     const int orangeWarningSeconds = 10;
     int rhythmStreak = 0;
@@ -731,7 +739,7 @@ void onStart(ServiceInstance service) async {
     _yellowTimer?.cancel();
     _yellowTimer = Timer.periodic(const Duration(seconds: 2), (timer) {
       _yellowCountdown -= 2;
-      final int elapsed = 60 - _yellowCountdown;
+      final int elapsed = totalObservation - _yellowCountdown;
 
       if (!orangeEmitted && _yellowCountdown <= orangeWarningSeconds && _yellowCountdown > 0) {
         orangeEmitted = true;
@@ -758,7 +766,7 @@ void onStart(ServiceInstance service) async {
         timer.cancel();
         _returnToGreen();
         if (!_isAlarmActive) {
-          _logSentinel("SYLVIA SERVICE: 🔴 Sin movimiento sostenido tras 60s. ACTIVANDO ALARMA.");
+          _logSentinel("SYLVIA SERVICE: 🔴 Sin movimiento sostenido tras ${totalObservation}s. ACTIVANDO ALARMA.");
           _isAlarmActive = true;
           _lanzarAlarma();
         }
@@ -858,7 +866,7 @@ void onStart(ServiceInstance service) async {
         }
       }
 
-      if (_isMonitoringImpact && !isPaused) {
+      if (_isMonitoringImpact && _impactDetectionEnabled && !isPaused) {
         // Buffer holds horizontal G for the cadence detector; impact still uses
         // full instantG (line below). Decoupling the two signals fixes Pixel 8.
         _gBuffer.add(horizontalG);
@@ -1042,21 +1050,37 @@ void onStart(ServiceInstance service) async {
     });
 
     service.on('setMonitoring').listen((event) async {
-      _logSentinel("SYLVIA SERVICE: 📥 setMonitoring received: active=${event?['active']}");
+      _logSentinel("SYLVIA SERVICE: 📥 setMonitoring received: active=${event?['active']} profile=${event?['profile']}");
       final prefs = await SharedPreferences.getInstance();
       _isMonitoringImpact = event?['active'] ?? false;
-      
+
       if (event != null && event.containsKey('inactivity_limit')) {
          _inactivityLimitSeconds = event['inactivity_limit'];
       } else {
          _inactivityLimitSeconds = prefs.getInt('inactivity_time') ?? 3600;
       }
-      
+
       if (event != null && event.containsKey('inactivity_enabled')) {
          _isMonitoringInactivity = event['inactivity_enabled'];
       } else {
          _isMonitoringInactivity = prefs.getBool('inactivity_monitor_enabled') ?? false;
       }
+
+      // Activity profile drives Smart Sentinel parameters at runtime. Read from
+      // event when present (UI just toggled), fall back to persisted setting.
+      final String profileName = (event != null && event.containsKey('profile'))
+          ? event['profile'] as String
+          : (prefs.getString('activity_profile') ?? 'trekking');
+      final ActivityProfile profile = activityProfileFromName(profileName);
+      final ActivityProfileConfig cfg = activityProfileConfigs[profile]!;
+      _impactDetectionEnabled = cfg.impactDetectionEnabled;
+      if (cfg.impactDetectionEnabled) {
+        _yellowThreshold = cfg.yellowThreshold;
+        _settlingSeconds = cfg.settlingSeconds;
+        _observationSeconds = cfg.observationSeconds;
+        _cvUpperBound = cfg.cvUpperBound;
+      }
+      _logSentinel("SYLVIA SERVICE: 🎯 Profile=${profile.name} threshold=${_yellowThreshold}G obs=${_observationSeconds}s cv=${_cvUpperBound} impactOn=${_impactDetectionEnabled}");
 
       print("SYLVIA SERVICE: Monitor - Impact: $_isMonitoringImpact, Inactivity: $_isMonitoringInactivity (Limit: $_inactivityLimitSeconds s)");
 

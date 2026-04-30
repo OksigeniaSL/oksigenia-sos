@@ -1165,6 +1165,90 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'ALARM ACTIVE'**
   String get sentinelRed;
+
+  /// No description provided for @activityProfileTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Activity profile'**
+  String get activityProfileTitle;
+
+  /// No description provided for @activityProfileSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Tunes Smart Sentinel detection to your sport. Choose the closest match — wrong profiles cause false alarms or miss real falls.'**
+  String get activityProfileSubtitle;
+
+  /// No description provided for @profileTrekking.
+  ///
+  /// In en, this message translates to:
+  /// **'Trekking / Hiking'**
+  String get profileTrekking;
+
+  /// No description provided for @profileTrekkingDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'Default. Walking outdoors with the phone in a pocket or backpack. Balanced sensitivity.'**
+  String get profileTrekkingDesc;
+
+  /// No description provided for @profileTrailMtb.
+  ///
+  /// In en, this message translates to:
+  /// **'Trail running / MTB'**
+  String get profileTrailMtb;
+
+  /// No description provided for @profileTrailMtbDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'Higher impact threshold and more permissive cadence — constant vibration on uneven ground would otherwise trigger false alarms.'**
+  String get profileTrailMtbDesc;
+
+  /// No description provided for @profileMountaineering.
+  ///
+  /// In en, this message translates to:
+  /// **'Mountaineering'**
+  String get profileMountaineering;
+
+  /// No description provided for @profileMountaineeringDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'Same baseline as trekking with a longer 90-second observation window after impact, accounting for slow recoveries on technical terrain.'**
+  String get profileMountaineeringDesc;
+
+  /// No description provided for @profileParagliding.
+  ///
+  /// In en, this message translates to:
+  /// **'Paragliding'**
+  String get profileParagliding;
+
+  /// No description provided for @profileParaglidingDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'Automatic fall detection is DISABLED — accelerometer cannot reliably distinguish flight manoeuvres from a fall. Manual SOS and inactivity monitor remain active.'**
+  String get profileParaglidingDesc;
+
+  /// No description provided for @profileKayak.
+  ///
+  /// In en, this message translates to:
+  /// **'Kayak / Watersports'**
+  String get profileKayak;
+
+  /// No description provided for @profileKayakDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'Automatic fall detection is DISABLED — water absorbs impact and floating motion is not informative. Use the inactivity monitor and manual SOS.'**
+  String get profileKayakDesc;
+
+  /// No description provided for @profileProfessional.
+  ///
+  /// In en, this message translates to:
+  /// **'Professional / Rescue'**
+  String get profileProfessional;
+
+  /// No description provided for @profileProfessionalDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'Extended 120-second observation window for advanced operational use where recovery time after a fall may exceed standard timeouts.'**
+  String get profileProfessionalDesc;
 }
 
 class _AppLocalizationsDelegate

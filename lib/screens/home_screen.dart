@@ -7,6 +7,8 @@ import 'package:wakelock_plus/wakelock_plus.dart';
 import 'package:permission_handler/permission_handler.dart'; 
 import 'package:oksigenia_sos/l10n/app_localizations.dart';
 import 'package:oksigenia_sos/logic/sos_logic.dart';
+import 'package:oksigenia_sos/logic/activity_profile.dart';
+import 'package:oksigenia_sos/services/preferences_service.dart';
 import 'package:oksigenia_sos/widgets/main_drawer.dart';
 import 'package:oksigenia_sos/services/remote_config_service.dart';
 import 'package:oksigenia_sos/screens/update_screen.dart';
@@ -249,6 +251,9 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver, Ti
 
             // SENTINEL STATE BADGE — visible only when monitoring is active
             _buildSentinelBadge(l10n),
+
+            // ACTIVITY PROFILE CHIP — discoverable + tappable to change
+            _buildProfileChip(l10n),
 
             // LIVE TRACKING CARD — arriba para separarlo del Stop y el SOS
             _buildLiveTrackingCard(l10n),
@@ -867,6 +872,185 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver, Ti
           ),
         );
       },
+    );
+  }
+
+  IconData _profileIcon(ActivityProfile p) {
+    switch (p) {
+      case ActivityProfile.trekking: return Icons.hiking;
+      case ActivityProfile.trailMtb: return Icons.directions_bike;
+      case ActivityProfile.mountaineering: return Icons.terrain;
+      case ActivityProfile.paragliding: return Icons.paragliding;
+      case ActivityProfile.kayak: return Icons.kayaking;
+      case ActivityProfile.professional: return Icons.health_and_safety;
+    }
+  }
+
+  Color _profileColor(ActivityProfile p) {
+    switch (p) {
+      case ActivityProfile.trekking: return const Color(0xFF66BB6A); // green — baseline outdoors
+      case ActivityProfile.trailMtb: return const Color(0xFFFF9800); // orange — high energy
+      case ActivityProfile.mountaineering: return const Color(0xFF42A5F5); // blue — alpine
+      case ActivityProfile.paragliding: return const Color(0xFFAB47BC); // purple — flight
+      case ActivityProfile.kayak: return const Color(0xFF26C6DA); // cyan — water
+      case ActivityProfile.professional: return const Color(0xFFEF5350); // red — emergency-grade
+    }
+  }
+
+  String _profileLabel(AppLocalizations l10n, ActivityProfile p) {
+    switch (p) {
+      case ActivityProfile.trekking: return l10n.profileTrekking;
+      case ActivityProfile.trailMtb: return l10n.profileTrailMtb;
+      case ActivityProfile.mountaineering: return l10n.profileMountaineering;
+      case ActivityProfile.paragliding: return l10n.profileParagliding;
+      case ActivityProfile.kayak: return l10n.profileKayak;
+      case ActivityProfile.professional: return l10n.profileProfessional;
+    }
+  }
+
+  String _profileDescription(AppLocalizations l10n, ActivityProfile p) {
+    switch (p) {
+      case ActivityProfile.trekking: return l10n.profileTrekkingDesc;
+      case ActivityProfile.trailMtb: return l10n.profileTrailMtbDesc;
+      case ActivityProfile.mountaineering: return l10n.profileMountaineeringDesc;
+      case ActivityProfile.paragliding: return l10n.profileParaglidingDesc;
+      case ActivityProfile.kayak: return l10n.profileKayakDesc;
+      case ActivityProfile.professional: return l10n.profileProfessionalDesc;
+    }
+  }
+
+  Widget _buildProfileChip(AppLocalizations l10n) {
+    final ActivityProfile current = PreferencesService().getActivityProfile();
+    final Color accent = _profileColor(current);
+
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 4),
+      child: Material(
+        color: Colors.transparent,
+        child: InkWell(
+          onTap: () => _showProfilePicker(l10n),
+          borderRadius: BorderRadius.circular(20),
+          child: Container(
+            padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 7),
+            decoration: BoxDecoration(
+              color: accent.withOpacity(0.14),
+              borderRadius: BorderRadius.circular(20),
+              border: Border.all(color: accent.withOpacity(0.55), width: 1),
+            ),
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Icon(_profileIcon(current), size: 18, color: accent),
+                const SizedBox(width: 8),
+                Text(
+                  _profileLabel(l10n, current),
+                  style: TextStyle(
+                    color: accent,
+                    fontSize: 13,
+                    fontWeight: FontWeight.w600,
+                    letterSpacing: 0.2,
+                  ),
+                ),
+                const SizedBox(width: 4),
+                Icon(Icons.expand_more, size: 18, color: accent.withOpacity(0.85)),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
+  Future<void> _showProfilePicker(AppLocalizations l10n) async {
+    final ActivityProfile current = PreferencesService().getActivityProfile();
+    await showModalBottomSheet<void>(
+      context: context,
+      backgroundColor: Colors.grey[900],
+      isScrollControlled: true,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
+      ),
+      builder: (ctx) => SafeArea(
+        child: Padding(
+          padding: const EdgeInsets.symmetric(vertical: 16),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 20),
+                child: Text(
+                  l10n.activityProfileTitle,
+                  style: const TextStyle(color: Colors.white, fontSize: 18, fontWeight: FontWeight.bold),
+                ),
+              ),
+              const SizedBox(height: 4),
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 20),
+                child: Text(
+                  l10n.activityProfileSubtitle,
+                  style: const TextStyle(color: Colors.white60, fontSize: 12),
+                ),
+              ),
+              const SizedBox(height: 12),
+              ...ActivityProfile.values.map((p) {
+                final bool selected = p == current;
+                final Color rowAccent = _profileColor(p);
+                return InkWell(
+                  onTap: () async {
+                    await PreferencesService().saveActivityProfile(p);
+                    if (mounted) {
+                      await _sosLogic.reapplyMonitoringConfig();
+                      setState(() {});
+                    }
+                    if (ctx.mounted) Navigator.pop(ctx);
+                  },
+                  child: Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+                    color: selected ? rowAccent.withOpacity(0.10) : null,
+                    child: Row(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Icon(
+                          _profileIcon(p),
+                          color: selected ? rowAccent : Colors.white70,
+                          size: 22,
+                        ),
+                        const SizedBox(width: 14),
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                _profileLabel(l10n, p),
+                                style: TextStyle(
+                                  color: selected ? rowAccent : Colors.white,
+                                  fontSize: 15,
+                                  fontWeight: FontWeight.w600,
+                                ),
+                              ),
+                              const SizedBox(height: 2),
+                              Text(
+                                _profileDescription(l10n, p),
+                                style: const TextStyle(color: Colors.white60, fontSize: 12),
+                              ),
+                            ],
+                          ),
+                        ),
+                        if (selected)
+                          Padding(
+                            padding: const EdgeInsets.only(left: 8, top: 2),
+                            child: Icon(Icons.check_circle, color: rowAccent, size: 20),
+                          ),
+                      ],
+                    ),
+                  ),
+                );
+              }),
+            ],
+          ),
+        ),
+      ),
     );
   }
 

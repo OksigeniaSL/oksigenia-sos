@@ -174,5 +174,19 @@
     "sentinelGreen": "Sistema ativo",
     "sentinelYellow": "Impacto detetado · a analisar...",
     "sentinelOrange": "Alerta iminente!",
-    "sentinelRed": "ALARME ATIVO"
+    "sentinelRed": "ALARME ATIVO",
+    "activityProfileTitle": "Perfil de atividade",
+    "activityProfileSubtitle": "Ajusta a deteção do Smart Sentinel ao teu desporto. Escolhe o mais próximo — um perfil errado provoca falsos alarmes ou perde quedas reais.",
+    "profileTrekking": "Trekking / Caminhada",
+    "profileTrekkingDesc": "Predefinição. Caminhar ao ar livre com o telemóvel no bolso ou mochila. Sensibilidade equilibrada.",
+    "profileTrailMtb": "Trail / BTT",
+    "profileTrailMtbDesc": "Limite de impacto mais alto e cadência mais permissiva — a vibração constante em terreno irregular provocaria falsos alarmes com a configuração padrão.",
+    "profileMountaineering": "Alpinismo",
+    "profileMountaineeringDesc": "Mesma base do trekking com janela de observação alargada a 90 segundos, para recuperações lentas em terreno técnico.",
+    "profileParagliding": "Parapente",
+    "profileParaglidingDesc": "A deteção automática de quedas está DESATIVADA — o acelerómetro não consegue distinguir manobras de voo de uma queda real. SOS manual e monitor de inatividade continuam ativos.",
+    "profileKayak": "Caiaque / Desportos aquáticos",
+    "profileKayakDesc": "A deteção automática de quedas está DESATIVADA — a água amortece os impactos e o movimento de flutuação não é informativo. Usa o monitor de inatividade e o SOS manual.",
+    "profileProfessional": "Profissional / Resgate",
+    "profileProfessionalDesc": "Janela de observação alargada a 120 segundos para uso operacional avançado onde a recuperação após uma queda pode exceder os tempos padrão."
 }

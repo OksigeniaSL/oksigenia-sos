@@ -174,5 +174,19 @@
     "sentinelGreen": "Sistema attivo",
     "sentinelYellow": "Impatto rilevato · analisi in corso...",
     "sentinelOrange": "Allarme imminente!",
-    "sentinelRed": "ALLARME ATTIVO"
+    "sentinelRed": "ALLARME ATTIVO",
+    "activityProfileTitle": "Profilo attività",
+    "activityProfileSubtitle": "Adatta la rilevazione dello Smart Sentinel al tuo sport. Scegli il più simile — un profilo errato provoca falsi allarmi o non rileva cadute reali.",
+    "profileTrekking": "Trekking / Escursionismo",
+    "profileTrekkingDesc": "Predefinito. Camminate all'aperto con il telefono in tasca o nello zaino. Sensibilità bilanciata.",
+    "profileTrailMtb": "Trail / MTB",
+    "profileTrailMtbDesc": "Soglia di impatto più alta e cadenza più permissiva — la vibrazione costante su terreno irregolare causerebbe falsi allarmi con le impostazioni standard.",
+    "profileMountaineering": "Alpinismo",
+    "profileMountaineeringDesc": "Stessa base del trekking con finestra di osservazione estesa a 90 secondi, per recuperi lenti su terreno tecnico.",
+    "profileParagliding": "Parapendio",
+    "profileParaglidingDesc": "Il rilevamento automatico delle cadute è DISATTIVATO — l'accelerometro non può distinguere manovre di volo da una caduta reale. SOS manuale e monitor di inattività restano attivi.",
+    "profileKayak": "Kayak / Sport acquatici",
+    "profileKayakDesc": "Il rilevamento automatico delle cadute è DISATTIVATO — l'acqua attutisce gli impatti e il movimento di galleggiamento non è informativo. Usa il monitor di inattività e l'SOS manuale.",
+    "profileProfessional": "Professionale / Soccorso",
+    "profileProfessionalDesc": "Finestra di osservazione estesa a 120 secondi per uso operativo avanzato dove il recupero dopo una caduta può superare i tempi standard."
 }

@@ -5,7 +5,17 @@ When something goes wrong, it sends an SMS alert with your GPS coordinates to yo
 
 Smart Fall Detection (Smart Sentinel)
 
-The accelerometer monitors you continuously at high frequency. A sudden impact triggers a 60-second observation window. If sustained walking movement is detected during that window, the alarm is dismissed automatically — false positives from drops or normal jolts won't fire the SOS. If no rhythmic movement is detected, the SOS is sent.
+The accelerometer monitors you continuously at high frequency. A sudden impact triggers an observation window. If sustained walking movement is detected during that window, the alarm is dismissed automatically — false positives from drops or normal jolts won't fire the SOS. If no rhythmic movement is detected, the SOS is sent.
+
+
+Activity profiles
+
+Pick the profile that matches what you're doing — Smart Sentinel adapts its sensitivity:
+- Trekking / Hiking: balanced default for walking outdoors.
+- Trail running / MTB: higher impact threshold for terrain with constant vibration.
+- Mountaineering: longer observation window for slow recoveries on technical ground.
+- Paragliding / Kayak / Watersports: automatic fall detection is disabled (the sensor cannot reliably interpret flight or water motion); inactivity monitor and manual SOS remain active.
+- Professional / Rescue: extended observation window for advanced operational use.
 
 
 Inactivity Monitor (Dead Man's Switch)

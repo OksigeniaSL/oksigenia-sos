@@ -174,5 +174,19 @@
     "sentinelGreen": "Système actif",
     "sentinelYellow": "Impact détecté · analyse en cours...",
     "sentinelOrange": "Alerte imminente !",
-    "sentinelRed": "ALARME ACTIVE"
+    "sentinelRed": "ALARME ACTIVE",
+    "activityProfileTitle": "Profil d'activité",
+    "activityProfileSubtitle": "Adapte la détection du Smart Sentinel à votre sport. Choisissez le plus proche — un mauvais profil provoque des fausses alarmes ou rate de vraies chutes.",
+    "profileTrekking": "Randonnée",
+    "profileTrekkingDesc": "Par défaut. Marcher en plein air avec le téléphone en poche ou dans un sac à dos. Sensibilité équilibrée.",
+    "profileTrailMtb": "Trail / VTT",
+    "profileTrailMtbDesc": "Seuil d'impact plus élevé et cadence plus permissive — la vibration constante sur terrain accidenté provoquerait des fausses alarmes avec la configuration standard.",
+    "profileMountaineering": "Alpinisme",
+    "profileMountaineeringDesc": "Même base que la randonnée avec une fenêtre d'observation étendue à 90 secondes, pour des récupérations lentes en terrain technique.",
+    "profileParagliding": "Parapente",
+    "profileParaglidingDesc": "La détection automatique de chute est DÉSACTIVÉE — l'accéléromètre ne peut pas distinguer les manœuvres de vol d'une vraie chute. Le SOS manuel et le moniteur d'inactivité restent actifs.",
+    "profileKayak": "Kayak / Sports nautiques",
+    "profileKayakDesc": "La détection automatique de chute est DÉSACTIVÉE — l'eau amortit les impacts et le mouvement de flottaison n'est pas informatif. Utilisez le moniteur d'inactivité et le SOS manuel.",
+    "profileProfessional": "Professionnel / Sauvetage",
+    "profileProfessionalDesc": "Fenêtre d'observation étendue à 120 secondes pour un usage opérationnel avancé où la récupération après une chute peut dépasser les délais standards."
 }

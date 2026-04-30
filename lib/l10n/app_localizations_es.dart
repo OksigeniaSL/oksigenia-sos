@@ -571,4 +571,53 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get sentinelRed => 'ALARMA ACTIVA';
+
+  @override
+  String get activityProfileTitle => 'Perfil de actividad';
+
+  @override
+  String get activityProfileSubtitle =>
+      'Ajusta la detección del Smart Sentinel a tu deporte. Elige el más parecido — un perfil incorrecto provoca falsas alarmas o pierde caídas reales.';
+
+  @override
+  String get profileTrekking => 'Trekking / Senderismo';
+
+  @override
+  String get profileTrekkingDesc =>
+      'Por defecto. Caminar al aire libre con el móvil en bolsillo o mochila. Sensibilidad equilibrada.';
+
+  @override
+  String get profileTrailMtb => 'Trail / MTB';
+
+  @override
+  String get profileTrailMtbDesc =>
+      'Umbral de impacto más alto y cadencia más permisiva — la vibración constante en terreno irregular generaría falsas alarmas con la configuración estándar.';
+
+  @override
+  String get profileMountaineering => 'Alpinismo';
+
+  @override
+  String get profileMountaineeringDesc =>
+      'Misma base que trekking con ventana de observación ampliada a 90 segundos, para recuperaciones lentas en terreno técnico.';
+
+  @override
+  String get profileParagliding => 'Parapente';
+
+  @override
+  String get profileParaglidingDesc =>
+      'La detección automática de caídas está DESACTIVADA — el acelerómetro no puede distinguir maniobras de vuelo de una caída real. SOS manual y monitor de inactividad siguen activos.';
+
+  @override
+  String get profileKayak => 'Kayak / Deportes acuáticos';
+
+  @override
+  String get profileKayakDesc =>
+      'La detección automática de caídas está DESACTIVADA — el agua amortigua los impactos y el movimiento de flotación no es informativo. Usa el monitor de inactividad y el SOS manual.';
+
+  @override
+  String get profileProfessional => 'Profesional / Rescate';
+
+  @override
+  String get profileProfessionalDesc =>
+      'Ventana de observación ampliada a 120 segundos para uso operativo avanzado donde la recuperación tras una caída puede superar los tiempos estándar.';
 }

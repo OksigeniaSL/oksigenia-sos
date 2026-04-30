@@ -1,4 +1,5 @@
 import 'package:shared_preferences/shared_preferences.dart';
+import '../logic/activity_profile.dart';
 
 class PreferencesService {
   static final PreferencesService _instance = PreferencesService._internal();
@@ -25,6 +26,9 @@ class PreferencesService {
   static const String _keyLiveTrackingEnabled = 'live_tracking_enabled';
   static const String _keyLiveTrackingInterval = 'live_tracking_interval_minutes';
   static const String _keyLiveTrackingShutdown = 'live_tracking_shutdown_minutes';
+
+  // ACTIVITY PROFILE (v4.0.0)
+  static const String _keyActivityProfile = 'activity_profile';
 
   Future<void> init() async {
     _prefs = await SharedPreferences.getInstance();
@@ -149,4 +153,13 @@ class PreferencesService {
 
   int getLiveTrackingShutdownMinutes() => _prefs?.getInt(_keyLiveTrackingShutdown) ?? 0;
   Future<void> setLiveTrackingShutdownMinutes(int v) async => await _prefs?.setInt(_keyLiveTrackingShutdown, v);
+
+  // --- ACTIVITY PROFILE ---
+  ActivityProfile getActivityProfile() {
+    return activityProfileFromName(_prefs?.getString(_keyActivityProfile));
+  }
+
+  Future<void> saveActivityProfile(ActivityProfile profile) async {
+    await _prefs?.setString(_keyActivityProfile, profile.name);
+  }
 }

@@ -576,4 +576,53 @@ class AppLocalizationsIt extends AppLocalizations {
 
   @override
   String get sentinelRed => 'ALLARME ATTIVO';
+
+  @override
+  String get activityProfileTitle => 'Profilo attività';
+
+  @override
+  String get activityProfileSubtitle =>
+      'Adatta la rilevazione dello Smart Sentinel al tuo sport. Scegli il più simile — un profilo errato provoca falsi allarmi o non rileva cadute reali.';
+
+  @override
+  String get profileTrekking => 'Trekking / Escursionismo';
+
+  @override
+  String get profileTrekkingDesc =>
+      'Predefinito. Camminate all\'aperto con il telefono in tasca o nello zaino. Sensibilità bilanciata.';
+
+  @override
+  String get profileTrailMtb => 'Trail / MTB';
+
+  @override
+  String get profileTrailMtbDesc =>
+      'Soglia di impatto più alta e cadenza più permissiva — la vibrazione costante su terreno irregolare causerebbe falsi allarmi con le impostazioni standard.';
+
+  @override
+  String get profileMountaineering => 'Alpinismo';
+
+  @override
+  String get profileMountaineeringDesc =>
+      'Stessa base del trekking con finestra di osservazione estesa a 90 secondi, per recuperi lenti su terreno tecnico.';
+
+  @override
+  String get profileParagliding => 'Parapendio';
+
+  @override
+  String get profileParaglidingDesc =>
+      'Il rilevamento automatico delle cadute è DISATTIVATO — l\'accelerometro non può distinguere manovre di volo da una caduta reale. SOS manuale e monitor di inattività restano attivi.';
+
+  @override
+  String get profileKayak => 'Kayak / Sport acquatici';
+
+  @override
+  String get profileKayakDesc =>
+      'Il rilevamento automatico delle cadute è DISATTIVATO — l\'acqua attutisce gli impatti e il movimento di galleggiamento non è informativo. Usa il monitor di inattività e l\'SOS manuale.';
+
+  @override
+  String get profileProfessional => 'Professionale / Soccorso';
+
+  @override
+  String get profileProfessionalDesc =>
+      'Finestra di osservazione estesa a 120 secondi per uso operativo avanzato dove il recupero dopo una caduta può superare i tempi standard.';
 }
