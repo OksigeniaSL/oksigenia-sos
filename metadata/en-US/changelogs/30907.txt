@@ -1,0 +1,9 @@
+Smart Sentinel v4: cadence-CV detector now distinguishes real walking from random vibration, with parameters validated empirically on Pixel 7 + Pixel 8 (median CV in pocket: 1.1, not 0.4 as wearable literature suggests).
+
+Activity profiles: pick Trekking, Trail/MTB, Mountaineering, Paragliding, Kayak or Professional. Each tunes Smart Sentinel sensitivity to match the sport — Paragliding and Kayak disable impact detection where the sensor cannot reliably interpret motion.
+
+Pixel 7 / Android 14 stability: fixed background-restart crash caused by foregroundServiceType=location and a duplicate startForegroundService race.
+
+Telephony stack: replaced discontinued telephony package with another_telephony fork — verified no READ_PHONE_STATE leak in the release APK.
+
+Sample-rate fix: P7 was delivering 58.8 Hz instead of the assumed 50 Hz, biasing the cadence frequency calculation. Now measured at runtime on every device.
