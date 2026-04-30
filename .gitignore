@@ -1,5 +1,6 @@
-# Claude Code
-.claude/settings.local.json
+# Tooling artifacts (no Claude footprint in the public repo)
+.claude/
+CLAUDE.md
 
 # Miscellaneous
 *.class

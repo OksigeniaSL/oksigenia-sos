@@ -1,4 +1,4 @@
-# Oksigenia SOS 🏔️ v3.9.6 "The Trekking Update"
+# Oksigenia SOS 🏔️ v3.9.7 "Smart Sentinel v4 & Activity Profiles"
 
 **The Ultimate Outdoor Guardian | FOSS | Privacy-First | Autonomous**
 
@@ -40,7 +40,43 @@ The interface is designed for high-stress situations. High contrast, large touch
 
 ---
 
-## 🥾 What's New in v3.9.6: The Trekking Update
+## 🎯 What's New in v3.9.7: Smart Sentinel v4 & Activity Profiles
+
+### 🧠 Smart Sentinel v4 — Cadence-CV Detector
+The fall-detection algorithm has been rewritten from scratch using field telemetry collected on Pixel 7a and Pixel 8 phones in pocket while walking real terrain.
+* **Horizontal-plane cadence** (`√(effX² + effY²)`) using `userAccelerometerEventStream` — gravity is removed by the platform; vertical bobbing is filtered out.
+* **Z-bias EMA filter** (α = 0.998) — corrects a Pixel 8 firmware quirk where the Z axis sticks at ~197 m/s² for several seconds.
+* **Runtime Hz measurement** — Pixel 7a delivers 58.8 Hz, Pixel 8 delivers 49.8 Hz (not the 50 Hz the old code assumed). Frequency now self-calibrates per device.
+* **CV cap raised to 1.30** (was 0.85) — the wearable literature's "CV ≈ 0.4" is wrong for a phone in a pocket. Median measured CV in real walking is 1.1.
+* **Crossing threshold raised to 1.12 m/s²** (was 1.06) — sits above hand-carried noise.
+* **File logger** at `app_flutter/sentinel.log` for post-incident analysis.
+
+### 🏃 Activity Profiles
+Six presets tune Smart Sentinel sensitivity to match the sport. Pick from the home screen chip or Settings.
+
+| Profile | Impact threshold | Cadence band |
+|:---|:---:|:---:|
+| 🥾 **Trekking** (default) | Standard | Walking |
+| 🚵 **Trail / MTB** | Higher | Wider |
+| 🧗 **Mountaineering** | Standard | Slow |
+| 🪂 **Paragliding** | Disabled | — |
+| 🛶 **Kayak** | Disabled | — |
+| 👷 **Professional** | Sensitive | Standard |
+
+Profiles apply mid-session — no restart needed.
+
+### 🛠️ Pixel 7 / Android 14 Stability
+* **FGS type fix:** Removed `foregroundServiceType=location` from the manifest (kept `dataSync|mediaPlayback`). The old declaration broke `WatchdogReceiver` background restarts on Android 14+.
+* **setMonitoring race:** `_loadSettings` now awaits `toggleInactivityMonitor` and skips the redundant `setMonitoring` event that caused intermittent cold-start failures.
+
+### 🔒 Privacy — Telephony Stack Replaced
+The unmaintained `telephony ^0.2.0` package was injecting a transitive `READ_PHONE_STATE` implied permission. Replaced with the active fork `another_telephony ^0.4.1`. APK verified with `aapt dump permissions` — zero phone-state permissions in the release build.
+
+See the [v3.9.7 GitHub Release](https://github.com/OksigeniaSL/oksigenia-sos/releases/tag/v3.9.7) for the full technical breakdown.
+
+---
+
+## 🥾 v3.9.6: The Trekking Update
 
 ### 📡 Live Tracking
 Stay connected with your emergency contact even when nothing goes wrong.
