@@ -1,10 +1,36 @@
-Oksigenia SOS es una herramienta de apoyo para tu seguridad en actividades al aire libre (ciclismo, senderismo, náutica). 
+Oksigenia SOS es una app de seguridad personal para actividades al aire libre y entornos de riesgo. Sin cuenta, sin servidores, sin Google Services — todo ocurre en tu dispositivo.
 
-Funciones principales:
+Cuando algo va mal, envía un SMS de alerta con tus coordenadas GPS a tu contacto de emergencia. Sin necesidad de conexión a internet.
 
-- Detección inteligente de impactos y caídas.
-- Monitor de inactividad (Dead Man's Switch).
-- Envío automático de SMS con ubicación GPS a tu contacto de confianza.
-- Privacidad total: funciona de forma local y sin trackers.
 
-IMPORTANTE: Esta app es una herramienta de apoyo y NO sustituye a los servicios de emergencia profesionales. Su funcionamiento depende de la cobertura móvil y señal GPS.
+Detección Inteligente de Caídas (Smart Sentinel)
+
+El acelerómetro te monitoriza continuamente a alta frecuencia. Un impacto brusco activa una ventana de observación de 60 segundos. Si se detecta movimiento rítmico de marcha durante ese tiempo, la alarma se cancela automáticamente — caídas del móvil o golpes normales no disparan el SOS. Si no hay movimiento rítmico, el SOS se envía.
+
+
+Monitor de Inactividad (Dead Man's Switch)
+
+Configura un temporizador de check-in. Si no confirmas que estás bien antes de que expire, la alerta se envía automáticamente. Imprescindible en aventuras en solitario donde una caída puede dejarte consciente pero incapaz de pedir ayuda.
+
+
+Seguimiento en Vivo
+
+Envía tu posición GPS por SMS cada 30, 60 o 120 minutos. Pausa, reanuda o haz check-in manual en cualquier momento — sin interrumpir la sesión de monitorización.
+
+
+Último Aliento
+
+Cuando la batería baja del 5%, se envía automáticamente un último SMS con tu posición GPS antes de que el teléfono se apague.
+
+
+Privacidad y Compatibilidad
+
+- Sin cuenta ni registro
+- Todos los datos permanecen en tu dispositivo — sin sincronización en la nube ni telemetría
+- Sin trackers, sin analíticas, sin publicidad
+- Compatible con móviles desgooglelados (GrapheneOS, MicroG)
+- Código abierto bajo licencia GPLv3
+
+Disponible en 8 idiomas: inglés, español, francés, alemán, portugués, italiano, neerlandés y sueco.
+
+IMPORTANTE: Oksigenia SOS es una herramienta de apoyo y NO sustituye a los servicios de emergencia profesionales. Su funcionamiento depende de la cobertura móvil, la señal GPS y el nivel de batería.

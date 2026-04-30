@@ -1,10 +1,36 @@
-Oksigenia SOS is a safety support tool for outdoor activities (cycling, hiking, sailing).
+Oksigenia SOS is an offline-first personal safety app for outdoor sports and high-risk environments. No account, no cloud, no Google Services required — everything runs on your device.
 
-Key features:
+When something goes wrong, it sends an SMS alert with your GPS coordinates to your emergency contact. No internet connection needed.
 
-- Smart impact and fall detection.
-- Inactivity monitor (Dead Man's Switch).
-- Automatic SMS alerts with GPS location to your trusted contact.
-- Full privacy: works locally with no trackers.
 
-IMPORTANT: This app is a support tool and DOES NOT replace professional emergency services. Operation depends on mobile coverage and GPS signal.
+Smart Fall Detection (Smart Sentinel)
+
+The accelerometer monitors you continuously at high frequency. A sudden impact triggers a 60-second observation window. If sustained walking movement is detected during that window, the alarm is dismissed automatically — false positives from drops or normal jolts won't fire the SOS. If no rhythmic movement is detected, the SOS is sent.
+
+
+Inactivity Monitor (Dead Man's Switch)
+
+Set a check-in timer. If you don't confirm you're OK before it expires, the alert is sent automatically. Essential for solo adventures where a fall might leave you conscious but unable to call for help.
+
+
+Live Tracking
+
+Send your GPS position by SMS every 30, 60 or 120 minutes. Pause, resume or check in manually at any time — without stopping the monitoring session.
+
+
+Dying Gasp
+
+When the battery drops below 5%, a final SMS with your last GPS position is sent automatically before the phone shuts down.
+
+
+Privacy and Compatibility
+
+- No account or registration required
+- All data stays on your device — no cloud sync, no telemetry
+- No trackers, no analytics, no ads
+- Works on de-Googled phones (GrapheneOS, MicroG)
+- Open source under GPLv3
+
+Available in 8 languages: English, Spanish, French, German, Portuguese, Italian, Dutch and Swedish.
+
+IMPORTANT: Oksigenia SOS is a support tool and does not replace professional emergency services. Its operation depends on mobile coverage, GPS signal and battery level.
