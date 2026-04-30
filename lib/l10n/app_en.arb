@@ -170,5 +170,9 @@
     "whyPermsActivity": "Detects movement patterns to avoid false alarms when walking or running.",
     "whyPermsSensors": "Reads the accelerometer to detect the G-force of a fall.",
     "whyPermsBattery": "Prevents Android from killing the app while it monitors in the background.",
-    "whyPermsFullScreen": "Shows the alarm over the lock screen so you can respond without unlocking."
+    "whyPermsFullScreen": "Shows the alarm over the lock screen so you can respond without unlocking.",
+    "sentinelGreen": "System active",
+    "sentinelYellow": "Impact detected · analysing...",
+    "sentinelOrange": "Alert imminent!",
+    "sentinelRed": "ALARM ACTIVE"
 }

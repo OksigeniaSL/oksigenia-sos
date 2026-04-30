@@ -170,5 +170,9 @@
     "whyPermsActivity": "Detecteert bewegingspatronen om valse alarmen te voorkomen bij lopen of rennen.",
     "whyPermsSensors": "Leest de versnellingsmeter om de G-kracht van een val te detecteren.",
     "whyPermsBattery": "Voorkomt dat Android de app stopt tijdens achtergrondmonitoring.",
-    "whyPermsFullScreen": "Toont het alarm over het vergrendelingsscherm zodat u kunt reageren zonder te ontgrendelen."
+    "whyPermsFullScreen": "Toont het alarm over het vergrendelingsscherm zodat u kunt reageren zonder te ontgrendelen.",
+    "sentinelGreen": "Systeem actief",
+    "sentinelYellow": "Impact gedetecteerd · analyseren...",
+    "sentinelOrange": "Alarm nadert!",
+    "sentinelRed": "ALARM ACTIEF"
 }

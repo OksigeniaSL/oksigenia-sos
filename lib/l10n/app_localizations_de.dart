@@ -554,4 +554,16 @@ class AppLocalizationsDe extends AppLocalizations {
   @override
   String get whyPermsFullScreen =>
       'Zeigt den Alarm über dem Sperrbildschirm, damit Sie reagieren können, ohne zu entsperren.';
+
+  @override
+  String get sentinelGreen => 'System aktiv';
+
+  @override
+  String get sentinelYellow => 'Aufprall erkannt · wird analysiert...';
+
+  @override
+  String get sentinelOrange => 'Alarm unmittelbar bevorstehend!';
+
+  @override
+  String get sentinelRed => 'ALARM AKTIV';
 }

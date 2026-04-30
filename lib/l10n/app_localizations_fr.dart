@@ -557,4 +557,16 @@ class AppLocalizationsFr extends AppLocalizations {
   @override
   String get whyPermsFullScreen =>
       'Affiche l\'alarme sur l\'écran verrouillé pour répondre sans déverrouiller.';
+
+  @override
+  String get sentinelGreen => 'Système actif';
+
+  @override
+  String get sentinelYellow => 'Impact détecté · analyse en cours...';
+
+  @override
+  String get sentinelOrange => 'Alerte imminente !';
+
+  @override
+  String get sentinelRed => 'ALARME ACTIVE';
 }

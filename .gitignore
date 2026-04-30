@@ -58,3 +58,6 @@ key.properties
 problems-report.html
 /doc/api/
 SOS Oksigenia/
+
+# Documentación local (capturas, PDFs, borradores)
+docs/

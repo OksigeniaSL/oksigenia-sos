@@ -554,4 +554,16 @@ class AppLocalizationsPt extends AppLocalizations {
   @override
   String get whyPermsFullScreen =>
       'Mostra o alarme sobre a tela de bloqueio para que você possa responder sem desbloquear.';
+
+  @override
+  String get sentinelGreen => 'Sistema ativo';
+
+  @override
+  String get sentinelYellow => 'Impacto detetado · a analisar...';
+
+  @override
+  String get sentinelOrange => 'Alerta iminente!';
+
+  @override
+  String get sentinelRed => 'ALARME ATIVO';
 }

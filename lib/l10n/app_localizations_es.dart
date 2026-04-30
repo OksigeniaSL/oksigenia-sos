@@ -559,4 +559,16 @@ class AppLocalizationsEs extends AppLocalizations {
   @override
   String get whyPermsFullScreen =>
       'Muestra la alarma sobre la pantalla de bloqueo para que puedas responder sin desbloquear.';
+
+  @override
+  String get sentinelGreen => 'Sistema activo';
+
+  @override
+  String get sentinelYellow => 'Impacto detectado · analizando...';
+
+  @override
+  String get sentinelOrange => '¡Alerta inminente!';
+
+  @override
+  String get sentinelRed => 'ALARMA ACTIVA';
 }

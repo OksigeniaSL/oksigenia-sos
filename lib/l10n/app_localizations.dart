@@ -1141,6 +1141,30 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Shows the alarm over the lock screen so you can respond without unlocking.'**
   String get whyPermsFullScreen;
+
+  /// No description provided for @sentinelGreen.
+  ///
+  /// In en, this message translates to:
+  /// **'System active'**
+  String get sentinelGreen;
+
+  /// No description provided for @sentinelYellow.
+  ///
+  /// In en, this message translates to:
+  /// **'Impact detected · analysing...'**
+  String get sentinelYellow;
+
+  /// No description provided for @sentinelOrange.
+  ///
+  /// In en, this message translates to:
+  /// **'Alert imminent!'**
+  String get sentinelOrange;
+
+  /// No description provided for @sentinelRed.
+  ///
+  /// In en, this message translates to:
+  /// **'ALARM ACTIVE'**
+  String get sentinelRed;
 }
 
 class _AppLocalizationsDelegate

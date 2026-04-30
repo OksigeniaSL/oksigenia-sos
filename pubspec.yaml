@@ -19,7 +19,7 @@ dependencies:
   url_launcher: ^6.3.1
   permission_handler: ^12.0.1
   wakelock_plus: ^1.2.8
-  telephony: ^0.2.0  # 🟢 ÚNICA OPCIÓN VIABLE PARA BACKGROUND SMS
+  another_telephony: ^0.4.1  # 🟢 BACKGROUND SMS — fork activo de telephony (discontinuado). Si falla, evaluar sms_sender.
   
   # Sensors & Audio
   sensors_plus: ^7.0.0       
@@ -36,6 +36,7 @@ dependencies:
   flutter_local_notifications: ^20.0.0
   timezone: ^0.10.1
   slide_to_act: ^2.0.2 # 🟢 BOTÓN DESLIZANTE MODERNO Y COMPATIBLE
+  path_provider: ^2.1.5 # File logger del Smart Sentinel (debug builds)
 
 dev_dependencies:
   flutter_test:

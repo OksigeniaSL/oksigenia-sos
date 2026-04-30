@@ -559,4 +559,16 @@ class AppLocalizationsSv extends AppLocalizations {
   @override
   String get whyPermsFullScreen =>
       'Visar larmet över låsskärmen så att du kan svara utan att låsa upp.';
+
+  @override
+  String get sentinelGreen => 'System aktivt';
+
+  @override
+  String get sentinelYellow => 'Stöt upptäckt · analyserar...';
+
+  @override
+  String get sentinelOrange => 'Larm omedelbart förestående!';
+
+  @override
+  String get sentinelRed => 'LARM AKTIVT';
 }

@@ -11,8 +11,9 @@ import 'package:vibration/vibration.dart';
 import 'package:sensors_plus/sensors_plus.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:geolocator/geolocator.dart';
-import 'package:telephony/telephony.dart';
+import 'package:another_telephony/telephony.dart';
 import 'package:battery_plus/battery_plus.dart';
+import 'package:path_provider/path_provider.dart';
 import 'package:timezone/data/latest_all.dart' as tz;
 import 'package:timezone/timezone.dart' as tz;
 
@@ -27,6 +28,30 @@ const int _liveTrackingShutdownAlarmId = 892;
 AudioPlayer? _audioPlayer;
 final Telephony _telephony = Telephony.instance;
 final Battery _battery = Battery();
+
+// File logger for Smart Sentinel events. Persists to app's internal documents
+// directory so we can pull it later via:
+//   adb shell run-as com.oksigenia.oksigenia_sos cat app_flutter/sentinel.log
+File? _sentinelLogFile;
+
+void _logSentinel(String line) {
+  print(line);
+  _sentinelLogAppend(line);
+}
+
+Future<void> _sentinelLogAppend(String line) async {
+  try {
+    if (_sentinelLogFile == null) {
+      final dir = await getApplicationDocumentsDirectory();
+      _sentinelLogFile = File('${dir.path}/sentinel.log');
+    }
+    final ts = DateTime.now().toIso8601String();
+    await _sentinelLogFile!
+        .writeAsString('$ts $line\n', mode: FileMode.append, flush: true);
+  } catch (e) {
+    print("SENTINEL LOG err: $e");
+  }
+}
 
 // Variables de Configuración
 List<String> _recipients = [];
@@ -98,6 +123,10 @@ Future<void> initializeService() async {
 void onStart(ServiceInstance service) async {
   DartPluginRegistrant.ensureInitialized();
 
+  // First log line of every service-isolate spawn. If we see this between an
+  // impact and an alarm, Android killed and respawned the service mid-yellow.
+  _logSentinel("SYLVIA SERVICE: 🚀 onStart entered (isolate spawn)");
+
   const MethodChannel platform = MethodChannel('com.oksigenia.sos/sms');
   final FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin =
       FlutterLocalNotificationsPlugin();
@@ -126,9 +155,13 @@ void onStart(ServiceInstance service) async {
   DateTime _liveTrackingNextSend = DateTime.fromMillisecondsSinceEpoch(0);
 
   bool _sensorCooldown = false;
-  const double _yellowThreshold = 3.5;
+  const double _yellowThreshold = 6.0;
   double _lastG = 1.0;
   final List<double> _gBuffer = [];
+  // Effective sample rate of the userAccelerometer stream. Android negotiates
+  // SensorInterval.gameInterval (~50Hz target) but actually delivers anywhere
+  // from 50–200Hz. Updated once per second from inside the listener.
+  double _measuredHz = 50.0;
   bool _sentinelYellow = false;
   int _yellowCountdown = 60;
   Timer? _yellowTimer;
@@ -486,7 +519,7 @@ void onStart(ServiceInstance service) async {
   }
 
   Future<void> _lanzarAlarma() async {
-    print("SYLVIA SERVICE: 🚨 EJECUTANDO PROTOCOLO DE ALARMA");
+    _logSentinel("SYLVIA SERVICE: 🚨 EJECUTANDO PROTOCOLO DE ALARMA");
     _isAlarmActive = true;
     await _cancelInactivityAlarmClock();
     // Pause live tracking during SOS — watchdog checks _isAlarmActive
@@ -599,49 +632,133 @@ void onStart(ServiceInstance service) async {
   // ---------------------------------------------------------------------------
 
   void _returnToGreen() {
+    final bool wasYellow = _sentinelYellow;
     _sentinelYellow = false;
     _yellowTimer?.cancel();
     _yellowCountdown = 60;
     _gBuffer.clear();
+    if (wasYellow) service.invoke("sentinelGreen");
   }
 
+  // Cadence-CV "is the user alive and walking" check.
+  // Operates on horizontal-G buffer (effX² + effY², Z removed). Resting value
+  // ~1.0; walking peaks oscillate above. Z is excluded because the Pixel 8
+  // bias filter distorts vertical signal during gait — see _startSensorListener.
+  // 2-second analysis window for stable cadence stats:
+  //   - >= 4 crossings of 1.12 (above hand-tremor noise; real walking peaks ~1.3-1.5G)
+  //   - frequency >= 1.0 Hz (slow walking with heavy load is ~1-1.3Hz; pendulum still <1Hz)
+  //   - CV of inter-crossing intervals in [0.05, 1.30]
+  //       <0.05 = too regular = mechanical/pendulum
+  //       >1.30 = chaotic/random (pure vibration, vehicle on rough road)
+  //   Empirical CV from real-life logs (Pixel 7+8, phone in back pocket, walking
+  //   + stairs): median ~1.1, range 0.81–1.71. Original 0.85 cap was tuned for
+  //   trunk-mounted wearables (Bourke 2007). Smartphones in pockets see fabric
+  //   damping + secondary microimpacts that legitimately raise CV.
+  // Window length is fixed at ~2s of *real* samples — uses _measuredHz updated
+  // by the sensor listener so timing math doesn't depend on Android delivering
+  // exactly 50Hz on every device.
   bool _isRhythmicMovement() {
-    if (_gBuffer.length < 30) return false;
-    final recent = _gBuffer.length > 60
-        ? _gBuffer.sublist(_gBuffer.length - 60)
+    final int targetWindowSamples = (_measuredHz * 2).round().clamp(50, 400);
+    if (_gBuffer.length < targetWindowSamples) return false;
+    final recent = _gBuffer.length > targetWindowSamples
+        ? _gBuffer.sublist(_gBuffer.length - targetWindowSamples)
         : List<double>.from(_gBuffer);
-    int crossings = 0;
-    bool aboveOne = recent[0] > 1.0;
+
+    const double rhythmThreshold = 1.12;
+    final List<int> crossingIdx = [];
+    bool above = recent[0] > rhythmThreshold;
     for (int i = 1; i < recent.length; i++) {
-      final bool curr = recent[i] > 1.0;
-      if (curr != aboveOne) {
-        crossings++;
-        aboveOne = curr;
+      final bool curr = recent[i] > rhythmThreshold;
+      if (curr != above) {
+        crossingIdx.add(i);
+        above = curr;
       }
     }
-    // Walking/running generates ~2 steps/sec → ≥3 crossings in ~1 second of data
-    return crossings >= 3;
+
+    final int crossings = crossingIdx.length;
+    if (crossings < 4) {
+      _logSentinel("SYLVIA RHYTHM: crossings=$crossings (< 4) → NO");
+      return false;
+    }
+
+    final double timeWindowSec = recent.length / _measuredHz;
+    final double cycles = crossings / 2.0;
+    final double freqHz = cycles / timeWindowSec;
+
+    final List<double> intervals = [];
+    for (int i = 1; i < crossingIdx.length; i++) {
+      intervals.add((crossingIdx[i] - crossingIdx[i - 1]).toDouble());
+    }
+    final double mean = intervals.reduce((a, b) => a + b) / intervals.length;
+    final double variance = intervals
+            .map((v) => (v - mean) * (v - mean))
+            .reduce((a, b) => a + b) /
+        intervals.length;
+    final double cv = mean > 0 ? sqrt(variance) / mean : 0;
+
+    if (freqHz < 1.0) {
+      _logSentinel("SYLVIA RHYTHM: cross=$crossings f=${freqHz.toStringAsFixed(2)}Hz cv=${cv.toStringAsFixed(2)} → NO (freq<1.0)");
+      return false;
+    }
+    if (cv < 0.05 || cv > 1.30) {
+      _logSentinel("SYLVIA RHYTHM: cross=$crossings f=${freqHz.toStringAsFixed(2)}Hz cv=${cv.toStringAsFixed(2)} → NO (cv out of range)");
+      return false;
+    }
+
+    _logSentinel("SYLVIA RHYTHM: cross=$crossings f=${freqHz.toStringAsFixed(2)}Hz cv=${cv.toStringAsFixed(2)} → YES");
+    return true;
   }
 
   void _enterYellowState() {
     if (_sentinelYellow || _isAlarmActive) return;
-    print("SYLVIA SERVICE: 🟡 Impacto detectado. Análisis Smart Sentinel ($_yellowCountdown s)...");
+    _logSentinel("SYLVIA SERVICE: 🟡 Impacto detectado. Análisis Smart Sentinel ($_yellowCountdown s)...");
     _sentinelYellow = true;
     _yellowCountdown = 60;
+    service.invoke("sentinelYellow");
+
+    // Phased post-impact analysis (Bourke/Kangas/Musci-style):
+    // 1. Settling window (5s, per Musci 2021): movement ignored — could be tumbling,
+    //    rolling, failed recovery attempts, secondary impacts.
+    // 2. Sustained rhythm check (post-settling): cancellation requires 3 consecutive
+    //    2s checks of rhythmic movement (= 6s of cadence-CV-validated gait).
+    // 3. Imminent-alert (last 10s): emit sentinelOrange so UI can warn the user.
+    const int settlingSeconds = 5;
+    const int sustainedRhythmChecks = 3;
+    const int orangeWarningSeconds = 10;
+    int rhythmStreak = 0;
+    bool orangeEmitted = false;
+
     _yellowTimer?.cancel();
     _yellowTimer = Timer.periodic(const Duration(seconds: 2), (timer) {
       _yellowCountdown -= 2;
-      if (_isRhythmicMovement()) {
-        print("SYLVIA SERVICE: ✅ Movimiento rítmico. Falso positivo.");
-        _returnToGreen();
-        timer.cancel();
-        return;
+      final int elapsed = 60 - _yellowCountdown;
+
+      if (!orangeEmitted && _yellowCountdown <= orangeWarningSeconds && _yellowCountdown > 0) {
+        orangeEmitted = true;
+        _logSentinel("SYLVIA SERVICE: 🟠 Alerta inminente (${_yellowCountdown}s restantes)");
+        service.invoke("sentinelOrange");
       }
+
+      if (elapsed >= settlingSeconds) {
+        if (_isRhythmicMovement()) {
+          rhythmStreak++;
+          _logSentinel("SYLVIA SERVICE: 🟡 Ritmo detectado ($rhythmStreak/$sustainedRhythmChecks)");
+          if (rhythmStreak >= sustainedRhythmChecks) {
+            _logSentinel("SYLVIA SERVICE: ✅ Movimiento rítmico sostenido (${sustainedRhythmChecks * 2}s). Falso positivo.");
+            _returnToGreen();
+            timer.cancel();
+            return;
+          }
+        } else {
+          rhythmStreak = 0;
+        }
+      }
+
       if (_yellowCountdown <= 0) {
         timer.cancel();
         _returnToGreen();
         if (!_isAlarmActive) {
-          print("SYLVIA SERVICE: 🔴 Sin movimiento tras 60s. ACTIVANDO ALARMA.");
+          _logSentinel("SYLVIA SERVICE: 🔴 Sin movimiento sostenido tras 60s. ACTIVANDO ALARMA.");
           _isAlarmActive = true;
           _lanzarAlarma();
         }
@@ -651,15 +768,30 @@ void onStart(ServiceInstance service) async {
 
   void _startSensorListener() {
     if (_accSub != null) return;
-    print("SYLVIA SERVICE: Iniciando escucha de sensores...");
+    _logSentinel("SYLVIA SERVICE: Iniciando escucha de sensores...");
 
-    _accSub = accelerometerEventStream(samplingPeriod: SensorInterval.gameInterval)
+    // Z-only bias tracker. The Pixel 8 z-axis reports a stuck constant (~197 m/s²) that
+    // would otherwise dominate magnitude. X and Y on healthy sensors oscillate around 0
+    // during rest, so EMA bias on those axes contributes nothing in steady state — but
+    // it amplifies transients (e.g. backpack reorientation after sustained walking) by
+    // mismatching baseline. Keep filter only where the hardware bug demands it.
+    double zBias = 0.0;
+    int sensorSamples = 0;
+    const double biasAlpha = 0.998;
+    final DateTime sensorStreamStart = DateTime.now();
+    // Peak watcher state — throttled to one log per 2s.
+    DateTime lastPeakLog = DateTime.fromMillisecondsSinceEpoch(0);
+    double currentPeakG = 0;
+    double currentPeakX = 0, currentPeakY = 0, currentPeakZ = 0;
+    // Sample-rate measurement: count packets per 1s window, then publish to
+    // _measuredHz so _isRhythmicMovement() can compute frequency correctly
+    // regardless of what Android negotiated.
+    DateTime hzWindowStart = DateTime.now();
+    int hzWindowSamples = 0;
+    DateTime lastHzLog = DateTime.fromMillisecondsSinceEpoch(0);
+
+    _accSub = userAccelerometerEventStream(samplingPeriod: SensorInterval.gameInterval)
         .listen((event) {
-      
-      // 🟢 FIX: Ignorar los primeros 3 segundos de vida del servicio
-      if (DateTime.now().difference(serviceStartupTime).inSeconds < 3) {
-        return;
-      }
 
       if (DateTime.now().difference(_lastStopTimestamp).inSeconds < 10) {
         return;
@@ -667,17 +799,75 @@ void onStart(ServiceInstance service) async {
 
       if (_isAlarmActive || _sensorCooldown) return;
 
-      double rawMagnitude = sqrt(event.x * event.x + event.y * event.y + event.z * event.z);
-      double instantG = rawMagnitude / 9.81;
+      sensorSamples++;
+      if (sensorSamples == 1) {
+        zBias = event.z;
+      } else {
+        zBias = biasAlpha * zBias + (1 - biasAlpha) * event.z;
+      }
+
+      hzWindowSamples++;
+      final int hzWindowElapsedMs =
+          DateTime.now().difference(hzWindowStart).inMilliseconds;
+      if (hzWindowElapsedMs >= 1000) {
+        _measuredHz = hzWindowSamples * 1000.0 / hzWindowElapsedMs;
+        hzWindowStart = DateTime.now();
+        hzWindowSamples = 0;
+        if (DateTime.now().difference(lastHzLog).inSeconds >= 30) {
+          _logSentinel("SYLVIA HZ: ${_measuredHz.toStringAsFixed(1)} Hz");
+          lastHzLog = DateTime.now();
+        }
+      }
+
+      // Need 100 samples (~2s) AND 4s elapsed before trusting bias-removed signal.
+      if (sensorSamples < 100 ||
+          DateTime.now().difference(sensorStreamStart).inMilliseconds < 4000) {
+        return;
+      }
+
+      final double effX = event.x;
+      final double effY = event.y;
+      final double effZ = event.z - zBias;
+      // Full magnitude (with bias-corrected Z) drives impact detection.
+      final double userMagnitude = sqrt(effX * effX + effY * effY + effZ * effZ);
+      final double instantG = 1.0 + userMagnitude / 9.81;
+      // Horizontal-only magnitude drives cadence detection. The Pixel 8 z-axis
+      // bias filter introduces asymmetric damping when Z varies during real
+      // walking (steps), distorting magnitude and inflating the inter-crossing
+      // CV. Walking-in-pocket signal is dominated by lateral sway + fore/aft
+      // pitch (XY plane); Z amplitude is heavily damped by fabric anyway.
+      // Removing Z from cadence yields a much more uniform CV across devices.
+      final double horizontalMagnitude = sqrt(effX * effX + effY * effY);
+      final double horizontalG = 1.0 + horizontalMagnitude / 9.81;
 
       final bool isPaused = _pausedUntil.isAfter(DateTime.now());
 
+      // Peak watcher: track significant motion peaks (above 2.5G) and log the highest
+      // every 2s so we can see what "normal use" looks like vs. what triggers the alarm.
+      if (instantG > 2.5 && !_sentinelYellow) {
+        if (instantG > currentPeakG) {
+          currentPeakG = instantG;
+          currentPeakX = effX;
+          currentPeakY = effY;
+          currentPeakZ = effZ;
+        }
+        if (DateTime.now().difference(lastPeakLog).inSeconds >= 2) {
+          _logSentinel("SYLVIA PEAK: ${currentPeakG.toStringAsFixed(2)}G (effX=${currentPeakX.toStringAsFixed(1)} effY=${currentPeakY.toStringAsFixed(1)} effZ=${currentPeakZ.toStringAsFixed(1)})");
+          lastPeakLog = DateTime.now();
+          currentPeakG = 0;
+        }
+      }
+
       if (_isMonitoringImpact && !isPaused) {
-        _gBuffer.add(instantG);
-        if (_gBuffer.length > 150) _gBuffer.removeAt(0);
+        // Buffer holds horizontal G for the cadence detector; impact still uses
+        // full instantG (line below). Decoupling the two signals fixes Pixel 8.
+        _gBuffer.add(horizontalG);
+        // Keep ~3s of margin even at 200Hz (some Pixels deliver that with
+        // gameInterval); _isRhythmicMovement only uses last 2s of real samples.
+        if (_gBuffer.length > 600) _gBuffer.removeAt(0);
 
         if (instantG > _yellowThreshold && !_sentinelYellow) {
-          print("SYLVIA BACKGROUND: ⚡ Impacto ${instantG.toStringAsFixed(1)}G → Smart Sentinel");
+          _logSentinel("SYLVIA BACKGROUND: ⚡ Impacto ${instantG.toStringAsFixed(2)}G → Smart Sentinel (effX=${effX.toStringAsFixed(1)} effY=${effY.toStringAsFixed(1)} effZ=${effZ.toStringAsFixed(1)})");
           _activarEscudo(segundos: 3);
           _enterYellowState();
         }
@@ -852,6 +1042,7 @@ void onStart(ServiceInstance service) async {
     });
 
     service.on('setMonitoring').listen((event) async {
+      _logSentinel("SYLVIA SERVICE: 📥 setMonitoring received: active=${event?['active']}");
       final prefs = await SharedPreferences.getInstance();
       _isMonitoringImpact = event?['active'] ?? false;
       
@@ -870,7 +1061,7 @@ void onStart(ServiceInstance service) async {
       print("SYLVIA SERVICE: Monitor - Impact: $_isMonitoringImpact, Inactivity: $_isMonitoringInactivity (Limit: $_inactivityLimitSeconds s)");
 
       if (_isMonitoringImpact || _isMonitoringInactivity) {
-        _activarEscudo(segundos: 2);
+        _activarEscudo(segundos: 4);
         _lastMovementTime = DateTime.now();
         _startSensorListener();
         if (_isMonitoringInactivity) {
@@ -903,7 +1094,7 @@ void onStart(ServiceInstance service) async {
     service.on('startAlarm').listen((event) => _lanzarAlarma());
 
     service.on('stopAlarm').listen((event) async {
-      print("SYLVIA SERVICE: 🛑 Recibida orden de STOP ALARM");
+      _logSentinel("SYLVIA SERVICE: 🛑 Recibida orden de STOP ALARM");
 
       _lastStopTimestamp = DateTime.now();
 

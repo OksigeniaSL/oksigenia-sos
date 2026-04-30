@@ -71,10 +71,10 @@
 
         <service
             android:name="id.flutter.flutter_background_service.BackgroundService"
-            android:foregroundServiceType="location|dataSync|mediaPlayback"
+            android:foregroundServiceType="dataSync|mediaPlayback"
             android:enabled="true"
-            android:exported="true" 
-            android:stopWithTask="false" 
+            android:exported="true"
+            android:stopWithTask="false"
             tools:replace="android:foregroundServiceType, android:exported, android:stopWithTask" />
             <meta-data android:name="flutterEmbedding" android:value="2" />
 

@@ -170,5 +170,9 @@
     "whyPermsActivity": "Détecte les schémas de mouvement pour éviter les fausses alarmes lors de la marche ou de la course.",
     "whyPermsSensors": "Lit l'accéléromètre pour détecter la force G d'une chute.",
     "whyPermsBattery": "Empêche Android de tuer l'application pendant la surveillance en arrière-plan.",
-    "whyPermsFullScreen": "Affiche l'alarme sur l'écran verrouillé pour répondre sans déverrouiller."
+    "whyPermsFullScreen": "Affiche l'alarme sur l'écran verrouillé pour répondre sans déverrouiller.",
+    "sentinelGreen": "Système actif",
+    "sentinelYellow": "Impact détecté · analyse en cours...",
+    "sentinelOrange": "Alerte imminente !",
+    "sentinelRed": "ALARME ACTIVE"
 }

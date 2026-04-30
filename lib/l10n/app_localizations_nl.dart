@@ -561,4 +561,16 @@ class AppLocalizationsNl extends AppLocalizations {
   @override
   String get whyPermsFullScreen =>
       'Toont het alarm over het vergrendelingsscherm zodat u kunt reageren zonder te ontgrendelen.';
+
+  @override
+  String get sentinelGreen => 'Systeem actief';
+
+  @override
+  String get sentinelYellow => 'Impact gedetecteerd · analyseren...';
+
+  @override
+  String get sentinelOrange => 'Alarm nadert!';
+
+  @override
+  String get sentinelRed => 'ALARM ACTIEF';
 }

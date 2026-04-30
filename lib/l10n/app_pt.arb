@@ -170,5 +170,9 @@
     "whyPermsActivity": "Detecta padrões de movimento para evitar falsos alarmes ao caminhar ou correr.",
     "whyPermsSensors": "Lê o acelerômetro para detectar a força G de uma queda.",
     "whyPermsBattery": "Impede que o Android encerre o app durante o monitoramento em segundo plano.",
-    "whyPermsFullScreen": "Mostra o alarme sobre a tela de bloqueio para que você possa responder sem desbloquear."
+    "whyPermsFullScreen": "Mostra o alarme sobre a tela de bloqueio para que você possa responder sem desbloquear.",
+    "sentinelGreen": "Sistema ativo",
+    "sentinelYellow": "Impacto detetado · a analisar...",
+    "sentinelOrange": "Alerta iminente!",
+    "sentinelRed": "ALARME ATIVO"
 }

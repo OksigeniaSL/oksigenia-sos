@@ -12,7 +12,7 @@ import 'package:vibration/vibration.dart';
 import 'package:flutter_background_service/flutter_background_service.dart';
 import 'package:battery_plus/battery_plus.dart';
 import 'package:oksigenia_sos/l10n/app_localizations.dart'; 
-import 'package:telephony/telephony.dart'; 
+import 'package:another_telephony/telephony.dart'; 
 import '../services/preferences_service.dart';
 import '../screens/settings_screen.dart';  
 import '../screens/alarm_screen.dart';
@@ -23,14 +23,13 @@ final GlobalKey<NavigatorState> oksigeniaNavigatorKey = GlobalKey<NavigatorState
 
 enum SOSStatus { ready, scanning, locationFixed, preAlert, sent, error }
 enum AlertCause { manual, fall, inactivity, dyingGasp }
+enum SentinelState { green, yellow, orange, red }
 
 class SOSLogic extends ChangeNotifier with WidgetsBindingObserver {
   SOSStatus _status = SOSStatus.ready;
   String _errorMessage = '';
   static const platform = MethodChannel('com.oksigenia.sos/sms');
   final Telephony _telephony = Telephony.instance;
-  
-  static const double _impactThreshold = 12.0;
 
   bool _isFallDetectionActive = false;
   bool _isDyingGaspSent = false;
@@ -42,9 +41,10 @@ class SOSLogic extends ChangeNotifier with WidgetsBindingObserver {
   DateTime? _liveTrackingNextSend;
   int _liveTrackingIntervalMinutes = 30;
   
-  bool _uiCooldown = false; 
-  // 🟢 Bandera de ignorar sensores activada por defecto
-  bool _ignoreSensors = true; 
+  bool _uiCooldown = false;
+  bool _ignoreSensors = true;
+  bool _sentinelYellow = false;
+  bool _sentinelOrange = false;
   
   AlertCause _lastTrigger = AlertCause.manual;
   AlertCause get lastTrigger => _lastTrigger;
@@ -106,6 +106,23 @@ class SOSLogic extends ChangeNotifier with WidgetsBindingObserver {
       : 0;
 
   double get currentGForce => _visualGForce;
+
+  SentinelState get sentinelState {
+    if (_status == SOSStatus.sent) return SentinelState.red;
+    if (_status == SOSStatus.preAlert) return SentinelState.red;
+    if (_sentinelOrange) return SentinelState.orange;
+    if (_sentinelYellow) return SentinelState.yellow;
+    return SentinelState.green;
+  }
+
+  Color get sentinelColor {
+    switch (sentinelState) {
+      case SentinelState.yellow: return Colors.amber;
+      case SentinelState.orange: return Colors.orange;
+      case SentinelState.red: return Colors.red;
+      case SentinelState.green: return Colors.green;
+    }
+  }
   
   String? get emergencyContact {
     final contacts = PreferencesService().getContacts();
@@ -197,6 +214,30 @@ class SOSLogic extends ChangeNotifier with WidgetsBindingObserver {
         _liveTrackingNextSend = DateTime.now().add(Duration(minutes: _liveTrackingIntervalMinutes));
       }
       notifyListeners();
+    });
+
+    service.on("sentinelYellow").listen((_) {
+      _sentinelYellow = true;
+      _sentinelOrange = false;
+      notifyListeners();
+    });
+
+    service.on("sentinelOrange").listen((_) {
+      _sentinelYellow = true;
+      _sentinelOrange = true;
+      notifyListeners();
+    });
+
+    service.on("sentinelGreen").listen((_) {
+      _sentinelYellow = false;
+      _sentinelOrange = false;
+      notifyListeners();
+    });
+
+    service.on("onAlarmTriggered").listen((_) {
+      _sentinelYellow = false;
+      _sentinelOrange = false;
+      _triggerPreAlert(AlertCause.fall, startedByService: true);
     });
 
     _startGForceMonitoring();
@@ -306,20 +347,37 @@ class SOSLogic extends ChangeNotifier with WidgetsBindingObserver {
     }
     
     bool savedInactivityState = prefs.getInactivityState();
+    bool inactivityToggleSentSetMonitoring = false;
+    // Awaited intentionally — toggleInactivityMonitor calls startService(),
+    // and the init flow below also checks isRunning() and may call it again.
+    // Without the await, both fire concurrently and trigger a second
+    // startForegroundService() that Android can't satisfy → FGS timeout.
     if (savedInactivityState && hasContact) {
-      if (!_isInactivityMonitorActive) toggleInactivityMonitor(true); 
+      if (!_isInactivityMonitorActive) {
+        await toggleInactivityMonitor(true);
+        inactivityToggleSentSetMonitoring = true;
+      }
     } else {
-      if (_isInactivityMonitorActive) toggleInactivityMonitor(false); 
+      if (_isInactivityMonitorActive) {
+        await toggleInactivityMonitor(false);
+        inactivityToggleSentSetMonitoring = true;
+      }
       if (savedInactivityState) prefs.saveInactivityState(false);
     }
 
-    final service = FlutterBackgroundService();
-    if (await service.isRunning()) {
-       service.invoke("setMonitoring", {
-         "active": _isFallDetectionActive,
-         "inactivity_limit": _currentInactivityLimit,
-         "inactivity_enabled": _isInactivityMonitorActive
-       });
+    // Skip the redundant invoke when toggleInactivityMonitor already sent it.
+    // Two startForegroundService calls within ~150ms have triggered
+    // ForegroundServiceDidNotStartInTimeException on Pixel 7 (Android 14, FGS
+    // type=location). One coalesced invoke avoids the race entirely.
+    if (!inactivityToggleSentSetMonitoring) {
+      final service = FlutterBackgroundService();
+      if (await service.isRunning()) {
+         service.invoke("setMonitoring", {
+           "active": _isFallDetectionActive,
+           "inactivity_limit": _currentInactivityLimit,
+           "inactivity_enabled": _isInactivityMonitorActive
+         });
+      }
     }
 
     if (_errorMessage == "NO_CONTACT") {
@@ -462,29 +520,58 @@ class SOSLogic extends ChangeNotifier with WidgetsBindingObserver {
 
   void _startGForceMonitoring() {
     _accelerometerSubscription?.cancel();
+    _isWarmingUp = true;
+    _visualGForce = 1.0;
+    final DateTime streamStart = DateTime.now();
+    int samplesSeen = 0;
+    // Z-only bias tracker (matches service-side rationale). Pixel 8 has a stuck z axis
+    // (~197 m/s²); X and Y on healthy sensors don't need filtering and removing them
+    // avoids transient amplification when the phone reorients quickly (e.g. taking off
+    // a backpack after sustained walking).
+    double zBias = 0.0;
+    const double biasAlpha = 0.998; // ~5s time constant at 50Hz
+    Future.delayed(const Duration(seconds: 3), () {
+      _isWarmingUp = false;
+      notifyListeners();
+    });
     double lastG = 1.0;
 
     try {
-      _accelerometerSubscription = accelerometerEventStream(samplingPeriod: SensorInterval.gameInterval)
-        .listen((AccelerometerEvent event) {
-          
-          // 🟢 FIX CRÍTICO: Bloqueo TOTAL al principio.
-          // Si _ignoreSensors es true, NO PROCESAMOS NADA.
+      _accelerometerSubscription = userAccelerometerEventStream(samplingPeriod: SensorInterval.gameInterval)
+        .listen((UserAccelerometerEvent event) {
+
           if (_ignoreSensors) {
             return;
           }
 
-          _lastSensorPacket = DateTime.now(); 
+          _lastSensorPacket = DateTime.now();
 
-          double rawMagnitude = sqrt(event.x * event.x + event.y * event.y + event.z * event.z);
-          double instantG = rawMagnitude / 9.81;
+          samplesSeen++;
+          if (samplesSeen == 1) {
+            zBias = event.z;
+          } else {
+            zBias = biasAlpha * zBias + (1 - biasAlpha) * event.z;
+          }
+          final double effX = event.x;
+          final double effY = event.y;
+          final double effZ = event.z - zBias;
+          final double userMagnitude = sqrt(effX * effX + effY * effY + effZ * effZ);
+          final double instantG = 1.0 + userMagnitude / 9.81;
+
+          final bool sensorWarmup = samplesSeen < 100 ||
+              DateTime.now().difference(streamStart).inMilliseconds < 4000;
+          if (_isWarmingUp || sensorWarmup) {
+            _visualGForce = 1.0;
+            notifyListeners();
+            return;
+          }
 
           if (instantG > _visualGForce) {
-            _visualGForce = instantG; 
+            _visualGForce = instantG;
           } else {
-            _visualGForce = (_visualGForce * 0.90) + (instantG * 0.10); 
+            _visualGForce = (_visualGForce * 0.90) + (instantG * 0.10);
           }
-          
+
           notifyListeners();
 
           if (_uiCooldown) return;
@@ -498,15 +585,12 @@ class SOSLogic extends ChangeNotifier with WidgetsBindingObserver {
           }
 
           if (DateTime.now().difference(_lastCancellationTime).inSeconds < 3) {
-             return; 
+             return;
           }
 
-          if (_isFallDetectionActive && instantG > _impactThreshold && (_status == SOSStatus.ready || _status == SOSStatus.locationFixed)) {
-            debugPrint("💥 IMPACTO: ${instantG.toStringAsFixed(2)} G");
-            _uiCooldown = true;
-            Future.delayed(const Duration(seconds: 5), () => _uiCooldown = false);
-            _triggerPreAlert(AlertCause.fall);
-          }
+          // Impact detection lives in Sylvia (background_service.dart) so every fall
+          // goes through Smart Sentinel observation. UI sensor here only powers the
+          // visual gauge and tracks _lastMovementTime for inactivity logic.
         }, onError: (e) => debugPrint("Sensor Error: $e"));
     } catch (e) { debugPrint("Error acelerómetro: $e"); }
   }
@@ -597,7 +681,7 @@ class SOSLogic extends ChangeNotifier with WidgetsBindingObserver {
     notifyListeners();
   }
 
-  void toggleInactivityMonitor(bool value) async {
+  Future<void> toggleInactivityMonitor(bool value) async {
     if (value && emergencyContact == null) {
       _setStatus(SOSStatus.error, "NO_CONTACT");
       _isInactivityMonitorActive = false;
@@ -657,7 +741,7 @@ class SOSLogic extends ChangeNotifier with WidgetsBindingObserver {
     notifyListeners();
   }
 
-  void _triggerPreAlert(AlertCause cause) async {
+  void _triggerPreAlert(AlertCause cause, {bool startedByService = false}) async {
     if (_status == SOSStatus.preAlert || _status == SOSStatus.sent) return;
 
     final prefs = await SharedPreferences.getInstance();
@@ -666,17 +750,19 @@ class SOSLogic extends ChangeNotifier with WidgetsBindingObserver {
     debugPrint("SYLVIA: 🚨 ALARMA ACTIVADA");
     _lastTrigger = cause;
     _status = SOSStatus.preAlert;
-    _countdownSeconds = 30; 
-    _updateSylviaStatus(); 
-    notifyListeners(); 
+    _countdownSeconds = 30;
+    _updateSylviaStatus();
+    notifyListeners();
 
-    _gpsSubscription?.pause(); 
-    
-    try {
-       final service = FlutterBackgroundService();
-       service.invoke("startAlarm"); 
-       Vibration.vibrate(pattern: [500, 1000, 500, 1000], repeat: 1);
-    } catch (e) { debugPrint("Error servicio: $e"); }
+    _gpsSubscription?.pause();
+
+    if (!startedByService) {
+      try {
+         final service = FlutterBackgroundService();
+         service.invoke("startAlarm");
+         Vibration.vibrate(pattern: [500, 1000, 500, 1000], repeat: 1);
+      } catch (e) { debugPrint("Error servicio: $e"); }
+    }
 
     _preAlertTimer?.cancel();
     _preAlertTimer = Timer.periodic(const Duration(seconds: 1), (timer) {

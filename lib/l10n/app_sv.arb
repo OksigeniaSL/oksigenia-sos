@@ -170,5 +170,9 @@
     "whyPermsActivity": "Identifierar rörelsemönster för att undvika falsklarm vid gång eller löpning.",
     "whyPermsSensors": "Läser accelerometern för att upptäcka G-kraften vid ett fall.",
     "whyPermsBattery": "Hindrar Android från att avsluta appen under bakgrundsövervakning.",
-    "whyPermsFullScreen": "Visar larmet över låsskärmen så att du kan svara utan att låsa upp."
+    "whyPermsFullScreen": "Visar larmet över låsskärmen så att du kan svara utan att låsa upp.",
+    "sentinelGreen": "System aktivt",
+    "sentinelYellow": "Stöt upptäckt · analyserar...",
+    "sentinelOrange": "Larm omedelbart förestående!",
+    "sentinelRed": "LARM AKTIVT"
 }

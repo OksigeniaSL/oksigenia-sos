@@ -71,6 +71,12 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver, Ti
         _sosLogic.disableLiveTracking();
       }
     });
+
+    _pulseController = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 900),
+    );
+    _sosLogic.addListener(_updatePulseAnimation);
     
     Future.delayed(const Duration(seconds: 1), () {
       FlutterBackgroundService().isRunning().then((isRunning) {
@@ -136,8 +142,34 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver, Ti
     }
   }
 
+  late AnimationController _pulseController;
+  SentinelState? _lastPulseState;
+
+  void _updatePulseAnimation() {
+    final state = _sosLogic.sentinelState;
+    final bool active = state == SentinelState.yellow || state == SentinelState.orange;
+
+    if (!active) {
+      _pulseController.stop();
+      _pulseController.reset();
+      _lastPulseState = state;
+      return;
+    }
+
+    if (state != _lastPulseState) {
+      _pulseController.stop();
+      _pulseController.duration = Duration(
+        milliseconds: state == SentinelState.orange ? 500 : 900,
+      );
+      _pulseController.repeat(reverse: true);
+      _lastPulseState = state;
+    }
+  }
+
   @override
   void dispose() {
+    _sosLogic.removeListener(_updatePulseAnimation);
+    _pulseController.dispose();
     WidgetsBinding.instance.removeObserver(this);
     _sosHoldController.dispose();
     _stopHoldController.dispose();
@@ -214,6 +246,9 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver, Ti
 
             // STATUS PILL — enriched priority display
             _buildStatusPill(l10n),
+
+            // SENTINEL STATE BADGE — visible only when monitoring is active
+            _buildSentinelBadge(l10n),
 
             // LIVE TRACKING CARD — arriba para separarlo del Stop y el SOS
             _buildLiveTrackingCard(l10n),
@@ -357,20 +392,34 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver, Ti
               child: Stack(
                 alignment: Alignment.center,
                 children: [
-                  Container(
-                    width: 195, 
-                    height: 195,
-                    decoration: BoxDecoration(
-                      shape: BoxShape.circle,
-                      gradient: const LinearGradient(
-                        colors: [Color(0xFFD32F2F), Color(0xFFB71C1C)],
-                        begin: Alignment.topLeft,
-                        end: Alignment.bottomRight,
-                      ),
-                      boxShadow: [
-                        BoxShadow(color: Colors.red.withOpacity(0.5), blurRadius: 30, spreadRadius: 5),
-                      ],
-                    ),
+                  AnimatedBuilder(
+                    animation: _pulseController,
+                    builder: (context, child) {
+                      final bool monitoring = _sosLogic.isFallDetectionActive || _sosLogic.isInactivityMonitorActive;
+                      final Color glowColor = monitoring ? _sosLogic.sentinelColor : Colors.red;
+                      final double glowSpread = monitoring && _sosLogic.sentinelState != SentinelState.green
+                          ? 5 + (_pulseController.value * 8)
+                          : 5;
+                      return Container(
+                        width: 195,
+                        height: 195,
+                        decoration: BoxDecoration(
+                          shape: BoxShape.circle,
+                          gradient: const LinearGradient(
+                            colors: [Color(0xFFD32F2F), Color(0xFFB71C1C)],
+                            begin: Alignment.topLeft,
+                            end: Alignment.bottomRight,
+                          ),
+                          boxShadow: [
+                            BoxShadow(
+                              color: glowColor.withOpacity(0.55),
+                              blurRadius: 30,
+                              spreadRadius: glowSpread,
+                            ),
+                          ],
+                        ),
+                      );
+                    },
                   ),
 
                   SizedBox(
@@ -721,6 +770,12 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver, Ti
     } else if (_sosLogic.status == SOSStatus.preAlert) {
       text = "🚨 SOS";
       color = Colors.red;
+    } else if (_sosLogic.sentinelState == SentinelState.orange) {
+      text = "🟠 ${l10n.sentinelOrange}";
+      color = Colors.orange;
+    } else if (_sosLogic.sentinelState == SentinelState.yellow) {
+      text = "🟡 ${l10n.sentinelYellow}";
+      color = Colors.amber;
     } else if (monitoring && _sosLogic.status == SOSStatus.locationFixed) {
       text = "✓ ${l10n.statusLocationFixed}";
       color = Colors.green;
@@ -749,6 +804,69 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver, Ti
         text,
         style: TextStyle(color: color, fontWeight: FontWeight.bold),
       ),
+    );
+  }
+
+  Widget _buildSentinelBadge(AppLocalizations l10n) {
+    final bool monitoring = _sosLogic.isFallDetectionActive || _sosLogic.isInactivityMonitorActive;
+    if (!monitoring) return const SizedBox.shrink();
+
+    final SentinelState state = _sosLogic.sentinelState;
+    final Color color = _sosLogic.sentinelColor;
+
+    final IconData icon;
+    final String label;
+    switch (state) {
+      case SentinelState.yellow:
+        icon = Icons.warning_amber_rounded;
+        label = l10n.sentinelYellow;
+      case SentinelState.orange:
+        icon = Icons.notification_important_rounded;
+        label = l10n.sentinelOrange;
+      case SentinelState.red:
+        icon = Icons.emergency_rounded;
+        label = l10n.sentinelRed;
+      case SentinelState.green:
+        icon = Icons.shield_rounded;
+        label = l10n.sentinelGreen;
+    }
+
+    return AnimatedBuilder(
+      animation: _pulseController,
+      builder: (context, child) {
+        final double opacity = (state == SentinelState.yellow || state == SentinelState.orange)
+            ? 0.65 + (_pulseController.value * 0.35)
+            : 1.0;
+        return Opacity(
+          opacity: opacity,
+          child: Container(
+            margin: const EdgeInsets.symmetric(horizontal: 30, vertical: 6),
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 9),
+            decoration: BoxDecoration(
+              color: color.withOpacity(0.08),
+              borderRadius: BorderRadius.circular(10),
+              border: Border.all(color: color.withOpacity(0.5), width: 1.5),
+            ),
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Icon(icon, color: color, size: 18),
+                const SizedBox(width: 8),
+                Text(
+                  label,
+                  style: TextStyle(
+                    color: color,
+                    fontWeight: FontWeight.bold,
+                    fontSize: 13,
+                    letterSpacing: state == SentinelState.red ? 1.2 : 0,
+                  ),
+                ),
+              ],
+            ),
+          ),
+        );
+      },
     );
   }
 

@@ -170,5 +170,9 @@
     "whyPermsActivity": "Erkennt Bewegungsmuster, um Fehlalarme beim Gehen oder Laufen zu vermeiden.",
     "whyPermsSensors": "Liest den Beschleunigungssensor, um die G-Kraft eines Sturzes zu erkennen.",
     "whyPermsBattery": "Verhindert, dass Android die App während der Hintergrundüberwachung beendet.",
-    "whyPermsFullScreen": "Zeigt den Alarm über dem Sperrbildschirm, damit Sie reagieren können, ohne zu entsperren."
+    "whyPermsFullScreen": "Zeigt den Alarm über dem Sperrbildschirm, damit Sie reagieren können, ohne zu entsperren.",
+    "sentinelGreen": "System aktiv",
+    "sentinelYellow": "Aufprall erkannt · wird analysiert...",
+    "sentinelOrange": "Alarm unmittelbar bevorstehend!",
+    "sentinelRed": "ALARM AKTIV"
 }

@@ -558,4 +558,16 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get whyPermsFullScreen =>
       'Shows the alarm over the lock screen so you can respond without unlocking.';
+
+  @override
+  String get sentinelGreen => 'System active';
+
+  @override
+  String get sentinelYellow => 'Impact detected · analysing...';
+
+  @override
+  String get sentinelOrange => 'Alert imminent!';
+
+  @override
+  String get sentinelRed => 'ALARM ACTIVE';
 }
