@@ -1,0 +1,5 @@
+Reproducible Build hot-fix. The GitHub Actions release workflow now strips the build-id embedded by the linker into libdartjni.so (transitive jni dependency). Without this patch, each build produced a slightly different shared library and the APK failed IzzyOnDroid RB verification.
+
+No app behaviour changes vs v4.1.0 — Smart Beacon, the Equitation profile and the three new languages (Polish, Russian, Norwegian Bokmål) all behave identically. This release exists to give IzzyOnDroid a bit-for-bit reproducible APK they can certify.
+
+Reported by IzzySoft in Issue #6 (oksigenia-sos GitHub).

@@ -1,7 +1,7 @@
 name: oksigenia_sos
 description: "Outdoor Emergency Assistant"
 publish_to: 'none'
-version: 4.1.0+41000
+version: 4.1.1+41001
 
 environment:
   sdk: '>=3.2.0 <4.0.0'

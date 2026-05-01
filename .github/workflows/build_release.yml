@@ -32,6 +32,12 @@ jobs:
     - name: Get Dependencies
       run: flutter pub get
 
+    # Reproducible Builds — strip the build-id embedded by the linker into
+    # libdartjni.so (transitive `jni` dep). Without this, every build produces
+    # a different .so and the APK fails IzzyOnDroid RB verification.
+    # Reported by IzzySoft in Issue #6 (oksigenia-sos GitHub).
+    - name: Patch jni for Reproducible Builds
+      run: sed -i -e 's/-Wl,/-Wl,--build-id=none,/' $HOME/.pub-cache/hosted/*/jni-*/src/CMakeLists.txt
 
     - name: Create Keystore
       run: |

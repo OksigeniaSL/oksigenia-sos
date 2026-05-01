@@ -1,4 +1,4 @@
-# Oksigenia SOS 🏔️ v4.1.0 "Smart Beacon"
+# Oksigenia SOS 🏔️ v4.1.1 "Smart Beacon"
 
 **The Ultimate Outdoor Guardian | FOSS | Privacy-First | Autonomous**
 
@@ -40,9 +40,11 @@ The interface is designed for high-stress situations. High contrast, large touch
 
 ---
 
-## 📍 What's New in v4.1.0: Smart Beacon
+## 📍 What's New in v4.1.1: Smart Beacon (RB hot-fix of v4.1.0)
 
-Three additions on top of v4.0.0.
+v4.1.1 carries the v4.1.0 feature set unchanged. The only difference is a Reproducible Build hot-fix: the release workflow now strips the build-id embedded by the linker into `libdartjni.so` (transitive `jni` dep), so the APK is bit-for-bit reproducible and IzzyOnDroid can certify it ([Issue #6](https://github.com/OksigeniaSL/oksigenia-sos/issues/6)).
+
+The user-visible features below all originate from v4.1.0:
 
 ### 📡 Smart Beacon — Post-SOS Position Updates
 After an SOS is sent, Sylvia automatically watches the victim's GPS position. If the user moves more than **300 m** from the last known reference, an SMS update is sent with the new coordinates. The flagship use case: a hiker who, after the alarm, gets disoriented and walks the wrong direction — rescuers arriving 2–4 hours later need fresh coordinates, not the original incident point.
@@ -64,7 +66,7 @@ Seventh activity profile for horse riding. Impact detection is disabled (horse c
 
 Now **11 languages** total (en, es, fr, de, pt, it, nl, sv, pl, ru, nb).
 
-See the [v4.1.0 GitHub Release](https://github.com/OksigeniaSL/oksigenia-sos/releases/tag/v4.1.0) for the full technical breakdown.
+See the [v4.1.1 GitHub Release](https://github.com/OksigeniaSL/oksigenia-sos/releases/tag/v4.1.1) for the full technical breakdown.
 
 ---
 
