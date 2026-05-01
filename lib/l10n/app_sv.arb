@@ -120,6 +120,7 @@
     "btnRestartSystem": "STARTA OM SYSTEMET",
     "smsDyingGasp": "⚠️ BATTERI <5%. Systemet stängs av. Plats:",
     "smsHelpMessage": "HJÄLP! Jag behöver assistans.",
+    "smsBeaconHeader": "📍 OKSIGENIA UPPDATERING — flyttat",
     "batteryDialogTitle": "Batteribegränsning",
     "btnDisableBatterySaver": "INAKTIVERA SPARLÄGE",
     "batteryDialogBody": "Systemet begränsar batteriet. För att SOS ska fungera i bakgrunden, välj 'Ingen begränsning' eller 'Optimera inte'.",
@@ -187,6 +188,8 @@
     "profileParaglidingDesc": "Automatisk falldetektering är AVSTÄNGD — accelerometern kan inte tillförlitligt skilja flygmanövrer från ett verkligt fall. Manuellt SOS och inaktivitetsmonitor förblir aktiva.",
     "profileKayak": "Kajak / Vattensport",
     "profileKayakDesc": "Automatisk falldetektering är AVSTÄNGD — vatten dämpar stötar och flytrörelser är inte informativa. Använd inaktivitetsmonitor och manuellt SOS.",
+    "profileEquitation": "Ridning",
+    "profileEquitationDesc": "Automatisk falldetektering är AVSTÄNGD — hästens kadens (trav, galopp) stör detektorn för mänsklig gång. Inaktivitetsmonitor och manuellt SOS skyddar under ritten.",
     "profileProfessional": "Professionell / Räddning",
     "profileProfessionalDesc": "Förlängt observationsfönster på 120 sekunder för avancerad operativ användning där återhämtning efter ett fall kan överskrida standardtidsgränserna."
 }

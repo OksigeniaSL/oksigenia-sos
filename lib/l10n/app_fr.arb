@@ -120,6 +120,7 @@
     "btnRestartSystem": "REDÉMARRER SYSTÈME",
     "smsDyingGasp": "⚠️ BATTERIE <5%. Arrêt système. Loc:",
     "smsHelpMessage": "À L'AIDE ! J'ai besoin d'assistance.",
+    "smsBeaconHeader": "📍 MISE À JOUR OKSIGENIA — déplacé",
     "batteryDialogTitle": "Restriction Batterie",
     "btnDisableBatterySaver": "DÉSACTIVER ÉCO",
     "batteryDialogBody": "The system is restricting this app's battery. For SOS to work in the background, you must select 'Unrestricted' or 'Don't Optimize'.",
@@ -187,6 +188,8 @@
     "profileParaglidingDesc": "La détection automatique de chute est DÉSACTIVÉE — l'accéléromètre ne peut pas distinguer les manœuvres de vol d'une vraie chute. Le SOS manuel et le moniteur d'inactivité restent actifs.",
     "profileKayak": "Kayak / Sports nautiques",
     "profileKayakDesc": "La détection automatique de chute est DÉSACTIVÉE — l'eau amortit les impacts et le mouvement de flottaison n'est pas informatif. Utilisez le moniteur d'inactivité et le SOS manuel.",
+    "profileEquitation": "Équitation",
+    "profileEquitationDesc": "La détection automatique de chute est DÉSACTIVÉE — la cadence du cheval (trot, galop) interfère avec le détecteur de marche humaine. Le moniteur d'inactivité et le SOS manuel vous protègent pendant la randonnée.",
     "profileProfessional": "Professionnel / Sauvetage",
     "profileProfessionalDesc": "Fenêtre d'observation étendue à 120 secondes pour un usage opérationnel avancé où la récupération après une chute peut dépasser les délais standards."
 }

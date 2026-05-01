@@ -10,6 +10,7 @@ enum ActivityProfile {
   mountaineering,
   paragliding,
   kayak,
+  equitation,
   professional,
 }
 
@@ -105,6 +106,20 @@ const Map<ActivityProfile, ActivityProfileConfig> activityProfileConfigs = {
     gpsDistanceFilterMeters: 5,
   ),
   ActivityProfile.kayak: ActivityProfileConfig(
+    yellowThreshold: 0,
+    orangeThreshold: 0,
+    settlingSeconds: 0,
+    observationSeconds: 0,
+    cvUpperBound: 0,
+    impactDetectionEnabled: false,
+    gpsIntervalSeconds: 15,
+    gpsDistanceFilterMeters: 20,
+  ),
+  // Horse cadence (trot ~1.5Hz, canter 2-3Hz) interferes with the human-walk
+  // cadence-CV detector. Without empirical data on phone-in-pocket while
+  // riding, impact detection is disabled (Paragliding/Kayak approach).
+  // Inactivity Monitor + manual SOS remain. Revisit with field data.
+  ActivityProfile.equitation: ActivityProfileConfig(
     yellowThreshold: 0,
     orangeThreshold: 0,
     settlingSeconds: 0,

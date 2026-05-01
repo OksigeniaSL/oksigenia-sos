@@ -1,0 +1,7 @@
+Smart Beacon: post-SOS automatic position-update protocol. After an SOS is sent, if the user moves more than 300 m from the last known reference, an update SMS is sent with the new coordinates. Up to 20 updates over a 4-hour window, throttled to one SMS every 5 minutes. Battery cost while stationary is essentially zero (no SMS sent until movement is detected). Stops automatically when the user taps "Restart system".
+
+Equitation profile: new activity profile for horse riding. Impact detection is disabled (horse cadence interferes with the human-walk detector). The Inactivity Monitor and manual SOS protect during the ride.
+
+Three new languages: Polish (pl), Russian (ru), Norwegian Bokmål (nb). Brings the total to 11 supported languages.
+
+Beacon parameters were calibrated for real outdoor rescue scenarios where rescuers may take 2–4 hours to arrive and the victim may wander, flee or be carried during that time.

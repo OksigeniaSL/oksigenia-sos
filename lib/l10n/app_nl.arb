@@ -120,6 +120,7 @@
     "btnRestartSystem": "SYSTEEM HERSTARTEN",
     "smsDyingGasp": "⚠️ BATTERIJ <5%. Systeem sluit af. Loc:",
     "smsHelpMessage": "HELP! Ik heb dringend hulp nodig.",
+    "smsBeaconHeader": "📍 OKSIGENIA UPDATE — verplaatst",
     "batteryDialogTitle": "Batterij Beperking",
     "btnDisableBatterySaver": "BESPARING UIT",
     "batteryDialogBody": "Het systeem beperkt de batterij. Om SOS op de achtergrond te laten werken, selecteer 'Onbeperkt' of 'Niet optimaliseren'.",
@@ -187,6 +188,8 @@
     "profileParaglidingDesc": "Automatische valdetectie is UITGESCHAKELD — de versnellingsmeter kan vluchtmanoeuvres niet betrouwbaar onderscheiden van een val. Handmatige SOS en inactiviteitsmonitor blijven actief.",
     "profileKayak": "Kajak / Watersport",
     "profileKayakDesc": "Automatische valdetectie is UITGESCHAKELD — water dempt impact en drijvende beweging is niet informatief. Gebruik de inactiviteitsmonitor en handmatige SOS.",
+    "profileEquitation": "Paardrijden",
+    "profileEquitationDesc": "Automatische valdetectie is UITGESCHAKELD — de cadans van het paard (draf, galop) verstoort de detector voor menselijke loopbeweging. De inactiviteitsmonitor en handmatige SOS beschermen je tijdens de rit.",
     "profileProfessional": "Professioneel / Reddingsdienst",
     "profileProfessionalDesc": "Verlengd observatievenster van 120 seconden voor geavanceerd operationeel gebruik waarbij herstel na een val de standaard time-outs kan overschrijden."
 }

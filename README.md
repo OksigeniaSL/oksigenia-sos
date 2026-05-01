@@ -1,4 +1,4 @@
-# Oksigenia SOS 🏔️ v4.0.0 "Smart Sentinel Complete"
+# Oksigenia SOS 🏔️ v4.1.0 "Smart Beacon"
 
 **The Ultimate Outdoor Guardian | FOSS | Privacy-First | Autonomous**
 
@@ -40,7 +40,35 @@ The interface is designed for high-stress situations. High contrast, large touch
 
 ---
 
-## 🛡️ What's New in v4.0.0: Smart Sentinel Complete
+## 📍 What's New in v4.1.0: Smart Beacon
+
+Three additions on top of v4.0.0.
+
+### 📡 Smart Beacon — Post-SOS Position Updates
+After an SOS is sent, Sylvia automatically watches the victim's GPS position. If the user moves more than **300 m** from the last known reference, an SMS update is sent with the new coordinates. The flagship use case: a hiker who, after the alarm, gets disoriented and walks the wrong direction — rescuers arriving 2–4 hours later need fresh coordinates, not the original incident point.
+
+* Throttled to **one SMS every 5 minutes**
+* Capped at **20 updates over a 4-hour window**
+* **Battery cost while stationary: zero** (no SMS sent until movement is detected)
+* Stops automatically when the user taps **"Restart system"**
+
+Smart Beacon is **automatic** (post-SOS only) and **complementary** to the existing voluntary Live Tracking, which sends periodic check-ins on demand.
+
+### 🐴 Equitation Profile
+Seventh activity profile for horse riding. Impact detection is disabled (horse cadence interferes with the human-walk detector). **Inactivity Monitor + manual SOS** protect during the ride. Same conservative approach as Paragliding and Kayak.
+
+### 🌍 Three new languages
+* 🇵🇱 **Polish** — Tatra/Beskid hiking, FOSS-friendly community
+* 🇷🇺 **Russian** — Caucasus, Altai, Urals
+* 🇳🇴 **Norwegian Bokmål** — friluftsliv
+
+Now **11 languages** total (en, es, fr, de, pt, it, nl, sv, pl, ru, nb).
+
+See the [v4.1.0 GitHub Release](https://github.com/OksigeniaSL/oksigenia-sos/releases/tag/v4.1.0) for the full technical breakdown.
+
+---
+
+## 🛡️ v4.0.0: Smart Sentinel Complete
 
 Closes the multi-sport story started in v3.9.7. Three additions on top of the existing Smart Sentinel v4 algorithm and activity profiles.
 

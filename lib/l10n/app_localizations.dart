@@ -10,8 +10,11 @@ import 'app_localizations_en.dart';
 import 'app_localizations_es.dart';
 import 'app_localizations_fr.dart';
 import 'app_localizations_it.dart';
+import 'app_localizations_nb.dart';
 import 'app_localizations_nl.dart';
+import 'app_localizations_pl.dart';
 import 'app_localizations_pt.dart';
+import 'app_localizations_ru.dart';
 import 'app_localizations_sv.dart';
 
 // ignore_for_file: type=lint
@@ -105,8 +108,11 @@ abstract class AppLocalizations {
     Locale('es'),
     Locale('fr'),
     Locale('it'),
+    Locale('nb'),
     Locale('nl'),
+    Locale('pl'),
     Locale('pt'),
+    Locale('ru'),
     Locale('sv')
   ];
 
@@ -836,6 +842,12 @@ abstract class AppLocalizations {
   /// **'HELP! I need assistance.'**
   String get smsHelpMessage;
 
+  /// No description provided for @smsBeaconHeader.
+  ///
+  /// In en, this message translates to:
+  /// **'📍 OKSIGENIA UPDATE — moved'**
+  String get smsBeaconHeader;
+
   /// No description provided for @batteryDialogTitle.
   ///
   /// In en, this message translates to:
@@ -1238,6 +1250,18 @@ abstract class AppLocalizations {
   /// **'Automatic fall detection is DISABLED — water absorbs impact and floating motion is not informative. Use the inactivity monitor and manual SOS.'**
   String get profileKayakDesc;
 
+  /// No description provided for @profileEquitation.
+  ///
+  /// In en, this message translates to:
+  /// **'Horse riding'**
+  String get profileEquitation;
+
+  /// No description provided for @profileEquitationDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'Automatic fall detection is DISABLED — horse cadence (trot, canter) interferes with the human-walk detector. The inactivity monitor and manual SOS protect during the ride.'**
+  String get profileEquitationDesc;
+
   /// No description provided for @profileProfessional.
   ///
   /// In en, this message translates to:
@@ -1267,8 +1291,11 @@ class _AppLocalizationsDelegate
         'es',
         'fr',
         'it',
+        'nb',
         'nl',
+        'pl',
         'pt',
+        'ru',
         'sv'
       ].contains(locale.languageCode);
 
@@ -1289,10 +1316,16 @@ AppLocalizations lookupAppLocalizations(Locale locale) {
       return AppLocalizationsFr();
     case 'it':
       return AppLocalizationsIt();
+    case 'nb':
+      return AppLocalizationsNb();
     case 'nl':
       return AppLocalizationsNl();
+    case 'pl':
+      return AppLocalizationsPl();
     case 'pt':
       return AppLocalizationsPt();
+    case 'ru':
+      return AppLocalizationsRu();
     case 'sv':
       return AppLocalizationsSv();
   }

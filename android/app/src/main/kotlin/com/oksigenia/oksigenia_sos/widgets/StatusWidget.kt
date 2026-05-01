@@ -138,6 +138,7 @@ class StatusWidget : AppWidgetProvider() {
         "mountaineering" -> "🧗 Alpinismo"
         "paragliding" -> "🪂 Parapente"
         "kayak" -> "🛶 Kayak"
+        "equitation" -> "🐴 Equitación"
         "professional" -> "👷 Profesional"
         else -> raw.replaceFirstChar { it.uppercase() }
     }

@@ -385,6 +385,9 @@ class AppLocalizationsDe extends AppLocalizations {
   String get smsHelpMessage => 'HILFE! Ich brauche dringend Unterstützung.';
 
   @override
+  String get smsBeaconHeader => '📍 OKSIGENIA UPDATE — bewegt';
+
+  @override
   String get batteryDialogTitle => 'Akku-Einschränkung';
 
   @override
@@ -608,6 +611,13 @@ class AppLocalizationsDe extends AppLocalizations {
   @override
   String get profileKayakDesc =>
       'Automatische Sturzerkennung ist DEAKTIVIERT — Wasser dämpft Aufprälle und Schwimmbewegung ist nicht aussagekräftig. Nutze den Inaktivitätsmonitor und manuellen SOS.';
+
+  @override
+  String get profileEquitation => 'Reiten';
+
+  @override
+  String get profileEquitationDesc =>
+      'Automatische Sturzerkennung ist DEAKTIVIERT — der Pferdetakt (Trab, Galopp) stört den menschlichen Gangerkenner. Inaktivitätsmonitor und manueller SOS schützen während des Ritts.';
 
   @override
   String get profileProfessional => 'Professionell / Rettung';

@@ -389,6 +389,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get smsHelpMessage => 'HELP! I need assistance.';
 
   @override
+  String get smsBeaconHeader => '📍 OKSIGENIA UPDATE — moved';
+
+  @override
   String get batteryDialogTitle => 'Battery Restriction';
 
   @override
@@ -612,6 +615,13 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get profileKayakDesc =>
       'Automatic fall detection is DISABLED — water absorbs impact and floating motion is not informative. Use the inactivity monitor and manual SOS.';
+
+  @override
+  String get profileEquitation => 'Horse riding';
+
+  @override
+  String get profileEquitationDesc =>
+      'Automatic fall detection is DISABLED — horse cadence (trot, canter) interferes with the human-walk detector. The inactivity monitor and manual SOS protect during the ride.';
 
   @override
   String get profileProfessional => 'Professional / Rescue';

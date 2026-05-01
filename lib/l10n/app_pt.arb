@@ -120,6 +120,7 @@
     "btnRestartSystem": "REINICIAR SISTEMA",
     "smsDyingGasp": "⚠️ BATERIA <5%. A desligar sistema. Loc:",
     "smsHelpMessage": "AJUDA! Preciso de assistência urgente.",
+    "smsBeaconHeader": "📍 ATUALIZAÇÃO OKSIGENIA — movido",
     "batteryDialogTitle": "Restrição de Bateria",
     "btnDisableBatterySaver": "DESATIVAR POUPANÇA",
     "batteryDialogBody": "O sistema restringe a bateria desta app. Para o SOS funcionar em segundo plano, selecione 'Sem restrições' ou 'Não otimizar'.",
@@ -187,6 +188,8 @@
     "profileParaglidingDesc": "A deteção automática de quedas está DESATIVADA — o acelerómetro não consegue distinguir manobras de voo de uma queda real. SOS manual e monitor de inatividade continuam ativos.",
     "profileKayak": "Caiaque / Desportos aquáticos",
     "profileKayakDesc": "A deteção automática de quedas está DESATIVADA — a água amortece os impactos e o movimento de flutuação não é informativo. Usa o monitor de inatividade e o SOS manual.",
+    "profileEquitation": "Equitação",
+    "profileEquitationDesc": "A deteção automática de quedas está DESATIVADA — a cadência do cavalo (trote, galope) interfere com o detetor de marcha humana. O monitor de inatividade e o SOS manual protegem-te durante a montaria.",
     "profileProfessional": "Profissional / Resgate",
     "profileProfessionalDesc": "Janela de observação alargada a 120 segundos para uso operacional avançado onde a recuperação após uma queda pode exceder os tempos padrão."
 }

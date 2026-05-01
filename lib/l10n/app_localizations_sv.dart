@@ -390,6 +390,9 @@ class AppLocalizationsSv extends AppLocalizations {
   String get smsHelpMessage => 'HJÄLP! Jag behöver assistans.';
 
   @override
+  String get smsBeaconHeader => '📍 OKSIGENIA UPPDATERING — flyttat';
+
+  @override
   String get batteryDialogTitle => 'Batteribegränsning';
 
   @override
@@ -613,6 +616,13 @@ class AppLocalizationsSv extends AppLocalizations {
   @override
   String get profileKayakDesc =>
       'Automatisk falldetektering är AVSTÄNGD — vatten dämpar stötar och flytrörelser är inte informativa. Använd inaktivitetsmonitor och manuellt SOS.';
+
+  @override
+  String get profileEquitation => 'Ridning';
+
+  @override
+  String get profileEquitationDesc =>
+      'Automatisk falldetektering är AVSTÄNGD — hästens kadens (trav, galopp) stör detektorn för mänsklig gång. Inaktivitetsmonitor och manuellt SOS skyddar under ritten.';
 
   @override
   String get profileProfessional => 'Professionell / Räddning';

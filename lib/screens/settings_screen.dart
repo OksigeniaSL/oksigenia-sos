@@ -168,6 +168,7 @@ class _SettingsScreenState extends State<SettingsScreen> with WidgetsBindingObse
       case ActivityProfile.mountaineering: return l10n.profileMountaineering;
       case ActivityProfile.paragliding: return l10n.profileParagliding;
       case ActivityProfile.kayak: return l10n.profileKayak;
+      case ActivityProfile.equitation: return l10n.profileEquitation;
       case ActivityProfile.professional: return l10n.profileProfessional;
     }
   }
@@ -179,6 +180,7 @@ class _SettingsScreenState extends State<SettingsScreen> with WidgetsBindingObse
       case ActivityProfile.mountaineering: return l10n.profileMountaineeringDesc;
       case ActivityProfile.paragliding: return l10n.profileParaglidingDesc;
       case ActivityProfile.kayak: return l10n.profileKayakDesc;
+      case ActivityProfile.equitation: return l10n.profileEquitationDesc;
       case ActivityProfile.professional: return l10n.profileProfessionalDesc;
     }
   }

@@ -151,6 +151,7 @@ class SOSLogic extends ChangeNotifier with WidgetsBindingObserver {
           'smsDyingGasp': l10n.smsDyingGasp,
           'pauseTitle': l10n.pauseTitle,
           'resumeNow': l10n.pauseResumeNow,
+          'smsBeaconHeader': l10n.smsBeaconHeader,
         };
       }
     } else {
@@ -168,6 +169,7 @@ class SOSLogic extends ChangeNotifier with WidgetsBindingObserver {
           'smsDyingGasp': l10n.smsDyingGasp,
           'pauseTitle': l10n.pauseTitle,
           'resumeNow': l10n.pauseResumeNow,
+          'smsBeaconHeader': l10n.smsBeaconHeader,
         };
       } catch (_) {}
     }
@@ -870,7 +872,8 @@ class SOSLogic extends ChangeNotifier with WidgetsBindingObserver {
     final prefs = await SharedPreferences.getInstance();
     await prefs.setBool('sos_sent_recently', false);
     await prefs.setBool('is_alarm_active', false);
-    
+    await prefs.setBool('beacon_active', false);
+
     _setStatus(SOSStatus.ready);
     _lastMovementTime = DateTime.now();
     
@@ -938,22 +941,22 @@ class SOSLogic extends ChangeNotifier with WidgetsBindingObserver {
       msgBody += "\n$helpText"; 
     }
     
+    Position? sosPos;
     try {
-      Position? pos;
       try {
         final LocationSettings locationSettings = AndroidSettings(
             accuracy: LocationAccuracy.high,
             forceLocationManager: true,
             timeLimit: const Duration(seconds: 5));
-        pos = await Geolocator.getCurrentPosition(locationSettings: locationSettings);
+        sosPos = await Geolocator.getCurrentPosition(locationSettings: locationSettings);
       } catch (_) {
-        pos = await Geolocator.getLastKnownPosition();
+        sosPos = await Geolocator.getLastKnownPosition();
       }
-      if (pos != null) {
+      if (sosPos != null) {
         _setStatus(SOSStatus.locationFixed);
-        msgBody += "\nMaps: https://maps.google.com/?q=${pos.latitude},${pos.longitude}";
-        msgBody += "\nOSM: https://www.openstreetmap.org/?mlat=${pos.latitude}&mlon=${pos.longitude}";
-        msgBody += "\n\n🔋Bat: $batteryLevel% | 📡Alt: ${pos.altitude.toStringAsFixed(0)}m | 🎯Acc: ${pos.accuracy.toStringAsFixed(0)}m";
+        msgBody += "\nMaps: https://maps.google.com/?q=${sosPos.latitude},${sosPos.longitude}";
+        msgBody += "\nOSM: https://www.openstreetmap.org/?mlat=${sosPos.latitude}&mlon=${sosPos.longitude}";
+        msgBody += "\n\n🔋Bat: $batteryLevel% | 📡Alt: ${sosPos.altitude.toStringAsFixed(0)}m | 🎯Acc: ${sosPos.accuracy.toStringAsFixed(0)}m";
       } else {
         msgBody += "\n(GPS Error/Timeout)";
         msgBody += "\n\n🔋Bat: $batteryLevel% (No Loc)";
@@ -967,7 +970,7 @@ class SOSLogic extends ChangeNotifier with WidgetsBindingObserver {
     for (String number in recipients) {
       try {
         await _telephony.sendSms(
-          to: number, 
+          to: number,
           message: msgBody,
           isMultipart: true
         );
@@ -979,14 +982,28 @@ class SOSLogic extends ChangeNotifier with WidgetsBindingObserver {
       try {
         final service = FlutterBackgroundService();
         service.invoke("stopAlarm");
-        Vibration.cancel(); 
+        Vibration.cancel();
       } catch (e) {}
 
       _setStatus(SOSStatus.sent);
-      
+
       final sharedPrefs = await SharedPreferences.getInstance();
       await sharedPrefs.setBool('sos_sent_recently', true);
       await sharedPrefs.setBool('is_alarm_active', false);
+
+      // Smart Beacon: arm post-SOS position-update protocol. Sylvia (service)
+      // polls these flags in _beaconTick from the inactivity checker loop.
+      if (sosPos != null) {
+        final now = DateTime.now().millisecondsSinceEpoch;
+        await sharedPrefs.setBool('beacon_active', true);
+        await sharedPrefs.setDouble('beacon_origin_lat', sosPos.latitude);
+        await sharedPrefs.setDouble('beacon_origin_lon', sosPos.longitude);
+        await sharedPrefs.setInt('beacon_origin_ts', now);
+        await sharedPrefs.setDouble('beacon_last_lat', sosPos.latitude);
+        await sharedPrefs.setDouble('beacon_last_lon', sosPos.longitude);
+        await sharedPrefs.setInt('beacon_last_ts', now);
+        await sharedPrefs.setInt('beacon_count', 0);
+      }
 
       await platform.invokeMethod('sleepScreen');
       

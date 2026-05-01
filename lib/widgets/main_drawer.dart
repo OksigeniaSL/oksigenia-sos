@@ -117,12 +117,15 @@ class MainDrawer extends StatelessWidget {
       title: const Text('Idioma / Language'), 
       children: [
         _langOption(context, 'Deutsch', const Locale('de')),
-        _langOption(context, 'English', const Locale('en')), 
-        _langOption(context, 'Español', const Locale('es')), 
-        _langOption(context, 'Français', const Locale('fr')), 
+        _langOption(context, 'English', const Locale('en')),
+        _langOption(context, 'Español', const Locale('es')),
+        _langOption(context, 'Français', const Locale('fr')),
         _langOption(context, 'Italiano', const Locale('it')),
         _langOption(context, 'Nederlands', const Locale('nl')),
-        _langOption(context, 'Português', const Locale('pt')), 
+        _langOption(context, 'Norsk bokmål', const Locale('nb')),
+        _langOption(context, 'Polski', const Locale('pl')),
+        _langOption(context, 'Português', const Locale('pt')),
+        _langOption(context, 'Русский', const Locale('ru')),
         _langOption(context, 'Svenska', const Locale('sv')),
       ]
     ));

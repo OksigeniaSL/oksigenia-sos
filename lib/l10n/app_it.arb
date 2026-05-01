@@ -120,6 +120,7 @@
     "btnRestartSystem": "RIAVVIA SISTEMA",
     "smsDyingGasp": "⚠️ BATTERIA <5%. Sistema in arresto. Pos:",
     "smsHelpMessage": "AIUTO! Ho bisogno di assistenza urgente.",
+    "smsBeaconHeader": "📍 AGGIORNAMENTO OKSIGENIA — spostato",
     "batteryDialogTitle": "Restrizione Batteria",
     "btnDisableBatterySaver": "DISATTIVA RISPARMIO",
     "batteryDialogBody": "Il sistema sta limitando la batteria. Affinché SOS funzioni in background, seleziona 'Nessuna restrizione' o 'Non ottimizzare'.",
@@ -187,6 +188,8 @@
     "profileParaglidingDesc": "Il rilevamento automatico delle cadute è DISATTIVATO — l'accelerometro non può distinguere manovre di volo da una caduta reale. SOS manuale e monitor di inattività restano attivi.",
     "profileKayak": "Kayak / Sport acquatici",
     "profileKayakDesc": "Il rilevamento automatico delle cadute è DISATTIVATO — l'acqua attutisce gli impatti e il movimento di galleggiamento non è informativo. Usa il monitor di inattività e l'SOS manuale.",
+    "profileEquitation": "Equitazione",
+    "profileEquitationDesc": "Il rilevamento automatico delle cadute è DISATTIVATO — la cadenza del cavallo (trotto, galoppo) interferisce con il rilevatore del passo umano. Il monitor di inattività e l'SOS manuale ti proteggono durante la cavalcata.",
     "profileProfessional": "Professionale / Soccorso",
     "profileProfessionalDesc": "Finestra di osservazione estesa a 120 secondi per uso operativo avanzato dove il recupero dopo una caduta può superare i tempi standard."
 }

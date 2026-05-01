@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="widget_panic_description">Oksigenia SOS — паника</string>
+    <string name="widget_status_description">Статус монитора Oksigenia</string>
+    <string name="widget_status_off">Монитор выключен</string>
+    <string name="widget_status_active">Монитор активен</string>
+    <string name="widget_status_yellow">Sentinel — наблюдение</string>
+    <string name="widget_status_orange">Тревога скоро</string>
+    <string name="widget_status_alarm">ТРЕВОГА АКТИВНА</string>
+    <string name="widget_mode_fall">Падения</string>
+    <string name="widget_mode_inactivity_fmt">Бездействие %1$s</string>
+    <string name="widget_mode_tracking">Tracking</string>
+    <string name="widget_modes_none">Нет активных режимов</string>
+</resources>

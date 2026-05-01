@@ -68,7 +68,21 @@ Map<String, String> _texts = {
   'pauseTitle': 'Monitoring paused',
   'resumesIn': 'Resumes in',
   'resumeNow': 'Resume now',
+  'smsBeaconHeader': '📍 OKSIGENIA UPDATE — moved',
 };
+
+// Smart Beacon: post-SOS position-update SMS protocol.
+// Activates when an SOS SMS is sent (auto via _enviarSMSZombie or manual via
+// UI sendSOS). Real outdoor rescues take 2–4 hours to arrive; the victim
+// may wander, flee, or be carried during that time. If they move >300 m
+// from the last reference point, send an update SMS with the new position
+// so rescuers always have fresh coordinates. Throttled to one SMS every
+// 5 minutes; capped at 20 updates over a 4-hour window. Stops automatically
+// after the window or when the user taps "Restart system" on SentScreen.
+const double _beaconDistanceM = 300.0;
+const int _beaconMinIntervalSeconds = 300;
+const int _beaconMaxUpdates = 20;
+const int _beaconWindowSeconds = 14400;
 
 // Variables Globales
 Timer? _zombieTimer;
@@ -463,6 +477,24 @@ void onStart(ServiceInstance service) async {
     );
   }
 
+  Future<void> _activateBeacon(Position originPos) async {
+    try {
+      final p = await SharedPreferences.getInstance();
+      final now = DateTime.now().millisecondsSinceEpoch;
+      await p.setBool('beacon_active', true);
+      await p.setDouble('beacon_origin_lat', originPos.latitude);
+      await p.setDouble('beacon_origin_lon', originPos.longitude);
+      await p.setInt('beacon_origin_ts', now);
+      await p.setDouble('beacon_last_lat', originPos.latitude);
+      await p.setDouble('beacon_last_lon', originPos.longitude);
+      await p.setInt('beacon_last_ts', now);
+      await p.setInt('beacon_count', 0);
+      _logSentinel("SYLVIA SERVICE: 📍 Beacon activated at ${originPos.latitude.toStringAsFixed(5)},${originPos.longitude.toStringAsFixed(5)}");
+    } catch (e) {
+      print("SYLVIA: Beacon activate error: $e");
+    }
+  }
+
   Future<void> _enviarSMSZombie() async {
     print("SYLVIA SERVICE: 🧟 TIEMPO AGOTADO. Ejecutando protocolo...");
 
@@ -487,19 +519,19 @@ void onStart(ServiceInstance service) async {
       batteryLevel = await _battery.batteryLevel;
     } catch (_) {}
 
+    Position? sosPos;
     try {
-      Position? pos;
       try {
-        pos = await Geolocator.getCurrentPosition(
+        sosPos = await Geolocator.getCurrentPosition(
             locationSettings: const LocationSettings(
                 accuracy: LocationAccuracy.high, timeLimit: Duration(seconds: 5)));
       } catch (_) {
-        pos = await Geolocator.getLastKnownPosition();
+        sosPos = await Geolocator.getLastKnownPosition();
       }
-      if (pos != null) {
-        msgBody += "\nMaps: https://maps.google.com/?q=${pos.latitude},${pos.longitude}";
-        msgBody += "\nOSM: https://www.openstreetmap.org/?mlat=${pos.latitude}&mlon=${pos.longitude}";
-        msgBody += "\n\n🔋Bat: $batteryLevel% | 📡Alt: ${pos.altitude.toStringAsFixed(0)}m | 🎯Acc: ${pos.accuracy.toStringAsFixed(0)}m";
+      if (sosPos != null) {
+        msgBody += "\nMaps: https://maps.google.com/?q=${sosPos.latitude},${sosPos.longitude}";
+        msgBody += "\nOSM: https://www.openstreetmap.org/?mlat=${sosPos.latitude}&mlon=${sosPos.longitude}";
+        msgBody += "\n\n🔋Bat: $batteryLevel% | 📡Alt: ${sosPos.altitude.toStringAsFixed(0)}m | 🎯Acc: ${sosPos.accuracy.toStringAsFixed(0)}m";
       } else {
         msgBody += "\n(GPS Error/Timeout)";
         msgBody += "\n\n🔋Bat: $batteryLevel% (No Loc)";
@@ -510,6 +542,7 @@ void onStart(ServiceInstance service) async {
       msgBody += "\n\n🔋Bat: $batteryLevel% (No Loc)";
     }
 
+    int sentCount = 0;
     for (String number in _recipients) {
       try {
         await _telephony.sendSms(
@@ -517,13 +550,81 @@ void onStart(ServiceInstance service) async {
           message: msgBody,
           isMultipart: true,
         );
+        sentCount++;
         print("SYLVIA: SMS enviado a $number vía Telephony");
       } catch (e) {
         print("SYLVIA ERROR: Fallo al enviar a $number: $e");
       }
     }
-    
+
+    if (sentCount > 0 && sosPos != null) {
+      await _activateBeacon(sosPos);
+    }
+
     await _reproducirConfirmacion();
+  }
+
+  Future<void> _beaconTick() async {
+    try {
+      final p = await SharedPreferences.getInstance();
+      if (!(p.getBool('beacon_active') ?? false)) return;
+
+      final now = DateTime.now().millisecondsSinceEpoch;
+      final originTs = p.getInt('beacon_origin_ts') ?? 0;
+      final count = p.getInt('beacon_count') ?? 0;
+
+      if (now - originTs > _beaconWindowSeconds * 1000 || count >= _beaconMaxUpdates) {
+        await p.setBool('beacon_active', false);
+        _logSentinel("SYLVIA SERVICE: 📍 Beacon stopped (window/count reached)");
+        return;
+      }
+
+      final lastTs = p.getInt('beacon_last_ts') ?? originTs;
+      if (now - lastTs < _beaconMinIntervalSeconds * 1000) return;
+
+      Position? pos;
+      try {
+        pos = await Geolocator.getCurrentPosition(
+            locationSettings: const LocationSettings(
+                accuracy: LocationAccuracy.high, timeLimit: Duration(seconds: 5)));
+      } catch (_) {
+        pos = await Geolocator.getLastKnownPosition();
+      }
+      if (pos == null) return;
+
+      final lastLat = p.getDouble('beacon_last_lat') ?? 0;
+      final lastLon = p.getDouble('beacon_last_lon') ?? 0;
+      final delta = Geolocator.distanceBetween(lastLat, lastLon, pos.latitude, pos.longitude);
+      if (delta < _beaconDistanceM) return;
+
+      final originLat = p.getDouble('beacon_origin_lat') ?? 0;
+      final originLon = p.getDouble('beacon_origin_lon') ?? 0;
+      final totalDist = Geolocator.distanceBetween(originLat, originLon, pos.latitude, pos.longitude);
+
+      final header = _texts['smsBeaconHeader'] ?? '📍 OKSIGENIA UPDATE — moved';
+      String msg = "$header ${totalDist.toStringAsFixed(0)}m";
+      msg += "\nMaps: https://maps.google.com/?q=${pos.latitude},${pos.longitude}";
+      msg += "\nOSM: https://www.openstreetmap.org/?mlat=${pos.latitude}&mlon=${pos.longitude}";
+
+      if (_recipients.isEmpty) {
+        _recipients = p.getStringList('contacts') ?? [];
+      }
+      for (final number in _recipients) {
+        try {
+          await _telephony.sendSms(to: number, message: msg, isMultipart: true);
+        } catch (e) {
+          print("SYLVIA: Beacon SMS error: $e");
+        }
+      }
+
+      await p.setDouble('beacon_last_lat', pos.latitude);
+      await p.setDouble('beacon_last_lon', pos.longitude);
+      await p.setInt('beacon_last_ts', now);
+      await p.setInt('beacon_count', count + 1);
+      _logSentinel("SYLVIA SERVICE: 📍 Beacon update #${count + 1} sent (delta ${delta.toStringAsFixed(0)}m, total ${totalDist.toStringAsFixed(0)}m)");
+    } catch (e) {
+      print("SYLVIA: Beacon tick error: $e");
+    }
   }
 
   Future<void> _writeWidgetState(String state) async {
@@ -972,6 +1073,9 @@ void onStart(ServiceInstance service) async {
           _sendLiveTrackingSMS();
         }
       }
+
+      // Smart Beacon: post-SOS position-update protocol.
+      _beaconTick();
 
       if (DateTime.now().difference(_lastStopTimestamp).inSeconds < 10) return;
       if (!_isMonitoringInactivity || _isAlarmActive) return;

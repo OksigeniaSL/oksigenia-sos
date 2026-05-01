@@ -273,6 +273,9 @@ class _OnboardingScreenState extends State<OnboardingScreen> with WidgetsBinding
       ('Português', 'pt', '🇵🇹'),
       ('Italiano', 'it', '🇮🇹'),
       ('Nederlands', 'nl', '🇳🇱'),
+      ('Norsk bokmål', 'nb', '🇳🇴'),
+      ('Polski', 'pl', '🇵🇱'),
+      ('Русский', 'ru', '🇷🇺'),
       ('Svenska', 'sv', '🇸🇪'),
     ];
     showDialog(

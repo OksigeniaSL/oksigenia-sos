@@ -120,6 +120,7 @@
     "btnRestartSystem": "SYSTEM NEUSTARTEN",
     "smsDyingGasp": "⚠️ AKKU <5%. System schaltet ab. Standort:",
     "smsHelpMessage": "HILFE! Ich brauche dringend Unterstützung.",
+    "smsBeaconHeader": "📍 OKSIGENIA UPDATE — bewegt",
     "batteryDialogTitle": "Akku-Einschränkung",
     "btnDisableBatterySaver": "SPARMODUS AUS",
     "batteryDialogBody": "Das System schränkt den Akku ein. Damit SOS im Hintergrund läuft, wählen Sie 'Keine Einschränkung' oder 'Nicht optimieren'.",
@@ -187,6 +188,8 @@
     "profileParaglidingDesc": "Automatische Sturzerkennung ist DEAKTIVIERT — der Beschleunigungssensor kann Flugmanöver nicht zuverlässig von einem Sturz unterscheiden. Manueller SOS und Inaktivitätsmonitor bleiben aktiv.",
     "profileKayak": "Kajak / Wassersport",
     "profileKayakDesc": "Automatische Sturzerkennung ist DEAKTIVIERT — Wasser dämpft Aufprälle und Schwimmbewegung ist nicht aussagekräftig. Nutze den Inaktivitätsmonitor und manuellen SOS.",
+    "profileEquitation": "Reiten",
+    "profileEquitationDesc": "Automatische Sturzerkennung ist DEAKTIVIERT — der Pferdetakt (Trab, Galopp) stört den menschlichen Gangerkenner. Inaktivitätsmonitor und manueller SOS schützen während des Ritts.",
     "profileProfessional": "Professionell / Rettung",
     "profileProfessionalDesc": "Erweitertes 120-Sekunden-Beobachtungsfenster für fortgeschrittene Einsätze, bei denen die Erholungszeit nach einem Sturz die Standard-Timeouts überschreiten kann."
 }

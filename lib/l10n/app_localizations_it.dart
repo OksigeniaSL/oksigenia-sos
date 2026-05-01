@@ -395,6 +395,9 @@ class AppLocalizationsIt extends AppLocalizations {
   String get smsHelpMessage => 'AIUTO! Ho bisogno di assistenza urgente.';
 
   @override
+  String get smsBeaconHeader => '📍 AGGIORNAMENTO OKSIGENIA — spostato';
+
+  @override
   String get batteryDialogTitle => 'Restrizione Batteria';
 
   @override
@@ -618,6 +621,13 @@ class AppLocalizationsIt extends AppLocalizations {
   @override
   String get profileKayakDesc =>
       'Il rilevamento automatico delle cadute è DISATTIVATO — l\'acqua attutisce gli impatti e il movimento di galleggiamento non è informativo. Usa il monitor di inattività e l\'SOS manuale.';
+
+  @override
+  String get profileEquitation => 'Equitazione';
+
+  @override
+  String get profileEquitationDesc =>
+      'Il rilevamento automatico delle cadute è DISATTIVATO — la cadenza del cavallo (trotto, galoppo) interferisce con il rilevatore del passo umano. Il monitor di inattività e l\'SOS manuale ti proteggono durante la cavalcata.';
 
   @override
   String get profileProfessional => 'Professionale / Soccorso';

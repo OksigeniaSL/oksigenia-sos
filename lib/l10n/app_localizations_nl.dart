@@ -392,6 +392,9 @@ class AppLocalizationsNl extends AppLocalizations {
   String get smsHelpMessage => 'HELP! Ik heb dringend hulp nodig.';
 
   @override
+  String get smsBeaconHeader => '📍 OKSIGENIA UPDATE — verplaatst';
+
+  @override
   String get batteryDialogTitle => 'Batterij Beperking';
 
   @override
@@ -615,6 +618,13 @@ class AppLocalizationsNl extends AppLocalizations {
   @override
   String get profileKayakDesc =>
       'Automatische valdetectie is UITGESCHAKELD — water dempt impact en drijvende beweging is niet informatief. Gebruik de inactiviteitsmonitor en handmatige SOS.';
+
+  @override
+  String get profileEquitation => 'Paardrijden';
+
+  @override
+  String get profileEquitationDesc =>
+      'Automatische valdetectie is UITGESCHAKELD — de cadans van het paard (draf, galop) verstoort de detector voor menselijke loopbeweging. De inactiviteitsmonitor en handmatige SOS beschermen je tijdens de rit.';
 
   @override
   String get profileProfessional => 'Professioneel / Reddingsdienst';

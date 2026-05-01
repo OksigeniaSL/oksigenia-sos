@@ -135,14 +135,17 @@ class _OksigeniaAppState extends State<OksigeniaApp> {
       // Idiomas (Esto lo dejamos igual)
       locale: _locale,
       supportedLocales: const [
-        Locale('en'), 
-        Locale('es'), 
-        Locale('fr'), 
-        Locale('de'), 
+        Locale('en'),
+        Locale('es'),
+        Locale('fr'),
+        Locale('de'),
         Locale('pt'),
         Locale('nl'),
         Locale('sv'),
-        Locale('it'), 
+        Locale('it'),
+        Locale('pl'),
+        Locale('ru'),
+        Locale('nb'),
       ],
       localizationsDelegates: const [
         AppLocalizations.delegate,

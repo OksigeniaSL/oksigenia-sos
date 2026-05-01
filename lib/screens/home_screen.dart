@@ -882,6 +882,7 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver, Ti
       case ActivityProfile.mountaineering: return Icons.terrain;
       case ActivityProfile.paragliding: return Icons.paragliding;
       case ActivityProfile.kayak: return Icons.kayaking;
+      case ActivityProfile.equitation: return Icons.pets;
       case ActivityProfile.professional: return Icons.health_and_safety;
     }
   }
@@ -893,6 +894,7 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver, Ti
       case ActivityProfile.mountaineering: return const Color(0xFF42A5F5); // blue — alpine
       case ActivityProfile.paragliding: return const Color(0xFFAB47BC); // purple — flight
       case ActivityProfile.kayak: return const Color(0xFF26C6DA); // cyan — water
+      case ActivityProfile.equitation: return const Color(0xFF8D6E63); // saddle brown — equestrian
       case ActivityProfile.professional: return const Color(0xFFEF5350); // red — emergency-grade
     }
   }
@@ -904,6 +906,7 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver, Ti
       case ActivityProfile.mountaineering: return l10n.profileMountaineering;
       case ActivityProfile.paragliding: return l10n.profileParagliding;
       case ActivityProfile.kayak: return l10n.profileKayak;
+      case ActivityProfile.equitation: return l10n.profileEquitation;
       case ActivityProfile.professional: return l10n.profileProfessional;
     }
   }
@@ -915,6 +918,7 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver, Ti
       case ActivityProfile.mountaineering: return l10n.profileMountaineeringDesc;
       case ActivityProfile.paragliding: return l10n.profileParaglidingDesc;
       case ActivityProfile.kayak: return l10n.profileKayakDesc;
+      case ActivityProfile.equitation: return l10n.profileEquitationDesc;
       case ActivityProfile.professional: return l10n.profileProfessionalDesc;
     }
   }

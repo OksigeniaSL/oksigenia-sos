@@ -390,6 +390,9 @@ class AppLocalizationsEs extends AppLocalizations {
   String get smsHelpMessage => '¡AYUDA! Necesito asistencia.';
 
   @override
+  String get smsBeaconHeader => '📍 ACTUALIZACIÓN OKSIGENIA — movido';
+
+  @override
   String get batteryDialogTitle => 'Restricción de Batería';
 
   @override
@@ -613,6 +616,13 @@ class AppLocalizationsEs extends AppLocalizations {
   @override
   String get profileKayakDesc =>
       'La detección automática de caídas está DESACTIVADA — el agua amortigua los impactos y el movimiento de flotación no es informativo. Usa el monitor de inactividad y el SOS manual.';
+
+  @override
+  String get profileEquitation => 'Equitación';
+
+  @override
+  String get profileEquitationDesc =>
+      'La detección automática de caídas está DESACTIVADA — el ritmo del caballo (trote, galope) interfiere con el detector de marcha humana. El monitor de inactividad y el SOS manual te protegen durante la ruta.';
 
   @override
   String get profileProfessional => 'Profesional / Rescate';

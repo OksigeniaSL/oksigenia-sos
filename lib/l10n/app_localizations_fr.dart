@@ -388,6 +388,9 @@ class AppLocalizationsFr extends AppLocalizations {
   String get smsHelpMessage => 'À L\'AIDE ! J\'ai besoin d\'assistance.';
 
   @override
+  String get smsBeaconHeader => '📍 MISE À JOUR OKSIGENIA — déplacé';
+
+  @override
   String get batteryDialogTitle => 'Restriction Batterie';
 
   @override
@@ -611,6 +614,13 @@ class AppLocalizationsFr extends AppLocalizations {
   @override
   String get profileKayakDesc =>
       'La détection automatique de chute est DÉSACTIVÉE — l\'eau amortit les impacts et le mouvement de flottaison n\'est pas informatif. Utilisez le moniteur d\'inactivité et le SOS manuel.';
+
+  @override
+  String get profileEquitation => 'Équitation';
+
+  @override
+  String get profileEquitationDesc =>
+      'La détection automatique de chute est DÉSACTIVÉE — la cadence du cheval (trot, galop) interfère avec le détecteur de marche humaine. Le moniteur d\'inactivité et le SOS manuel vous protègent pendant la randonnée.';
 
   @override
   String get profileProfessional => 'Professionnel / Sauvetage';
