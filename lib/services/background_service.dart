@@ -159,6 +159,7 @@ void onStart(ServiceInstance service) async {
   // Smart Sentinel runtime parameters (mutable — driven by activity profile).
   // Defaults match the Trekking baseline; setMonitoring overrides on demand.
   double _yellowThreshold = 6.0;
+  double _orangeThreshold = 12.0;
   int _settlingSeconds = 5;
   int _observationSeconds = 60;
   double _cvUpperBound = 1.30;
@@ -525,9 +526,17 @@ void onStart(ServiceInstance service) async {
     await _reproducirConfirmacion();
   }
 
+  Future<void> _writeWidgetState(String state) async {
+    try {
+      final p = await SharedPreferences.getInstance();
+      await p.setString('widget_sentinel_state', state);
+    } catch (_) {}
+  }
+
   Future<void> _lanzarAlarma() async {
     _logSentinel("SYLVIA SERVICE: 🚨 EJECUTANDO PROTOCOLO DE ALARMA");
     _isAlarmActive = true;
+    _writeWidgetState('red');
     await _cancelInactivityAlarmClock();
     // Pause live tracking during SOS — watchdog checks _isAlarmActive
     if (_isLiveTrackingActive) {
@@ -644,6 +653,7 @@ void onStart(ServiceInstance service) async {
     _yellowTimer?.cancel();
     _yellowCountdown = _observationSeconds;
     _gBuffer.clear();
+    _writeWidgetState('green');
     if (wasYellow) service.invoke("sentinelGreen");
   }
 
@@ -721,6 +731,7 @@ void onStart(ServiceInstance service) async {
     _yellowCountdown = _observationSeconds;
     _logSentinel("SYLVIA SERVICE: 🟡 Impacto detectado. Análisis Smart Sentinel ($_yellowCountdown s)...");
     _sentinelYellow = true;
+    _writeWidgetState('yellow');
     service.invoke("sentinelYellow");
 
     // Phased post-impact analysis (Bourke/Kangas/Musci-style):
@@ -744,6 +755,7 @@ void onStart(ServiceInstance service) async {
       if (!orangeEmitted && _yellowCountdown <= orangeWarningSeconds && _yellowCountdown > 0) {
         orangeEmitted = true;
         _logSentinel("SYLVIA SERVICE: 🟠 Alerta inminente (${_yellowCountdown}s restantes)");
+        _writeWidgetState('orange');
         service.invoke("sentinelOrange");
       }
 
@@ -874,7 +886,18 @@ void onStart(ServiceInstance service) async {
         // gameInterval); _isRhythmicMovement only uses last 2s of real samples.
         if (_gBuffer.length > 600) _gBuffer.removeAt(0);
 
-        if (instantG > _yellowThreshold && !_sentinelYellow) {
+        // Catastrophic impact: skip the yellow observation window. The 30 s
+        // pre-alert on AlarmScreen is still the user's chance to cancel.
+        if (_orangeThreshold > 0 && instantG >= _orangeThreshold && !_isAlarmActive) {
+          _logSentinel("SYLVIA BACKGROUND: 🟠 Impacto crítico ${instantG.toStringAsFixed(2)}G ≥ ${_orangeThreshold}G → ALARMA DIRECTA (effX=${effX.toStringAsFixed(1)} effY=${effY.toStringAsFixed(1)} effZ=${effZ.toStringAsFixed(1)})");
+          _activarEscudo(segundos: 3);
+          if (_sentinelYellow) {
+            _sentinelYellow = false;
+            _yellowTimer?.cancel();
+            _yellowCountdown = _observationSeconds;
+          }
+          _lanzarAlarma();
+        } else if (instantG > _yellowThreshold && !_sentinelYellow) {
           _logSentinel("SYLVIA BACKGROUND: ⚡ Impacto ${instantG.toStringAsFixed(2)}G → Smart Sentinel (effX=${effX.toStringAsFixed(1)} effY=${effY.toStringAsFixed(1)} effZ=${effZ.toStringAsFixed(1)})");
           _activarEscudo(segundos: 3);
           _enterYellowState();
@@ -918,6 +941,20 @@ void onStart(ServiceInstance service) async {
           _lastMovementTime = DateTime.now();
           if (_isMonitoringInactivity) _scheduleInactivityAlarmClock();
           service.invoke("onPauseResumed");
+        }
+        // Panic widget tap: PanicWidget receiver writes this flag, we trigger
+        // the alarm directly. AlarmScreen + 30 s pre-alert remains the safety.
+        final int panicReq = prefs.getInt('widget_panic_requested') ?? 0;
+        if (panicReq > 0 && !_isAlarmActive) {
+          await prefs.setInt('widget_panic_requested', 0);
+          _logSentinel("SYLVIA SERVICE: 🆘 Panic widget tapped → ALARMA");
+          _activarEscudo(segundos: 3);
+          if (_sentinelYellow) {
+            _sentinelYellow = false;
+            _yellowTimer?.cancel();
+            _yellowCountdown = _observationSeconds;
+          }
+          _lanzarAlarma();
         }
       } catch (_) {}
 
@@ -997,10 +1034,12 @@ void onStart(ServiceInstance service) async {
         _isMonitoringInactivity = savedInactivity;
         _startSensorListener();
         if (_isMonitoringInactivity) {
-          _startInactivityChecker();
           _scheduleInactivityAlarmClock();
         }
       }
+      // Always run the inactivity checker so the panic-widget poll fires even
+      // when monitoring is off. Internal guards skip inactivity-specific logic.
+      _startInactivityChecker();
     } catch (e) {
       print("SYLVIA BOOT ERROR: $e");
     }
@@ -1076,11 +1115,12 @@ void onStart(ServiceInstance service) async {
       _impactDetectionEnabled = cfg.impactDetectionEnabled;
       if (cfg.impactDetectionEnabled) {
         _yellowThreshold = cfg.yellowThreshold;
+        _orangeThreshold = cfg.orangeThreshold;
         _settlingSeconds = cfg.settlingSeconds;
         _observationSeconds = cfg.observationSeconds;
         _cvUpperBound = cfg.cvUpperBound;
       }
-      _logSentinel("SYLVIA SERVICE: 🎯 Profile=${profile.name} threshold=${_yellowThreshold}G obs=${_observationSeconds}s cv=${_cvUpperBound} impactOn=${_impactDetectionEnabled}");
+      _logSentinel("SYLVIA SERVICE: 🎯 Profile=${profile.name} yellow=${_yellowThreshold}G orange=${_orangeThreshold}G obs=${_observationSeconds}s cv=${_cvUpperBound} impactOn=${_impactDetectionEnabled}");
 
       print("SYLVIA SERVICE: Monitor - Impact: $_isMonitoringImpact, Inactivity: $_isMonitoringInactivity (Limit: $_inactivityLimitSeconds s)");
 

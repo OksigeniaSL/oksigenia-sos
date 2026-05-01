@@ -499,11 +499,12 @@ class SOSLogic extends ChangeNotifier with WidgetsBindingObserver {
 
   void _startPassiveGPS() async {
     await _gpsSubscription?.cancel();
+    final cfg = activityProfileConfigs[PreferencesService().getActivityProfile()]!;
     final LocationSettings locationSettings = AndroidSettings(
         accuracy: LocationAccuracy.high,
-        distanceFilter: 10,
-        forceLocationManager: true, 
-        intervalDuration: const Duration(seconds: 5)
+        distanceFilter: cfg.gpsDistanceFilterMeters,
+        forceLocationManager: true,
+        intervalDuration: Duration(seconds: cfg.gpsIntervalSeconds)
     );
 
     try {
@@ -1070,6 +1071,10 @@ class SOSLogic extends ChangeNotifier with WidgetsBindingObserver {
       "inactivity_enabled": _isInactivityMonitorActive,
       "profile": PreferencesService().getActivityProfile().name,
     });
+    // Profile may have changed → restart GPS stream with new interval/filter.
+    if (_status == SOSStatus.ready || _status == SOSStatus.locationFixed) {
+      _startPassiveGPS();
+    }
   }
 
   Future<void> resumeMonitoring() async {

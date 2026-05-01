@@ -19,6 +19,12 @@ class ActivityProfileConfig {
   /// value is ~1.0G.
   final double yellowThreshold;
 
+  /// G-force threshold above which an impact is considered catastrophic and
+  /// fires the alarm directly, skipping the yellow observation window. The
+  /// 30 s pre-alert on AlarmScreen remains the user's last chance to cancel.
+  /// Set to 0 to disable orange-direct (alarm only fires after observation).
+  final double orangeThreshold;
+
   /// Seconds after impact during which rhythm checks are ignored — accounts
   /// for tumbling, secondary impacts and failed recovery attempts.
   final int settlingSeconds;
@@ -36,57 +42,87 @@ class ActivityProfileConfig {
   /// activities where impact patterns are uninformative (paragliding, kayak).
   final bool impactDetectionEnabled;
 
+  /// Passive GPS sampling interval. Slower for activities where the user
+  /// moves at low speeds (trekking, mountaineering); fast for high-speed
+  /// activities where position drifts quickly (paragliding, MTB).
+  final int gpsIntervalSeconds;
+
+  /// Distance filter: a new GPS sample is only delivered after the device
+  /// has moved this many meters. Larger value = fewer wakeups, less battery.
+  final int gpsDistanceFilterMeters;
+
   const ActivityProfileConfig({
     required this.yellowThreshold,
+    required this.orangeThreshold,
     required this.settlingSeconds,
     required this.observationSeconds,
     required this.cvUpperBound,
     required this.impactDetectionEnabled,
+    required this.gpsIntervalSeconds,
+    required this.gpsDistanceFilterMeters,
   });
 }
 
 const Map<ActivityProfile, ActivityProfileConfig> activityProfileConfigs = {
   ActivityProfile.trekking: ActivityProfileConfig(
     yellowThreshold: 6.0,
+    orangeThreshold: 10.0,
     settlingSeconds: 5,
     observationSeconds: 60,
     cvUpperBound: 1.30,
     impactDetectionEnabled: true,
+    gpsIntervalSeconds: 30,
+    gpsDistanceFilterMeters: 30,
   ),
   ActivityProfile.trailMtb: ActivityProfileConfig(
     yellowThreshold: 8.0,
+    orangeThreshold: 13.0,
     settlingSeconds: 5,
     observationSeconds: 60,
     cvUpperBound: 1.50,
     impactDetectionEnabled: true,
+    gpsIntervalSeconds: 5,
+    gpsDistanceFilterMeters: 10,
   ),
   ActivityProfile.mountaineering: ActivityProfileConfig(
     yellowThreshold: 6.0,
+    orangeThreshold: 10.0,
     settlingSeconds: 5,
     observationSeconds: 90,
     cvUpperBound: 1.30,
     impactDetectionEnabled: true,
+    gpsIntervalSeconds: 30,
+    gpsDistanceFilterMeters: 30,
   ),
   ActivityProfile.paragliding: ActivityProfileConfig(
     yellowThreshold: 0,
+    orangeThreshold: 0,
     settlingSeconds: 0,
     observationSeconds: 0,
     cvUpperBound: 0,
     impactDetectionEnabled: false,
+    gpsIntervalSeconds: 2,
+    gpsDistanceFilterMeters: 5,
   ),
   ActivityProfile.kayak: ActivityProfileConfig(
     yellowThreshold: 0,
+    orangeThreshold: 0,
     settlingSeconds: 0,
     observationSeconds: 0,
     cvUpperBound: 0,
     impactDetectionEnabled: false,
+    gpsIntervalSeconds: 15,
+    gpsDistanceFilterMeters: 20,
   ),
   ActivityProfile.professional: ActivityProfileConfig(
     yellowThreshold: 6.0,
+    orangeThreshold: 10.0,
     settlingSeconds: 5,
     observationSeconds: 120,
     cvUpperBound: 1.30,
     impactDetectionEnabled: true,
+    gpsIntervalSeconds: 5,
+    gpsDistanceFilterMeters: 10,
   ),
 };
 

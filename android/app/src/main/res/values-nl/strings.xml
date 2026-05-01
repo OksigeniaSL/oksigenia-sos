@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="widget_panic_description">Oksigenia paniek-SOS</string>
+    <string name="widget_status_description">Oksigenia monitorstatus</string>
+    <string name="widget_status_off">Monitor uit</string>
+    <string name="widget_status_active">Monitor actief</string>
+    <string name="widget_status_yellow">Sentinel — observatie</string>
+    <string name="widget_status_orange">Alarm ophanden</string>
+    <string name="widget_status_alarm">ALARM ACTIEF</string>
+    <string name="widget_mode_fall">Vallen</string>
+    <string name="widget_mode_inactivity_fmt">Inactiviteit %1$s</string>
+    <string name="widget_mode_tracking">Tracking</string>
+    <string name="widget_modes_none">Geen modi actief</string>
+</resources>

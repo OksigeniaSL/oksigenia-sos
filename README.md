@@ -1,4 +1,4 @@
-# Oksigenia SOS 🏔️ v3.9.7 "Smart Sentinel v4 & Activity Profiles"
+# Oksigenia SOS 🏔️ v4.0.0 "Smart Sentinel Complete"
 
 **The Ultimate Outdoor Guardian | FOSS | Privacy-First | Autonomous**
 
@@ -40,7 +40,45 @@ The interface is designed for high-stress situations. High contrast, large touch
 
 ---
 
-## 🎯 What's New in v3.9.7: Smart Sentinel v4 & Activity Profiles
+## 🛡️ What's New in v4.0.0: Smart Sentinel Complete
+
+Closes the multi-sport story started in v3.9.7. Three additions on top of the existing Smart Sentinel v4 algorithm and activity profiles.
+
+### ⚡ Catastrophic Impact Path
+A second G-force threshold per profile fires the alarm immediately, skipping the 60-second yellow observation window. The 30-second pre-alert on the alarm screen is still the user's chance to cancel.
+
+| Profile | Yellow (observation) | Orange (direct alarm) |
+|:---|:---:|:---:|
+| 🥾 Trekking | 6G | **10G** |
+| 🚵 Trail / MTB | 8G | **13G** |
+| 🧗 Mountaineering | 6G | **10G** |
+| 🪂 Paragliding | impact off | impact off |
+| 🛶 Kayak | impact off | impact off |
+| 👷 Professional | 6G | **10G** |
+
+### 📍 GPS Interval per Profile
+Each profile declares its own GPS sampling rate. Slow-motion sports save battery; fast-motion sports get the resolution they need. Applied mid-session when the user changes the active profile.
+
+| Profile | Interval | Distance filter |
+|:---|:---:|:---:|
+| 🥾 Trekking / 🧗 Mountaineering | 30 s | 30 m |
+| 🚵 Trail / MTB / 👷 Professional | 5 s | 10 m |
+| 🪂 Paragliding | 2 s | 5 m |
+| 🛶 Kayak | 15 s | 20 m |
+
+### 🏠 Home Screen Widgets
+Two AppWidgets, native Kotlin, zero new dependencies, zero new permissions.
+* **🆘 Panic widget (1×1):** circular SOS button. Tap fires the alarm flow directly with the 30-second pre-alert as safety. Works even if monitoring is currently off — wakes the foreground service if needed.
+* **📊 Status widget (2×2):** active profile (with emoji), Sentinel state (green/yellow/orange/red dot), active modes (fall detection, inactivity monitor with configured time, live tracking), battery level. Updates once per minute.
+
+### 🛠️ Resolves Issue #3
+[Issue #3](https://github.com/OksigeniaSL/oksigenia-sos/issues/3) reported false positives during paragliding. v4.0.0 ships a Paragliding profile with impact detection disabled entirely; in flight only Inactivity Monitor + manual SOS protect.
+
+See the [v4.0.0 GitHub Release](https://github.com/OksigeniaSL/oksigenia-sos/releases/tag/v4.0.0) for the full technical breakdown.
+
+---
+
+## 🎯 v3.9.7: Smart Sentinel v4 & Activity Profiles
 
 ### 🧠 Smart Sentinel v4 — Cadence-CV Detector
 The fall-detection algorithm has been rewritten from scratch using field telemetry collected on Pixel 7a and Pixel 8 phones in pocket while walking real terrain.

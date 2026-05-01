@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="widget_panic_description">Oksigenia Panik-SOS</string>
+    <string name="widget_status_description">Oksigenia Monitorstatus</string>
+    <string name="widget_status_off">Monitor aus</string>
+    <string name="widget_status_active">Monitor aktiv</string>
+    <string name="widget_status_yellow">Sentinel — Beobachtung</string>
+    <string name="widget_status_orange">Bevorstehender Alarm</string>
+    <string name="widget_status_alarm">ALARM AKTIV</string>
+    <string name="widget_mode_fall">Stürze</string>
+    <string name="widget_mode_inactivity_fmt">Inaktivität %1$s</string>
+    <string name="widget_mode_tracking">Tracking</string>
+    <string name="widget_modes_none">Keine Modi aktiv</string>
+</resources>
