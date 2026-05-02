@@ -239,7 +239,7 @@ These settings are **required** for Oksigenia SOS to function reliably in the fi
 
 ## 🌍 Global Availability
 
-Oksigenia SOS is fully localized in 8 languages:
+Oksigenia SOS is fully localized in 11 languages:
 * 🇬🇧 English
 * 🇪🇸 Español
 * 🇮🇹 Italiano
@@ -248,6 +248,9 @@ Oksigenia SOS is fully localized in 8 languages:
 * 🇵🇹 Português
 * 🇳🇱 Nederlands
 * 🇸🇪 Svenska
+* 🇵🇱 Polski
+* 🇷🇺 Русский
+* 🇳🇴 Norsk Bokmål
 
 ---
 
@@ -268,3 +271,14 @@ flutter pub get
 # Note: You need your own key.properties for release builds
 flutter build apk --release --split-per-abi
 ```
+
+---
+
+## 💚 Support the Project
+
+Oksigenia SOS is — and will remain — free, open-source, and free of commercial commitments. If the app has been useful to you or gives you peace of mind when you head outdoors, you can support its development:
+
+[![Donate via Liberapay](https://img.shields.io/liberapay/patrons/Oksigenia.svg?logo=liberapay&label=Liberapay)](https://liberapay.com/Oksigenia/)
+[![Donate via PayPal](https://img.shields.io/badge/PayPal-Donate-blue?logo=paypal)](https://www.paypal.com/donate/?business=paypal@oksigenia.cc&currency_code=EUR)
+
+Donations help cover development costs (test hardware, domains, tools) and the time spent maintaining the app, translations, and field validation across all the activity profiles.
