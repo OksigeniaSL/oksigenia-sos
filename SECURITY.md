@@ -6,19 +6,18 @@ The following versions of Oksigenia SOS are currently supported with security up
 
 | Version | Supported          |
 | ------- | ------------------ |
-| 3.9.x   | :white_check_mark: |
-| 3.8.x   | :white_check_mark: |
-| < 3.7   | :x:                |
+| 4.1.x   | :white_check_mark: |
+| < 4.1   | :x:                |
 
 ## Reporting a Vulnerability
 
 We take the security of Oksigenia SOS very seriously. If you have discovered a security vulnerability, we appreciate your help in disclosing it to us in a responsible manner.
 
 ### How to report
-Please **DO NOT** open a public issue on GitHub. Instead, report the vulnerability privately using GitHub's **Private Vulnerability Reporting** feature:
+Please **DO NOT** open a public issue on GitHub. Instead, report the vulnerability privately:
 
-1. Go to the [Security tab](https://github.com/OksigeniaSL/oksigenia-sos/security).
-2. Click on **"Report a vulnerability"** (if available) or email us directly at: **dev@oksigenia.cc**.
+1. Go to the [Security tab](https://github.com/OksigeniaSL/oksigenia-sos/security) and click **"Report a vulnerability"** (Private Vulnerability Reporting is enabled on this repository), **or**
+2. Email us at **dev@oksigenia.cc**.
 
 ### What to include
 * A detailed description of the vulnerability.
