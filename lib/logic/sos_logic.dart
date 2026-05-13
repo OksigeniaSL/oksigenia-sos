@@ -15,6 +15,7 @@ import 'package:oksigenia_sos/l10n/app_localizations.dart';
 import 'package:another_telephony/telephony.dart';
 import 'activity_profile.dart';
 import '../services/preferences_service.dart';
+import '../utils/phone_utils.dart';
 import '../screens/settings_screen.dart';  
 import '../screens/alarm_screen.dart';
 import '../screens/sent_screen.dart';
@@ -818,7 +819,7 @@ class SOSLogic extends ChangeNotifier with WidgetsBindingObserver {
       msg += "\nhttps://maps.google.com/?q=${pos.latitude},${pos.longitude}";
       
       for (String number in recipients) {
-        await _telephony.sendSms(to: number, message: msg);
+        await _telephony.sendSms(to: normalizePhoneE164(number), message: msg);
       }
     } catch (e) { debugPrint("❌ Fallo Dying Gasp: $e"); }
   }
@@ -970,7 +971,7 @@ class SOSLogic extends ChangeNotifier with WidgetsBindingObserver {
     for (String number in recipients) {
       try {
         await _telephony.sendSms(
-          to: number,
+          to: normalizePhoneE164(number),
           message: msgBody,
           isMultipart: true
         );
@@ -1028,7 +1029,7 @@ class SOSLogic extends ChangeNotifier with WidgetsBindingObserver {
 
   void _startPeriodicUpdates(int minutes, List<String> recipients) {
     if (recipients.isEmpty) return;
-    String target = recipients.first; 
+    String target = normalizePhoneE164(recipients.first);
     _periodicUpdateTimer?.cancel();
     _periodicUpdateTimer = Timer.periodic(Duration(minutes: minutes), (timer) async {
       try {
