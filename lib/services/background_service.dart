@@ -15,6 +15,7 @@ import 'package:another_telephony/telephony.dart';
 import 'package:battery_plus/battery_plus.dart';
 import 'package:path_provider/path_provider.dart';
 import '../logic/activity_profile.dart';
+import '../utils/phone_utils.dart';
 import 'package:timezone/data/latest_all.dart' as tz;
 import 'package:timezone/timezone.dart' as tz;
 
@@ -393,7 +394,7 @@ void onStart(ServiceInstance service) async {
       if (_recipients.isEmpty) return;
     }
 
-    String target = _recipients.first;
+    String target = normalizePhoneE164(_recipients.first);
     int batteryLevel = 0;
     try { batteryLevel = await _battery.batteryLevel; } catch (_) {}
 
@@ -544,16 +545,17 @@ void onStart(ServiceInstance service) async {
 
     int sentCount = 0;
     for (String number in _recipients) {
+      final target = normalizePhoneE164(number);
       try {
         await _telephony.sendSms(
-          to: number,
+          to: target,
           message: msgBody,
           isMultipart: true,
         );
         sentCount++;
-        print("SYLVIA: SMS enviado a $number vía Telephony");
+        print("SYLVIA: SMS enviado a $target vía Telephony");
       } catch (e) {
-        print("SYLVIA ERROR: Fallo al enviar a $number: $e");
+        print("SYLVIA ERROR: Fallo al enviar a $target: $e");
       }
     }
 
@@ -611,7 +613,7 @@ void onStart(ServiceInstance service) async {
       }
       for (final number in _recipients) {
         try {
-          await _telephony.sendSms(to: number, message: msg, isMultipart: true);
+          await _telephony.sendSms(to: normalizePhoneE164(number), message: msg, isMultipart: true);
         } catch (e) {
           print("SYLVIA: Beacon SMS error: $e");
         }

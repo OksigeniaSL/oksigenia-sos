@@ -216,6 +216,9 @@ class _SettingsScreenState extends State<SettingsScreen> with WidgetsBindingObse
         _contacts.add(phone);
         _phoneController.clear();
       });
+      // Re-fill the country prefix so contact #2, #3… don't get saved
+      // as raw digits (US carriers silently drop non-E.164 A2P SMS).
+      _detectCountryPrefix();
       PreferencesService().addContact(phone);
     } else {
       ScaffoldMessenger.of(context).showSnackBar(
