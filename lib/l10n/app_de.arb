@@ -191,5 +191,16 @@
     "profileEquitation": "Reiten",
     "profileEquitationDesc": "Automatische Sturzerkennung ist DEAKTIVIERT — der Pferdetakt (Trab, Galopp) stört den menschlichen Gangerkenner. Inaktivitätsmonitor und manueller SOS schützen während des Ritts.",
     "profileProfessional": "Professionell / Rettung",
-    "profileProfessionalDesc": "Erweitertes 120-Sekunden-Beobachtungsfenster für fortgeschrittene Einsätze, bei denen die Erholungszeit nach einem Sturz die Standard-Timeouts überschreiten kann."
+    "profileProfessionalDesc": "Erweitertes 120-Sekunden-Beobachtungsfenster für fortgeschrittene Einsätze, bei denen die Erholungszeit nach einem Sturz die Standard-Timeouts überschreiten kann.",
+    "homeSummaryWithImpact": "Impact {imp}G · Beob {obs}s · GPS {gps}",
+    "homeSummaryNoImpact": "Impact AUS · GPS {gps}",
+    "homeAlertNotArmed": "NICHT BEREIT — Schalter unten antippen zum Aktivieren",
+    "homeAlertSensorPermDenied": "Sensor-Berechtigung verweigert",
+    "homeConfirmTitleImpact": "Aufprallerkennung",
+    "homeConfirmTitleObservation": "Beobachtung",
+    "homeConfirmTitleGps": "GPS-Intervall",
+    "homeConfirmValueOn": "AN · {threshold}G",
+    "homeConfirmValueOff": "AUS",
+    "homeProfileNoFallWarning": "Dieses Profil erkennt KEINE Stürze. SOS muss manuell ausgelöst werden.",
+    "homeActionApply": "Anwenden"
 }

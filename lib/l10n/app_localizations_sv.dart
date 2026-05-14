@@ -630,4 +630,45 @@ class AppLocalizationsSv extends AppLocalizations {
   @override
   String get profileProfessionalDesc =>
       'Förlängt observationsfönster på 120 sekunder för avancerad operativ användning där återhämtning efter ett fall kan överskrida standardtidsgränserna.';
+
+  @override
+  String homeSummaryWithImpact(int imp, int obs, String gps) {
+    return 'Stöt ${imp}G · Obs ${obs}s · GPS $gps';
+  }
+
+  @override
+  String homeSummaryNoImpact(String gps) {
+    return 'Stöt AV · GPS $gps';
+  }
+
+  @override
+  String get homeAlertNotArmed =>
+      'EJ AKTIVERAD — tryck på en knapp nedan för att aktivera';
+
+  @override
+  String get homeAlertSensorPermDenied => 'Sensorbehörighet nekad';
+
+  @override
+  String get homeConfirmTitleImpact => 'Stötdetektering';
+
+  @override
+  String get homeConfirmTitleObservation => 'Observation';
+
+  @override
+  String get homeConfirmTitleGps => 'GPS-intervall';
+
+  @override
+  String homeConfirmValueOn(int threshold) {
+    return 'PÅ · ${threshold}G';
+  }
+
+  @override
+  String get homeConfirmValueOff => 'AV';
+
+  @override
+  String get homeProfileNoFallWarning =>
+      'Denna profil upptäcker INTE fall. SOS måste utlösas manuellt.';
+
+  @override
+  String get homeActionApply => 'Tillämpa';
 }

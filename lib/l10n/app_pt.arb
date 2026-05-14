@@ -191,5 +191,16 @@
     "profileEquitation": "Equitação",
     "profileEquitationDesc": "A deteção automática de quedas está DESATIVADA — a cadência do cavalo (trote, galope) interfere com o detetor de marcha humana. O monitor de inatividade e o SOS manual protegem-te durante a montaria.",
     "profileProfessional": "Profissional / Resgate",
-    "profileProfessionalDesc": "Janela de observação alargada a 120 segundos para uso operacional avançado onde a recuperação após uma queda pode exceder os tempos padrão."
+    "profileProfessionalDesc": "Janela de observação alargada a 120 segundos para uso operacional avançado onde a recuperação após uma queda pode exceder os tempos padrão.",
+    "homeSummaryWithImpact": "Impacto {imp}G · Observ {obs}s · GPS {gps}",
+    "homeSummaryNoImpact": "Impacto OFF · GPS {gps}",
+    "homeAlertNotArmed": "DESARMADO — toque num interruptor abaixo para ativar",
+    "homeAlertSensorPermDenied": "Permissão de sensores negada",
+    "homeConfirmTitleImpact": "Deteção de impactos",
+    "homeConfirmTitleObservation": "Observação",
+    "homeConfirmTitleGps": "Intervalo GPS",
+    "homeConfirmValueOn": "ON · {threshold}G",
+    "homeConfirmValueOff": "OFF",
+    "homeProfileNoFallWarning": "Este perfil NÃO deteta quedas. O SOS deve ser ativado manualmente.",
+    "homeActionApply": "Aplicar"
 }

@@ -629,4 +629,45 @@ class AppLocalizationsRu extends AppLocalizations {
   @override
   String get profileProfessionalDesc =>
       'Расширенное окно наблюдения 120 секунд для продвинутого оперативного использования, когда время восстановления после падения может превышать стандартные таймауты.';
+
+  @override
+  String homeSummaryWithImpact(int imp, int obs, String gps) {
+    return 'Удар ${imp}G · Набл $obsс · GPS $gps';
+  }
+
+  @override
+  String homeSummaryNoImpact(String gps) {
+    return 'Удар ВЫКЛ · GPS $gps';
+  }
+
+  @override
+  String get homeAlertNotArmed =>
+      'НЕ АКТИВИРОВАНО — нажмите переключатель ниже для активации';
+
+  @override
+  String get homeAlertSensorPermDenied => 'Разрешение на датчики отклонено';
+
+  @override
+  String get homeConfirmTitleImpact => 'Обнаружение ударов';
+
+  @override
+  String get homeConfirmTitleObservation => 'Наблюдение';
+
+  @override
+  String get homeConfirmTitleGps => 'Интервал GPS';
+
+  @override
+  String homeConfirmValueOn(int threshold) {
+    return 'ВКЛ · ${threshold}G';
+  }
+
+  @override
+  String get homeConfirmValueOff => 'ВЫКЛ';
+
+  @override
+  String get homeProfileNoFallWarning =>
+      'Этот профиль НЕ обнаруживает падения. SOS должен быть активирован вручную.';
+
+  @override
+  String get homeActionApply => 'Применить';
 }

@@ -191,5 +191,16 @@
     "profileEquitation": "Equitación",
     "profileEquitationDesc": "La detección automática de caídas está DESACTIVADA — el ritmo del caballo (trote, galope) interfiere con el detector de marcha humana. El monitor de inactividad y el SOS manual te protegen durante la ruta.",
     "profileProfessional": "Profesional / Rescate",
-    "profileProfessionalDesc": "Ventana de observación ampliada a 120 segundos para uso operativo avanzado donde la recuperación tras una caída puede superar los tiempos estándar."
+    "profileProfessionalDesc": "Ventana de observación ampliada a 120 segundos para uso operativo avanzado donde la recuperación tras una caída puede superar los tiempos estándar.",
+    "homeSummaryWithImpact": "Impacto {imp}G · Observ {obs}s · GPS {gps}",
+    "homeSummaryNoImpact": "Impacto OFF · GPS {gps}",
+    "homeAlertNotArmed": "SIN ARMAR — pulsa un interruptor abajo para activar",
+    "homeAlertSensorPermDenied": "Permiso de sensores denegado",
+    "homeConfirmTitleImpact": "Detección de impactos",
+    "homeConfirmTitleObservation": "Observación",
+    "homeConfirmTitleGps": "Intervalo GPS",
+    "homeConfirmValueOn": "ON · {threshold}G",
+    "homeConfirmValueOff": "OFF",
+    "homeProfileNoFallWarning": "Este perfil NO detecta caídas. El SOS debe activarse manualmente.",
+    "homeActionApply": "Aplicar"
 }

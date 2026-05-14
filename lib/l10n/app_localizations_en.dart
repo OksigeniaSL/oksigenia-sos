@@ -629,4 +629,44 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get profileProfessionalDesc =>
       'Extended 120-second observation window for advanced operational use where recovery time after a fall may exceed standard timeouts.';
+
+  @override
+  String homeSummaryWithImpact(int imp, int obs, String gps) {
+    return 'Impact ${imp}G · Observ ${obs}s · GPS $gps';
+  }
+
+  @override
+  String homeSummaryNoImpact(String gps) {
+    return 'Impact OFF · GPS $gps';
+  }
+
+  @override
+  String get homeAlertNotArmed => 'NO ARMED — tap a toggle below to activate';
+
+  @override
+  String get homeAlertSensorPermDenied => 'Sensor permission denied';
+
+  @override
+  String get homeConfirmTitleImpact => 'Impact detection';
+
+  @override
+  String get homeConfirmTitleObservation => 'Observation';
+
+  @override
+  String get homeConfirmTitleGps => 'GPS interval';
+
+  @override
+  String homeConfirmValueOn(int threshold) {
+    return 'ON · ${threshold}G';
+  }
+
+  @override
+  String get homeConfirmValueOff => 'OFF';
+
+  @override
+  String get homeProfileNoFallWarning =>
+      'This profile does NOT detect falls. SOS must be triggered manually.';
+
+  @override
+  String get homeActionApply => 'Apply';
 }

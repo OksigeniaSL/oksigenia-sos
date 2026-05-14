@@ -191,5 +191,16 @@
     "profileEquitation": "Конный спорт",
     "profileEquitationDesc": "Автоматический детектор падений ОТКЛЮЧЁН — каденция лошади (рысь, галоп) мешает детектору человеческой ходьбы. Монитор бездействия и ручной SOS защищают во время поездки.",
     "profileProfessional": "Профессиональный / Спасение",
-    "profileProfessionalDesc": "Расширенное окно наблюдения 120 секунд для продвинутого оперативного использования, когда время восстановления после падения может превышать стандартные таймауты."
+    "profileProfessionalDesc": "Расширенное окно наблюдения 120 секунд для продвинутого оперативного использования, когда время восстановления после падения может превышать стандартные таймауты.",
+    "homeSummaryWithImpact": "Удар {imp}G · Набл {obs}с · GPS {gps}",
+    "homeSummaryNoImpact": "Удар ВЫКЛ · GPS {gps}",
+    "homeAlertNotArmed": "НЕ АКТИВИРОВАНО — нажмите переключатель ниже для активации",
+    "homeAlertSensorPermDenied": "Разрешение на датчики отклонено",
+    "homeConfirmTitleImpact": "Обнаружение ударов",
+    "homeConfirmTitleObservation": "Наблюдение",
+    "homeConfirmTitleGps": "Интервал GPS",
+    "homeConfirmValueOn": "ВКЛ · {threshold}G",
+    "homeConfirmValueOff": "ВЫКЛ",
+    "homeProfileNoFallWarning": "Этот профиль НЕ обнаруживает падения. SOS должен быть активирован вручную.",
+    "homeActionApply": "Применить"
 }

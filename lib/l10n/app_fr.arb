@@ -191,5 +191,16 @@
     "profileEquitation": "Équitation",
     "profileEquitationDesc": "La détection automatique de chute est DÉSACTIVÉE — la cadence du cheval (trot, galop) interfère avec le détecteur de marche humaine. Le moniteur d'inactivité et le SOS manuel vous protègent pendant la randonnée.",
     "profileProfessional": "Professionnel / Sauvetage",
-    "profileProfessionalDesc": "Fenêtre d'observation étendue à 120 secondes pour un usage opérationnel avancé où la récupération après une chute peut dépasser les délais standards."
+    "profileProfessionalDesc": "Fenêtre d'observation étendue à 120 secondes pour un usage opérationnel avancé où la récupération après une chute peut dépasser les délais standards.",
+    "homeSummaryWithImpact": "Impact {imp}G · Observ {obs}s · GPS {gps}",
+    "homeSummaryNoImpact": "Impact OFF · GPS {gps}",
+    "homeAlertNotArmed": "NON ARMÉ — touchez un interrupteur ci-dessous pour activer",
+    "homeAlertSensorPermDenied": "Permission capteurs refusée",
+    "homeConfirmTitleImpact": "Détection d'impacts",
+    "homeConfirmTitleObservation": "Observation",
+    "homeConfirmTitleGps": "Intervalle GPS",
+    "homeConfirmValueOn": "ON · {threshold}G",
+    "homeConfirmValueOff": "OFF",
+    "homeProfileNoFallWarning": "Ce profil NE détecte PAS les chutes. Le SOS doit être déclenché manuellement.",
+    "homeActionApply": "Appliquer"
 }

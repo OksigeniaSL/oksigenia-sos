@@ -191,5 +191,16 @@
     "profileEquitation": "Ridning",
     "profileEquitationDesc": "Automatisk falldetektering är AVSTÄNGD — hästens kadens (trav, galopp) stör detektorn för mänsklig gång. Inaktivitetsmonitor och manuellt SOS skyddar under ritten.",
     "profileProfessional": "Professionell / Räddning",
-    "profileProfessionalDesc": "Förlängt observationsfönster på 120 sekunder för avancerad operativ användning där återhämtning efter ett fall kan överskrida standardtidsgränserna."
+    "profileProfessionalDesc": "Förlängt observationsfönster på 120 sekunder för avancerad operativ användning där återhämtning efter ett fall kan överskrida standardtidsgränserna.",
+    "homeSummaryWithImpact": "Stöt {imp}G · Obs {obs}s · GPS {gps}",
+    "homeSummaryNoImpact": "Stöt AV · GPS {gps}",
+    "homeAlertNotArmed": "EJ AKTIVERAD — tryck på en knapp nedan för att aktivera",
+    "homeAlertSensorPermDenied": "Sensorbehörighet nekad",
+    "homeConfirmTitleImpact": "Stötdetektering",
+    "homeConfirmTitleObservation": "Observation",
+    "homeConfirmTitleGps": "GPS-intervall",
+    "homeConfirmValueOn": "PÅ · {threshold}G",
+    "homeConfirmValueOff": "AV",
+    "homeProfileNoFallWarning": "Denna profil upptäcker INTE fall. SOS måste utlösas manuellt.",
+    "homeActionApply": "Tillämpa"
 }

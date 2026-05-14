@@ -191,5 +191,33 @@
     "profileEquitation": "Horse riding",
     "profileEquitationDesc": "Automatic fall detection is DISABLED — horse cadence (trot, canter) interferes with the human-walk detector. The inactivity monitor and manual SOS protect during the ride.",
     "profileProfessional": "Professional / Rescue",
-    "profileProfessionalDesc": "Extended 120-second observation window for advanced operational use where recovery time after a fall may exceed standard timeouts."
+    "profileProfessionalDesc": "Extended 120-second observation window for advanced operational use where recovery time after a fall may exceed standard timeouts.",
+    "homeSummaryWithImpact": "Impact {imp}G · Observ {obs}s · GPS {gps}",
+    "@homeSummaryWithImpact": {
+        "placeholders": {
+            "imp": {"type": "int"},
+            "obs": {"type": "int"},
+            "gps": {"type": "String"}
+        }
+    },
+    "homeSummaryNoImpact": "Impact OFF · GPS {gps}",
+    "@homeSummaryNoImpact": {
+        "placeholders": {
+            "gps": {"type": "String"}
+        }
+    },
+    "homeAlertNotArmed": "NO ARMED — tap a toggle below to activate",
+    "homeAlertSensorPermDenied": "Sensor permission denied",
+    "homeConfirmTitleImpact": "Impact detection",
+    "homeConfirmTitleObservation": "Observation",
+    "homeConfirmTitleGps": "GPS interval",
+    "homeConfirmValueOn": "ON · {threshold}G",
+    "@homeConfirmValueOn": {
+        "placeholders": {
+            "threshold": {"type": "int"}
+        }
+    },
+    "homeConfirmValueOff": "OFF",
+    "homeProfileNoFallWarning": "This profile does NOT detect falls. SOS must be triggered manually.",
+    "homeActionApply": "Apply"
 }

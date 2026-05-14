@@ -191,5 +191,16 @@
     "profileEquitation": "Paardrijden",
     "profileEquitationDesc": "Automatische valdetectie is UITGESCHAKELD — de cadans van het paard (draf, galop) verstoort de detector voor menselijke loopbeweging. De inactiviteitsmonitor en handmatige SOS beschermen je tijdens de rit.",
     "profileProfessional": "Professioneel / Reddingsdienst",
-    "profileProfessionalDesc": "Verlengd observatievenster van 120 seconden voor geavanceerd operationeel gebruik waarbij herstel na een val de standaard time-outs kan overschrijden."
+    "profileProfessionalDesc": "Verlengd observatievenster van 120 seconden voor geavanceerd operationeel gebruik waarbij herstel na een val de standaard time-outs kan overschrijden.",
+    "homeSummaryWithImpact": "Impact {imp}G · Obs {obs}s · GPS {gps}",
+    "homeSummaryNoImpact": "Impact UIT · GPS {gps}",
+    "homeAlertNotArmed": "NIET GEACTIVEERD — tik hieronder op een schakelaar om te activeren",
+    "homeAlertSensorPermDenied": "Sensortoegang geweigerd",
+    "homeConfirmTitleImpact": "Impactdetectie",
+    "homeConfirmTitleObservation": "Observatie",
+    "homeConfirmTitleGps": "GPS-interval",
+    "homeConfirmValueOn": "AAN · {threshold}G",
+    "homeConfirmValueOff": "UIT",
+    "homeProfileNoFallWarning": "Dit profiel detecteert GEEN vallen. SOS moet handmatig worden geactiveerd.",
+    "homeActionApply": "Toepassen"
 }

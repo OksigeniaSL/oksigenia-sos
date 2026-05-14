@@ -625,4 +625,45 @@ class AppLocalizationsDe extends AppLocalizations {
   @override
   String get profileProfessionalDesc =>
       'Erweitertes 120-Sekunden-Beobachtungsfenster für fortgeschrittene Einsätze, bei denen die Erholungszeit nach einem Sturz die Standard-Timeouts überschreiten kann.';
+
+  @override
+  String homeSummaryWithImpact(int imp, int obs, String gps) {
+    return 'Impact ${imp}G · Beob ${obs}s · GPS $gps';
+  }
+
+  @override
+  String homeSummaryNoImpact(String gps) {
+    return 'Impact AUS · GPS $gps';
+  }
+
+  @override
+  String get homeAlertNotArmed =>
+      'NICHT BEREIT — Schalter unten antippen zum Aktivieren';
+
+  @override
+  String get homeAlertSensorPermDenied => 'Sensor-Berechtigung verweigert';
+
+  @override
+  String get homeConfirmTitleImpact => 'Aufprallerkennung';
+
+  @override
+  String get homeConfirmTitleObservation => 'Beobachtung';
+
+  @override
+  String get homeConfirmTitleGps => 'GPS-Intervall';
+
+  @override
+  String homeConfirmValueOn(int threshold) {
+    return 'AN · ${threshold}G';
+  }
+
+  @override
+  String get homeConfirmValueOff => 'AUS';
+
+  @override
+  String get homeProfileNoFallWarning =>
+      'Dieses Profil erkennt KEINE Stürze. SOS muss manuell ausgelöst werden.';
+
+  @override
+  String get homeActionApply => 'Anwenden';
 }

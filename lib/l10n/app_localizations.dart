@@ -1273,6 +1273,72 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Extended 120-second observation window for advanced operational use where recovery time after a fall may exceed standard timeouts.'**
   String get profileProfessionalDesc;
+
+  /// No description provided for @homeSummaryWithImpact.
+  ///
+  /// In en, this message translates to:
+  /// **'Impact {imp}G · Observ {obs}s · GPS {gps}'**
+  String homeSummaryWithImpact(int imp, int obs, String gps);
+
+  /// No description provided for @homeSummaryNoImpact.
+  ///
+  /// In en, this message translates to:
+  /// **'Impact OFF · GPS {gps}'**
+  String homeSummaryNoImpact(String gps);
+
+  /// No description provided for @homeAlertNotArmed.
+  ///
+  /// In en, this message translates to:
+  /// **'NO ARMED — tap a toggle below to activate'**
+  String get homeAlertNotArmed;
+
+  /// No description provided for @homeAlertSensorPermDenied.
+  ///
+  /// In en, this message translates to:
+  /// **'Sensor permission denied'**
+  String get homeAlertSensorPermDenied;
+
+  /// No description provided for @homeConfirmTitleImpact.
+  ///
+  /// In en, this message translates to:
+  /// **'Impact detection'**
+  String get homeConfirmTitleImpact;
+
+  /// No description provided for @homeConfirmTitleObservation.
+  ///
+  /// In en, this message translates to:
+  /// **'Observation'**
+  String get homeConfirmTitleObservation;
+
+  /// No description provided for @homeConfirmTitleGps.
+  ///
+  /// In en, this message translates to:
+  /// **'GPS interval'**
+  String get homeConfirmTitleGps;
+
+  /// No description provided for @homeConfirmValueOn.
+  ///
+  /// In en, this message translates to:
+  /// **'ON · {threshold}G'**
+  String homeConfirmValueOn(int threshold);
+
+  /// No description provided for @homeConfirmValueOff.
+  ///
+  /// In en, this message translates to:
+  /// **'OFF'**
+  String get homeConfirmValueOff;
+
+  /// No description provided for @homeProfileNoFallWarning.
+  ///
+  /// In en, this message translates to:
+  /// **'This profile does NOT detect falls. SOS must be triggered manually.'**
+  String get homeProfileNoFallWarning;
+
+  /// No description provided for @homeActionApply.
+  ///
+  /// In en, this message translates to:
+  /// **'Apply'**
+  String get homeActionApply;
 }
 
 class _AppLocalizationsDelegate

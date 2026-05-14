@@ -628,4 +628,45 @@ class AppLocalizationsPl extends AppLocalizations {
   @override
   String get profileProfessionalDesc =>
       'Wydłużone 120-sekundowe okno obserwacji do zaawansowanego użytku operacyjnego, gdy czas dochodzenia do siebie po upadku może przekraczać standardowe limity.';
+
+  @override
+  String homeSummaryWithImpact(int imp, int obs, String gps) {
+    return 'Uderzenie ${imp}G · Obs ${obs}s · GPS $gps';
+  }
+
+  @override
+  String homeSummaryNoImpact(String gps) {
+    return 'Uderzenie WYŁ · GPS $gps';
+  }
+
+  @override
+  String get homeAlertNotArmed =>
+      'NIEUZBROJONY — dotknij przełącznika poniżej, aby aktywować';
+
+  @override
+  String get homeAlertSensorPermDenied => 'Brak uprawnień do czujników';
+
+  @override
+  String get homeConfirmTitleImpact => 'Wykrywanie uderzeń';
+
+  @override
+  String get homeConfirmTitleObservation => 'Obserwacja';
+
+  @override
+  String get homeConfirmTitleGps => 'Interwał GPS';
+
+  @override
+  String homeConfirmValueOn(int threshold) {
+    return 'WŁ · ${threshold}G';
+  }
+
+  @override
+  String get homeConfirmValueOff => 'WYŁ';
+
+  @override
+  String get homeProfileNoFallWarning =>
+      'Ten profil NIE wykrywa upadków. SOS musi być uruchomiony ręcznie.';
+
+  @override
+  String get homeActionApply => 'Zastosuj';
 }

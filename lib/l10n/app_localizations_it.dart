@@ -635,4 +635,45 @@ class AppLocalizationsIt extends AppLocalizations {
   @override
   String get profileProfessionalDesc =>
       'Finestra di osservazione estesa a 120 secondi per uso operativo avanzato dove il recupero dopo una caduta può superare i tempi standard.';
+
+  @override
+  String homeSummaryWithImpact(int imp, int obs, String gps) {
+    return 'Impatto ${imp}G · Osserv ${obs}s · GPS $gps';
+  }
+
+  @override
+  String homeSummaryNoImpact(String gps) {
+    return 'Impatto OFF · GPS $gps';
+  }
+
+  @override
+  String get homeAlertNotArmed =>
+      'NON ARMATO — tocca un interruttore qui sotto per attivare';
+
+  @override
+  String get homeAlertSensorPermDenied => 'Permesso sensori negato';
+
+  @override
+  String get homeConfirmTitleImpact => 'Rilevamento impatti';
+
+  @override
+  String get homeConfirmTitleObservation => 'Osservazione';
+
+  @override
+  String get homeConfirmTitleGps => 'Intervallo GPS';
+
+  @override
+  String homeConfirmValueOn(int threshold) {
+    return 'ON · ${threshold}G';
+  }
+
+  @override
+  String get homeConfirmValueOff => 'OFF';
+
+  @override
+  String get homeProfileNoFallWarning =>
+      'Questo profilo NON rileva cadute. Il SOS deve essere attivato manualmente.';
+
+  @override
+  String get homeActionApply => 'Applica';
 }

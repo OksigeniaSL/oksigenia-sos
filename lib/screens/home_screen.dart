@@ -793,7 +793,7 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver, Ti
       icon = Icons.sms_failed_outlined;
     } else if (!_sosLogic.sensorsPermissionOk) {
       level = _AlertLevel.critical;
-      text = "Sensor permission denied";
+      text = l10n.homeAlertSensorPermDenied;
       icon = Icons.sensors_off;
     } else if (!_sosLogic.batteryOptimizationOk) {
       level = _AlertLevel.warning;
@@ -806,7 +806,7 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver, Ti
       icon = Icons.warning_amber_rounded;
     } else if (!monitoring) {
       level = _AlertLevel.warning;
-      text = "NO ARMED — tap a toggle below to activate";
+      text = l10n.homeAlertNotArmed;
       icon = Icons.shield_outlined;
     }
 
@@ -916,27 +916,20 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver, Ti
   // Compact one-line summary of what the profile actually does, shown under the
   // hero label so the user can verify behavior at a glance — the missing-signal
   // that caused the wrong-profile incident on 2026-05-13.
-  String _profileSummary(ActivityProfile p) {
+  String _profileSummary(AppLocalizations l10n, ActivityProfile p) {
     final cfg = activityProfileConfigs[p]!;
-    final List<String> parts = [];
+    final String gps = cfg.gpsIntervalSeconds < 60
+        ? "${cfg.gpsIntervalSeconds}s"
+        : "${cfg.gpsIntervalSeconds ~/ 60}m";
 
-    if (cfg.impactDetectionEnabled) {
-      parts.add("Impact ${cfg.yellowThreshold.toStringAsFixed(0)}G");
-    } else {
-      parts.add("Impact OFF");
+    if (!cfg.impactDetectionEnabled) {
+      return l10n.homeSummaryNoImpact(gps);
     }
-
-    if (cfg.observationSeconds > 0) {
-      parts.add("Observ ${cfg.observationSeconds}s");
-    }
-
-    if (cfg.gpsIntervalSeconds < 60) {
-      parts.add("GPS ${cfg.gpsIntervalSeconds}s");
-    } else {
-      parts.add("GPS ${cfg.gpsIntervalSeconds ~/ 60}m");
-    }
-
-    return parts.join(" · ");
+    return l10n.homeSummaryWithImpact(
+      cfg.yellowThreshold.toInt(),
+      cfg.observationSeconds,
+      gps,
+    );
   }
 
   Widget _buildProfileHero(AppLocalizations l10n) {
@@ -985,7 +978,7 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver, Ti
                           ],
                           Expanded(
                             child: Text(
-                              _profileSummary(current),
+                              _profileSummary(l10n, current),
                               style: TextStyle(
                                 color: hasImpact
                                     ? Colors.white70
@@ -1142,12 +1135,14 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver, Ti
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            _kv("Impact detection",
-                hasImpact ? "ON · ${cfg.yellowThreshold.toStringAsFixed(0)}G" : "OFF",
+            _kv(l10n.homeConfirmTitleImpact,
+                hasImpact
+                    ? l10n.homeConfirmValueOn(cfg.yellowThreshold.toInt())
+                    : l10n.homeConfirmValueOff,
                 emphasize: !hasImpact),
             if (hasImpact)
-              _kv("Observation", "${cfg.observationSeconds}s"),
-            _kv("GPS interval",
+              _kv(l10n.homeConfirmTitleObservation, "${cfg.observationSeconds}s"),
+            _kv(l10n.homeConfirmTitleGps,
                 cfg.gpsIntervalSeconds < 60
                     ? "${cfg.gpsIntervalSeconds}s"
                     : "${cfg.gpsIntervalSeconds ~/ 60}min"),
@@ -1160,16 +1155,16 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver, Ti
                   border: Border.all(color: Colors.orangeAccent, width: 1),
                   borderRadius: BorderRadius.circular(8),
                 ),
-                child: const Row(
+                child: Row(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Icon(Icons.warning_amber_rounded,
+                    const Icon(Icons.warning_amber_rounded,
                         color: Colors.orangeAccent, size: 20),
-                    SizedBox(width: 8),
+                    const SizedBox(width: 8),
                     Expanded(
                       child: Text(
-                        "This profile does NOT detect falls. SOS must be triggered manually.",
-                        style: TextStyle(
+                        l10n.homeProfileNoFallWarning,
+                        style: const TextStyle(
                             color: Colors.orangeAccent,
                             fontSize: 13,
                             fontWeight: FontWeight.w600),
@@ -1184,8 +1179,8 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver, Ti
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(ctx, false),
-            child: const Text("CANCEL",
-                style: TextStyle(color: Colors.white70)),
+            child: Text(l10n.alertCancel,
+                style: const TextStyle(color: Colors.white70)),
           ),
           ElevatedButton(
             style: ElevatedButton.styleFrom(
@@ -1193,8 +1188,8 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver, Ti
               foregroundColor: Colors.white,
             ),
             onPressed: () => Navigator.pop(ctx, true),
-            child: const Text("APPLY",
-                style: TextStyle(fontWeight: FontWeight.bold)),
+            child: Text(l10n.homeActionApply.toUpperCase(),
+                style: const TextStyle(fontWeight: FontWeight.bold)),
           ),
         ],
       ),

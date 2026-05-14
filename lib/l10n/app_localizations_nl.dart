@@ -632,4 +632,45 @@ class AppLocalizationsNl extends AppLocalizations {
   @override
   String get profileProfessionalDesc =>
       'Verlengd observatievenster van 120 seconden voor geavanceerd operationeel gebruik waarbij herstel na een val de standaard time-outs kan overschrijden.';
+
+  @override
+  String homeSummaryWithImpact(int imp, int obs, String gps) {
+    return 'Impact ${imp}G · Obs ${obs}s · GPS $gps';
+  }
+
+  @override
+  String homeSummaryNoImpact(String gps) {
+    return 'Impact UIT · GPS $gps';
+  }
+
+  @override
+  String get homeAlertNotArmed =>
+      'NIET GEACTIVEERD — tik hieronder op een schakelaar om te activeren';
+
+  @override
+  String get homeAlertSensorPermDenied => 'Sensortoegang geweigerd';
+
+  @override
+  String get homeConfirmTitleImpact => 'Impactdetectie';
+
+  @override
+  String get homeConfirmTitleObservation => 'Observatie';
+
+  @override
+  String get homeConfirmTitleGps => 'GPS-interval';
+
+  @override
+  String homeConfirmValueOn(int threshold) {
+    return 'AAN · ${threshold}G';
+  }
+
+  @override
+  String get homeConfirmValueOff => 'UIT';
+
+  @override
+  String get homeProfileNoFallWarning =>
+      'Dit profiel detecteert GEEN vallen. SOS moet handmatig worden geactiveerd.';
+
+  @override
+  String get homeActionApply => 'Toepassen';
 }

@@ -191,5 +191,16 @@
     "profileEquitation": "Jeździectwo",
     "profileEquitationDesc": "Automatyczne wykrywanie upadku jest WYŁĄCZONE — kadencja konia (kłus, galop) zakłóca detektor ludzkiego chodu. Monitor bezruchu i ręczne SOS chronią podczas jazdy.",
     "profileProfessional": "Profesjonalny / Ratownictwo",
-    "profileProfessionalDesc": "Wydłużone 120-sekundowe okno obserwacji do zaawansowanego użytku operacyjnego, gdy czas dochodzenia do siebie po upadku może przekraczać standardowe limity."
+    "profileProfessionalDesc": "Wydłużone 120-sekundowe okno obserwacji do zaawansowanego użytku operacyjnego, gdy czas dochodzenia do siebie po upadku może przekraczać standardowe limity.",
+    "homeSummaryWithImpact": "Uderzenie {imp}G · Obs {obs}s · GPS {gps}",
+    "homeSummaryNoImpact": "Uderzenie WYŁ · GPS {gps}",
+    "homeAlertNotArmed": "NIEUZBROJONY — dotknij przełącznika poniżej, aby aktywować",
+    "homeAlertSensorPermDenied": "Brak uprawnień do czujników",
+    "homeConfirmTitleImpact": "Wykrywanie uderzeń",
+    "homeConfirmTitleObservation": "Obserwacja",
+    "homeConfirmTitleGps": "Interwał GPS",
+    "homeConfirmValueOn": "WŁ · {threshold}G",
+    "homeConfirmValueOff": "WYŁ",
+    "homeProfileNoFallWarning": "Ten profil NIE wykrywa upadków. SOS musi być uruchomiony ręcznie.",
+    "homeActionApply": "Zastosuj"
 }
