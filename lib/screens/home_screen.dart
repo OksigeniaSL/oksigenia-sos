@@ -246,14 +246,16 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver, Ti
 
             const SizedBox(height: 10),
 
-            // STATUS PILL — enriched priority display
-            _buildStatusPill(l10n),
+            // ACTIVITY PROFILE HERO — the screen's primary anchor. Tells the
+            // user at a glance what mode is armed and what it does. Replaces
+            // the old three-pill header so the most important configuration
+            // can't blend in with auxiliary state.
+            _buildProfileHero(l10n),
 
-            // SENTINEL STATE BADGE — visible only when monitoring is active
-            _buildSentinelBadge(l10n),
-
-            // ACTIVITY PROFILE CHIP — discoverable + tappable to change
-            _buildProfileChip(l10n),
+            // ALERT BANNER — single conditional row covering permissions,
+            // monitoring-off (NO ARMED), and sentinel state. Silent when all
+            // is well; loud only when something needs attention.
+            _buildAlertBanner(l10n),
 
             // LIVE TRACKING CARD — arriba para separarlo del Stop y el SOS
             _buildLiveTrackingCard(l10n),
@@ -758,121 +760,109 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver, Ti
     );
   }
 
-  Widget _buildStatusPill(AppLocalizations l10n) {
-    String text;
-    Color color;
-    bool monitoring = _sosLogic.isFallDetectionActive || _sosLogic.isInactivityMonitorActive;
+  // Single conditional banner — replaces the old StatusPill + SentinelBadge
+  // pair. Stays silent when everything is fine (the hero card already proves
+  // the app is configured). Shouts only when there's something to act on:
+  // missing permissions, monitoring off (NO ARMED), or sentinel in yellow/
+  // orange/red. Ordered by criticality so the most urgent wins on conflicts.
+  Widget _buildAlertBanner(AppLocalizations l10n) {
+    final bool monitoring =
+        _sosLogic.isFallDetectionActive || _sosLogic.isInactivityMonitorActive;
 
-    if (!_sosLogic.batteryOptimizationOk) {
-      text = "⚡ ${l10n.batteryDialogTitle}";
-      color = Colors.orange;
-    } else if (!_sosLogic.smsPermissionOk) {
-      text = "⚠ ${l10n.permSmsMissing}";
-      color = Colors.red;
-    } else if (!_sosLogic.fullScreenIntentOk) {
-      text = "⚠ ${l10n.fullScreenIntentTitle}";
-      color = Colors.orange;
-    } else if (_sosLogic.status == SOSStatus.preAlert) {
+    _AlertLevel? level;
+    String text = '';
+    IconData icon = Icons.info_outline;
+    VoidCallback? onTap;
+
+    // Order matters: emergency > permissions > sentinel state > idle.
+    if (_sosLogic.status == SOSStatus.preAlert) {
+      level = _AlertLevel.critical;
       text = "🚨 SOS";
-      color = Colors.red;
+      icon = Icons.emergency_rounded;
     } else if (_sosLogic.sentinelState == SentinelState.orange) {
-      text = "🟠 ${l10n.sentinelOrange}";
-      color = Colors.orange;
+      level = _AlertLevel.critical;
+      text = l10n.sentinelOrange;
+      icon = Icons.notification_important_rounded;
     } else if (_sosLogic.sentinelState == SentinelState.yellow) {
-      text = "🟡 ${l10n.sentinelYellow}";
-      color = Colors.amber;
-    } else if (monitoring && _sosLogic.status == SOSStatus.locationFixed) {
-      text = "✓ ${l10n.statusLocationFixed}";
-      color = Colors.green;
-    } else if (monitoring) {
-      text = "⏳ ${l10n.statusConnecting}";
-      color = Colors.yellow;
-    } else if (_sosLogic.status == SOSStatus.locationFixed) {
-      text = l10n.statusLocationFixed;
-      color = Colors.green;
-    } else if (_sosLogic.status == SOSStatus.scanning) {
-      text = l10n.statusConnecting;
-      color = Colors.grey;
-    } else {
-      text = l10n.statusReady;
-      color = Colors.grey;
+      level = _AlertLevel.warning;
+      text = l10n.sentinelYellow;
+      icon = Icons.warning_amber_rounded;
+    } else if (!_sosLogic.smsPermissionOk) {
+      level = _AlertLevel.critical;
+      text = l10n.permSmsMissing;
+      icon = Icons.sms_failed_outlined;
+    } else if (!_sosLogic.sensorsPermissionOk) {
+      level = _AlertLevel.critical;
+      text = "Sensor permission denied";
+      icon = Icons.sensors_off;
+    } else if (!_sosLogic.batteryOptimizationOk) {
+      level = _AlertLevel.warning;
+      text = l10n.batteryDialogTitle;
+      icon = Icons.battery_alert;
+      onTap = () => _showBatteryDialog(context, l10n);
+    } else if (!_sosLogic.fullScreenIntentOk) {
+      level = _AlertLevel.warning;
+      text = l10n.fullScreenIntentTitle;
+      icon = Icons.warning_amber_rounded;
+    } else if (!monitoring) {
+      level = _AlertLevel.warning;
+      text = "NO ARMED — tap a toggle below to activate";
+      icon = Icons.shield_outlined;
     }
 
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 8),
+    if (level == null) return const SizedBox.shrink();
+
+    final Color color = level == _AlertLevel.critical
+        ? Colors.redAccent
+        : Colors.orangeAccent;
+
+    final Widget banner = Container(
+      width: double.infinity,
+      margin: const EdgeInsets.symmetric(horizontal: 20, vertical: 6),
+      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 11),
       decoration: BoxDecoration(
-        color: color.withOpacity(0.1),
-        borderRadius: BorderRadius.circular(20),
-        border: Border.all(color: color),
+        color: color.withOpacity(0.12),
+        borderRadius: BorderRadius.circular(10),
+        border: Border.all(color: color.withOpacity(0.65), width: 1.5),
       ),
-      child: Text(
-        text,
-        style: TextStyle(color: color, fontWeight: FontWeight.bold),
-      ),
-    );
-  }
-
-  Widget _buildSentinelBadge(AppLocalizations l10n) {
-    final bool monitoring = _sosLogic.isFallDetectionActive || _sosLogic.isInactivityMonitorActive;
-    if (!monitoring) return const SizedBox.shrink();
-
-    final SentinelState state = _sosLogic.sentinelState;
-    final Color color = _sosLogic.sentinelColor;
-
-    final IconData icon;
-    final String label;
-    switch (state) {
-      case SentinelState.yellow:
-        icon = Icons.warning_amber_rounded;
-        label = l10n.sentinelYellow;
-      case SentinelState.orange:
-        icon = Icons.notification_important_rounded;
-        label = l10n.sentinelOrange;
-      case SentinelState.red:
-        icon = Icons.emergency_rounded;
-        label = l10n.sentinelRed;
-      case SentinelState.green:
-        icon = Icons.shield_rounded;
-        label = l10n.sentinelGreen;
-    }
-
-    return AnimatedBuilder(
-      animation: _pulseController,
-      builder: (context, child) {
-        final double opacity = (state == SentinelState.yellow || state == SentinelState.orange)
-            ? 0.65 + (_pulseController.value * 0.35)
-            : 1.0;
-        return Opacity(
-          opacity: opacity,
-          child: Container(
-            margin: const EdgeInsets.symmetric(horizontal: 30, vertical: 6),
-            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 9),
-            decoration: BoxDecoration(
-              color: color.withOpacity(0.08),
-              borderRadius: BorderRadius.circular(10),
-              border: Border.all(color: color.withOpacity(0.5), width: 1.5),
-            ),
-            child: Row(
-              mainAxisSize: MainAxisSize.min,
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                Icon(icon, color: color, size: 18),
-                const SizedBox(width: 8),
-                Text(
-                  label,
-                  style: TextStyle(
-                    color: color,
-                    fontWeight: FontWeight.bold,
-                    fontSize: 13,
-                    letterSpacing: state == SentinelState.red ? 1.2 : 0,
-                  ),
-                ),
-              ],
+      child: Row(
+        children: [
+          Icon(icon, color: color, size: 20),
+          const SizedBox(width: 10),
+          Expanded(
+            child: Text(
+              text,
+              style: TextStyle(
+                color: color,
+                fontWeight: FontWeight.bold,
+                fontSize: 13,
+                letterSpacing: 0.3,
+              ),
             ),
           ),
-        );
-      },
+        ],
+      ),
     );
+
+    // Pulse only the truly urgent ones; warnings stay calm.
+    if (level == _AlertLevel.critical) {
+      return AnimatedBuilder(
+        animation: _pulseController,
+        builder: (context, child) {
+          return Opacity(
+            opacity: 0.7 + (_pulseController.value * 0.3),
+            child: onTap != null
+                ? InkWell(onTap: onTap, child: child)
+                : child,
+          );
+        },
+        child: banner,
+      );
+    }
+
+    return onTap != null
+        ? InkWell(onTap: onTap, child: banner)
+        : banner;
   }
 
   IconData _profileIcon(ActivityProfile p) {
@@ -923,40 +913,96 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver, Ti
     }
   }
 
-  Widget _buildProfileChip(AppLocalizations l10n) {
+  // Compact one-line summary of what the profile actually does, shown under the
+  // hero label so the user can verify behavior at a glance — the missing-signal
+  // that caused the wrong-profile incident on 2026-05-13.
+  String _profileSummary(ActivityProfile p) {
+    final cfg = activityProfileConfigs[p]!;
+    final List<String> parts = [];
+
+    if (cfg.impactDetectionEnabled) {
+      parts.add("Impact ${cfg.yellowThreshold.toStringAsFixed(0)}G");
+    } else {
+      parts.add("Impact OFF");
+    }
+
+    if (cfg.observationSeconds > 0) {
+      parts.add("Observ ${cfg.observationSeconds}s");
+    }
+
+    if (cfg.gpsIntervalSeconds < 60) {
+      parts.add("GPS ${cfg.gpsIntervalSeconds}s");
+    } else {
+      parts.add("GPS ${cfg.gpsIntervalSeconds ~/ 60}m");
+    }
+
+    return parts.join(" · ");
+  }
+
+  Widget _buildProfileHero(AppLocalizations l10n) {
     final ActivityProfile current = PreferencesService().getActivityProfile();
     final Color accent = _profileColor(current);
+    final bool hasImpact = activityProfileConfigs[current]!.impactDetectionEnabled;
 
     return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 4),
+      padding: const EdgeInsets.fromLTRB(20, 4, 20, 8),
       child: Material(
         color: Colors.transparent,
         child: InkWell(
           onTap: () => _showProfilePicker(l10n),
-          borderRadius: BorderRadius.circular(20),
+          borderRadius: BorderRadius.circular(14),
           child: Container(
-            padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 7),
+            padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 14),
             decoration: BoxDecoration(
-              color: accent.withOpacity(0.14),
-              borderRadius: BorderRadius.circular(20),
-              border: Border.all(color: accent.withOpacity(0.55), width: 1),
+              color: accent.withOpacity(0.10),
+              borderRadius: BorderRadius.circular(14),
+              border: Border.all(color: accent.withOpacity(0.55), width: 1.5),
             ),
             child: Row(
-              mainAxisSize: MainAxisSize.min,
               children: [
-                Icon(_profileIcon(current), size: 18, color: accent),
-                const SizedBox(width: 8),
-                Text(
-                  _profileLabel(l10n, current),
-                  style: TextStyle(
-                    color: accent,
-                    fontSize: 13,
-                    fontWeight: FontWeight.w600,
-                    letterSpacing: 0.2,
+                Icon(_profileIcon(current), size: 36, color: accent),
+                const SizedBox(width: 14),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        _profileLabel(l10n, current).toUpperCase(),
+                        style: TextStyle(
+                          color: accent,
+                          fontSize: 17,
+                          fontWeight: FontWeight.w700,
+                          letterSpacing: 0.6,
+                        ),
+                      ),
+                      const SizedBox(height: 4),
+                      Row(
+                        children: [
+                          if (!hasImpact) ...[
+                            const Icon(Icons.warning_amber_rounded,
+                                size: 14, color: Colors.orangeAccent),
+                            const SizedBox(width: 4),
+                          ],
+                          Expanded(
+                            child: Text(
+                              _profileSummary(current),
+                              style: TextStyle(
+                                color: hasImpact
+                                    ? Colors.white70
+                                    : Colors.orangeAccent,
+                                fontSize: 12.5,
+                                fontWeight: hasImpact
+                                    ? FontWeight.w400
+                                    : FontWeight.w600,
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ],
                   ),
                 ),
-                const SizedBox(width: 4),
-                Icon(Icons.expand_more, size: 18, color: accent.withOpacity(0.85)),
+                Icon(Icons.expand_more, size: 26, color: accent.withOpacity(0.85)),
               ],
             ),
           ),
@@ -967,7 +1013,7 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver, Ti
 
   Future<void> _showProfilePicker(AppLocalizations l10n) async {
     final ActivityProfile current = PreferencesService().getActivityProfile();
-    await showModalBottomSheet<void>(
+    final ActivityProfile? picked = await showModalBottomSheet<ActivityProfile>(
       context: context,
       backgroundColor: Colors.grey[900],
       isScrollControlled: true,
@@ -1001,14 +1047,7 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver, Ti
                 final bool selected = p == current;
                 final Color rowAccent = _profileColor(p);
                 return InkWell(
-                  onTap: () async {
-                    await PreferencesService().saveActivityProfile(p);
-                    if (mounted) {
-                      await _sosLogic.reapplyMonitoringConfig();
-                      setState(() {});
-                    }
-                    if (ctx.mounted) Navigator.pop(ctx);
-                  },
+                  onTap: () => Navigator.pop(ctx, p),
                   child: Container(
                     padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
                     color: selected ? rowAccent.withOpacity(0.10) : null,
@@ -1054,6 +1093,138 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver, Ti
             ],
           ),
         ),
+      ),
+    );
+
+    if (picked == null || picked == current || !mounted) return;
+
+    final bool confirmed = await _confirmProfileSwitch(l10n, picked);
+    if (!confirmed || !mounted) return;
+
+    await PreferencesService().saveActivityProfile(picked);
+    if (!mounted) return;
+    await _sosLogic.reapplyMonitoringConfig();
+    if (mounted) setState(() {});
+  }
+
+  // Confirmation dialog shown when the user picks a different profile from
+  // the bottom sheet. Profiles without impact detection
+  // (paragliding/kayak/equitation) get a high-contrast warning since the user
+  // is silently giving up automatic fall detection.
+  Future<bool> _confirmProfileSwitch(
+      AppLocalizations l10n, ActivityProfile target) async {
+    final cfg = activityProfileConfigs[target]!;
+    final Color accent = _profileColor(target);
+    final bool hasImpact = cfg.impactDetectionEnabled;
+
+    final result = await showDialog<bool>(
+      context: context,
+      barrierDismissible: true,
+      builder: (ctx) => AlertDialog(
+        backgroundColor: Colors.grey[900],
+        title: Row(
+          children: [
+            Icon(_profileIcon(target), color: accent, size: 28),
+            const SizedBox(width: 12),
+            Expanded(
+              child: Text(
+                _profileLabel(l10n, target).toUpperCase(),
+                style: TextStyle(
+                    color: accent,
+                    fontSize: 18,
+                    fontWeight: FontWeight.w700,
+                    letterSpacing: 0.5),
+              ),
+            ),
+          ],
+        ),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            _kv("Impact detection",
+                hasImpact ? "ON · ${cfg.yellowThreshold.toStringAsFixed(0)}G" : "OFF",
+                emphasize: !hasImpact),
+            if (hasImpact)
+              _kv("Observation", "${cfg.observationSeconds}s"),
+            _kv("GPS interval",
+                cfg.gpsIntervalSeconds < 60
+                    ? "${cfg.gpsIntervalSeconds}s"
+                    : "${cfg.gpsIntervalSeconds ~/ 60}min"),
+            if (!hasImpact) ...[
+              const SizedBox(height: 14),
+              Container(
+                padding: const EdgeInsets.all(10),
+                decoration: BoxDecoration(
+                  color: Colors.orangeAccent.withOpacity(0.12),
+                  border: Border.all(color: Colors.orangeAccent, width: 1),
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                child: const Row(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Icon(Icons.warning_amber_rounded,
+                        color: Colors.orangeAccent, size: 20),
+                    SizedBox(width: 8),
+                    Expanded(
+                      child: Text(
+                        "This profile does NOT detect falls. SOS must be triggered manually.",
+                        style: TextStyle(
+                            color: Colors.orangeAccent,
+                            fontSize: 13,
+                            fontWeight: FontWeight.w600),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ],
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(ctx, false),
+            child: const Text("CANCEL",
+                style: TextStyle(color: Colors.white70)),
+          ),
+          ElevatedButton(
+            style: ElevatedButton.styleFrom(
+              backgroundColor: accent,
+              foregroundColor: Colors.white,
+            ),
+            onPressed: () => Navigator.pop(ctx, true),
+            child: const Text("APPLY",
+                style: TextStyle(fontWeight: FontWeight.bold)),
+          ),
+        ],
+      ),
+    );
+    return result ?? false;
+  }
+
+  Widget _kv(String k, String v, {bool emphasize = false}) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 4),
+      child: Row(
+        children: [
+          Expanded(
+            flex: 3,
+            child: Text(k,
+                style: const TextStyle(color: Colors.white60, fontSize: 14)),
+          ),
+          Expanded(
+            flex: 2,
+            child: Text(
+              v,
+              textAlign: TextAlign.right,
+              style: TextStyle(
+                color: emphasize ? Colors.orangeAccent : Colors.white,
+                fontSize: 14,
+                fontWeight: emphasize ? FontWeight.w700 : FontWeight.w500,
+              ),
+            ),
+          ),
+        ],
       ),
     );
   }
@@ -1343,3 +1514,5 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver, Ti
         action: SnackBarAction(label: "OK", textColor: Colors.white, onPressed: () { ScaffoldMessenger.of(context).clearSnackBars(); })));
   }
 }
+
+enum _AlertLevel { warning, critical }
