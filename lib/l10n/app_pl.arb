@@ -180,6 +180,8 @@
     "activityProfileSubtitle": "Dostosowuje wykrywanie Smart Sentinel do twojego sportu. Wybierz najbliższe dopasowanie — niewłaściwe profile powodują fałszywe alarmy lub przegapiają prawdziwe upadki.",
     "profileTrekking": "Trekking / Wędrówki",
     "profileTrekkingDesc": "Domyślny. Chodzenie na zewnątrz z telefonem w kieszeni lub plecaku. Zrównoważona czułość.",
+    "profileRunning": "Bieganie (asfalt)",
+    "profileRunningDesc": "Bieganie po asfalcie lub twardej nawierzchni. Wyższy próg uderzenia (10G) i adaptacyjny detektor kadencji — radzi sobie z utrzymującym się poziomym reżimem G biegu, który łamie standardowy detektor kadencji.",
     "profileTrailMtb": "Trail running / MTB",
     "profileTrailMtbDesc": "Wyższy próg uderzenia i bardziej tolerancyjna kadencja — stałe wibracje na nierównym terenie powodowałyby fałszywe alarmy.",
     "profileMountaineering": "Alpinizm",

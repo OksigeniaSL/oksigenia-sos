@@ -589,6 +589,13 @@ class AppLocalizationsEn extends AppLocalizations {
       'Default. Walking outdoors with the phone in a pocket or backpack. Balanced sensitivity.';
 
   @override
+  String get profileRunning => 'Running (road)';
+
+  @override
+  String get profileRunningDesc =>
+      'Road running on asphalt or hard pavement. Higher impact threshold (10G) and adaptive cadence detector — handles the persistent horizontal-G of running gait that breaks the walk-baseline cadence check.';
+
+  @override
   String get profileTrailMtb => 'Trail running / MTB';
 
   @override

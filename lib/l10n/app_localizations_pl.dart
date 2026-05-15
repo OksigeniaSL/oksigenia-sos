@@ -588,6 +588,13 @@ class AppLocalizationsPl extends AppLocalizations {
       'Domyślny. Chodzenie na zewnątrz z telefonem w kieszeni lub plecaku. Zrównoważona czułość.';
 
   @override
+  String get profileRunning => 'Bieganie (asfalt)';
+
+  @override
+  String get profileRunningDesc =>
+      'Bieganie po asfalcie lub twardej nawierzchni. Wyższy próg uderzenia (10G) i adaptacyjny detektor kadencji — radzi sobie z utrzymującym się poziomym reżimem G biegu, który łamie standardowy detektor kadencji.';
+
+  @override
   String get profileTrailMtb => 'Trail running / MTB';
 
   @override

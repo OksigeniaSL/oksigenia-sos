@@ -590,6 +590,13 @@ class AppLocalizationsSv extends AppLocalizations {
       'Standard. Vandring utomhus med telefonen i ficka eller ryggsäck. Balanserad känslighet.';
 
   @override
+  String get profileRunning => 'Löpning (väg)';
+
+  @override
+  String get profileRunningDesc =>
+      'Löpning på asfalt eller hård beläggning. Högre stöttröskel (10G) och adaptiv kadensdetektor — hanterar löpningens ihållande horisontella G-regim som bryter standardkadensdetektorn.';
+
+  @override
   String get profileTrailMtb => 'Trail / MTB';
 
   @override

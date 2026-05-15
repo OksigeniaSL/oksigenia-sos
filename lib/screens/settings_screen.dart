@@ -164,6 +164,7 @@ class _SettingsScreenState extends State<SettingsScreen> with WidgetsBindingObse
   String _profileLabel(AppLocalizations l10n, ActivityProfile p) {
     switch (p) {
       case ActivityProfile.trekking: return l10n.profileTrekking;
+      case ActivityProfile.running: return l10n.profileRunning;
       case ActivityProfile.trailMtb: return l10n.profileTrailMtb;
       case ActivityProfile.mountaineering: return l10n.profileMountaineering;
       case ActivityProfile.paragliding: return l10n.profileParagliding;
@@ -176,6 +177,7 @@ class _SettingsScreenState extends State<SettingsScreen> with WidgetsBindingObse
   String _profileDescription(AppLocalizations l10n, ActivityProfile p) {
     switch (p) {
       case ActivityProfile.trekking: return l10n.profileTrekkingDesc;
+      case ActivityProfile.running: return l10n.profileRunningDesc;
       case ActivityProfile.trailMtb: return l10n.profileTrailMtbDesc;
       case ActivityProfile.mountaineering: return l10n.profileMountaineeringDesc;
       case ActivityProfile.paragliding: return l10n.profileParaglidingDesc;

@@ -585,6 +585,13 @@ class AppLocalizationsDe extends AppLocalizations {
       'Standard. Outdoor-Wandern mit dem Handy in Tasche oder Rucksack. Ausgewogene Empfindlichkeit.';
 
   @override
+  String get profileRunning => 'Running (Straße)';
+
+  @override
+  String get profileRunningDesc =>
+      'Laufen auf Asphalt oder hartem Belag. Höhere Aufprallschwelle (10G) und adaptiver Kadenz-Detektor — bewältigt den anhaltenden horizontalen G-Modus des Laufens, der den Standard-Kadenz-Detektor stört.';
+
+  @override
   String get profileTrailMtb => 'Trail / MTB';
 
   @override

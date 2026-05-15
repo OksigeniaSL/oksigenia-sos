@@ -588,6 +588,13 @@ class AppLocalizationsFr extends AppLocalizations {
       'Par défaut. Marcher en plein air avec le téléphone en poche ou dans un sac à dos. Sensibilité équilibrée.';
 
   @override
+  String get profileRunning => 'Running (route)';
+
+  @override
+  String get profileRunningDesc =>
+      'Course sur asphalte ou revêtement dur. Seuil d\'impact plus élevé (10G) et détecteur de cadence adaptatif — gère le régime soutenu de la force horizontale du running qui casse le détecteur de cadence standard.';
+
+  @override
   String get profileTrailMtb => 'Trail / VTT';
 
   @override

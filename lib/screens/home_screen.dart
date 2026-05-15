@@ -868,6 +868,7 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver, Ti
   IconData _profileIcon(ActivityProfile p) {
     switch (p) {
       case ActivityProfile.trekking: return Icons.hiking;
+      case ActivityProfile.running: return Icons.directions_run;
       case ActivityProfile.trailMtb: return Icons.directions_bike;
       case ActivityProfile.mountaineering: return Icons.terrain;
       case ActivityProfile.paragliding: return Icons.paragliding;
@@ -880,6 +881,7 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver, Ti
   Color _profileColor(ActivityProfile p) {
     switch (p) {
       case ActivityProfile.trekking: return const Color(0xFF66BB6A); // green — baseline outdoors
+      case ActivityProfile.running: return const Color(0xFFEC407A); // pink — road running
       case ActivityProfile.trailMtb: return const Color(0xFFFF9800); // orange — high energy
       case ActivityProfile.mountaineering: return const Color(0xFF42A5F5); // blue — alpine
       case ActivityProfile.paragliding: return const Color(0xFFAB47BC); // purple — flight
@@ -892,6 +894,7 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver, Ti
   String _profileLabel(AppLocalizations l10n, ActivityProfile p) {
     switch (p) {
       case ActivityProfile.trekking: return l10n.profileTrekking;
+      case ActivityProfile.running: return l10n.profileRunning;
       case ActivityProfile.trailMtb: return l10n.profileTrailMtb;
       case ActivityProfile.mountaineering: return l10n.profileMountaineering;
       case ActivityProfile.paragliding: return l10n.profileParagliding;
@@ -904,6 +907,7 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver, Ti
   String _profileDescription(AppLocalizations l10n, ActivityProfile p) {
     switch (p) {
       case ActivityProfile.trekking: return l10n.profileTrekkingDesc;
+      case ActivityProfile.running: return l10n.profileRunningDesc;
       case ActivityProfile.trailMtb: return l10n.profileTrailMtbDesc;
       case ActivityProfile.mountaineering: return l10n.profileMountaineeringDesc;
       case ActivityProfile.paragliding: return l10n.profileParaglidingDesc;

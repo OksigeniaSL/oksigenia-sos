@@ -590,6 +590,13 @@ class AppLocalizationsEs extends AppLocalizations {
       'Por defecto. Caminar al aire libre con el móvil en bolsillo o mochila. Sensibilidad equilibrada.';
 
   @override
+  String get profileRunning => 'Running (asfalto)';
+
+  @override
+  String get profileRunningDesc =>
+      'Correr en asfalto o pavimento duro. Umbral de impacto más alto (10G) y detector de cadencia adaptativo — gestiona el régimen sostenido de fuerza horizontal del running que rompe el detector de cadencia estándar.';
+
+  @override
   String get profileTrailMtb => 'Trail / MTB';
 
   @override

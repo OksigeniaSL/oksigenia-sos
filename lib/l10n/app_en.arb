@@ -180,6 +180,8 @@
     "activityProfileSubtitle": "Tunes Smart Sentinel detection to your sport. Choose the closest match — wrong profiles cause false alarms or miss real falls.",
     "profileTrekking": "Trekking / Hiking",
     "profileTrekkingDesc": "Default. Walking outdoors with the phone in a pocket or backpack. Balanced sensitivity.",
+    "profileRunning": "Running (road)",
+    "profileRunningDesc": "Road running on asphalt or hard pavement. Higher impact threshold (10G) and adaptive cadence detector — handles the persistent horizontal-G of running gait that breaks the walk-baseline cadence check.",
     "profileTrailMtb": "Trail running / MTB",
     "profileTrailMtbDesc": "Higher impact threshold and more permissive cadence — constant vibration on uneven ground would otherwise trigger false alarms.",
     "profileMountaineering": "Mountaineering",

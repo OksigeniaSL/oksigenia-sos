@@ -180,6 +180,8 @@
     "activityProfileSubtitle": "Tilpasser Smart Sentinel-deteksjon til sporten din. Velg det nærmeste — feil profil gir falske alarmer eller overser ekte fall.",
     "profileTrekking": "Tursti / Fjelltur",
     "profileTrekkingDesc": "Standard. Gange ute med telefonen i lomme eller sekk. Balansert følsomhet.",
+    "profileRunning": "Løping (asfalt)",
+    "profileRunningDesc": "Løping på asfalt eller hardt underlag. Høyere støtterskel (10G) og adaptiv kadensdetektor — håndterer det vedvarende horisontale G-regimet i løping som bryter standardkadensdetektoren.",
     "profileTrailMtb": "Stiløping / MTB",
     "profileTrailMtbDesc": "Høyere støtterskel og mer tolerant kadens — konstant vibrasjon på ujevnt underlag ville ellers utløse falske alarmer.",
     "profileMountaineering": "Tindebestigning",

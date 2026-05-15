@@ -31,10 +31,12 @@ AudioPlayer? _audioPlayer;
 final Telephony _telephony = Telephony.instance;
 final Battery _battery = Battery();
 
-// File logger for Smart Sentinel events. Persists to app's internal documents
-// directory so we can pull it later via:
-//   adb shell run-as com.oksigenia.oksigenia_sos cat app_flutter/sentinel.log
+// File logger for Smart Sentinel events. Writes to external scoped storage so
+// we can pull it without run-as (release APKs block run-as):
+//   adb pull /sdcard/Android/data/com.oksigenia.oksigenia_sos/files/sentinel.log
+// On first run after upgrading, migrates any pre-existing internal log.
 File? _sentinelLogFile;
+bool _sentinelLogMigrated = false;
 
 void _logSentinel(String line) {
   print(line);
@@ -44,8 +46,36 @@ void _logSentinel(String line) {
 Future<void> _sentinelLogAppend(String line) async {
   try {
     if (_sentinelLogFile == null) {
-      final dir = await getApplicationDocumentsDirectory();
+      Directory? dir = await getExternalStorageDirectory();
+      dir ??= await getApplicationDocumentsDirectory();
       _sentinelLogFile = File('${dir.path}/sentinel.log');
+
+      if (!_sentinelLogMigrated) {
+        _sentinelLogMigrated = true;
+        try {
+          final prefs = await SharedPreferences.getInstance();
+          if (!(prefs.getBool('sentinel_migrated_v2') ?? false)) {
+            final internalDir = await getApplicationDocumentsDirectory();
+            final internalLog = File('${internalDir.path}/sentinel.log');
+            final bool internalExists = internalLog.existsSync();
+            final int internalSize = internalExists ? internalLog.lengthSync() : 0;
+            print("SENTINEL MIGRATE: internal=$internalExists size=$internalSize path=${internalLog.path}");
+            if (internalExists &&
+                internalLog.absolute.path != _sentinelLogFile!.absolute.path) {
+              final bytes = internalLog.readAsBytesSync();
+              _sentinelLogFile!.writeAsBytesSync(
+                bytes,
+                mode: FileMode.append,
+                flush: true,
+              );
+              print("SENTINEL MIGRATE: copied $internalSize bytes to ${_sentinelLogFile!.path}");
+            }
+            await prefs.setBool('sentinel_migrated_v2', true);
+          }
+        } catch (e) {
+          print("SENTINEL MIGRATE err: $e");
+        }
+      }
     }
     final ts = DateTime.now().toIso8601String();
     await _sentinelLogFile!
@@ -777,6 +807,19 @@ void onStart(ServiceInstance service) async {
   // Window length is fixed at ~2s of *real* samples — uses _measuredHz updated
   // by the sensor listener so timing math doesn't depend on Android delivering
   // exactly 50Hz on every device.
+  List<int> _crossingsOver(List<double> samples, double threshold) {
+    final List<int> idx = [];
+    bool above = samples[0] > threshold;
+    for (int i = 1; i < samples.length; i++) {
+      final bool curr = samples[i] > threshold;
+      if (curr != above) {
+        idx.add(i);
+        above = curr;
+      }
+    }
+    return idx;
+  }
+
   bool _isRhythmicMovement() {
     final int targetWindowSamples = (_measuredHz * 2).round().clamp(50, 400);
     if (_gBuffer.length < targetWindowSamples) return false;
@@ -784,20 +827,43 @@ void onStart(ServiceInstance service) async {
         ? _gBuffer.sublist(_gBuffer.length - targetWindowSamples)
         : List<double>.from(_gBuffer);
 
+    // Window stats. Mean is also the adaptive crossing threshold below.
+    final double meanH = recent.reduce((a, b) => a + b) / recent.length;
+    final double varH = recent
+            .map((v) => (v - meanH) * (v - meanH))
+            .reduce((a, b) => a + b) /
+        recent.length;
+    final double stdH = sqrt(varH);
+    double minH = recent[0];
+    double maxH = recent[0];
+    for (final v in recent) {
+      if (v < minH) minH = v;
+      if (v > maxH) maxH = v;
+    }
+    final String stats =
+        "mean=${meanH.toStringAsFixed(2)} std=${stdH.toStringAsFixed(2)} min=${minH.toStringAsFixed(2)} max=${maxH.toStringAsFixed(2)}";
+
+    // Primary detector: crossings over fixed 1.12 — walking baseline.
+    // Adaptive fallback: when running keeps horizontalG persistently above
+    // 1.12 (mean >1.5 = clearly elevated regime), recompute crossings over
+    // the moving mean to catch the cadence still embedded in the high-G
+    // oscillation. Validated against P8 logs 2026-04-30 and 2026-05-15.
     const double rhythmThreshold = 1.12;
-    final List<int> crossingIdx = [];
-    bool above = recent[0] > rhythmThreshold;
-    for (int i = 1; i < recent.length; i++) {
-      final bool curr = recent[i] > rhythmThreshold;
-      if (curr != above) {
-        crossingIdx.add(i);
-        above = curr;
+    List<int> crossingIdx = _crossingsOver(recent, rhythmThreshold);
+    bool usingAdaptive = false;
+
+    if (crossingIdx.length < 4 && meanH > 1.5) {
+      final adaptiveIdx = _crossingsOver(recent, meanH);
+      if (adaptiveIdx.length >= 4) {
+        crossingIdx = adaptiveIdx;
+        usingAdaptive = true;
       }
     }
+    final String mode = usingAdaptive ? "[adapt]" : "[fixed]";
 
     final int crossings = crossingIdx.length;
     if (crossings < 4) {
-      _logSentinel("SYLVIA RHYTHM: crossings=$crossings (< 4) → NO");
+      _logSentinel("SYLVIA RHYTHM: $mode crossings=$crossings (< 4) $stats → NO");
       return false;
     }
 
@@ -817,15 +883,15 @@ void onStart(ServiceInstance service) async {
     final double cv = mean > 0 ? sqrt(variance) / mean : 0;
 
     if (freqHz < 1.0) {
-      _logSentinel("SYLVIA RHYTHM: cross=$crossings f=${freqHz.toStringAsFixed(2)}Hz cv=${cv.toStringAsFixed(2)} → NO (freq<1.0)");
+      _logSentinel("SYLVIA RHYTHM: $mode cross=$crossings f=${freqHz.toStringAsFixed(2)}Hz cv=${cv.toStringAsFixed(2)} $stats → NO (freq<1.0)");
       return false;
     }
     if (cv < 0.05 || cv > _cvUpperBound) {
-      _logSentinel("SYLVIA RHYTHM: cross=$crossings f=${freqHz.toStringAsFixed(2)}Hz cv=${cv.toStringAsFixed(2)} → NO (cv out of range)");
+      _logSentinel("SYLVIA RHYTHM: $mode cross=$crossings f=${freqHz.toStringAsFixed(2)}Hz cv=${cv.toStringAsFixed(2)} $stats → NO (cv out of range)");
       return false;
     }
 
-    _logSentinel("SYLVIA RHYTHM: cross=$crossings f=${freqHz.toStringAsFixed(2)}Hz cv=${cv.toStringAsFixed(2)} → YES");
+    _logSentinel("SYLVIA RHYTHM: $mode cross=$crossings f=${freqHz.toStringAsFixed(2)}Hz cv=${cv.toStringAsFixed(2)} $stats → YES");
     return true;
   }
 

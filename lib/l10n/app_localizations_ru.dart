@@ -589,6 +589,13 @@ class AppLocalizationsRu extends AppLocalizations {
       'По умолчанию. Ходьба на природе с телефоном в кармане или рюкзаке. Сбалансированная чувствительность.';
 
   @override
+  String get profileRunning => 'Бег (асфальт)';
+
+  @override
+  String get profileRunningDesc =>
+      'Бег по асфальту или твёрдому покрытию. Более высокий порог удара (10G) и адаптивный детектор каденции — справляется с устойчивым горизонтальным G-режимом бега, который ломает стандартный детектор каденции.';
+
+  @override
   String get profileTrailMtb => 'Трейлраннинг / MTB';
 
   @override

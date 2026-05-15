@@ -180,6 +180,8 @@
     "activityProfileSubtitle": "Adatta la rilevazione dello Smart Sentinel al tuo sport. Scegli il più simile — un profilo errato provoca falsi allarmi o non rileva cadute reali.",
     "profileTrekking": "Trekking / Escursionismo",
     "profileTrekkingDesc": "Predefinito. Camminate all'aperto con il telefono in tasca o nello zaino. Sensibilità bilanciata.",
+    "profileRunning": "Running (strada)",
+    "profileRunningDesc": "Corsa su asfalto o pavimentazione dura. Soglia di impatto più alta (10G) e rilevatore di cadenza adattivo — gestisce il regime sostenuto della forza orizzontale della corsa che rompe il rilevatore di cadenza standard.",
     "profileTrailMtb": "Trail / MTB",
     "profileTrailMtbDesc": "Soglia di impatto più alta e cadenza più permissiva — la vibrazione costante su terreno irregolare causerebbe falsi allarmi con le impostazioni standard.",
     "profileMountaineering": "Alpinismo",

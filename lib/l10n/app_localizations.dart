@@ -1202,6 +1202,18 @@ abstract class AppLocalizations {
   /// **'Default. Walking outdoors with the phone in a pocket or backpack. Balanced sensitivity.'**
   String get profileTrekkingDesc;
 
+  /// No description provided for @profileRunning.
+  ///
+  /// In en, this message translates to:
+  /// **'Running (road)'**
+  String get profileRunning;
+
+  /// No description provided for @profileRunningDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'Road running on asphalt or hard pavement. Higher impact threshold (10G) and adaptive cadence detector — handles the persistent horizontal-G of running gait that breaks the walk-baseline cadence check.'**
+  String get profileRunningDesc;
+
   /// No description provided for @profileTrailMtb.
   ///
   /// In en, this message translates to:

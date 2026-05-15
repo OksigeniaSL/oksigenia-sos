@@ -589,6 +589,13 @@ class AppLocalizationsNb extends AppLocalizations {
       'Standard. Gange ute med telefonen i lomme eller sekk. Balansert følsomhet.';
 
   @override
+  String get profileRunning => 'Løping (asfalt)';
+
+  @override
+  String get profileRunningDesc =>
+      'Løping på asfalt eller hardt underlag. Høyere støtterskel (10G) og adaptiv kadensdetektor — håndterer det vedvarende horisontale G-regimet i løping som bryter standardkadensdetektoren.';
+
+  @override
   String get profileTrailMtb => 'Stiløping / MTB';
 
   @override

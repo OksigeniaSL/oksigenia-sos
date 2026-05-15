@@ -585,6 +585,13 @@ class AppLocalizationsPt extends AppLocalizations {
       'Predefinição. Caminhar ao ar livre com o telemóvel no bolso ou mochila. Sensibilidade equilibrada.';
 
   @override
+  String get profileRunning => 'Corrida (estrada)';
+
+  @override
+  String get profileRunningDesc =>
+      'Corrida em asfalto ou pavimento duro. Limiar de impacto mais elevado (10G) e detetor de cadência adaptativo — gere o regime sustentado de força horizontal da corrida que quebra o detetor de cadência padrão.';
+
+  @override
   String get profileTrailMtb => 'Trail / BTT';
 
   @override

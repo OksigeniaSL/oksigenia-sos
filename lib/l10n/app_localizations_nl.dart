@@ -592,6 +592,13 @@ class AppLocalizationsNl extends AppLocalizations {
       'Standaard. Buiten wandelen met de telefoon in een zak of rugzak. Evenwichtige gevoeligheid.';
 
   @override
+  String get profileRunning => 'Hardlopen (weg)';
+
+  @override
+  String get profileRunningDesc =>
+      'Hardlopen op asfalt of harde ondergrond. Hogere impactdrempel (10G) en adaptieve cadansdetector — verwerkt het aanhoudende horizontale G-regime van hardlopen dat de standaard cadansdetector breekt.';
+
+  @override
   String get profileTrailMtb => 'Trail / MTB';
 
   @override

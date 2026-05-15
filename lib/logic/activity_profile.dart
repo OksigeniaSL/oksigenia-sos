@@ -6,6 +6,7 @@
 /// 2021 settling windows). Do not edit values without updating that doc.
 enum ActivityProfile {
   trekking,
+  running,
   trailMtb,
   mountaineering,
   paragliding,
@@ -74,6 +75,22 @@ const Map<ActivityProfile, ActivityProfileConfig> activityProfileConfigs = {
     impactDetectionEnabled: true,
     gpsIntervalSeconds: 30,
     gpsDistanceFilterMeters: 30,
+  ),
+  // Road running on asphalt/hard pavement. Calibrated from P8 logs:
+  //   2026-04-30: 9.75G impact + crossings=0 over 27 yellow checks → alarm
+  //   2026-05-15: ~8G impact + horizontalG mean 1.6-2.8 / min ≥1.03 → alarm
+  // Both required (a) higher yellow threshold so the gait peaks themselves
+  // don't enter yellow, and (b) an adaptive cadence detector that crosses on
+  // the moving mean rather than the fixed 1.12 walking baseline.
+  ActivityProfile.running: ActivityProfileConfig(
+    yellowThreshold: 10.0,
+    orangeThreshold: 14.0,
+    settlingSeconds: 5,
+    observationSeconds: 60,
+    cvUpperBound: 1.50,
+    impactDetectionEnabled: true,
+    gpsIntervalSeconds: 5,
+    gpsDistanceFilterMeters: 10,
   ),
   ActivityProfile.trailMtb: ActivityProfileConfig(
     yellowThreshold: 8.0,

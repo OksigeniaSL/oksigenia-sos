@@ -595,6 +595,13 @@ class AppLocalizationsIt extends AppLocalizations {
       'Predefinito. Camminate all\'aperto con il telefono in tasca o nello zaino. Sensibilità bilanciata.';
 
   @override
+  String get profileRunning => 'Running (strada)';
+
+  @override
+  String get profileRunningDesc =>
+      'Corsa su asfalto o pavimentazione dura. Soglia di impatto più alta (10G) e rilevatore di cadenza adattivo — gestisce il regime sostenuto della forza orizzontale della corsa che rompe il rilevatore di cadenza standard.';
+
+  @override
   String get profileTrailMtb => 'Trail / MTB';
 
   @override

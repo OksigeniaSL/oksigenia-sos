@@ -180,6 +180,8 @@
     "activityProfileSubtitle": "Ajusta a deteção do Smart Sentinel ao teu desporto. Escolhe o mais próximo — um perfil errado provoca falsos alarmes ou perde quedas reais.",
     "profileTrekking": "Trekking / Caminhada",
     "profileTrekkingDesc": "Predefinição. Caminhar ao ar livre com o telemóvel no bolso ou mochila. Sensibilidade equilibrada.",
+    "profileRunning": "Corrida (estrada)",
+    "profileRunningDesc": "Corrida em asfalto ou pavimento duro. Limiar de impacto mais elevado (10G) e detetor de cadência adaptativo — gere o regime sustentado de força horizontal da corrida que quebra o detetor de cadência padrão.",
     "profileTrailMtb": "Trail / BTT",
     "profileTrailMtbDesc": "Limite de impacto mais alto e cadência mais permissiva — a vibração constante em terreno irregular provocaria falsos alarmes com a configuração padrão.",
     "profileMountaineering": "Alpinismo",
