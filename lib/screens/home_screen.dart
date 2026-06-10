@@ -133,14 +133,14 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver, Ti
     if (state == AppLifecycleState.resumed) {
       if (_sosLogic.status == SOSStatus.preAlert || _sosLogic.status == SOSStatus.sent) return;
 
+      // init() ya re-sincroniza config+textos con Sylvia vía setConfig; el
+      // antiguo invoke("updateLanguage") no tenía handler en el servicio.
       FlutterBackgroundService().isRunning().then((isRunning) {
         if (!isRunning) {
           FlutterBackgroundService().startService();
-        } else {
-           FlutterBackgroundService().invoke("updateLanguage");
         }
       });
-      _sosLogic.init(); 
+      _sosLogic.init();
     }
   }
 
@@ -176,7 +176,10 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver, Ti
     _sosHoldController.dispose();
     _stopHoldController.dispose();
     _liveTrackingHoldController.dispose();
-    WakelockPlus.disable();
+    // No WakelockPlus.disable() aquí: en pushAndRemoveUntil(HomeScreen) el
+    // initState del Home nuevo (enable) corre ANTES que este dispose, así que
+    // el disable ganaba y la pantalla volvía a dormirse tras cancelar una
+    // alarma. El wakelock muere con el engine al cerrar la app.
     super.dispose();
   }
 
@@ -667,6 +670,7 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver, Ti
             }
             if (newValue) {
               bool smsGranted = await Permission.sms.isGranted;
+              if (!mounted) return;
               if (!smsGranted) {
                 _showErrorSnackBar(context, l10n.permSmsMissing,
                     actionLabel: l10n.menuSettings.toUpperCase(),
@@ -674,6 +678,7 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver, Ti
                 return;
               }
               bool locGranted = await Permission.location.isGranted;
+              if (!mounted) return;
               if (!locGranted) {
                 _showErrorSnackBar(context, l10n.permLocMissing,
                     actionLabel: l10n.btnGoToSettings.toUpperCase(),
@@ -850,7 +855,12 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver, Ti
         animation: _pulseController,
         builder: (context, child) {
           return Opacity(
-            opacity: 0.7 + (_pulseController.value * 0.3),
+            // Si el controller no está animando (sólo corre en yellow/orange),
+            // el banner crítico debe verse a plena opacidad — congelado en
+            // 0.7 quedaba más tenue que un simple warning.
+            opacity: _pulseController.isAnimating
+                ? 0.7 + (_pulseController.value * 0.3)
+                : 1.0,
             child: onTap != null
                 ? InkWell(onTap: onTap, child: child)
                 : child,

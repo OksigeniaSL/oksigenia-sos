@@ -48,11 +48,12 @@ class _AlarmScreenState extends State<AlarmScreen> with TickerProviderStateMixin
       }
     });
 
-    // Cerrar automáticamente si se envía o se cancela
+    // Cerrar automáticamente si se envía o se cancela. scanning y error NO
+    // cierran: la pantalla los renderiza ("Enviando…" / fallo con reintento).
     _statusListener = () {
       if (!mounted) return;
       final currentStatus = _logic.status;
-      
+
       if (currentStatus == SOSStatus.sent || currentStatus == SOSStatus.ready) {
         if (Navigator.canPop(context)) {
           Navigator.pop(context);
@@ -92,6 +93,9 @@ class _AlarmScreenState extends State<AlarmScreen> with TickerProviderStateMixin
     final Color bgColor = isDark ? Colors.black : const Color(0xFFB71C1C);
     final Color textColor = Colors.white;
 
+    final bool isSending = logic.status == SOSStatus.scanning;
+    final bool isError = logic.status == SOSStatus.error;
+
     String titleText = "SOS";
     String bodyText = l10n.alertSendingIn;
 
@@ -101,6 +105,13 @@ class _AlarmScreenState extends State<AlarmScreen> with TickerProviderStateMixin
     } else if (logic.lastTrigger == AlertCause.inactivity) {
       titleText = l10n.alertInactivityDetected;
       bodyText = l10n.alertInactivityBody;
+    }
+
+    if (isError) {
+      titleText = l10n.alarmSendFailed;
+      bodyText = l10n.statusSendFailedBody;
+    } else if (isSending) {
+      bodyText = l10n.alarmSendingNow;
     }
 
     return Scaffold(
@@ -146,38 +157,69 @@ class _AlarmScreenState extends State<AlarmScreen> with TickerProviderStateMixin
                   ),
                   const SizedBox(height: 30),
 
-                  // RELOJ
-                  Stack(
-                    alignment: Alignment.center,
-                    children: [
-                      SizedBox(
-                        width: 180,
-                        height: 180,
-                        child: AnimatedBuilder(
-                          animation: _countdownController,
-                          builder: (context, child) {
-                            return CircularProgressIndicator(
-                              value: _countdownController.value,
-                              strokeWidth: 12,
-                              backgroundColor: Colors.white12,
-                              valueColor: const AlwaysStoppedAnimation<Color>(Colors.white),
-                            );
-                          },
+                  // RELOJ — o spinner de envío / icono de fallo según estado
+                  if (isError)
+                    Icon(Icons.sms_failed_rounded, size: 120, color: textColor)
+                  else if (isSending)
+                    const SizedBox(
+                      width: 180,
+                      height: 180,
+                      child: Padding(
+                        padding: EdgeInsets.all(20),
+                        child: CircularProgressIndicator(
+                          strokeWidth: 12,
+                          backgroundColor: Colors.white12,
+                          valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
                         ),
                       ),
-                      // TEXTO DIRECTO DE LA LÓGICA
-                      Text(
-                        '${logic.currentCountdownSeconds}',
-                        style: TextStyle(
-                          fontSize: 70,
-                          fontWeight: FontWeight.bold,
-                          color: textColor,
+                    )
+                  else
+                    Stack(
+                      alignment: Alignment.center,
+                      children: [
+                        SizedBox(
+                          width: 180,
+                          height: 180,
+                          child: AnimatedBuilder(
+                            animation: _countdownController,
+                            builder: (context, child) {
+                              return CircularProgressIndicator(
+                                value: _countdownController.value,
+                                strokeWidth: 12,
+                                backgroundColor: Colors.white12,
+                                valueColor: const AlwaysStoppedAnimation<Color>(Colors.white),
+                              );
+                            },
+                          ),
                         ),
-                      ),
-                    ],
-                  ),
-                  
+                        // TEXTO DIRECTO DE LA LÓGICA
+                        Text(
+                          '${logic.currentCountdownSeconds}',
+                          style: TextStyle(
+                            fontSize: 70,
+                            fontWeight: FontWeight.bold,
+                            color: textColor,
+                          ),
+                        ),
+                      ],
+                    ),
+
                   const SizedBox(height: 40),
+
+                  if (isError) ...[
+                    ElevatedButton.icon(
+                      onPressed: () => logic.sendSOS(),
+                      icon: const Icon(Icons.refresh),
+                      label: Text(l10n.btnRetry.toUpperCase()),
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: Colors.white,
+                        foregroundColor: const Color(0xFFB71C1C),
+                        padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 16),
+                        textStyle: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                      ),
+                    ),
+                    const SizedBox(height: 30),
+                  ],
 
                   // BOTÓN DE SEGURIDAD
                   GestureDetector(

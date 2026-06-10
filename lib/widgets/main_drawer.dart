@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_background_service/flutter_background_service.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:oksigenia_sos/l10n/app_localizations.dart';
 import 'package:oksigenia_sos/logic/sos_logic.dart';
@@ -136,14 +135,17 @@ class MainDrawer extends StatelessWidget {
       onPressed: () async {
         final prefs = await SharedPreferences.getInstance();
         await prefs.setString('language_code', locale.languageCode);
-        
-        final service = FlutterBackgroundService();
-        service.invoke('updateLanguage');
 
         if (context.mounted) {
-          OksigeniaApp.setLocale(context, locale); 
-          Navigator.pop(context); 
+          OksigeniaApp.setLocale(context, locale);
+          Navigator.pop(context);
         }
+
+        // El antiguo invoke('updateLanguage') no tenía handler en Sylvia: si
+        // la alarma saltaba desde background antes de un resume, el SOS salía
+        // en el idioma anterior. refreshConfig reenvía setConfig con los
+        // textos ya en el idioma nuevo (espera 200ms al rebuild del locale).
+        sosLogic.refreshConfig();
       },
       child: Padding(padding: const EdgeInsets.symmetric(vertical: 10), child: Text(text, style: const TextStyle(fontSize: 18))),
     );
