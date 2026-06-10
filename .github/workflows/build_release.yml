@@ -2,14 +2,15 @@ name: Build Android Release
 
 on:
   push:
-    # Solo se activa con etiquetas de versión
+    # Solo se activa con etiquetas de versión. Sin paths-ignore: combinado
+    # con un trigger de tags puede saltarse la build si el commit etiquetado
+    # sólo toca .md — y el commit de release toca changelog/README.
     tags:
       - 'v*'
-    # Ignora cambios en documentación para no gastar minutos
-    paths-ignore:
-      - '**.md'
-      - 'docs/**'
-      - '.gitignore'
+
+# Necesario para crear la Release; no depender del default del repo.
+permissions:
+  contents: write
 
 jobs:
   build:

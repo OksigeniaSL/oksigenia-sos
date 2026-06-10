@@ -1,6 +1,5 @@
 package com.oksigenia.oksigenia_sos
 
-import android.app.NotificationChannel
 import android.app.NotificationManager
 import android.content.Context
 import android.content.Intent
@@ -17,24 +16,18 @@ import io.flutter.plugin.common.MethodChannel
 class MainActivity: FlutterActivity() {
     // Solo mantenemos el canal para despertar la pantalla, el SMS va por plugin
     private val CHANNEL = "com.oksigenia.sos/sms"
-    private val NOTIFICATION_CHANNEL_ID = "oksigenia_sos_modular_v1"
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        createNotificationChannel()
-    }
-
-    private fun createNotificationChannel() {
+        // Los canales reales ('my_foreground', 'oksigenia_alarm') los crea el
+        // lado Dart. El canal 'oksigenia_sos_modular_v1' que se creaba aquí
+        // quedó huérfano: nada publicaba en él, pero aparecía en los ajustes
+        // del sistema y silenciarlo daba falsa sensación de control sobre el
+        // servicio. Se borra para retirarlo de instalaciones existentes.
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            val name = "Oksigenia SOS Service"
-            val descriptionText = "Canal de notificaciones persistentes"
-            val importance = NotificationManager.IMPORTANCE_HIGH
-            val channel = NotificationChannel(NOTIFICATION_CHANNEL_ID, name, importance).apply {
-                description = descriptionText
-            }
             val notificationManager: NotificationManager =
                 getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
-            notificationManager.createNotificationChannel(channel)
+            notificationManager.deleteNotificationChannel("oksigenia_sos_modular_v1")
         }
     }
 
