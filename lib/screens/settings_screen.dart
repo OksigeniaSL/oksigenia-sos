@@ -1,4 +1,3 @@
-import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:provider/provider.dart';
@@ -6,6 +5,7 @@ import 'package:oksigenia_sos/l10n/app_localizations.dart';
 import '../services/preferences_service.dart';
 import '../logic/sos_logic.dart';
 import '../logic/activity_profile.dart';
+import '../utils/phone_utils.dart';
 
 class SettingsScreen extends StatefulWidget {
   const SettingsScreen({super.key});
@@ -38,17 +38,12 @@ class _SettingsScreenState extends State<SettingsScreen> with WidgetsBindingObse
 
   void _detectCountryPrefix() {
     if (_phoneController.text.isNotEmpty) return;
-    const Map<String, String> prefixes = {
-      'ES': '+34', 'FR': '+33', 'PT': '+351', 'DE': '+49', 'IT': '+39',
-      'GB': '+44', 'UK': '+44', 'US': '+1', 'CA': '+1', 'MX': '+52',
-      'AR': '+54', 'CO': '+57', 'CL': '+56', 'PE': '+51',
-      'NL': '+31', 'SE': '+46', 'NO': '+47', 'CH': '+41', 'AT': '+43',
-    };
-
-    final countryCode = (PlatformDispatcher.instance.locale.countryCode ?? '').toUpperCase();
-    if (prefixes.containsKey(countryCode)) {
+    // Mapa compartido con phone_utils: si el envío sabe normalizar un país,
+    // el prefill debe conocerlo también (y viceversa).
+    final prefix = detectDefaultPrefix();
+    if (prefix != null) {
       setState(() {
-        _phoneController.text = prefixes[countryCode]!;
+        _phoneController.text = prefix;
       });
     }
   }
@@ -58,13 +53,21 @@ class _SettingsScreenState extends State<SettingsScreen> with WidgetsBindingObse
     String cleanInput = input.trim();
     if (cleanInput.isEmpty) return false;
 
-    // 1. Regex: Solo permite números, +, espacios y guiones
-    final RegExp validCharacters = RegExp(r'^[+0-9\-\s]+$');
+    // 1. Regex: números, +, espacios, guiones, paréntesis y puntos — los
+    // formatos habituales al pegar desde la agenda, p.ej. (555) 123-4567.
+    final RegExp validCharacters = RegExp(r'^[+0-9\-\s().]+$');
     if (!validCharacters.hasMatch(cleanInput)) return false;
 
     // 2. Conteo de dígitos reales:
     String justDigits = cleanInput.replaceAll(RegExp(r'[^0-9]'), '');
     return justDigits.length >= 6;
+  }
+
+  // Duplicados por número real, no por string: '+34600111222' y
+  // '+34 600 111 222' son el mismo contacto (y el mismo SOS duplicado).
+  bool _isDuplicateContact(String phone) {
+    final normalized = normalizePhoneE164(phone);
+    return _contacts.any((c) => normalizePhoneE164(c) == normalized);
   }
 
   // 💡 NUEVO: Diálogo de ayuda para permisos restringidos (Android 13+)
@@ -111,7 +114,7 @@ class _SettingsScreenState extends State<SettingsScreen> with WidgetsBindingObse
     
     // Auto-guardado al salir (CON VALIDACIÓN)
     String pendingPhone = _phoneController.text.trim();
-    if (_isValidPhoneNumber(pendingPhone) && !_contacts.contains(pendingPhone)) {
+    if (_isValidPhoneNumber(pendingPhone) && !_isDuplicateContact(pendingPhone)) {
        PreferencesService().addContact(pendingPhone);
     }
 
@@ -213,7 +216,7 @@ class _SettingsScreenState extends State<SettingsScreen> with WidgetsBindingObse
     }
 
     // 3. Añadir si no está repetido
-    if (!_contacts.contains(phone)) {
+    if (!_isDuplicateContact(phone)) {
       setState(() {
         _contacts.add(phone);
         _phoneController.clear();
