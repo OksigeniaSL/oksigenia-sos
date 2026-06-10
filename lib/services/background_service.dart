@@ -41,8 +41,16 @@ bool _sentinelLogMigrated = false;
 
 void _logSentinel(String line) {
   print(line);
-  _sentinelLogAppend(line);
+  // El timestamp se captura AQUÍ (no dentro del append encolado) para que la
+  // hora refleje el evento y no el momento en que la cola llegó a escribirlo.
+  final ts = DateTime.now().toIso8601String();
+  // Escrituras serializadas: dos streams de sensores loguean concurrentemente
+  // (FREEFALL + Impacto coinciden por diseño) y los appends async sin orden
+  // entrelazaban bytes, mutilando justo las líneas que hay que correlacionar.
+  _sentinelLogChain = _sentinelLogChain.then((_) => _sentinelLogAppend('$ts $line'));
 }
+
+Future<void> _sentinelLogChain = Future.value();
 
 Future<void> _sentinelLogAppend(String line) async {
   try {
@@ -78,9 +86,8 @@ Future<void> _sentinelLogAppend(String line) async {
         }
       }
     }
-    final ts = DateTime.now().toIso8601String();
     await _sentinelLogFile!
-        .writeAsString('$ts $line\n', mode: FileMode.append, flush: true);
+        .writeAsString('$line\n', mode: FileMode.append, flush: true);
   } catch (e) {
     print("SENTINEL LOG err: $e");
   }
