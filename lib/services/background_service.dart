@@ -1088,18 +1088,28 @@ void onStart(ServiceInstance service) async {
     int ffSupMaxMs = 0;
     double ffSupMinA = 99;
 
+    // Pico raw reciente (~400ms): corrobora la magnitud de los impactos del
+    // stream lineal. Sospecha empírica 2026-06-10: dos caídas casi idénticas
+    // al cojín dieron effZ=49 y effZ=164 — el bias EMA del Z atascado tarda
+    // ~7s en converger tras un volteo y puede fabricar G fantasma. El raw del
+    // P8 está sano y no tiene ese problema: si lineal dice 21G y raw dice
+    // ~60 m/s², el impacto es artefacto del filtro.
+    double recentRawMax = 0;
+    DateTime recentRawMaxAt = DateTime.fromMillisecondsSinceEpoch(0);
+
     String freefallInfo() {
+      final String raw = "rawPk=${recentRawMax.toStringAsFixed(0)}";
       // Un dip EN CURSO es el caso de la caída real (el impacto interrumpe la
       // caída libre, y el cierre llega por otro stream sin orden garantizado):
       // hay que reportarlo, no decir "none".
       if (inFreefall) {
         final int ms = DateTime.now().difference(freefallStart).inMilliseconds;
-        return "freefall=ONGOING ${ms}ms minA=${freefallMinA.toStringAsFixed(1)}";
+        return "freefall=ONGOING ${ms}ms minA=${freefallMinA.toStringAsFixed(1)} $raw";
       }
       final int agoMs = DateTime.now().difference(lastFreefallEnd).inMilliseconds;
       return (lastFreefallMs > 0 && agoMs < 3000)
-          ? "freefall=${lastFreefallMs}ms@-${agoMs}ms"
-          : "freefall=none";
+          ? "freefall=${lastFreefallMs}ms@-${agoMs}ms $raw"
+          : "freefall=none $raw";
     }
 
     _rawAccSub?.cancel();
@@ -1107,6 +1117,11 @@ void onStart(ServiceInstance service) async {
         .listen((e) {
       final double rawMag = sqrt(e.x * e.x + e.y * e.y + e.z * e.z);
       lastRawMag = rawMag;
+      if (rawMag >= recentRawMax ||
+          DateTime.now().difference(recentRawMaxAt).inMilliseconds > 400) {
+        recentRawMax = rawMag;
+        recentRawMaxAt = DateTime.now();
+      }
       if (rawMag < 4.0) {
         if (!inFreefall) {
           inFreefall = true;
@@ -1209,7 +1224,7 @@ void onStart(ServiceInstance service) async {
           currentPeakZ = effZ;
         }
         if (DateTime.now().difference(lastPeakLog).inSeconds >= 2) {
-          _logSentinel("SYLVIA PEAK: ${currentPeakG.toStringAsFixed(2)}G (effX=${currentPeakX.toStringAsFixed(1)} effY=${currentPeakY.toStringAsFixed(1)} effZ=${currentPeakZ.toStringAsFixed(1)})");
+          _logSentinel("SYLVIA PEAK: ${currentPeakG.toStringAsFixed(2)}G (effX=${currentPeakX.toStringAsFixed(1)} effY=${currentPeakY.toStringAsFixed(1)} effZ=${currentPeakZ.toStringAsFixed(1)}) rawPk=${recentRawMax.toStringAsFixed(0)}");
           lastPeakLog = DateTime.now();
           currentPeakG = 0;
         }
