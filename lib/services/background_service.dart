@@ -16,6 +16,7 @@ import 'package:battery_plus/battery_plus.dart';
 import 'package:path_provider/path_provider.dart';
 import '../logic/activity_profile.dart';
 import '../utils/phone_utils.dart';
+import 'preferences_service.dart';
 import 'package:timezone/data/latest_all.dart' as tz;
 import 'package:timezone/timezone.dart' as tz;
 
@@ -93,6 +94,8 @@ Map<String, String> _texts = {
   'holdToCancel': 'Hold to cancel',
   'alertSendingIn': 'Sending alert in...',
   'statusSent': 'Alert sent successfully.',
+  'statusSendFailed': '⚠️ SOS NOT SENT',
+  'statusSendFailedBody': 'No SMS could be sent. Check signal and contacts, then retry.',
   'statusReady': 'Oksigenia System Ready.',
   'smsHelpMessage': 'HELP! SOS!',
   'smsDyingGasp': 'BATTERY CRITICAL. Bye.',
@@ -219,8 +222,6 @@ void onStart(ServiceInstance service) async {
   int _yellowCountdown = 60;
   Timer? _yellowTimer;
   Timer? _shieldTimer;
-
-  final DateTime serviceStartupTime = DateTime.now();
 
   const AndroidInitializationSettings initializationSettingsAndroid =
       AndroidInitializationSettings('ic_stat_oksigenia');
@@ -420,8 +421,13 @@ void onStart(ServiceInstance service) async {
   Future<void> _sendLiveTrackingSMS({bool isCheckin = false}) async {
     if (_recipients.isEmpty) {
       final prefs = await SharedPreferences.getInstance();
-      _recipients = prefs.getStringList('contacts') ?? [];
-      if (_recipients.isEmpty) return;
+      await prefs.reload();
+      _recipients = prefs.getStringList(PreferencesService.keyContacts) ?? [];
+      if (_recipients.isEmpty) {
+        print("SYLVIA: ❌ Live Tracking sin contactos. Reprogramando siguiente intento.");
+        if (_isLiveTrackingActive && !isCheckin) await _scheduleLiveTrackingAlarm();
+        return;
+      }
     }
 
     String target = normalizePhoneE164(_recipients.first);
@@ -526,15 +532,18 @@ void onStart(ServiceInstance service) async {
     }
   }
 
-  Future<void> _enviarSMSZombie() async {
+  // Devuelve cuántos SMS salieron de verdad; 0 = el SOS NO se envió y el
+  // llamante debe avisar de fallo en vez de fingir éxito.
+  Future<int> _enviarSMSZombie() async {
     print("SYLVIA SERVICE: 🧟 TIEMPO AGOTADO. Ejecutando protocolo...");
 
     if (_recipients.isEmpty) {
       final prefs = await SharedPreferences.getInstance();
-      _recipients = prefs.getStringList('contacts') ?? [];
+      await prefs.reload();
+      _recipients = prefs.getStringList(PreferencesService.keyContacts) ?? [];
       if (_recipients.isEmpty) {
-         print("SYLVIA FATAL: No hay contactos configurados.");
-         return;
+         _logSentinel("SYLVIA FATAL: No hay contactos configurados.");
+         return 0;
       }
     }
 
@@ -593,12 +602,16 @@ void onStart(ServiceInstance service) async {
       await _activateBeacon(sosPos);
     }
 
-    await _reproducirConfirmacion();
+    if (sentCount > 0) await _reproducirConfirmacion();
+    return sentCount;
   }
 
   Future<void> _beaconTick() async {
     try {
       final p = await SharedPreferences.getInstance();
+      // beacon_active lo apaga la UI ("Reiniciar sistema") desde otro isolate;
+      // sin reload este isolate seguiría viendo la copia cacheada.
+      await p.reload();
       if (!(p.getBool('beacon_active') ?? false)) return;
 
       final now = DateTime.now().millisecondsSinceEpoch;
@@ -639,7 +652,8 @@ void onStart(ServiceInstance service) async {
       msg += "\nOSM: https://www.openstreetmap.org/?mlat=${pos.latitude}&mlon=${pos.longitude}";
 
       if (_recipients.isEmpty) {
-        _recipients = p.getStringList('contacts') ?? [];
+        _recipients = p.getStringList(PreferencesService.keyContacts) ?? [];
+        if (_recipients.isEmpty) return;
       }
       for (final number in _recipients) {
         try {
@@ -666,20 +680,35 @@ void onStart(ServiceInstance service) async {
     } catch (_) {}
   }
 
-  Future<void> _lanzarAlarma() async {
-    _logSentinel("SYLVIA SERVICE: 🚨 EJECUTANDO PROTOCOLO DE ALARMA");
+  // resumeCountdown: segundos restantes al reanudar una alarma que sobrevivió
+  // a un respawn del servicio (Android mató el isolate a mitad de cuenta atrás).
+  Future<void> _lanzarAlarma({int? resumeCountdown}) async {
+    _logSentinel("SYLVIA SERVICE: 🚨 EJECUTANDO PROTOCOLO DE ALARMA"
+        "${resumeCountdown != null ? ' (reanudada, ${resumeCountdown}s restantes)' : ''}");
     _isAlarmActive = true;
     _writeWidgetState('red');
-    await _cancelInactivityAlarmClock();
+    try { await _cancelInactivityAlarmClock(); } catch (_) {}
     // Pause live tracking during SOS — watchdog checks _isAlarmActive
     if (_isLiveTrackingActive) {
       print("SYLVIA: 📍 Live Tracking paused during SOS");
     }
-    try {
-      final prefs = await SharedPreferences.getInstance();
-      await prefs.setBool('is_alarm_active', true);
-      await prefs.setInt('alarm_start_timestamp', DateTime.now().millisecondsSinceEpoch);
 
+    // Cada paso va en su propio try: un fallo en prefs, notificación, audio o
+    // vibración no puede impedir que el zombie timer (el que acaba enviando el
+    // SMS) llegue a crearse. Antes todo iba en un único try y una excepción
+    // temprana dejaba _isAlarmActive=true sin timer: ni SMS ni sensores.
+    SharedPreferences? prefs;
+    try {
+      prefs = await SharedPreferences.getInstance();
+      await prefs.setBool('is_alarm_active', true);
+      if (resumeCountdown == null) {
+        await prefs.setInt('alarm_start_timestamp', DateTime.now().millisecondsSinceEpoch);
+      }
+    } catch (e) {
+      print("SYLVIA: ❌ prefs en alarma: $e");
+    }
+
+    try {
       // fullScreenIntent: Android launches the Activity over the lock screen automatically.
       // This is the only reliable mechanism from the service isolate — MethodChannel calls
       // to 'com.oksigenia.sos/sms' fail silently here because that channel is registered
@@ -702,30 +731,40 @@ void onStart(ServiceInstance service) async {
           ),
         ),
       );
+    } catch (e) {
+      print("SYLVIA: ❌ notificación de alarma: $e");
+    }
 
+    try {
       if (service is AndroidServiceInstance) service.setAsForegroundService();
       service.invoke("onAlarmTriggered");
+    } catch (e) {
+      print("SYLVIA: ❌ onAlarmTriggered: $e");
+    }
 
-      // 🟢 USAR EL NUEVO MÉTODO DE AUDIO ROBUSTO
+    try {
       await _reproducirSonidoAlarma();
-
       if (await Vibration.hasVibrator() ?? false) {
         Vibration.vibrate(pattern: [500, 1000, 500, 1000], repeat: 0);
       }
+    } catch (e) {
+      print("SYLVIA: ❌ audio/vibración: $e");
+    }
 
-      _zombieCountdown = 30;
-      _zombieTimer?.cancel();
-      _zombieTimer = Timer.periodic(const Duration(seconds: 1), (timer) async {
-        if (!_isAlarmActive) {
-           print("SYLVIA SERVICE: 🛑 Alarma cancelada detectada dentro del timer. Abortando.");
-           timer.cancel();
-           await _detenerSonido();
-           Vibration.cancel();
-           return;
-        }
+    _zombieCountdown = resumeCountdown ?? 30;
+    _zombieTimer?.cancel();
+    _zombieTimer = Timer.periodic(const Duration(seconds: 1), (timer) async {
+      if (!_isAlarmActive) {
+         print("SYLVIA SERVICE: 🛑 Alarma cancelada detectada dentro del timer. Abortando.");
+         timer.cancel();
+         await _detenerSonido();
+         Vibration.cancel();
+         return;
+      }
 
-        _zombieCountdown--;
-        
+      _zombieCountdown--;
+
+      try {
         flutterLocalNotificationsPlugin.show(
           id: alarmNotifId,
           title: "${_texts['alertSendingIn']} $_zombieCountdown s",
@@ -742,38 +781,70 @@ void onStart(ServiceInstance service) async {
                   enableVibration: false,
                   onlyAlertOnce: true)),
         );
+      } catch (_) {}
 
-        if (_zombieCountdown <= 0) {
-          timer.cancel();
-          await _detenerSonido();
-          Vibration.cancel();
-          
-          await _enviarSMSZombie();
+      if (_zombieCountdown <= 0) {
+        timer.cancel();
+        try { await _detenerSonido(); } catch (_) {}
+        Vibration.cancel();
 
-          await prefs.setBool('sos_sent_recently', true);
+        int sentCount = 0;
+        try {
+          sentCount = await _enviarSMSZombie();
+
+          final p = prefs ?? await SharedPreferences.getInstance();
+          await p.setBool('sos_sent_recently', sentCount > 0);
 
           _lastMovementTime = DateTime.now().add(const Duration(seconds: 60));
 
           await flutterLocalNotificationsPlugin.cancel(id: alarmNotifId);
-          flutterLocalNotificationsPlugin.show(
-            id: notificationId,
-            title: _texts['statusSent'],
-            body: _texts['statusReady'],
-            notificationDetails: const NotificationDetails(
-                android: AndroidNotificationDetails(
-                    channelId, 'Oksigenia SOS',
-                    icon: 'ic_stat_oksigenia',
-                    importance: Importance.high)),
-          );
-          await prefs.setBool('is_alarm_active', false);
+          if (sentCount > 0) {
+            flutterLocalNotificationsPlugin.show(
+              id: notificationId,
+              title: _texts['statusSent'],
+              body: _texts['statusReady'],
+              notificationDetails: const NotificationDetails(
+                  android: AndroidNotificationDetails(
+                      channelId, 'Oksigenia SOS',
+                      icon: 'ic_stat_oksigenia',
+                      importance: Importance.high)),
+            );
+          } else {
+            // 0 SMS salieron: decirle "Alert sent successfully" a una víctima
+            // sería mentirle. Notificación de fallo bien visible.
+            _logSentinel("SYLVIA SERVICE: ❌ SOS NO ENVIADO (0 SMS, ${_recipients.length} contactos)");
+            flutterLocalNotificationsPlugin.show(
+              id: notificationId,
+              title: _texts['statusSendFailed'],
+              body: _texts['statusSendFailedBody'],
+              notificationDetails: const NotificationDetails(
+                  android: AndroidNotificationDetails(
+                      channelId, 'Oksigenia SOS',
+                      icon: 'ic_stat_oksigenia',
+                      ongoing: true,
+                      importance: Importance.max,
+                      priority: Priority.max)),
+            );
+          }
+          service.invoke("onSosSent", {"sent": sentCount});
+        } catch (e) {
+          _logSentinel("SYLVIA SERVICE: ❌ Error en protocolo de envío: $e");
+        } finally {
+          // Pase lo que pase, el flag no puede quedarse colgado: con
+          // _isAlarmActive=true los sensores y el inactivity check quedan
+          // muertos sin vía de recuperación.
+          try {
+            final p = prefs ?? await SharedPreferences.getInstance();
+            await p.setBool('is_alarm_active', false);
+          } catch (_) {}
           _isAlarmActive = false;
-          
+        }
+
+        if (sentCount > 0) {
           try { await platform.invokeMethod('sleepScreen'); } catch (_) {}
         }
-      });
-    } catch (e) {
-      print("Error lanzando alarma: $e");
-    }
+      }
+    });
   }
 
   // ---------------------------------------------------------------------------
@@ -945,11 +1016,18 @@ void onStart(ServiceInstance service) async {
 
       if (_yellowCountdown <= 0) {
         timer.cancel();
-        _returnToGreen();
         if (!_isAlarmActive) {
           _logSentinel("SYLVIA SERVICE: 🔴 Sin movimiento sostenido tras ${totalObservation}s. ACTIVANDO ALARMA.");
+          // Limpieza manual en vez de _returnToGreen(): ese método emite
+          // sentinelGreen y escribe el widget en verde — UI y widget dirían
+          // "todo bien" un instante antes del rojo.
           _isAlarmActive = true;
+          _sentinelYellow = false;
+          _yellowCountdown = _observationSeconds;
+          _gBuffer.clear();
           _lanzarAlarma();
+        } else {
+          _returnToGreen();
         }
       }
     });
@@ -982,11 +1060,16 @@ void onStart(ServiceInstance service) async {
     _accSub = userAccelerometerEventStream(samplingPeriod: SensorInterval.gameInterval)
         .listen((event) {
 
-      if (DateTime.now().difference(_lastStopTimestamp).inSeconds < 10) {
+      if (DateTime.now().difference(_lastStopTimestamp).inSeconds < 10 ||
+          _isAlarmActive ||
+          _sensorCooldown) {
+        // Reinicia la ventana de medición de Hz: si no, la primera ventana al
+        // salir del bloqueo abarca el hueco y publica un Hz absurdamente bajo
+        // que distorsiona la frecuencia del detector de ritmo.
+        hzWindowStart = DateTime.now();
+        hzWindowSamples = 0;
         return;
       }
-
-      if (_isAlarmActive || _sensorCooldown) return;
 
       sensorSamples++;
       if (sensorSamples == 1) {
@@ -1103,6 +1186,10 @@ void onStart(ServiceInstance service) async {
       // Check "Resume now" action tapped on notification
       try {
         final prefs = await SharedPreferences.getInstance();
+        // Estos flags los escriben OTROS isolates (PanicWidget.kt y el isolate
+        // de la acción de notificación). Sin reload, esta copia cacheada no
+        // los vería jamás.
+        await prefs.reload();
         final int resumeReq = prefs.getInt('pause_resume_requested') ?? 0;
         if (resumeReq > 0) {
           await prefs.setInt('pause_resume_requested', 0);
@@ -1127,6 +1214,11 @@ void onStart(ServiceInstance service) async {
         }
       } catch (_) {}
 
+      // Smart Beacon: post-SOS position-update protocol. Corre ANTES del
+      // return de pausa: es protocolo de rescate, no monitorización — una
+      // pausa no debe dejar a los rescatadores sin actualizaciones.
+      _beaconTick();
+
       // Update pause countdown in notification
       if (_pausedUntil.isAfter(DateTime.now())) {
         _updatePausedNotification();
@@ -1141,9 +1233,6 @@ void onStart(ServiceInstance service) async {
           _sendLiveTrackingSMS();
         }
       }
-
-      // Smart Beacon: post-SOS position-update protocol.
-      _beaconTick();
 
       if (DateTime.now().difference(_lastStopTimestamp).inSeconds < 10) return;
       if (!_isMonitoringInactivity || _isAlarmActive) return;
@@ -1161,12 +1250,35 @@ void onStart(ServiceInstance service) async {
   // 3. CARGA DE CONFIGURACIÓN
   // ---------------------------------------------------------------------------
 
+  // Aplica los parámetros del Smart Sentinel del perfil. Único punto de
+  // verdad: lo usan setMonitoring (toggle desde la UI) y _loadConfigFromDisk
+  // (respawn del servicio) — antes el respawn volvía a los defaults de
+  // Trekking aunque el usuario corriera con yellow=10G.
+  void _applyProfileConfig(String profileName) {
+    final ActivityProfile profile = activityProfileFromName(profileName);
+    final ActivityProfileConfig cfg = activityProfileConfigs[profile]!;
+    _impactDetectionEnabled = cfg.impactDetectionEnabled;
+    if (cfg.impactDetectionEnabled) {
+      _yellowThreshold = cfg.yellowThreshold;
+      _orangeThreshold = cfg.orangeThreshold;
+      _settlingSeconds = cfg.settlingSeconds;
+      _observationSeconds = cfg.observationSeconds;
+      _cvUpperBound = cfg.cvUpperBound;
+    }
+    _logSentinel("SYLVIA SERVICE: 🎯 Profile=${profile.name} yellow=${_yellowThreshold}G orange=${_orangeThreshold}G obs=${_observationSeconds}s cv=$_cvUpperBound impactOn=$_impactDetectionEnabled");
+  }
+
   Future<void> _loadConfigFromDisk() async {
     try {
       final prefs = await SharedPreferences.getInstance();
-      _recipients = prefs.getStringList('contacts') ?? [];
-      _customMessage = prefs.getString('sos_message') ?? "";
-      
+      await prefs.reload();
+      _recipients = prefs.getStringList(PreferencesService.keyContacts) ?? [];
+      _customMessage = prefs.getString(PreferencesService.keySosMessage) ?? "";
+
+      // Restaurar el perfil de actividad: un respawn a mitad de ruta debe
+      // volver con los umbrales del usuario, no con los defaults.
+      _applyProfileConfig(prefs.getString(PreferencesService.keyActivityProfile) ?? 'trekking');
+
       bool savedFall = prefs.getBool('fall_detection_enabled') ?? false;
       bool savedInactivity = prefs.getBool('inactivity_monitor_enabled') ?? false;
       _inactivityLimitSeconds = prefs.getInt('inactivity_time') ?? 3600;
@@ -1212,6 +1324,20 @@ void onStart(ServiceInstance service) async {
       // Always run the inactivity checker so the panic-widget poll fires even
       // when monitoring is off. Internal guards skip inactivity-specific logic.
       _startInactivityChecker();
+
+      // Recuperación de alarma: si Android mató el servicio durante la cuenta
+      // atrás, is_alarm_active sobrevive en prefs. La recuperación de la UI no
+      // basta — exige que alguien abra la app, y la víctima puede estar
+      // inconsciente. Reanudamos la cuenta atrás restante (mínimo 2s para que
+      // el isolate termine de arrancar; si ya expiró, envía casi de inmediato).
+      if (prefs.getBool('is_alarm_active') ?? false) {
+        final int startMs = prefs.getInt('alarm_start_timestamp') ?? 0;
+        final int elapsed = startMs > 0
+            ? (DateTime.now().millisecondsSinceEpoch - startMs) ~/ 1000
+            : 9999;
+        _logSentinel("SYLVIA BOOT: 🚨 Alarma activa detectada tras respawn (${elapsed}s transcurridos)");
+        _lanzarAlarma(resumeCountdown: (30 - elapsed).clamp(2, 30));
+      }
     } catch (e) {
       print("SYLVIA BOOT ERROR: $e");
     }
@@ -1281,18 +1407,8 @@ void onStart(ServiceInstance service) async {
       // event when present (UI just toggled), fall back to persisted setting.
       final String profileName = (event != null && event.containsKey('profile'))
           ? event['profile'] as String
-          : (prefs.getString('activity_profile') ?? 'trekking');
-      final ActivityProfile profile = activityProfileFromName(profileName);
-      final ActivityProfileConfig cfg = activityProfileConfigs[profile]!;
-      _impactDetectionEnabled = cfg.impactDetectionEnabled;
-      if (cfg.impactDetectionEnabled) {
-        _yellowThreshold = cfg.yellowThreshold;
-        _orangeThreshold = cfg.orangeThreshold;
-        _settlingSeconds = cfg.settlingSeconds;
-        _observationSeconds = cfg.observationSeconds;
-        _cvUpperBound = cfg.cvUpperBound;
-      }
-      _logSentinel("SYLVIA SERVICE: 🎯 Profile=${profile.name} yellow=${_yellowThreshold}G orange=${_orangeThreshold}G obs=${_observationSeconds}s cv=${_cvUpperBound} impactOn=${_impactDetectionEnabled}");
+          : (prefs.getString(PreferencesService.keyActivityProfile) ?? 'trekking');
+      _applyProfileConfig(profileName);
 
       print("SYLVIA SERVICE: Monitor - Impact: $_isMonitoringImpact, Inactivity: $_isMonitoringInactivity (Limit: $_inactivityLimitSeconds s)");
 
@@ -1301,24 +1417,30 @@ void onStart(ServiceInstance service) async {
         _lastMovementTime = DateTime.now();
         _startSensorListener();
         if (_isMonitoringInactivity) {
-          _startInactivityChecker();
           _scheduleInactivityAlarmClock();
         } else {
-          if (!_isLiveTrackingActive) _inactivityCheckTimer?.cancel();
           _cancelInactivityAlarmClock();
         }
       } else {
         _accSub?.cancel();
         _accSub = null;
-        if (!_isLiveTrackingActive) _inactivityCheckTimer?.cancel();
         _cancelInactivityAlarmClock();
       }
+      // El checker de 5s NUNCA se cancela aquí: además de la inactividad
+      // atiende el flag del widget de pánico, el Smart Beacon, el watchdog de
+      // live tracking y el auto-resume de pausas. La lógica de inactividad ya
+      // está gateada internamente por _isMonitoringInactivity.
+      _startInactivityChecker();
     });
 
     service.on('setPaused').listen((event) async {
       final int until = event?['until'] ?? 0;
       _pausedUntil = DateTime.fromMillisecondsSinceEpoch(until);
       if (until > 0) {
+        // Un amarillo en curso no puede sobrevivir a la pausa: con isPaused el
+        // buffer se congela, la cancelación por ritmo es imposible y la alarma
+        // dispararía en mitad de la pausa que el usuario pidió explícitamente.
+        if (_sentinelYellow) _returnToGreen();
         await _cancelInactivityAlarmClock();
         _updatePausedNotification();
         print("SYLVIA: ⏸ Monitorización pausada por ${_pausedUntil.difference(DateTime.now()).inMinutes} min");

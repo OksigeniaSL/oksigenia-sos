@@ -8,9 +8,11 @@ class PreferencesService {
 
   SharedPreferences? _prefs;
 
-  // Claves
-  static const String _keyContacts = 'emergency_contacts';
-  static const String _keySosMessage = 'custom_message';
+  // Claves. Las que también lee Sylvia (background_service.dart) son públicas:
+  // el isolate del servicio debe usar SIEMPRE estas constantes, nunca strings
+  // a mano (un typo aquí = SOS zombie sin contactos).
+  static const String keyContacts = 'emergency_contacts';
+  static const String keySosMessage = 'custom_message';
   static const String _keyInactivityTime = 'inactivity_time';
   static const String _keyUpdateInterval = 'update_interval';
   
@@ -28,7 +30,7 @@ class PreferencesService {
   static const String _keyLiveTrackingShutdown = 'live_tracking_shutdown_minutes';
 
   // ACTIVITY PROFILE (v4.0.0)
-  static const String _keyActivityProfile = 'activity_profile';
+  static const String keyActivityProfile = 'activity_profile';
 
   Future<void> init() async {
     _prefs = await SharedPreferences.getInstance();
@@ -36,12 +38,12 @@ class PreferencesService {
 
   // --- CONTACTOS ---
   List<String> getContacts() {
-    return _prefs?.getStringList(_keyContacts) ?? [];
+    return _prefs?.getStringList(keyContacts) ?? [];
   }
 
   // Método interno para guardar la lista
   Future<void> _saveContactsList(List<String> contacts) async {
-    await _prefs?.setStringList(_keyContacts, contacts);
+    await _prefs?.setStringList(keyContacts, contacts);
   }
 
   // Métodos antiguos (MANTENIDOS)
@@ -66,12 +68,12 @@ class PreferencesService {
 
   // --- MENSAJE ---
   String getSosMessage() {
-    return _prefs?.getString(_keySosMessage) ?? '';
+    return _prefs?.getString(keySosMessage) ?? '';
   }
 
   // Alias para compatibilidad con settings_screen
   Future<void> saveSosMessage(String msg) async {
-    await _prefs?.setString(_keySosMessage, msg);
+    await _prefs?.setString(keySosMessage, msg);
   }
   
   // Mantenemos tu método set por si acaso
@@ -156,10 +158,10 @@ class PreferencesService {
 
   // --- ACTIVITY PROFILE ---
   ActivityProfile getActivityProfile() {
-    return activityProfileFromName(_prefs?.getString(_keyActivityProfile));
+    return activityProfileFromName(_prefs?.getString(keyActivityProfile));
   }
 
   Future<void> saveActivityProfile(ActivityProfile profile) async {
-    await _prefs?.setString(_keyActivityProfile, profile.name);
+    await _prefs?.setString(keyActivityProfile, profile.name);
   }
 }
