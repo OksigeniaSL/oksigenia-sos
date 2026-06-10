@@ -418,6 +418,20 @@ class AppLocalizationsEn extends AppLocalizations {
       'The system is restricting this app\'s battery. For SOS to work in the background, you must select \'Unrestricted\' or \'Don\'t Optimize\'.';
 
   @override
+  String get permBgLocationTitle => 'GPS in background';
+
+  @override
+  String get bgLocationDialogBody =>
+      'When the alarm fires, your phone is usually in your pocket with the screen off. For the SOS to leave with your exact position at that moment, Android needs location set to \'Allow all the time\'.\n\nYour location never leaves the phone: no internet, no cloud, no trackers — it only travels inside the SOS SMS to your own contacts.\n\nOn the next screen, choose \'Allow all the time\'.';
+
+  @override
+  String get whyPermsBgLocation =>
+      'Gets your GPS position while the screen is off or the app is in the background — exactly when an SOS fires. The location is only ever sent inside the SOS SMS to your contacts; it never leaves your phone otherwise.';
+
+  @override
+  String get btnEnableBgLocation => 'Allow all the time';
+
+  @override
   String get permLocMissing => 'Missing Location Permission';
 
   @override

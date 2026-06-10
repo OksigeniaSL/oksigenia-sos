@@ -12,6 +12,7 @@ Activity profiles
 
 Pick the profile that matches what you're doing — Smart Sentinel adapts its sensitivity:
 - Trekking / Hiking: balanced default for walking outdoors.
+- Running (road): tuned for the sustained high-G cadence of road running, with an adaptive rhythm detector.
 - Trail running / MTB: higher impact threshold for terrain with constant vibration.
 - Mountaineering: longer observation window for slow recoveries on technical ground.
 - Paragliding / Kayak / Watersports: automatic fall detection is disabled (the sensor cannot reliably interpret flight or water motion); inactivity monitor and manual SOS remain active.
@@ -41,6 +42,18 @@ Privacy and Compatibility
 - Works on de-Googled phones (GrapheneOS, MicroG)
 - Open source under GPLv3
 
-Available in 8 languages: English, Spanish, French, German, Portuguese, Italian, Dutch and Swedish.
+
+About the permissions
+
+Oksigenia SOS asks for sensitive permissions because its job is to call for help when you cannot. Each one maps to a single rescue function:
+
+- SMS: sends the alert. SMS is the only channel that works in the mountains without internet.
+- Location, including "Allow all the time" (background location): when you fall, your phone is in your pocket with the screen off and the app in the background. Without background access, Android can deny a fresh GPS fix at exactly that moment, and the SOS would leave without usable coordinates. Your position is read only when an alert or tracking update is being sent, and it travels exclusively inside the SMS to the contacts you configured — it is never uploaded anywhere. The app's only network use is a version check against a static file on oksigenia.com, which carries no personal data and no location.
+- Motion sensors / physical activity: fall and inactivity detection.
+- Battery exemption: so Android doesn't kill the monitoring service mid-route.
+
+A safety app that prioritised permission minimalism over getting your coordinates to a rescuer would be failing at its only job. The privacy guarantee here is structural, not cosmetic: everything stays on the device.
+
+Available in 11 languages: English, Spanish, French, German, Portuguese, Italian, Dutch, Swedish, Norwegian (Bokmål), Polish and Russian.
 
 IMPORTANT: Oksigenia SOS is a support tool and does not replace professional emergency services. Its operation depends on mobile coverage, GPS signal and battery level.

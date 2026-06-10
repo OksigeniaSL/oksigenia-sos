@@ -419,6 +419,20 @@ class AppLocalizationsSv extends AppLocalizations {
       'Systemet begränsar batteriet. För att SOS ska fungera i bakgrunden, välj \'Ingen begränsning\' eller \'Optimera inte\'.';
 
   @override
+  String get permBgLocationTitle => 'GPS i bakgrunden';
+
+  @override
+  String get bgLocationDialogBody =>
+      'När larmet utlöses ligger telefonen oftast i fickan med släckt skärm. För att SOS:et ska skickas med din exakta position i det ögonblicket kräver Android platsnivån \'Tillåt alltid\'.\n\nDin plats lämnar aldrig telefonen: inget internet, inget moln, inga spårare — den färdas bara i SOS-sms:et till dina egna kontakter.\n\nVälj \'Tillåt alltid\' på nästa skärm.';
+
+  @override
+  String get whyPermsBgLocation =>
+      'Hämtar din GPS-position när skärmen är släckt eller appen är i bakgrunden — precis när ett SOS utlöses. Platsen skickas endast i SOS-sms:et till dina kontakter; den lämnar aldrig telefonen på annat sätt.';
+
+  @override
+  String get btnEnableBgLocation => 'Tillåt alltid';
+
+  @override
   String get permLocMissing => 'Platsbehörighet saknas';
 
   @override

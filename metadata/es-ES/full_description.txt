@@ -12,6 +12,7 @@ Perfiles de actividad
 
 Elige el perfil que más se ajuste a lo que estás haciendo — el Smart Sentinel adapta su sensibilidad:
 - Trekking / Senderismo: ajuste equilibrado para caminar al aire libre.
+- Running (asfalto): calibrado para la cadencia sostenida de alta G del running en carretera, con detector de ritmo adaptativo.
 - Trail / MTB: umbral de impacto más alto para terrenos con vibración constante.
 - Alpinismo: ventana de observación más larga para recuperaciones lentas en terreno técnico.
 - Parapente / Kayak / Deportes acuáticos: la detección automática se desactiva (el sensor no interpreta de forma fiable maniobras de vuelo ni movimiento en el agua); el monitor de inactividad y el SOS manual siguen activos.
@@ -41,6 +42,18 @@ Privacidad y Compatibilidad
 - Compatible con móviles desgooglelados (GrapheneOS, MicroG)
 - Código abierto bajo licencia GPLv3
 
-Disponible en 8 idiomas: inglés, español, francés, alemán, portugués, italiano, neerlandés y sueco.
+
+Sobre los permisos
+
+Oksigenia SOS pide permisos sensibles porque su trabajo es pedir ayuda cuando tú no puedes. Cada uno corresponde a una única función de rescate:
+
+- SMS: envía la alerta. El SMS es el único canal que funciona en la montaña sin internet.
+- Ubicación, incluido «Permitir siempre» (ubicación en segundo plano): cuando te caes, el móvil está en el bolsillo con la pantalla apagada y la app en segundo plano. Sin ese acceso, Android puede negar un fix GPS fresco justo en ese momento, y el SOS saldría sin coordenadas útiles. Tu posición se lee únicamente al enviar una alerta o actualización de seguimiento, y viaja exclusivamente dentro del SMS a los contactos que tú configuraste — nunca se sube a ningún sitio. El único uso de red de la app es un chequeo de versión contra un archivo estático en oksigenia.com, que no lleva datos personales ni ubicación.
+- Sensores de movimiento / actividad física: detección de caídas e inactividad.
+- Exención de batería: para que Android no mate el servicio de monitorización a mitad de ruta.
+
+Una app de seguridad que priorizase el minimalismo de permisos frente a hacer llegar tus coordenadas a un rescatador estaría fallando en su único trabajo. La garantía de privacidad aquí es estructural, no cosmética: todo permanece en el dispositivo.
+
+Disponible en 11 idiomas: inglés, español, francés, alemán, portugués, italiano, neerlandés, sueco, noruego (bokmål), polaco y ruso.
 
 IMPORTANTE: Oksigenia SOS es una herramienta de apoyo y NO sustituye a los servicios de emergencia profesionales. Su funcionamiento depende de la cobertura móvil, la señal GPS y el nivel de batería.

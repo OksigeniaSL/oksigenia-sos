@@ -414,6 +414,20 @@ class AppLocalizationsDe extends AppLocalizations {
       'Das System schränkt den Akku ein. Damit SOS im Hintergrund läuft, wählen Sie \'Keine Einschränkung\' oder \'Nicht optimieren\'.';
 
   @override
+  String get permBgLocationTitle => 'GPS im Hintergrund';
+
+  @override
+  String get bgLocationDialogBody =>
+      'Wenn der Alarm auslöst, steckt das Handy meist mit ausgeschaltetem Bildschirm in der Tasche. Damit das SOS in diesem Moment mit deiner genauen Position rausgeht, verlangt Android die Standortstufe „Immer zulassen“.\n\nDein Standort verlässt das Telefon nie: kein Internet, keine Cloud, keine Tracker — er reist nur in der SOS-SMS an deine eigenen Kontakte.\n\nWähle auf dem nächsten Bildschirm „Immer zulassen“.';
+
+  @override
+  String get whyPermsBgLocation =>
+      'Ermittelt deine GPS-Position bei ausgeschaltetem Bildschirm oder App im Hintergrund — genau dann, wenn ein SOS auslöst. Der Standort wird ausschließlich in der SOS-SMS an deine Kontakte gesendet und verlässt das Telefon sonst nie.';
+
+  @override
+  String get btnEnableBgLocation => 'Immer zulassen';
+
+  @override
   String get permLocMissing => 'Standortberechtigung fehlt';
 
   @override

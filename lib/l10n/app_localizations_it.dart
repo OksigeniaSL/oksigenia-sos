@@ -424,6 +424,20 @@ class AppLocalizationsIt extends AppLocalizations {
       'Il sistema sta limitando la batteria. Affinché SOS funzioni in background, seleziona \'Nessuna restrizione\' o \'Non ottimizzare\'.';
 
   @override
+  String get permBgLocationTitle => 'GPS in background';
+
+  @override
+  String get bgLocationDialogBody =>
+      'Quando scatta l\'allarme, il telefono è di solito in tasca con lo schermo spento. Perché l\'SOS parta con la tua posizione esatta in quel momento, Android richiede la localizzazione su «Consenti sempre».\n\nLa tua posizione non lascia mai il telefono: niente internet, niente cloud, niente tracker — viaggia solo dentro l\'SMS di SOS ai tuoi contatti.\n\nNella schermata successiva scegli «Consenti sempre».';
+
+  @override
+  String get whyPermsBgLocation =>
+      'Rileva la tua posizione GPS a schermo spento o con l\'app in background — esattamente quando scatta un SOS. La posizione viene inviata solo dentro l\'SMS di SOS ai tuoi contatti; non lascia mai il telefono in altro modo.';
+
+  @override
+  String get btnEnableBgLocation => 'Consenti sempre';
+
+  @override
   String get permLocMissing => 'Permesso posizione mancante';
 
   @override

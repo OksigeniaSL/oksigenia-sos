@@ -896,6 +896,30 @@ abstract class AppLocalizations {
   /// **'The system is restricting this app\'s battery. For SOS to work in the background, you must select \'Unrestricted\' or \'Don\'t Optimize\'.'**
   String get batteryDialogBody;
 
+  /// No description provided for @permBgLocationTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'GPS in background'**
+  String get permBgLocationTitle;
+
+  /// No description provided for @bgLocationDialogBody.
+  ///
+  /// In en, this message translates to:
+  /// **'When the alarm fires, your phone is usually in your pocket with the screen off. For the SOS to leave with your exact position at that moment, Android needs location set to \'Allow all the time\'.\n\nYour location never leaves the phone: no internet, no cloud, no trackers — it only travels inside the SOS SMS to your own contacts.\n\nOn the next screen, choose \'Allow all the time\'.'**
+  String get bgLocationDialogBody;
+
+  /// No description provided for @whyPermsBgLocation.
+  ///
+  /// In en, this message translates to:
+  /// **'Gets your GPS position while the screen is off or the app is in the background — exactly when an SOS fires. The location is only ever sent inside the SOS SMS to your contacts; it never leaves your phone otherwise.'**
+  String get whyPermsBgLocation;
+
+  /// No description provided for @btnEnableBgLocation.
+  ///
+  /// In en, this message translates to:
+  /// **'Allow all the time'**
+  String get btnEnableBgLocation;
+
   /// No description provided for @permLocMissing.
   ///
   /// In en, this message translates to:

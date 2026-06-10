@@ -82,6 +82,7 @@ class SOSLogic extends ChangeNotifier with WidgetsBindingObserver {
   bool _sensorsPermissionOk = true;
   bool _batteryOptimizationOk = true;
   bool _fullScreenIntentOk = true;
+  bool _bgLocationOk = true;
 
   bool _smsPermissionOk = true;
   bool _notificationPermissionOk = true;
@@ -91,6 +92,7 @@ class SOSLogic extends ChangeNotifier with WidgetsBindingObserver {
   bool get sensorsPermissionOk => _sensorsPermissionOk;
   bool get batteryOptimizationOk => _batteryOptimizationOk;
   bool get fullScreenIntentOk => _fullScreenIntentOk;
+  bool get bgLocationOk => _bgLocationOk;
   bool get smsPermissionOk => _smsPermissionOk;
   bool get notificationPermissionOk => _notificationPermissionOk;
   int get inactivityElapsedSeconds => isMonitoringPaused
@@ -308,6 +310,10 @@ class SOSLogic extends ChangeNotifier with WidgetsBindingObserver {
       }
 
       _batteryOptimizationOk = await Permission.ignoreBatteryOptimizations.isGranted;
+      // "Permitir siempre": sin él, en Android stock 11+ el servicio puede
+      // quedarse sin GPS fresco justo cuando el SOS sale desde el bolsillo.
+      // Cubre a usuarios existentes que no vuelven a pasar por el onboarding.
+      _bgLocationOk = await Permission.locationAlways.isGranted;
       try {
         _fullScreenIntentOk = await platform.invokeMethod('canUseFullScreenIntent') ?? true;
       } catch (_) {}
@@ -348,6 +354,16 @@ class SOSLogic extends ChangeNotifier with WidgetsBindingObserver {
      } else {
        openAppSettings();
      }
+  }
+
+  Future<void> requestBackgroundLocation() async {
+    final status = await Permission.locationAlways.request();
+    _bgLocationOk = status.isGranted;
+    if (!_bgLocationOk) {
+      // Android 11+ no muestra diálogo para este nivel: hay que ir a Ajustes.
+      await openAppSettings();
+    }
+    notifyListeners();
   }
 
   Future<void> requestFullScreenIntentPermission() async {

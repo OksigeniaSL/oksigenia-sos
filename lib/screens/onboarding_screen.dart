@@ -20,6 +20,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> with WidgetsBinding
 
   bool _smsDone = false;
   bool _locDone = false;
+  bool _bgLocDone = false;
   bool _notifDone = false;
   bool _activityDone = false;
   bool _sensorsDone = false;
@@ -104,6 +105,9 @@ class _OnboardingScreenState extends State<OnboardingScreen> with WidgetsBinding
   Future<void> _refresh() async {
     final sms = await _isSmsGranted();
     final loc = await Permission.location.isGranted;
+    // En Android < 10 no existe el permiso separado: permission_handler lo
+    // reporta concedido junto con location.
+    final bgLoc = await Permission.locationAlways.isGranted;
     final notif = await Permission.notification.isGranted;
     final activity = await Permission.activityRecognition.isGranted;
     final battery = await Permission.ignoreBatteryOptimizations.isGranted;
@@ -115,6 +119,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> with WidgetsBinding
     setState(() {
       _smsDone = sms;
       _locDone = loc;
+      _bgLocDone = bgLoc;
       _notifDone = notif;
       _activityDone = activity;
       _batteryDone = battery;
@@ -124,7 +129,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> with WidgetsBinding
   }
 
   bool get _mandatoryDone =>
-      _smsDone && _locDone && _notifDone && _activityDone && _sensorsDone && _batteryDone;
+      _smsDone && _locDone && _bgLocDone && _notifDone && _activityDone && _sensorsDone && _batteryDone;
 
   Future<void> _openSettingsWithDialog(String permissionName) async {
     if (!mounted) return;
@@ -221,6 +226,48 @@ class _OnboardingScreenState extends State<OnboardingScreen> with WidgetsBinding
     await _openSettingsWithDialog('Location');
   }
 
+  Future<void> _grantBackgroundLocation() async {
+    if (await Permission.locationAlways.isGranted) { await _refresh(); return; }
+    // Android exige el nivel "mientras se usa" antes de poder pedir "siempre".
+    if (!await Permission.location.isGranted) {
+      await _grantLocation();
+      if (!await Permission.location.isGranted) return;
+    }
+    if (!mounted) return;
+    final l10n = AppLocalizations.of(context)!;
+    // Diálogo previo: Android va a abrir su pantalla de ajuste de ubicación y
+    // el usuario tiene que saber qué opción elegir y por qué es seguro.
+    final proceed = await showDialog<bool>(
+      context: context,
+      barrierDismissible: false,
+      builder: (ctx) => AlertDialog(
+        backgroundColor: Colors.grey[900],
+        title: Text(l10n.permBgLocationTitle,
+            style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 16)),
+        content: SingleChildScrollView(
+          child: Text(l10n.bgLocationDialogBody,
+              style: const TextStyle(color: Colors.white70, fontSize: 14)),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(ctx, false),
+            child: Text(l10n.alertCancel, style: TextStyle(color: Colors.grey[500])),
+          ),
+          ElevatedButton(
+            onPressed: () => Navigator.pop(ctx, true),
+            style: ElevatedButton.styleFrom(
+                backgroundColor: Colors.amber, foregroundColor: Colors.black),
+            child: Text(l10n.btnEnableBgLocation),
+          ),
+        ],
+      ),
+    );
+    if (proceed != true) return;
+    final status = await Permission.locationAlways.request();
+    if (status.isGranted) { await _refresh(); return; }
+    await _openSettingsWithDialog('Location → ${AppLocalizations.of(context)!.btnEnableBgLocation}');
+  }
+
   Future<void> _grantNotification() async {
     if (await Permission.notification.isGranted) { await _refresh(); return; }
     final status = await Permission.notification.request();
@@ -306,6 +353,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> with WidgetsBinding
     final items = [
       (Icons.message_outlined, 'SMS', l10n.whyPermsSms),
       (Icons.location_on_outlined, 'GPS', l10n.whyPermsLocation),
+      (Icons.my_location_outlined, l10n.permBgLocationTitle, l10n.whyPermsBgLocation),
       (Icons.notifications_outlined, 'Notifications', l10n.whyPermsNotifications),
       (Icons.directions_run, 'Physical Activity', l10n.whyPermsActivity),
       (Icons.sensors, 'Motion Sensors', l10n.whyPermsSensors),
@@ -437,6 +485,14 @@ class _OnboardingScreenState extends State<OnboardingScreen> with WidgetsBinding
                             granted: _locDone,
                             l10n: l10n,
                             onGrant: _grantLocation,
+                          ),
+                          _PermRow(
+                            icon: Icons.my_location_outlined,
+                            title: l10n.permBgLocationTitle,
+                            mandatory: true,
+                            granted: _bgLocDone,
+                            l10n: l10n,
+                            onGrant: _grantBackgroundLocation,
                           ),
                           _PermRow(
                             icon: Icons.notifications_outlined,

@@ -417,6 +417,20 @@ class AppLocalizationsFr extends AppLocalizations {
       'Le système restreint la batterie de cette application. Pour que le SOS fonctionne en arrière-plan, vous devez sélectionner « Non restreint » ou « Ne pas optimiser ».';
 
   @override
+  String get permBgLocationTitle => 'GPS en arrière-plan';
+
+  @override
+  String get bgLocationDialogBody =>
+      'Quand l\'alarme se déclenche, le téléphone est généralement dans la poche, écran éteint. Pour que le SOS parte avec votre position exacte à cet instant, Android exige le niveau de localisation « Toujours autoriser ».\n\nVotre position ne quitte jamais le téléphone : pas d\'internet, pas de cloud, pas de traceurs — elle ne voyage que dans le SMS de SOS envoyé à vos propres contacts.\n\nSur l\'écran suivant, choisissez « Toujours autoriser ».';
+
+  @override
+  String get whyPermsBgLocation =>
+      'Obtient votre position GPS quand l\'écran est éteint ou l\'application en arrière-plan — précisément quand un SOS se déclenche. La position n\'est envoyée que dans le SMS de SOS à vos contacts ; elle ne quitte jamais votre téléphone autrement.';
+
+  @override
+  String get btnEnableBgLocation => 'Toujours autoriser';
+
+  @override
   String get permLocMissing => 'Permission localisation manquante';
 
   @override

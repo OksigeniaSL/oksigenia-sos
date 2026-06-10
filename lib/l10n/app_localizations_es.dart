@@ -419,6 +419,20 @@ class AppLocalizationsEs extends AppLocalizations {
       'El sistema está restringiendo la batería de esta app. Para que SOS funcione en segundo plano, debes seleccionar \'Sin Restricciones\' o \'No Optimizar\'.';
 
   @override
+  String get permBgLocationTitle => 'GPS en segundo plano';
+
+  @override
+  String get bgLocationDialogBody =>
+      'Cuando la alarma salta, el móvil suele estar en el bolsillo con la pantalla apagada. Para que el SOS salga con tu posición exacta en ese momento, Android necesita la ubicación en modo «Permitir siempre».\n\nTu ubicación nunca sale del teléfono: ni internet, ni nube, ni rastreadores — sólo viaja dentro del SMS de SOS a tus propios contactos.\n\nEn la siguiente pantalla, elige «Permitir siempre».';
+
+  @override
+  String get whyPermsBgLocation =>
+      'Obtiene tu posición GPS con la pantalla apagada o la app en segundo plano — justo cuando salta un SOS. La ubicación sólo se envía dentro del SMS de SOS a tus contactos; nunca sale del teléfono por otra vía.';
+
+  @override
+  String get btnEnableBgLocation => 'Permitir siempre';
+
+  @override
   String get permLocMissing => 'Falta Permiso de Ubicación';
 
   @override

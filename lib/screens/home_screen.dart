@@ -805,6 +805,11 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver, Ti
       text = l10n.batteryDialogTitle;
       icon = Icons.battery_alert;
       onTap = () => _showBatteryDialog(context, l10n);
+    } else if (!_sosLogic.bgLocationOk) {
+      level = _AlertLevel.warning;
+      text = l10n.permBgLocationTitle;
+      icon = Icons.location_off_outlined;
+      onTap = () => _showBgLocationDialog(context, l10n);
     } else if (!_sosLogic.fullScreenIntentOk) {
       level = _AlertLevel.warning;
       text = l10n.fullScreenIntentTitle;
@@ -1476,6 +1481,17 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver, Ti
     showDialog(context: context, builder: (ctx) => AlertDialog(
         title: Row(children: [const Icon(Icons.battery_alert, color: Colors.orange), const SizedBox(width: 10), Expanded(child: Text(l10n.batteryDialogTitle))]),
         content: Text(l10n.batteryDialogBody), actions: [TextButton(onPressed: () => Navigator.pop(ctx), child: const Text("OK")), ElevatedButton(onPressed: () { Navigator.pop(ctx); _sosLogic.requestBatteryOptimizationIgnore(); }, child: Text(l10n.btnDisableBatterySaver))]
+      ));
+  }
+
+  void _showBgLocationDialog(BuildContext context, AppLocalizations l10n) {
+    showDialog(context: context, builder: (ctx) => AlertDialog(
+        title: Row(children: [const Icon(Icons.location_off_outlined, color: Colors.orange), const SizedBox(width: 10), Expanded(child: Text(l10n.permBgLocationTitle))]),
+        content: SingleChildScrollView(child: Text(l10n.bgLocationDialogBody)),
+        actions: [
+          TextButton(onPressed: () => Navigator.pop(ctx), child: const Text("OK")),
+          ElevatedButton(onPressed: () { Navigator.pop(ctx); _sosLogic.requestBackgroundLocation(); }, child: Text(l10n.btnEnableBgLocation)),
+        ]
       ));
   }
 

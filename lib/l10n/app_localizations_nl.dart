@@ -421,6 +421,20 @@ class AppLocalizationsNl extends AppLocalizations {
       'Het systeem beperkt de batterij. Om SOS op de achtergrond te laten werken, selecteer \'Onbeperkt\' of \'Niet optimaliseren\'.';
 
   @override
+  String get permBgLocationTitle => 'GPS op de achtergrond';
+
+  @override
+  String get bgLocationDialogBody =>
+      'Wanneer het alarm afgaat, zit de telefoon meestal in je zak met het scherm uit. Om de SOS op dat moment met je exacte positie te versturen, vereist Android het locatieniveau \'Altijd toestaan\'.\n\nJe locatie verlaat de telefoon nooit: geen internet, geen cloud, geen trackers — ze reist alleen mee in de SOS-sms naar je eigen contacten.\n\nKies op het volgende scherm \'Altijd toestaan\'.';
+
+  @override
+  String get whyPermsBgLocation =>
+      'Bepaalt je GPS-positie terwijl het scherm uit is of de app op de achtergrond draait — precies wanneer een SOS afgaat. De locatie wordt alleen verzonden in de SOS-sms naar je contacten; ze verlaat je telefoon verder nooit.';
+
+  @override
+  String get btnEnableBgLocation => 'Altijd toestaan';
+
+  @override
   String get permLocMissing => 'Locatietoestemming ontbreekt';
 
   @override

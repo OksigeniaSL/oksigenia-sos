@@ -417,6 +417,20 @@ class AppLocalizationsPl extends AppLocalizations {
       'System ogranicza baterię tej aplikacji. Aby SOS działało w tle, wybierz „Bez ograniczeń” lub „Nie optymalizuj”.';
 
   @override
+  String get permBgLocationTitle => 'GPS w tle';
+
+  @override
+  String get bgLocationDialogBody =>
+      'Gdy alarm się uruchamia, telefon zwykle leży w kieszeni z wygaszonym ekranem. Aby SOS wyszedł z Twoją dokładną pozycją w tym momencie, Android wymaga poziomu lokalizacji „Zawsze zezwalaj”.\n\nTwoja lokalizacja nigdy nie opuszcza telefonu: bez internetu, bez chmury, bez trackerów — podróżuje wyłącznie w SMS-ie SOS do Twoich własnych kontaktów.\n\nNa następnym ekranie wybierz „Zawsze zezwalaj”.';
+
+  @override
+  String get whyPermsBgLocation =>
+      'Pobiera Twoją pozycję GPS przy wygaszonym ekranie lub aplikacji w tle — dokładnie wtedy, gdy uruchamia się SOS. Lokalizacja jest wysyłana wyłącznie w SMS-ie SOS do Twoich kontaktów; w żaden inny sposób nie opuszcza telefonu.';
+
+  @override
+  String get btnEnableBgLocation => 'Zawsze zezwalaj';
+
+  @override
   String get permLocMissing => 'Brak uprawnienia lokalizacji';
 
   @override
