@@ -182,6 +182,7 @@ void onStart(ServiceInstance service) async {
 
   int _zombieCountdown = 30;
   StreamSubscription? _accSub;
+  StreamSubscription? _rawAccSub;
 
   bool _isMonitoringImpact = false;
   bool _isMonitoringInactivity = false;
@@ -1057,6 +1058,81 @@ void onStart(ServiceInstance service) async {
     int hzWindowSamples = 0;
     DateTime lastHzLog = DateTime.fromMillisecondsSinceEpoch(0);
 
+    // --- Instrumentación de caída libre (SOLO logging — no gatea nada) ---
+    // Una caída real lleva ~0.3-0.5s de G≈0 antes del impacto (Bourke 2007);
+    // apoyar una mochila en un mueble es un descenso controlado sin caída
+    // libre (falsas alarmas documentadas 2026-06-09 y 2026-06-10). La firma
+    // se mide en el acelerómetro RAW (con gravedad: |a|≈9.81 en reposo, →0
+    // cayendo) — el stream lineal del detector no la ve. Si los datos de
+    // campo confirman la separación, se calibrará un gate del amarillo.
+    DateTime lastFreefallEnd = DateTime.fromMillisecondsSinceEpoch(0);
+    int lastFreefallMs = 0;
+    DateTime freefallStart = DateTime.fromMillisecondsSinceEpoch(0);
+    double freefallMinA = 99;
+    bool inFreefall = false;
+    // Salud del stream raw: si el bug de z-atascado del P8 afecta también al
+    // raw, rawMag se clava en ~197 y la instrumentación quedaría muerta en
+    // silencio. Se publica en el log HZ cada 30s para verificarlo en campo.
+    double lastRawMag = 0;
+    // Throttle: el running tiene fase aérea por zancada (~100ms, 3/s) — sin
+    // esto, una carrera generaría miles de escrituras con flush.
+    DateTime lastFfLogTime = DateTime.fromMillisecondsSinceEpoch(0);
+    int ffSuppressed = 0;
+    int ffSupMaxMs = 0;
+    double ffSupMinA = 99;
+
+    String freefallInfo() {
+      // Un dip EN CURSO es el caso de la caída real (el impacto interrumpe la
+      // caída libre, y el cierre llega por otro stream sin orden garantizado):
+      // hay que reportarlo, no decir "none".
+      if (inFreefall) {
+        final int ms = DateTime.now().difference(freefallStart).inMilliseconds;
+        return "freefall=ONGOING ${ms}ms minA=${freefallMinA.toStringAsFixed(1)}";
+      }
+      final int agoMs = DateTime.now().difference(lastFreefallEnd).inMilliseconds;
+      return (lastFreefallMs > 0 && agoMs < 3000)
+          ? "freefall=${lastFreefallMs}ms@-${agoMs}ms"
+          : "freefall=none";
+    }
+
+    _rawAccSub?.cancel();
+    _rawAccSub = accelerometerEventStream(samplingPeriod: SensorInterval.gameInterval)
+        .listen((e) {
+      final double rawMag = sqrt(e.x * e.x + e.y * e.y + e.z * e.z);
+      lastRawMag = rawMag;
+      if (rawMag < 4.0) {
+        if (!inFreefall) {
+          inFreefall = true;
+          freefallStart = DateTime.now();
+          freefallMinA = rawMag;
+        } else if (rawMag < freefallMinA) {
+          freefallMinA = rawMag;
+        }
+      } else if (inFreefall) {
+        inFreefall = false;
+        final int ms = DateTime.now().difference(freefallStart).inMilliseconds;
+        if (ms >= 60) {
+          final DateTime now = DateTime.now();
+          lastFreefallEnd = now;
+          lastFreefallMs = ms;
+          if (now.difference(lastFfLogTime).inSeconds >= 2) {
+            final String extra = ffSuppressed > 0
+                ? " (+$ffSuppressed dips, max=${ffSupMaxMs}ms, minA=${ffSupMinA.toStringAsFixed(1)})"
+                : "";
+            _logSentinel("SYLVIA FREEFALL: ${ms}ms minA=${freefallMinA.toStringAsFixed(1)} m/s²$extra");
+            lastFfLogTime = now;
+            ffSuppressed = 0;
+            ffSupMaxMs = 0;
+            ffSupMinA = 99;
+          } else {
+            ffSuppressed++;
+            if (ms > ffSupMaxMs) ffSupMaxMs = ms;
+            if (freefallMinA < ffSupMinA) ffSupMinA = freefallMinA;
+          }
+        }
+      }
+    });
+
     _accSub = userAccelerometerEventStream(samplingPeriod: SensorInterval.gameInterval)
         .listen((event) {
 
@@ -1086,7 +1162,9 @@ void onStart(ServiceInstance service) async {
         hzWindowStart = DateTime.now();
         hzWindowSamples = 0;
         if (DateTime.now().difference(lastHzLog).inSeconds >= 30) {
-          _logSentinel("SYLVIA HZ: ${_measuredHz.toStringAsFixed(1)} Hz");
+          // raw≈9.8 en reposo = stream raw sano; raw≈197 = bug z-atascado del
+          // P8 también en el raw → la instrumentación freefall no puede operar.
+          _logSentinel("SYLVIA HZ: ${_measuredHz.toStringAsFixed(1)} Hz raw=${lastRawMag.toStringAsFixed(1)}");
           lastHzLog = DateTime.now();
         }
       }
@@ -1141,7 +1219,7 @@ void onStart(ServiceInstance service) async {
         // Catastrophic impact: skip the yellow observation window. The 30 s
         // pre-alert on AlarmScreen is still the user's chance to cancel.
         if (_orangeThreshold > 0 && instantG >= _orangeThreshold && !_isAlarmActive) {
-          _logSentinel("SYLVIA BACKGROUND: 🟠 Impacto crítico ${instantG.toStringAsFixed(2)}G ≥ ${_orangeThreshold}G → ALARMA DIRECTA (effX=${effX.toStringAsFixed(1)} effY=${effY.toStringAsFixed(1)} effZ=${effZ.toStringAsFixed(1)})");
+          _logSentinel("SYLVIA BACKGROUND: 🟠 Impacto crítico ${instantG.toStringAsFixed(2)}G ≥ ${_orangeThreshold}G → ALARMA DIRECTA (effX=${effX.toStringAsFixed(1)} effY=${effY.toStringAsFixed(1)} effZ=${effZ.toStringAsFixed(1)}) ${freefallInfo()}");
           _activarEscudo(segundos: 3);
           if (_sentinelYellow) {
             _sentinelYellow = false;
@@ -1150,7 +1228,7 @@ void onStart(ServiceInstance service) async {
           }
           _lanzarAlarma();
         } else if (instantG > _yellowThreshold && !_sentinelYellow) {
-          _logSentinel("SYLVIA BACKGROUND: ⚡ Impacto ${instantG.toStringAsFixed(2)}G → Smart Sentinel (effX=${effX.toStringAsFixed(1)} effY=${effY.toStringAsFixed(1)} effZ=${effZ.toStringAsFixed(1)})");
+          _logSentinel("SYLVIA BACKGROUND: ⚡ Impacto ${instantG.toStringAsFixed(2)}G → Smart Sentinel (effX=${effX.toStringAsFixed(1)} effY=${effY.toStringAsFixed(1)} effZ=${effZ.toStringAsFixed(1)}) ${freefallInfo()}");
           _activarEscudo(segundos: 3);
           _enterYellowState();
         }
@@ -1354,6 +1432,7 @@ void onStart(ServiceInstance service) async {
     service.on('stopService').listen((event) async {
       print("SYLVIA: 💀 Recibida orden de apagado.");
       _accSub?.cancel();
+      _rawAccSub?.cancel();
       _inactivityCheckTimer?.cancel();
       _zombieTimer?.cancel();
       _yellowTimer?.cancel();
@@ -1424,6 +1503,8 @@ void onStart(ServiceInstance service) async {
       } else {
         _accSub?.cancel();
         _accSub = null;
+        _rawAccSub?.cancel();
+        _rawAccSub = null;
         _cancelInactivityAlarmClock();
       }
       // El checker de 5s NUNCA se cancela aquí: además de la inactividad
