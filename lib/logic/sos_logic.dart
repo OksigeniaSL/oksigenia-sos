@@ -68,6 +68,16 @@ class SOSLogic extends ChangeNotifier with WidgetsBindingObserver {
   int _batteryLevel = 0;
   double _gpsAccuracy = 0.0;
   Timer? _healthCheckTimer;
+  DateTime _lastServiceRevive = DateTime.fromMillisecondsSinceEpoch(0);
+
+  // init() se llama en main(), en cada initState de HomeScreen y en cada
+  // resume: sin registrar las suscripciones aquí se acumulaban N listeners
+  // duplicados (N pre-alerts paralelas, N health-checks de 5s).
+  final List<StreamSubscription> _serviceSubscriptions = [];
+  // Para causas automáticas Sylvia es el emisor: no mostramos "ENVIADO"
+  // hasta su confirmación onSosSent.
+  bool _awaitingServiceSend = false;
+  Timer? _serviceSendTimeout;
   
   bool _sensorsPermissionOk = true;
   bool _batteryOptimizationOk = true;
@@ -206,43 +216,52 @@ class SOSLogic extends ChangeNotifier with WidgetsBindingObserver {
     
     Future.delayed(const Duration(seconds: 1), () => _syncConfigWithService());
 
-    service.on("onPauseResumed").listen((_) {
+    for (final sub in _serviceSubscriptions) {
+      sub.cancel();
+    }
+    _serviceSubscriptions.clear();
+
+    _serviceSubscriptions.add(service.on("onPauseResumed").listen((_) {
       _pausedUntil = null;
       _lastMovementTime = DateTime.now();
       _updateSylviaStatus();
       notifyListeners();
-    });
+    }));
 
-    service.on("onLiveTrackingSent").listen((_) async {
+    _serviceSubscriptions.add(service.on("onLiveTrackingSent").listen((_) async {
       if (_isLiveTrackingActive) {
         _liveTrackingNextSend = DateTime.now().add(Duration(minutes: _liveTrackingIntervalMinutes));
       }
       notifyListeners();
-    });
+    }));
 
-    service.on("sentinelYellow").listen((_) {
+    _serviceSubscriptions.add(service.on("sentinelYellow").listen((_) {
       _sentinelYellow = true;
       _sentinelOrange = false;
       notifyListeners();
-    });
+    }));
 
-    service.on("sentinelOrange").listen((_) {
+    _serviceSubscriptions.add(service.on("sentinelOrange").listen((_) {
       _sentinelYellow = true;
       _sentinelOrange = true;
       notifyListeners();
-    });
+    }));
 
-    service.on("sentinelGreen").listen((_) {
+    _serviceSubscriptions.add(service.on("sentinelGreen").listen((_) {
       _sentinelYellow = false;
       _sentinelOrange = false;
       notifyListeners();
-    });
+    }));
 
-    service.on("onAlarmTriggered").listen((_) {
+    _serviceSubscriptions.add(service.on("onAlarmTriggered").listen((_) {
       _sentinelYellow = false;
       _sentinelOrange = false;
       _triggerPreAlert(AlertCause.fall, startedByService: true);
-    });
+    }));
+
+    _serviceSubscriptions.add(service.on("onSosSent").listen((event) {
+      _onServiceSendResult(((event?["sent"]) ?? 0) as int);
+    }));
 
     _startGForceMonitoring();
     _startHealthMonitor();
@@ -257,6 +276,7 @@ class SOSLogic extends ChangeNotifier with WidgetsBindingObserver {
   }
 
   void _startHealthMonitor() {
+    _healthCheckTimer?.cancel();
     _checkHealth();
     _healthCheckTimer = Timer.periodic(const Duration(seconds: 5), (_) => _checkHealth());
   }
@@ -292,6 +312,24 @@ class SOSLogic extends ChangeNotifier with WidgetsBindingObserver {
       bool isSystemArmed = _isFallDetectionActive || _isInactivityMonitorActive;
       if (_batteryLevel <= 5 && !_isDyingGaspSent && emergencyContact != null && isSystemArmed) {
         _triggerDyingGasp();
+      }
+
+      // Watchdog UI-side: si los toggles dicen "armado" pero Sylvia está
+      // muerta, la UI mentiría mostrando protección inexistente. Revivir el
+      // servicio y reenviar config (máx. un intento cada 30s para no
+      // encadenar startForegroundService).
+      if (isSystemArmed &&
+          DateTime.now().difference(_lastServiceRevive).inSeconds > 30) {
+        final service = FlutterBackgroundService();
+        if (!(await service.isRunning())) {
+          _lastServiceRevive = DateTime.now();
+          debugPrint("LOGIC: ⚠️ Servicio muerto con sistema armado. Reviviendo...");
+          await service.startService();
+          Future.delayed(const Duration(seconds: 1), () {
+            _syncConfigWithService();
+            reapplyMonitoringConfig();
+          });
+        }
       }
 
       notifyListeners();
@@ -411,6 +449,14 @@ class SOSLogic extends ChangeNotifier with WidgetsBindingObserver {
        debugPrint("LOGIC: 🧟 ¡Detectada alarma zombie!");
        try { await platform.invokeMethod('wakeScreen'); } catch (_) {}
 
+       // Restaurar la causa real (persistida en _triggerPreAlert). El default
+       // es fall, no manual: una alarma zombie sin causa conocida es casi
+       // seguro del servicio, y con fall el emisor es Sylvia (sin doble SMS).
+       final String causeName = rawPrefs.getString('alarm_cause') ?? '';
+       _lastTrigger = AlertCause.values
+           .where((c) => c.name == causeName)
+           .firstOrNull ?? AlertCause.fall;
+
        int startTime = rawPrefs.getInt('alarm_start_timestamp') ?? 0;
        int now = DateTime.now().millisecondsSinceEpoch;
        int elapsedSeconds = ((now - startTime) / 1000).floor();
@@ -436,6 +482,7 @@ class SOSLogic extends ChangeNotifier with WidgetsBindingObserver {
             if (_countdownSeconds <= 0) {
               timer.cancel();
               if (_lastTrigger == AlertCause.manual) {
+                 try { FlutterBackgroundService().invoke("stopAlarm"); } catch (_) {}
                  sendSOS();
               } else {
                  _onAutoAlertSent();
@@ -443,7 +490,7 @@ class SOSLogic extends ChangeNotifier with WidgetsBindingObserver {
             }
           });
           notifyListeners();
-          return; 
+          return;
        } else {
           debugPrint("LOGIC: 🧟 Tiempo agotado. Esperando confirmación de Sylvia...");
           await rawPrefs.setBool('is_alarm_active', false);
@@ -466,14 +513,43 @@ class SOSLogic extends ChangeNotifier with WidgetsBindingObserver {
     }
   }
 
-  void _onAutoAlertSent() async {
+  void _onAutoAlertSent() {
+    // Para causas automáticas el SMS lo envía Sylvia. Antes esto saltaba
+    // directo a "ENVIADO" sin confirmación: si el servicio había muerto, el
+    // usuario veía el check verde y nadie había recibido nada. Ahora queda en
+    // scanning hasta el onSosSent real (con timeout honesto a error).
+    _setStatus(SOSStatus.scanning);
+    _awaitingServiceSend = true;
+    _serviceSendTimeout?.cancel();
+    _serviceSendTimeout = Timer(const Duration(seconds: 90), () {
+      if (_awaitingServiceSend) {
+        _awaitingServiceSend = false;
+        debugPrint("LOGIC: ❌ Sin confirmación de envío de Sylvia tras 90s.");
+        _setStatus(SOSStatus.error, "Fallo SMS / SMS Failed");
+      }
+    });
+  }
+
+  void _onServiceSendResult(int sentCount) async {
+    // Confirmación de Sylvia. Se acepta también en preAlert: si su zombie
+    // ganó la carrera y ya envió, mostrar SentScreen es lo veraz.
+    if (_status != SOSStatus.scanning && _status != SOSStatus.preAlert) return;
+    _awaitingServiceSend = false;
+    _serviceSendTimeout?.cancel();
+    _preAlertTimer?.cancel();
+
+    if (sentCount <= 0) {
+      _setStatus(SOSStatus.error, "Fallo SMS / SMS Failed");
+      return;
+    }
+
     _setStatus(SOSStatus.sent);
     final sharedPrefs = await SharedPreferences.getInstance();
     await sharedPrefs.setBool('sos_sent_recently', true);
     await sharedPrefs.setBool('is_alarm_active', false);
-    
-    await platform.invokeMethod('sleepScreen');
-    
+
+    try { await platform.invokeMethod('sleepScreen'); } catch (_) {}
+
     try {
       _audioPlayer = AudioPlayer();
       await _audioPlayer!.setAudioContext(AudioContext(
@@ -482,7 +558,7 @@ class SOSLogic extends ChangeNotifier with WidgetsBindingObserver {
          ),
          iOS: AudioContextIOS(category: AVAudioSessionCategory.playback)
       ));
-      await _audioPlayer!.setVolume(1.0); 
+      await _audioPlayer!.setVolume(1.0);
       await _audioPlayer!.play(AssetSource('sounds/send.mp3'));
     } catch(e) {}
 
@@ -752,8 +828,12 @@ class SOSLogic extends ChangeNotifier with WidgetsBindingObserver {
   void _triggerPreAlert(AlertCause cause, {bool startedByService = false}) async {
     if (_status == SOSStatus.preAlert || _status == SOSStatus.sent) return;
 
+    // alarm_start_timestamp es de Sylvia (lo escribe _lanzarAlarma) y de él
+    // dependen las dos recuperaciones tras kill de proceso — no se borra aquí.
+    // La causa sí se persiste: sin ella, una restauración zombie volvía a
+    // 'manual' y la UI enviaba su propio SMS además del de Sylvia.
     final prefs = await SharedPreferences.getInstance();
-    await prefs.remove('alarm_start_timestamp');
+    await prefs.setString('alarm_cause', cause.name);
 
     debugPrint("SYLVIA: 🚨 ALARMA ACTIVADA");
     _lastTrigger = cause;
@@ -775,10 +855,14 @@ class SOSLogic extends ChangeNotifier with WidgetsBindingObserver {
     _preAlertTimer?.cancel();
     _preAlertTimer = Timer.periodic(const Duration(seconds: 1), (timer) {
       _countdownSeconds--;
-      notifyListeners(); 
+      notifyListeners();
       if (_countdownSeconds <= 0) {
         timer.cancel();
         if (_lastTrigger == AlertCause.manual) {
+           // En manual la UI es el emisor: abortar el zombie de Sylvia ANTES
+           // de adquirir GPS y enviar. Su timer corre en paralelo y llegaba a
+           // 0 a la vez → SMS duplicado a cada contacto.
+           try { FlutterBackgroundService().invoke("stopAlarm"); } catch (_) {}
            sendSOS();
         } else {
            _onAutoAlertSent();
@@ -840,9 +924,13 @@ class SOSLogic extends ChangeNotifier with WidgetsBindingObserver {
     await prefs.remove('alarm_start_timestamp');
     await prefs.setBool('sos_sent_recently', false);
 
-    _preAlertTimer?.cancel();
+    // _stopAllAlerts también cancela _periodicUpdateTimer: sin esto, tras un
+    // SOS con seguimiento activo, cancelar seguía mandando "Sigo en ruta"
+    // cada N minutos indefinidamente.
+    _stopAllAlerts();
     _preAlertTimer = null;
-    _audioPlayer?.stop();
+    _awaitingServiceSend = false;
+    _serviceSendTimeout?.cancel();
     try {
       final service = FlutterBackgroundService();
       service.invoke("stopAlarm");
@@ -875,6 +963,9 @@ class SOSLogic extends ChangeNotifier with WidgetsBindingObserver {
     await prefs.setBool('is_alarm_active', false);
     await prefs.setBool('beacon_active', false);
 
+    _stopAllAlerts();
+    _awaitingServiceSend = false;
+    _serviceSendTimeout?.cancel();
     _setStatus(SOSStatus.ready);
     _lastMovementTime = DateTime.now();
     
@@ -1055,14 +1146,19 @@ class SOSLogic extends ChangeNotifier with WidgetsBindingObserver {
   @override
   void dispose() {
     WidgetsBinding.instance.removeObserver(this);
+    for (final sub in _serviceSubscriptions) {
+      sub.cancel();
+    }
+    _serviceSubscriptions.clear();
     _accelerometerSubscription?.cancel();
     _gpsSubscription?.cancel();
     _inactivityTimer?.cancel();
     _periodicUpdateTimer?.cancel();
     _healthCheckTimer?.cancel();
     _preAlertTimer?.cancel();
+    _serviceSendTimeout?.cancel();
     _audioPlayer?.dispose();
-    
+
     super.dispose();
   }
 
