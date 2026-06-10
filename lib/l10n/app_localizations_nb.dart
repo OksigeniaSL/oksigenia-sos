@@ -27,6 +27,22 @@ class AppLocalizationsNb extends AppLocalizations {
   String get statusSent => 'Varsel sendt.';
 
   @override
+  String get alarmSendingNow => 'Sender alarm…';
+
+  @override
+  String get alarmSendFailed => 'SOS IKKE SENDT';
+
+  @override
+  String get btnRetry => 'Prøv igjen';
+
+  @override
+  String get statusSendFailed => '⚠️ SOS IKKE SENDT';
+
+  @override
+  String get statusSendFailedBody =>
+      'Ingen SMS kunne sendes. Sjekk dekning og kontakter, og prøv igjen.';
+
+  @override
   String statusError(Object error) {
     return 'FEIL: $error';
   }

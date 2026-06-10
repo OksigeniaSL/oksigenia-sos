@@ -27,6 +27,22 @@ class AppLocalizationsFr extends AppLocalizations {
   String get statusSent => 'Alerte envoyée avec succès.';
 
   @override
+  String get alarmSendingNow => 'Envoi de l\'alerte…';
+
+  @override
+  String get alarmSendFailed => 'SOS NON ENVOYÉ';
+
+  @override
+  String get btnRetry => 'Réessayer';
+
+  @override
+  String get statusSendFailed => '⚠️ SOS NON ENVOYÉ';
+
+  @override
+  String get statusSendFailedBody =>
+      'Aucun SMS n\'a pu être envoyé. Vérifiez la couverture et les contacts, puis réessayez.';
+
+  @override
   String statusError(Object error) {
     return 'ERREUR : $error';
   }
@@ -398,7 +414,7 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get batteryDialogBody =>
-      'The system is restricting this app\'s battery. For SOS to work in the background, you must select \'Unrestricted\' or \'Don\'t Optimize\'.';
+      'Le système restreint la batterie de cette application. Pour que le SOS fonctionne en arrière-plan, vous devez sélectionner « Non restreint » ou « Ne pas optimiser ».';
 
   @override
   String get permLocMissing => 'Permission localisation manquante';

@@ -27,6 +27,22 @@ class AppLocalizationsSv extends AppLocalizations {
   String get statusSent => 'Varning skickad.';
 
   @override
+  String get alarmSendingNow => 'Skickar larm…';
+
+  @override
+  String get alarmSendFailed => 'SOS EJ SKICKAT';
+
+  @override
+  String get btnRetry => 'Försök igen';
+
+  @override
+  String get statusSendFailed => '⚠️ SOS EJ SKICKAT';
+
+  @override
+  String get statusSendFailedBody =>
+      'Inget SMS kunde skickas. Kontrollera täckning och kontakter och försök igen.';
+
+  @override
   String statusError(Object error) {
     return 'FEL: $error';
   }

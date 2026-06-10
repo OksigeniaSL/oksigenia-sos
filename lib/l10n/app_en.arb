@@ -5,6 +5,11 @@
     "statusConnecting": "Connecting satellites...",
     "statusLocationFixed": "LOCATION FIXED",
     "statusSent": "Alert sent successfully.",
+    "alarmSendingNow": "Sending alert…",
+    "alarmSendFailed": "SOS NOT SENT",
+    "btnRetry": "Retry",
+    "statusSendFailed": "⚠️ SOS NOT SENT",
+    "statusSendFailedBody": "No SMS could be sent. Check signal and contacts, then retry.",
     "statusError": "ERROR: {error}",
     "menuWeb": "Official Website",
     "menuSupport": "Tech Support",
@@ -197,18 +202,26 @@
     "homeSummaryWithImpact": "Impact {imp}G · Observ {obs}s · GPS {gps}",
     "@homeSummaryWithImpact": {
         "placeholders": {
-            "imp": {"type": "int"},
-            "obs": {"type": "int"},
-            "gps": {"type": "String"}
+            "imp": {
+                "type": "int"
+            },
+            "obs": {
+                "type": "int"
+            },
+            "gps": {
+                "type": "String"
+            }
         }
     },
     "homeSummaryNoImpact": "Impact OFF · GPS {gps}",
     "@homeSummaryNoImpact": {
         "placeholders": {
-            "gps": {"type": "String"}
+            "gps": {
+                "type": "String"
+            }
         }
     },
-    "homeAlertNotArmed": "NO ARMED — tap a toggle below to activate",
+    "homeAlertNotArmed": "NOT ARMED — tap a toggle below to activate",
     "homeAlertSensorPermDenied": "Sensor permission denied",
     "homeConfirmTitleImpact": "Impact detection",
     "homeConfirmTitleObservation": "Observation",
@@ -216,7 +229,9 @@
     "homeConfirmValueOn": "ON · {threshold}G",
     "@homeConfirmValueOn": {
         "placeholders": {
-            "threshold": {"type": "int"}
+            "threshold": {
+                "type": "int"
+            }
         }
     },
     "homeConfirmValueOff": "OFF",

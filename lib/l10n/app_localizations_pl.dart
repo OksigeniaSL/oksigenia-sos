@@ -27,6 +27,22 @@ class AppLocalizationsPl extends AppLocalizations {
   String get statusSent => 'Alert wysłany pomyślnie.';
 
   @override
+  String get alarmSendingNow => 'Wysyłanie alarmu…';
+
+  @override
+  String get alarmSendFailed => 'SOS NIE WYSŁANE';
+
+  @override
+  String get btnRetry => 'Spróbuj ponownie';
+
+  @override
+  String get statusSendFailed => '⚠️ SOS NIE WYSŁANE';
+
+  @override
+  String get statusSendFailedBody =>
+      'Nie udało się wysłać żadnego SMS-a. Sprawdź zasięg i kontakty, a następnie spróbuj ponownie.';
+
+  @override
   String statusError(Object error) {
     return 'BŁĄD: $error';
   }

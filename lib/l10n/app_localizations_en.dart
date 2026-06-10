@@ -27,6 +27,22 @@ class AppLocalizationsEn extends AppLocalizations {
   String get statusSent => 'Alert sent successfully.';
 
   @override
+  String get alarmSendingNow => 'Sending alert…';
+
+  @override
+  String get alarmSendFailed => 'SOS NOT SENT';
+
+  @override
+  String get btnRetry => 'Retry';
+
+  @override
+  String get statusSendFailed => '⚠️ SOS NOT SENT';
+
+  @override
+  String get statusSendFailedBody =>
+      'No SMS could be sent. Check signal and contacts, then retry.';
+
+  @override
   String statusError(Object error) {
     return 'ERROR: $error';
   }
@@ -648,7 +664,7 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
-  String get homeAlertNotArmed => 'NO ARMED — tap a toggle below to activate';
+  String get homeAlertNotArmed => 'NOT ARMED — tap a toggle below to activate';
 
   @override
   String get homeAlertSensorPermDenied => 'Sensor permission denied';

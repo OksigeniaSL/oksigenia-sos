@@ -27,6 +27,22 @@ class AppLocalizationsRu extends AppLocalizations {
   String get statusSent => 'Тревога отправлена успешно.';
 
   @override
+  String get alarmSendingNow => 'Отправка сигнала…';
+
+  @override
+  String get alarmSendFailed => 'SOS НЕ ОТПРАВЛЕН';
+
+  @override
+  String get btnRetry => 'Повторить';
+
+  @override
+  String get statusSendFailed => '⚠️ SOS НЕ ОТПРАВЛЕН';
+
+  @override
+  String get statusSendFailedBody =>
+      'Не удалось отправить ни одного SMS. Проверьте сигнал сети и контакты, затем повторите.';
+
+  @override
   String statusError(Object error) {
     return 'ОШИБКА: $error';
   }

@@ -152,6 +152,36 @@ abstract class AppLocalizations {
   /// **'Alert sent successfully.'**
   String get statusSent;
 
+  /// No description provided for @alarmSendingNow.
+  ///
+  /// In en, this message translates to:
+  /// **'Sending alert…'**
+  String get alarmSendingNow;
+
+  /// No description provided for @alarmSendFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'SOS NOT SENT'**
+  String get alarmSendFailed;
+
+  /// No description provided for @btnRetry.
+  ///
+  /// In en, this message translates to:
+  /// **'Retry'**
+  String get btnRetry;
+
+  /// No description provided for @statusSendFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'⚠️ SOS NOT SENT'**
+  String get statusSendFailed;
+
+  /// No description provided for @statusSendFailedBody.
+  ///
+  /// In en, this message translates to:
+  /// **'No SMS could be sent. Check signal and contacts, then retry.'**
+  String get statusSendFailedBody;
+
   /// No description provided for @statusError.
   ///
   /// In en, this message translates to:
@@ -1301,7 +1331,7 @@ abstract class AppLocalizations {
   /// No description provided for @homeAlertNotArmed.
   ///
   /// In en, this message translates to:
-  /// **'NO ARMED — tap a toggle below to activate'**
+  /// **'NOT ARMED — tap a toggle below to activate'**
   String get homeAlertNotArmed;
 
   /// No description provided for @homeAlertSensorPermDenied.
