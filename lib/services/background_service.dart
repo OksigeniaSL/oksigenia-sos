@@ -1238,21 +1238,32 @@ void onStart(ServiceInstance service) async {
         // gameInterval); _isRhythmicMovement only uses last 2s of real samples.
         if (_gBuffer.length > 600) _gBuffer.removeAt(0);
 
-        // Catastrophic impact: skip the yellow observation window. The 30 s
-        // pre-alert on AlarmScreen is still the user's chance to cancel.
-        if (_orangeThreshold > 0 && instantG >= _orangeThreshold && !_isAlarmActive) {
-          _logSentinel("SYLVIA BACKGROUND: 🟠 Impacto crítico ${instantG.toStringAsFixed(2)}G ≥ ${_orangeThreshold}G → ALARMA DIRECTA (effX=${effX.toStringAsFixed(1)} effY=${effY.toStringAsFixed(1)} effZ=${effZ.toStringAsFixed(1)}) ${freefallInfo()}");
-          _activarEscudo(segundos: 3);
-          if (_sentinelYellow) {
-            _sentinelYellow = false;
-            _yellowTimer?.cancel();
-            _yellowCountdown = _observationSeconds;
+        if (instantG > _yellowThreshold && !_sentinelYellow && !_isAlarmActive) {
+          // Corroboración física: el stream lineal fabrica impactos fantasma
+          // durante volteos/caída libre — medido 2026-06-10: "17.5G" con
+          // rawPk=2, el móvil aún EN EL AIRE. Un impacto real tiene que
+          // haberse visto también en el acelerómetro raw (impactos reales
+          // contra colchón midieron rawPk=119-167; reposo=9.8; caída libre≈0).
+          final bool rawCorroborated = recentRawMax >= 25.0;
+          final bool isOrange = _orangeThreshold > 0 && instantG >= _orangeThreshold;
+
+          if (!rawCorroborated) {
+            _logSentinel("SYLVIA BACKGROUND: 👻 Impacto ${instantG.toStringAsFixed(2)}G DESCARTADO — rawPk=${recentRawMax.toStringAsFixed(0)} < 25 m/s², fantasma del stream lineal (effX=${effX.toStringAsFixed(1)} effY=${effY.toStringAsFixed(1)} effZ=${effZ.toStringAsFixed(1)}) ${freefallInfo()}");
+          } else {
+            // Decisión de diseño 2026-06-10: NINGÚN impacto dispara la alarma
+            // directamente — siempre vigilancia primero. El antiguo
+            // orange-direct saltaba el amarillo; ahora un impacto crítico
+            // entra en la misma ventana de observación (se conserva el log
+            // 🟠 para el análisis de campo). La pre-alerta de 30s y el
+            // monitor de inactividad siguen siendo las redes de seguridad.
+            if (isOrange) {
+              _logSentinel("SYLVIA BACKGROUND: 🟠 Impacto crítico ${instantG.toStringAsFixed(2)}G ≥ ${_orangeThreshold}G → VIGILANCIA (effX=${effX.toStringAsFixed(1)} effY=${effY.toStringAsFixed(1)} effZ=${effZ.toStringAsFixed(1)}) ${freefallInfo()}");
+            } else {
+              _logSentinel("SYLVIA BACKGROUND: ⚡ Impacto ${instantG.toStringAsFixed(2)}G → Smart Sentinel (effX=${effX.toStringAsFixed(1)} effY=${effY.toStringAsFixed(1)} effZ=${effZ.toStringAsFixed(1)}) ${freefallInfo()}");
+            }
+            _activarEscudo(segundos: 3);
+            _enterYellowState();
           }
-          _lanzarAlarma();
-        } else if (instantG > _yellowThreshold && !_sentinelYellow) {
-          _logSentinel("SYLVIA BACKGROUND: ⚡ Impacto ${instantG.toStringAsFixed(2)}G → Smart Sentinel (effX=${effX.toStringAsFixed(1)} effY=${effY.toStringAsFixed(1)} effZ=${effZ.toStringAsFixed(1)}) ${freefallInfo()}");
-          _activarEscudo(segundos: 3);
-          _enterYellowState();
         }
       }
 
