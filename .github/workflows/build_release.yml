@@ -56,6 +56,9 @@ jobs:
       with:
         files: build/app/outputs/flutter-apk/app-*-release.apk
         draft: false
-        prerelease: false
+        # Tags con sufijo (v4.2.0-beta.1) → pre-release: GitHub no las marca
+        # como "latest" y el crawler de IzzyOnDroid no las publica. Sólo los
+        # tags limpios (v4.2.0) llegan a Izzy.
+        prerelease: ${{ contains(github.ref_name, '-') }}
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
