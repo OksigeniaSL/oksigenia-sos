@@ -28,15 +28,20 @@ It is an **autonomous bio-telemetry system** designed to detect life-threatening
 
 The interface is designed for high-stress situations. High contrast, large touch targets for gloved hands, and clear status indicators.
 
-| **Flight Deck** | **Fall Detected** | **Inactivity Alert** | **Configuration** |
+| **Flight Deck** | **Activity Profiles** | **Configuration** | **Live Tracking** |
 |:---:|:---:|:---:|:---:|
-| <img src="screenshots/main_en.jpg" width="180" /> | <img src="screenshots/impact_en.jpg" width="180" /> | <img src="screenshots/inactivity_en.jpg" width="180" /> | <img src="screenshots/settings_en.jpg" width="180" /> |
-| *Real-time telemetry & status* | *30s countdown before SMS* | *Triggered by lack of motion* | *Local contacts & settings* |
+| <img src="screenshots/main_en.jpg" width="180" /> | <img src="screenshots/profile_en.jpg" width="180" /> | <img src="screenshots/settings_en.jpg" width="180" /> | <img src="screenshots/tracking_en.jpg" width="180" /> |
+| *Profile hero & real-time telemetry* | *8 sport presets tune Smart Sentinel* | *Contacts, message & profile* | *Periodic check-ins with "I'm OK"* |
 
-| **Test Mode** | **Alert Sent** | **SMS Payload** | **Localization** |
+| **Fall Detected** | **Inactivity Alert** | **Alert Sent** | **SMS Payload** |
 |:---:|:---:|:---:|:---:|
-| <img src="screenshots/main_testmode_en.jpg" width="180" /> | <img src="screenshots/sent_en.jpg" width="180" /> | <img src="screenshots/sms_sos_en.png" width="180" /> | <img src="screenshots/lang_en.jpg" width="180" /> |
-| *Safe testing environment* | *Confirmation screen* | *Direct GPS coordinates* | *8 Native languages* |
+| <img src="screenshots/impact_en.jpg" width="180" /> | <img src="screenshots/inactivity_en.jpg" width="180" /> | <img src="screenshots/sent_en.jpg" width="180" /> | <img src="screenshots/sms_sos_en.png" width="180" /> |
+| *30s countdown before SMS* | *Triggered by lack of motion* | *Confirmation screen* | *Direct GPS coordinates* |
+
+| **Test Mode** | **Localization** |
+|:---:|:---:|
+| <img src="screenshots/main_testmode_en.jpg" width="180" /> | <img src="screenshots/lang_en.jpg" width="180" /> |
+| *Safe testing environment* | *11 native languages* |
 
 ---
 
