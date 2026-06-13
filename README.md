@@ -1,4 +1,4 @@
-# Oksigenia SOS 🏔️ v4.1.1 "Smart Beacon"
+# Oksigenia SOS 🏔️ v4.2.0 "Running"
 
 **The Ultimate Outdoor Guardian | FOSS | Privacy-First | Autonomous**
 
@@ -45,7 +45,36 @@ The interface is designed for high-stress situations. High contrast, large touch
 
 ---
 
-## 📍 What's New in v4.1.1: Smart Beacon (RB hot-fix of v4.1.0)
+## 🏃 What's New in v4.2.0: Running profile & reliability
+
+### 🏃 Running (road) profile
+Eighth activity profile, tuned for road running. Field telemetry showed that sustained running keeps the G-signal permanently elevated (mean 1.6–2.8 G), which the walking-calibrated cadence detector read as "no movement" — a false-alarm trap. The new profile adds an **adaptive rhythm detector**: in a clearly elevated regime it re-evaluates cadence over the moving mean instead of the fixed walking threshold. Yellow 10 G, 60 s observation, GPS 5 s / 10 m. Validated across a multi-surface field route (trekking, road running, trail).
+
+### 🏠 Redesigned Home
+Profile hero card with the active parameters at a glance, a single context-aware alert banner (replacing the old status pills), and confirm-on-switch when changing profiles — with a warning when the target profile disables automatic fall detection.
+
+### 📡 Smart Beacon — stoppable & clearer
+The post-SOS position beacon can now be stopped directly from the Home screen — a tap on its banner — without shutting down monitoring. Its SMS now states plainly that it is an **automatic follow-up to the emergency alert, not a new alarm**, so the recipient is never confused.
+
+### 🛰️ Background location, explained
+The app now requests "Allow all the time" location with a plain-language rationale: when the alarm fires with the phone in a pocket and the screen off, Android can otherwise deny a fresh GPS fix at the worst possible moment. Your position is read only when an alert or tracking update is sent, and travels only inside the SMS to your own contacts — never uploaded anywhere.
+
+### 🛡️ Reliability overhaul
+Every recovery path of the safety system was hardened:
+- The SOS **survives the background service being killed mid-countdown**; the active profile is restored after a respawn (no silent fallback to the wrong thresholds).
+- A storage-key mismatch that could leave the autonomous send path without contacts is fixed.
+- Impacts are **cross-checked against the raw accelerometer**, rejecting phantom spikes the fused sensor can produce during a free-fall tumble.
+- **No impact triggers the alarm instantly any more** — every impact enters the observation window first (the 30-second pre-alert and the inactivity monitor remain the safety nets).
+- **Honest send feedback**: the UI no longer reports "sent" without the service confirming it, and a failed send offers a retry.
+
+### 🌍 International SMS
+National-format numbers with a trunk zero (e.g. FR `06…`, UK `07…`) are now normalised to E.164, so carriers no longer silently drop the alert (Italy's leading zero is preserved, as E.164 requires).
+
+See the [v4.2.0 GitHub Release](https://github.com/OksigeniaSL/oksigenia-sos/releases/tag/v4.2.0) for the full technical breakdown.
+
+---
+
+## 📍 v4.1.1: Smart Beacon (RB hot-fix of v4.1.0)
 
 v4.1.1 carries the v4.1.0 feature set unchanged. The only difference is a Reproducible Build hot-fix: the release workflow now strips the build-id embedded by the linker into `libdartjni.so` (transitive `jni` dep), so the APK is bit-for-bit reproducible and IzzyOnDroid can certify it ([Issue #6](https://github.com/OksigeniaSL/oksigenia-sos/issues/6)).
 
@@ -81,6 +110,8 @@ Closes the multi-sport story started in v3.9.7. Three additions on top of the ex
 
 ### ⚡ Catastrophic Impact Path
 A second G-force threshold per profile fires the alarm immediately, skipping the 60-second yellow observation window. The 30-second pre-alert on the alarm screen is still the user's chance to cancel.
+
+> **Superseded in v4.2.0:** the direct-alarm path was removed. No impact now triggers the alarm instantly — every impact enters the observation window, and impacts are cross-checked against the raw accelerometer to reject phantom spikes. See the v4.2.0 section above.
 
 | Profile | Yellow (observation) | Orange (direct alarm) |
 |:---|:---:|:---:|

@@ -1,0 +1,18 @@
+v4.2.0 "Running"
+
+NEW
+- Running (road) profile: tuned for the sustained high-G cadence of road running, with an adaptive rhythm detector that stops it mistaking your stride for a fall. Field-validated.
+- Redesigned Home: profile hero card, a single context-aware alert banner, and confirm-on-switch when changing activity profile.
+- Background location ("Allow all the time") is now requested with a plain-language explanation, so the SOS carries a fresh GPS fix when the alarm fires with the screen off.
+
+RELIABILITY
+- The SOS now survives the background service being killed mid-countdown, and your active profile is restored after a respawn.
+- Emergency contacts are always reachable for the autonomous SOS (fixed an internal storage mismatch).
+- Impacts are cross-checked against the raw sensor to reject phantom spikes; no impact triggers the alarm instantly any more — each enters the observation window first.
+- Honest feedback: the app no longer shows "sent" unless the SOS really went out, and a failed send offers a retry.
+- The post-SOS location beacon can now be stopped from the Home screen, and its SMS says clearly it is an automatic follow-up to the alert, not a new alarm.
+
+SMS
+- International numbers in national format (leading "0") are normalised to E.164 so carriers don't silently drop the alert.
+
+Now in 11 languages.
