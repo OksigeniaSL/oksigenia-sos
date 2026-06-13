@@ -94,7 +94,11 @@ class _SentScreenState extends State<SentScreen> {
                   width: double.infinity,
                   height: 60,
                   child: ElevatedButton(
-                    onPressed: () => logic.cancelAlert(), 
+                    // resetSystem (no cancelAlert): apaga también el beacon.
+                    // El botón decía "Monitor stopped" pero cancelAlert dejaba
+                    // el beacon vivo enviando avisos de movimiento sin parada
+                    // posible (bug de campo 2026-06-13).
+                    onPressed: () => logic.resetSystem(),
                     style: ElevatedButton.styleFrom(
                       backgroundColor: Colors.white, 
                       foregroundColor: Colors.black, 

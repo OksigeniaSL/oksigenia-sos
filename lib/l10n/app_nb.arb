@@ -125,7 +125,7 @@
     "btnRestartSystem": "START SYSTEM PÅ NYTT",
     "smsDyingGasp": "⚠️ BATTERI <5%. Systemet slår seg av. Pos:",
     "smsHelpMessage": "HJELP! Jeg trenger assistanse.",
-    "smsBeaconHeader": "📍 OKSIGENIA OPPDATERING — flyttet",
+    "smsBeaconHeader": "📍 OKSIGENIA SOS — automatisk oppfølging av nødvarselet mitt (dette er IKKE en ny alarm). Min oppdaterte posisjon:",
     "batteryDialogTitle": "Batteribegrensning",
     "btnDisableBatterySaver": "DEAKTIVER SPARING",
     "batteryDialogBody": "Systemet begrenser appens batteri. For at SOS skal fungere i bakgrunnen, velg «Ubegrenset» eller «Ikke optimaliser».",
@@ -213,5 +213,8 @@
     "homeConfirmValueOn": "PÅ · {threshold}G",
     "homeConfirmValueOff": "AV",
     "homeProfileNoFallWarning": "Denne profilen oppdager IKKE fall. SOS må utløses manuelt.",
-    "homeActionApply": "Bruk"
+    "homeActionApply": "Bruk",
+    "smsBeaconDistance": "fra punktet der SOS-en ble sendt.",
+    "homeBeaconBanner": "Sender posisjonsoppdateringer til kontakten din etter SOS — trykk for å stoppe",
+    "beaconStopped": "Bevegelsesvarsler stoppet"
 }

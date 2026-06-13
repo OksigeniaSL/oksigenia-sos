@@ -125,7 +125,7 @@
     "btnRestartSystem": "ZRESTARTUJ SYSTEM",
     "smsDyingGasp": "⚠️ BATERIA <5%. System się wyłącza. Lok:",
     "smsHelpMessage": "POMOCY! Potrzebuję wsparcia.",
-    "smsBeaconHeader": "📍 OKSIGENIA AKTUALIZACJA — przemieszczenie",
+    "smsBeaconHeader": "📍 OKSIGENIA SOS — automatyczna aktualizacja mojego alarmu awaryjnego (to NIE jest nowy alarm). Moja zaktualizowana lokalizacja:",
     "batteryDialogTitle": "Ograniczenie baterii",
     "btnDisableBatterySaver": "WYŁĄCZ OSZCZĘDZANIE",
     "batteryDialogBody": "System ogranicza baterię tej aplikacji. Aby SOS działało w tle, wybierz „Bez ograniczeń” lub „Nie optymalizuj”.",
@@ -213,5 +213,8 @@
     "homeConfirmValueOn": "WŁ · {threshold}G",
     "homeConfirmValueOff": "WYŁ",
     "homeProfileNoFallWarning": "Ten profil NIE wykrywa upadków. SOS musi być uruchomiony ręcznie.",
-    "homeActionApply": "Zastosuj"
+    "homeActionApply": "Zastosuj",
+    "smsBeaconDistance": "od miejsca, w którym wysłano SOS.",
+    "homeBeaconBanner": "Wysyłanie lokalizacji do kontaktu po SOS — dotknij, aby zatrzymać",
+    "beaconStopped": "Powiadomienia o ruchu zatrzymane"
 }

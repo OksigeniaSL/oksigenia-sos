@@ -406,7 +406,8 @@ class AppLocalizationsEs extends AppLocalizations {
   String get smsHelpMessage => '¡AYUDA! Necesito asistencia.';
 
   @override
-  String get smsBeaconHeader => '📍 ACTUALIZACIÓN OKSIGENIA — movido';
+  String get smsBeaconHeader =>
+      '📍 OKSIGENIA SOS — seguimiento automático de mi alerta de emergencia (esto NO es una alarma nueva). Mi ubicación actualizada:';
 
   @override
   String get batteryDialogTitle => 'Restricción de Batería';
@@ -708,4 +709,14 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get homeActionApply => 'Aplicar';
+
+  @override
+  String get smsBeaconDistance => 'desde el punto donde se envió el SOS.';
+
+  @override
+  String get homeBeaconBanner =>
+      'Enviando tu ubicación al contacto tras el SOS — toca para detener';
+
+  @override
+  String get beaconStopped => 'Avisos de movimiento detenidos';
 }

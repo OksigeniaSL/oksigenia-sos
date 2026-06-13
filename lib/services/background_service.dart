@@ -109,7 +109,8 @@ Map<String, String> _texts = {
   'pauseTitle': 'Monitoring paused',
   'resumesIn': 'Resumes in',
   'resumeNow': 'Resume now',
-  'smsBeaconHeader': '📍 OKSIGENIA UPDATE — moved',
+  'smsBeaconHeader': '📍 OKSIGENIA SOS — automatic follow-up to my emergency alert (this is NOT a new alarm). My updated location:',
+  'smsBeaconDistance': 'from the point where the SOS was sent.',
 };
 
 // Smart Beacon: post-SOS position-update SMS protocol.
@@ -654,8 +655,13 @@ void onStart(ServiceInstance service) async {
       final originLon = p.getDouble('beacon_origin_lon') ?? 0;
       final totalDist = Geolocator.distanceBetween(originLat, originLon, pos.latitude, pos.longitude);
 
-      final header = _texts['smsBeaconHeader'] ?? '📍 OKSIGENIA UPDATE — moved';
-      String msg = "$header ${totalDist.toStringAsFixed(0)}m";
+      // Mensaje autoexplicativo para quien lo recibe: el destinatario no debe
+      // confundir un aviso de movimiento con una nueva alarma SOS (feedback
+      // real de campo 2026-06-13: la contacto no sabía si los "moved" eran SOS).
+      final header = _texts['smsBeaconHeader'] ??
+          '📍 OKSIGENIA SOS — automatic follow-up to my emergency alert (this is NOT a new alarm). My updated location:';
+      final distSuffix = _texts['smsBeaconDistance'] ?? 'from the point where the SOS was sent.';
+      String msg = "$header\n${totalDist.toStringAsFixed(0)} m $distSuffix";
       msg += "\nMaps: https://maps.google.com/?q=${pos.latitude},${pos.longitude}";
       msg += "\nOSM: https://www.openstreetmap.org/?mlat=${pos.latitude}&mlon=${pos.longitude}";
 

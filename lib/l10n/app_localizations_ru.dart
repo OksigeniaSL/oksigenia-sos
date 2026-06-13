@@ -405,7 +405,8 @@ class AppLocalizationsRu extends AppLocalizations {
   String get smsHelpMessage => 'ПОМОГИТЕ! Нужна помощь.';
 
   @override
-  String get smsBeaconHeader => '📍 OKSIGENIA ОБНОВЛЕНИЕ — переместился';
+  String get smsBeaconHeader =>
+      '📍 OKSIGENIA SOS — автоматическое продолжение моего сигнала тревоги (это НЕ новая тревога). Моё текущее местоположение:';
 
   @override
   String get batteryDialogTitle => 'Ограничение батареи';
@@ -707,4 +708,14 @@ class AppLocalizationsRu extends AppLocalizations {
 
   @override
   String get homeActionApply => 'Применить';
+
+  @override
+  String get smsBeaconDistance => 'от точки, где был отправлен сигнал SOS.';
+
+  @override
+  String get homeBeaconBanner =>
+      'Отправка местоположения контакту после SOS — нажмите, чтобы остановить';
+
+  @override
+  String get beaconStopped => 'Оповещения о перемещении остановлены';
 }

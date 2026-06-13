@@ -125,7 +125,7 @@
     "btnRestartSystem": "ПЕРЕЗАПУСТИТЬ",
     "smsDyingGasp": "⚠️ БАТАРЕЯ <5%. Система выключается. Лок:",
     "smsHelpMessage": "ПОМОГИТЕ! Нужна помощь.",
-    "smsBeaconHeader": "📍 OKSIGENIA ОБНОВЛЕНИЕ — переместился",
+    "smsBeaconHeader": "📍 OKSIGENIA SOS — автоматическое продолжение моего сигнала тревоги (это НЕ новая тревога). Моё текущее местоположение:",
     "batteryDialogTitle": "Ограничение батареи",
     "btnDisableBatterySaver": "ОТКЛЮЧИТЬ ЭКОНОМИЮ",
     "batteryDialogBody": "Система ограничивает батарею этого приложения. Чтобы SOS работал в фоне, выбери «Без ограничений» или «Не оптимизировать».",
@@ -213,5 +213,8 @@
     "homeConfirmValueOn": "ВКЛ · {threshold}G",
     "homeConfirmValueOff": "ВЫКЛ",
     "homeProfileNoFallWarning": "Этот профиль НЕ обнаруживает падения. SOS должен быть активирован вручную.",
-    "homeActionApply": "Применить"
+    "homeActionApply": "Применить",
+    "smsBeaconDistance": "от точки, где был отправлен сигнал SOS.",
+    "homeBeaconBanner": "Отправка местоположения контакту после SOS — нажмите, чтобы остановить",
+    "beaconStopped": "Оповещения о перемещении остановлены"
 }

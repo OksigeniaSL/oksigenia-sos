@@ -125,7 +125,7 @@
     "btnRestartSystem": "REINICIAR SISTEMA",
     "smsDyingGasp": "⚠️ BATERÍA <5%. Me apago. Loc:",
     "smsHelpMessage": "¡AYUDA! Necesito asistencia.",
-    "smsBeaconHeader": "📍 ACTUALIZACIÓN OKSIGENIA — movido",
+    "smsBeaconHeader": "📍 OKSIGENIA SOS — seguimiento automático de mi alerta de emergencia (esto NO es una alarma nueva). Mi ubicación actualizada:",
     "batteryDialogTitle": "Restricción de Batería",
     "btnDisableBatterySaver": "DESACTIVAR AHORRO",
     "batteryDialogBody": "El sistema está restringiendo la batería de esta app. Para que SOS funcione en segundo plano, debes seleccionar 'Sin Restricciones' o 'No Optimizar'.",
@@ -213,5 +213,8 @@
     "homeConfirmValueOn": "ON · {threshold}G",
     "homeConfirmValueOff": "OFF",
     "homeProfileNoFallWarning": "Este perfil NO detecta caídas. El SOS debe activarse manualmente.",
-    "homeActionApply": "Aplicar"
+    "homeActionApply": "Aplicar",
+    "smsBeaconDistance": "desde el punto donde se envió el SOS.",
+    "homeBeaconBanner": "Enviando tu ubicación al contacto tras el SOS — toca para detener",
+    "beaconStopped": "Avisos de movimiento detenidos"
 }

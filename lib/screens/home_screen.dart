@@ -149,7 +149,11 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver, Ti
 
   void _updatePulseAnimation() {
     final state = _sosLogic.sentinelState;
-    final bool active = state == SentinelState.yellow || state == SentinelState.orange;
+    // El beacon también pulsa (aunque el sentinel esté verde): es la señal de
+    // que se está enviando la posición y de que se puede tocar para parar.
+    final bool active = state == SentinelState.yellow ||
+        state == SentinelState.orange ||
+        _sosLogic.beaconActive;
 
     if (!active) {
       _pulseController.stop();
@@ -158,14 +162,18 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver, Ti
       return;
     }
 
-    if (state != _lastPulseState) {
+    final int ms = state == SentinelState.orange
+        ? 500
+        : state == SentinelState.yellow
+            ? 900
+            : 1100; // beacon: pulso más lento, informativo
+    if (!_pulseController.isAnimating ||
+        _pulseController.duration?.inMilliseconds != ms) {
       _pulseController.stop();
-      _pulseController.duration = Duration(
-        milliseconds: state == SentinelState.orange ? 500 : 900,
-      );
+      _pulseController.duration = Duration(milliseconds: ms);
       _pulseController.repeat(reverse: true);
-      _lastPulseState = state;
     }
+    _lastPulseState = state;
   }
 
   @override
@@ -778,6 +786,7 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver, Ti
     String text = '';
     IconData icon = Icons.info_outline;
     VoidCallback? onTap;
+    bool isBeacon = false;
 
     // Order matters: emergency > permissions > sentinel state > idle.
     if (_sosLogic.status == SOSStatus.preAlert) {
@@ -800,6 +809,18 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver, Ti
       level = _AlertLevel.critical;
       text = l10n.homeAlertSensorPermDenied;
       icon = Icons.sensors_off;
+    } else if (_sosLogic.beaconActive) {
+      // Post-SOS: el beacon manda la posición al contacto cuando te mueves.
+      // Banner siempre visible y pulsante para poder cortarlo de un toque
+      // (antes era imposible pararlo desde la app).
+      level = _AlertLevel.warning;
+      isBeacon = true;
+      text = l10n.homeBeaconBanner;
+      icon = Icons.podcasts;
+      onTap = () async {
+        await _sosLogic.stopBeacon();
+        if (mounted) _showSuccessToast(context, l10n.beaconStopped);
+      };
     } else if (!_sosLogic.batteryOptimizationOk) {
       level = _AlertLevel.warning;
       text = l10n.batteryDialogTitle;
@@ -822,9 +843,10 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver, Ti
 
     if (level == null) return const SizedBox.shrink();
 
-    final Color color = level == _AlertLevel.critical
-        ? Colors.redAccent
-        : Colors.orangeAccent;
+    final Color color = isBeacon
+        ? const Color(0xFF29B6F6) // azul: transmisión activa, no es una alarma
+        : (level == _AlertLevel.critical ? Colors.redAccent : Colors.orangeAccent);
+    final bool pulse = level == _AlertLevel.critical || isBeacon;
 
     final Widget banner = Container(
       width: double.infinity,
@@ -854,8 +876,8 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver, Ti
       ),
     );
 
-    // Pulse only the truly urgent ones; warnings stay calm.
-    if (level == _AlertLevel.critical) {
+    // Pulse the urgent ones and the active beacon; plain warnings stay calm.
+    if (pulse) {
       return AnimatedBuilder(
         animation: _pulseController,
         builder: (context, child) {

@@ -83,6 +83,9 @@ class SOSLogic extends ChangeNotifier with WidgetsBindingObserver {
   bool _batteryOptimizationOk = true;
   bool _fullScreenIntentOk = true;
   bool _bgLocationOk = true;
+  // Smart Beacon activo tras un SOS: la UI lo refleja para ofrecer un botón
+  // visible de parada (antes era imposible apagarlo desde la app).
+  bool _beaconActive = false;
 
   bool _smsPermissionOk = true;
   bool _notificationPermissionOk = true;
@@ -93,6 +96,7 @@ class SOSLogic extends ChangeNotifier with WidgetsBindingObserver {
   bool get batteryOptimizationOk => _batteryOptimizationOk;
   bool get fullScreenIntentOk => _fullScreenIntentOk;
   bool get bgLocationOk => _bgLocationOk;
+  bool get beaconActive => _beaconActive;
   bool get smsPermissionOk => _smsPermissionOk;
   bool get notificationPermissionOk => _notificationPermissionOk;
   int get inactivityElapsedSeconds => isMonitoringPaused
@@ -167,6 +171,7 @@ class SOSLogic extends ChangeNotifier with WidgetsBindingObserver {
           'pauseTitle': l10n.pauseTitle,
           'resumeNow': l10n.pauseResumeNow,
           'smsBeaconHeader': l10n.smsBeaconHeader,
+          'smsBeaconDistance': l10n.smsBeaconDistance,
         };
       }
     } else {
@@ -187,6 +192,7 @@ class SOSLogic extends ChangeNotifier with WidgetsBindingObserver {
           'pauseTitle': l10n.pauseTitle,
           'resumeNow': l10n.pauseResumeNow,
           'smsBeaconHeader': l10n.smsBeaconHeader,
+          'smsBeaconDistance': l10n.smsBeaconDistance,
         };
       } catch (_) {}
     }
@@ -318,7 +324,15 @@ class SOSLogic extends ChangeNotifier with WidgetsBindingObserver {
         _fullScreenIntentOk = await platform.invokeMethod('canUseFullScreenIntent') ?? true;
       } catch (_) {}
       if (_status != SOSStatus.locationFixed) _gpsAccuracy = 0.0;
-      
+
+      // Estado del beacon: lo escribe Sylvia en otro isolate, así que recargamos
+      // antes de leer. Alimenta el banner de "detener avisos" en Home.
+      try {
+        final raw = await SharedPreferences.getInstance();
+        await raw.reload();
+        _beaconActive = raw.getBool('beacon_active') ?? false;
+      } catch (_) {}
+
       bool isSystemArmed = _isFallDetectionActive || _isInactivityMonitorActive;
       if (_batteryLevel <= 5 && !_isDyingGaspSent && emergencyContact != null && isSystemArmed) {
         _triggerDyingGasp();
@@ -977,24 +991,50 @@ class SOSLogic extends ChangeNotifier with WidgetsBindingObserver {
     notifyListeners();
   }
 
+  // "REINICIAR SISTEMA" de SentScreen lo llama: cierre explícito tras un SOS
+  // enviado ("estoy bien"). Apaga el beacon — antes el botón llamaba a
+  // cancelAlert(), que NO lo tocaba, así que el beacon seguía enviando avisos
+  // de movimiento sin forma de pararlo (bug reportado en campo 2026-06-13).
   void resetSystem() async {
     final prefs = await SharedPreferences.getInstance();
     await prefs.setBool('sos_sent_recently', false);
     await prefs.setBool('is_alarm_active', false);
     await prefs.setBool('beacon_active', false);
+    await prefs.remove('alarm_start_timestamp');
+    _beaconActive = false;
+
+    _uiCooldown = true;
+    Future.delayed(const Duration(seconds: 10), () => _uiCooldown = false);
 
     _stopAllAlerts();
     _awaitingServiceSend = false;
     _serviceSendTimeout?.cancel();
+    try { FlutterBackgroundService().invoke("stopAlarm"); } catch (_) {}
     _setStatus(SOSStatus.ready);
+    _countdownSeconds = 30;
     _lastMovementTime = DateTime.now();
-    
+    // Reactivar el GPS pasivo: el camino de SOS lo pausó (auto) o lo canceló
+    // (manual), y sin esto el indicador de precisión en Home queda congelado
+    // tras "REINICIAR SISTEMA". cancelSOS lo hacía; resetSystem debe también.
+    _startPassiveGPS();
+    _updateSylviaStatus();
+
     if (oksigeniaNavigatorKey.currentState != null) {
       oksigeniaNavigatorKey.currentState!.pushAndRemoveUntil(
         MaterialPageRoute(builder: (context) => const HomeScreen()),
         (route) => false
       );
     }
+    notifyListeners();
+  }
+
+  // Para SOLO el Smart Beacon (avisos de movimiento post-SOS), dejando la
+  // monitorización activa. Lo llama el banner de Home — el usuario puede no
+  // querer apagar toda la app, solo dejar de mandar su posición.
+  Future<void> stopBeacon() async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setBool('beacon_active', false);
+    _beaconActive = false;
     notifyListeners();
   }
 
@@ -1009,6 +1049,14 @@ class SOSLogic extends ChangeNotifier with WidgetsBindingObserver {
     prefs.saveFallDetectionState(false);
     prefs.saveInactivityState(false);
     prefs.setLiveTrackingEnabled(false);
+
+    // Parar el sistema para TODO, incluido el beacon: si no se limpia el flag,
+    // al reabrir la app el servicio revive y reanuda los avisos de movimiento.
+    try {
+      final raw = await SharedPreferences.getInstance();
+      await raw.setBool('beacon_active', false);
+    } catch (_) {}
+    _beaconActive = false;
 
     _isFallDetectionActive = false;
     _isInactivityMonitorActive = false;

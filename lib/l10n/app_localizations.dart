@@ -875,7 +875,7 @@ abstract class AppLocalizations {
   /// No description provided for @smsBeaconHeader.
   ///
   /// In en, this message translates to:
-  /// **'📍 OKSIGENIA UPDATE — moved'**
+  /// **'📍 OKSIGENIA SOS — automatic follow-up to my emergency alert (this is NOT a new alarm). My updated location:'**
   String get smsBeaconHeader;
 
   /// No description provided for @batteryDialogTitle.
@@ -1405,6 +1405,24 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Apply'**
   String get homeActionApply;
+
+  /// No description provided for @smsBeaconDistance.
+  ///
+  /// In en, this message translates to:
+  /// **'from the point where the SOS was sent.'**
+  String get smsBeaconDistance;
+
+  /// No description provided for @homeBeaconBanner.
+  ///
+  /// In en, this message translates to:
+  /// **'Sending location updates to your contact after the SOS — tap to stop'**
+  String get homeBeaconBanner;
+
+  /// No description provided for @beaconStopped.
+  ///
+  /// In en, this message translates to:
+  /// **'Movement alerts stopped'**
+  String get beaconStopped;
 }
 
 class _AppLocalizationsDelegate
