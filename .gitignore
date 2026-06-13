@@ -62,3 +62,10 @@ SOS Oksigenia/
 
 # Documentación local (capturas, PDFs, borradores)
 docs/
+
+# Scratch: logcats de campo y borradores de notas de release (temporales)
+logcat*.txt
+p7-logcat*.txt
+p8-logcat*.txt
+sentinel*.log
+RELEASE_NOTES_*.md
