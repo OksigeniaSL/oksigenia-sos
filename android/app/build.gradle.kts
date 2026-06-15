@@ -14,10 +14,9 @@ if (keystorePropertiesFile.exists()) {
     keystoreProperties.load(FileInputStream(keystorePropertiesFile))
 }
 
-// --- BLOQUEAR LIBRERÍAS DE GOOGLE (CRÍTICO PARA F-DROID) ---
-configurations.all {
-    exclude(group = "com.google.android.gms", module = "play-services-location")
-}
+// GMS-free: geolocator_android se sustituye por el fork FLOSS en pubspec.yaml
+// (dependency_overrides). El antiguo `exclude` aquí no afectaba al submódulo
+// geolocator y dejaba GMS dentro del APK; el override sí lo elimina de verdad.
 
 android {
     namespace = "com.oksigenia.oksigenia_sos"

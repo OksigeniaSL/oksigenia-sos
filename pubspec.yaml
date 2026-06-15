@@ -1,7 +1,7 @@
 name: oksigenia_sos
 description: "Outdoor Emergency Assistant"
 publish_to: 'none'
-version: 4.2.0+42000
+version: 4.2.1+42001
 
 environment:
   sdk: '>=3.2.0 <4.0.0'
@@ -43,6 +43,18 @@ dev_dependencies:
     sdk: flutter
   flutter_lints: ^6.0.0
   flutter_launcher_icons: ^0.14.4
+
+# Sustituye geolocator_android por el fork FLOSS (sin Google Play Services).
+# El upstream declara play-services-location como dependencia dura; este fork
+# borra ese camino y usa solo el LocationManager nativo de Android. Así el APK
+# es realmente GMS-free en TODAS las fuentes (Izzy/F-Droid/GitHub) con una sola
+# firma. pubspec.lock fija el commit exacto → build reproducible.
+dependency_overrides:
+  geolocator_android:
+    git:
+      url: https://github.com/Zverik/flutter-geolocator.git
+      ref: floss
+      path: geolocator_android
 
 flutter:
   uses-material-design: true

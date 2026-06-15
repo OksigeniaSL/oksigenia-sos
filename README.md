@@ -1,4 +1,4 @@
-# Oksigenia SOS 🏔️ v4.2.0 "Running"
+# Oksigenia SOS 🏔️ v4.2.1 "Running"
 
 **The Ultimate Outdoor Guardian | FOSS | Privacy-First | Autonomous**
 
@@ -42,6 +42,16 @@ The interface is designed for high-stress situations. High contrast, large touch
 |:---:|:---:|
 | <img src="screenshots/main_testmode_en.jpg" width="180" /> | <img src="screenshots/lang_en.jpg" width="180" /> |
 | *Safe testing environment* | *11 native languages* |
+
+---
+
+## 🔒 What's New in v4.2.1: genuinely Google-free
+
+The `geolocator` plugin was quietly pulling in Google Play Services (`play-services-location`) as a hard dependency, so previous APKs shipped GMS location code even though the app forces Android's native location at runtime. v4.2.1 replaces `geolocator_android` with its FLOSS fork, which removes that path entirely.
+
+- The APK is now actually GMS-free — your location never goes through Google services.
+- No functional change on de-Googled phones (they already used the native `LocationManager` path); outdoors, behaviour is identical everywhere.
+- Same signing key, so it updates cleanly over any earlier install and stays reproducible.
 
 ---
 
