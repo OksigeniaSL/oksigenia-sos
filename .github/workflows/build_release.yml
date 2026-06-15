@@ -22,7 +22,10 @@ jobs:
       uses: actions/setup-java@v5
       with:
         distribution: 'zulu'
-        java-version: '17'
+        # JDK 21 to match the F-Droid buildserver default → reproducible build
+        # (F-Droid moved its buildserver to JDK 21; aligning here keeps classes.dex
+        # byte-identical between this release and the F-Droid rebuild).
+        java-version: '21'
 
     - name: Setup Flutter
       uses: subosito/flutter-action@v2

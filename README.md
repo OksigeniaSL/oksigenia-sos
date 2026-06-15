@@ -1,4 +1,4 @@
-# Oksigenia SOS 🏔️ v4.2.1 "Running"
+# Oksigenia SOS 🏔️ v4.2.2 "Running"
 
 **The Ultimate Outdoor Guardian | FOSS | Privacy-First | Autonomous**
 
@@ -42,6 +42,12 @@ The interface is designed for high-stress situations. High contrast, large touch
 |:---:|:---:|
 | <img src="screenshots/main_testmode_en.jpg" width="180" /> | <img src="screenshots/lang_en.jpg" width="180" /> |
 | *Safe testing environment* | *11 native languages* |
+
+---
+
+## 🔁 What's New in v4.2.2: verifiable builds
+
+v4.2.2 is a build-only release with no functional changes. The release workflow now builds with JDK 21 to match the F-Droid buildserver, so the published APK is byte-for-byte reproducible from source. Same signing key across every source, so it updates cleanly over any earlier install.
 
 ---
 

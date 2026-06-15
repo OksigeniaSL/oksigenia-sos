@@ -1,0 +1,5 @@
+v4.2.2 — Verifiable builds
+
+- Build-only release, no functional changes.
+- The release is now built with JDK 21 to match the F-Droid buildserver, so the published APK is byte-for-byte reproducible from source.
+- Same signing key as before, so this updates cleanly over any previous install.
