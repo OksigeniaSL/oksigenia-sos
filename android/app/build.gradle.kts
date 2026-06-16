@@ -66,8 +66,15 @@ android {
             if (keystorePropertiesFile.exists()) {
                 signingConfig = signingConfigs.getByName("release")
             }
-            isMinifyEnabled = false
-            isShrinkResources = false
+            // Enabled per F-Droid maintainer request: R8 strips Flutter's unused
+            // deferred-components classes and the dangling Play Core references the
+            // scanner flags. Keep rules in proguard-rules.pro guard the safety chain.
+            isMinifyEnabled = true
+            isShrinkResources = true
+            proguardFiles(
+                getDefaultProguardFile("proguard-android-optimize.txt"),
+                "proguard-rules.pro"
+            )
         }
     }
 }

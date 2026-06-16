@@ -54,10 +54,19 @@ jobs:
     - name: Build Split APKs
       run: flutter build apk --release --split-per-abi
 
+    # Release body = the F-Droid changelog for this version, so notes live in
+    # one place and the GitHub Release is never empty.
+    - name: Resolve changelog path
+      id: changelog
+      run: |
+        code="$(sed -n -E 's/^version:\s*.+\+([0-9]+).*/\1/p' pubspec.yaml)"
+        echo "path=metadata/en-US/changelogs/${code}.txt" >> "$GITHUB_OUTPUT"
+
     - name: Create Release
       uses: softprops/action-gh-release@v2
       with:
         files: build/app/outputs/flutter-apk/app-*-release.apk
+        body_path: ${{ steps.changelog.outputs.path }}
         draft: false
         # Tags con sufijo (v4.2.0-beta.1) → pre-release: GitHub no las marca
         # como "latest" y el crawler de IzzyOnDroid no las publica. Sólo los

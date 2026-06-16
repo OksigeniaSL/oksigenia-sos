@@ -1,4 +1,4 @@
-# Oksigenia SOS 🏔️ v4.2.2 "Running"
+# Oksigenia SOS 🏔️ v4.2.3 "Running"
 
 **The Ultimate Outdoor Guardian | FOSS | Privacy-First | Autonomous**
 
@@ -42,6 +42,12 @@ The interface is designed for high-stress situations. High contrast, large touch
 |:---:|:---:|
 | <img src="screenshots/main_testmode_en.jpg" width="180" /> | <img src="screenshots/lang_en.jpg" width="180" /> |
 | *Safe testing environment* | *11 native languages* |
+
+---
+
+## 🪶 What's New in v4.2.3: leaner build
+
+v4.2.3 enables R8 code and resource shrinking, which strips Flutter's unused Google Play Core (deferred components) classes — code the app never used. The APK is now fully free of Play Store delivery code and about 3 MB lighter, with no functional changes. Validated on device (monitoring, fall detection, SOS SMS, reboot persistence, widgets). Same signing key, so it updates cleanly over any earlier install.
 
 ---
 

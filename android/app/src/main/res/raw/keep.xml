@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  Protect resources referenced only by NAME (resolved at runtime via
+  getIdentifier), which the resource shrinker cannot see as used.
+
+  The persistent notification icon is passed as the string 'ic_stat_oksigenia'
+  to flutter_local_notifications, so without this it would be stripped and the
+  foreground/alarm notifications would lose their icon. The home-screen widget
+  resources are kept too as a safety net.
+-->
+<resources xmlns:tools="http://schemas.android.com/tools"
+    tools:keep="@drawable/ic_stat_oksigenia,@drawable/ic_stat_paused,@drawable/ic_stat_protected,@drawable/widget_*,@layout/widget_*"
+    tools:shrinkMode="safe" />
