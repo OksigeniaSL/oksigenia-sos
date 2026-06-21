@@ -20,7 +20,10 @@ import 'preferences_service.dart';
 import 'package:timezone/data/latest_all.dart' as tz;
 import 'package:timezone/timezone.dart' as tz;
 
-const String channelId = 'my_foreground';
+// Canal nuevo (no 'my_foreground'): el viejo se creó CON sonido y los canales
+// son inmutables; no se puede borrar mientras el foreground service lo usa. Un
+// id nuevo nace silencioso (playSound:false) sin pelear con el existente.
+const String channelId = 'oksigenia_service';
 const String alarmChannelId = 'oksigenia_alarm';
 const int notificationId = 888;
 const int alarmNotifId = 890;
@@ -133,11 +136,18 @@ DateTime _lastStopTimestamp = DateTime.fromMillisecondsSinceEpoch(0);
 Future<void> initializeService() async {
   final service = FlutterBackgroundService();
 
+  // Canal del servicio: defaultImportance para seguir VISIBLE (fuera del grupo
+  // de silenciosas en GrapheneOS), pero SIN sonido ni vibración. Una notif de
+  // monitoreo persistente no debe sonar; antes "sonaba sólo la 1ª vez" gracias a
+  // ONLY_ALERT_ONCE, pero cualquier re-emisión (cada setAsForeground/cambio de
+  // estado) volvía a sonar. Quitando el sonido del canal, no suena jamás.
   const AndroidNotificationChannel channel = AndroidNotificationChannel(
-    'my_foreground',
+    channelId,
     'Oksigenia SOS Service',
     description: 'Running in background monitoring sensors',
     importance: Importance.defaultImportance,
+    playSound: false,
+    enableVibration: false,
   );
 
   const AndroidNotificationChannel alarmChannel = AndroidNotificationChannel(
@@ -153,6 +163,9 @@ Future<void> initializeService() async {
   if (Platform.isIOS || Platform.isAndroid) {
     final androidPlugin = flutterLocalNotificationsPlugin
         .resolvePlatformSpecificImplementation<AndroidFlutterLocalNotificationsPlugin>();
+    // Limpiar el canal viejo 'my_foreground' (creado con sonido) que queda
+    // huérfano al migrar al nuevo canal silencioso.
+    await androidPlugin?.deleteNotificationChannel(channelId: 'my_foreground');
     await androidPlugin?.createNotificationChannel(channel);
     await androidPlugin?.createNotificationChannel(alarmChannel);
   }
@@ -161,12 +174,16 @@ Future<void> initializeService() async {
     androidConfiguration: AndroidConfiguration(
       onStart: onStart,
       isForegroundMode: true,
-      notificationChannelId: 'my_foreground',
+      notificationChannelId: channelId,
       foregroundServiceNotificationId: 888,
       initialNotificationTitle: 'Oksigenia SOS',
       initialNotificationContent: 'System Initializing...',
-      autoStart: true, 
-      autoStartOnBoot: true, 
+      autoStart: true,
+      // autoStartOnBoot OFF: el autostart del plugin es incondicional y revive
+      // el servicio en CADA reinicio (con su wakelock) aunque no haya nada que
+      // vigilar → batería drenada en vacío. En su lugar, OksigeniaBootReceiver
+      // arranca Sylvia tras el boot SOLO si hay monitoreo/beacon/alarma activos.
+      autoStartOnBoot: false,
     ),
     iosConfiguration: IosConfiguration(
       autoStart: false,
@@ -1303,9 +1320,8 @@ void onStart(ServiceInstance service) async {
       // Check "Resume now" action tapped on notification
       try {
         final prefs = await SharedPreferences.getInstance();
-        // Estos flags los escriben OTROS isolates (PanicWidget.kt y el isolate
-        // de la acción de notificación). Sin reload, esta copia cacheada no
-        // los vería jamás.
+        // Este flag lo escribe OTRO isolate (la acción "Resume now" de la
+        // notificación). Sin reload, esta copia cacheada no lo vería jamás.
         await prefs.reload();
         final int resumeReq = prefs.getInt('pause_resume_requested') ?? 0;
         if (resumeReq > 0) {
@@ -1314,20 +1330,6 @@ void onStart(ServiceInstance service) async {
           _lastMovementTime = DateTime.now();
           if (_isMonitoringInactivity) _scheduleInactivityAlarmClock();
           service.invoke("onPauseResumed");
-        }
-        // Panic widget tap: PanicWidget receiver writes this flag, we trigger
-        // the alarm directly. AlarmScreen + 30 s pre-alert remains the safety.
-        final int panicReq = prefs.getInt('widget_panic_requested') ?? 0;
-        if (panicReq > 0 && !_isAlarmActive) {
-          await prefs.setInt('widget_panic_requested', 0);
-          _logSentinel("SYLVIA SERVICE: 🆘 Panic widget tapped → ALARMA");
-          _activarEscudo(segundos: 3);
-          if (_sentinelYellow) {
-            _sentinelYellow = false;
-            _yellowTimer?.cancel();
-            _yellowCountdown = _observationSeconds;
-          }
-          _lanzarAlarma();
         }
       } catch (_) {}
 
@@ -1385,6 +1387,55 @@ void onStart(ServiceInstance service) async {
     _logSentinel("SYLVIA SERVICE: 🎯 Profile=${profile.name} yellow=${_yellowThreshold}G orange=${_orangeThreshold}G obs=${_observationSeconds}s cv=$_cvUpperBound impactOn=$_impactDetectionEnabled");
   }
 
+  // ÚNICA fuente de verdad de si Sylvia tiene algún motivo para seguir viva.
+  // El foreground service mantiene un wakelock permanente del plugin mientras
+  // exista; si no hay nada activo, ese wakelock drena la batería sin dar
+  // protección a cambio. En montaña (sin WiFi → módem activo; con movimiento →
+  // sin Doze profundo que enmascare el wakelock) eso son horas de batería
+  // perdidas, y sin batería no hay SOS. Conservador a propósito: ante la duda,
+  // seguir viva (un falso "parar" tiraría la protección a mitad de rescate).
+  Future<bool> _shouldStayAlive() async {
+    if (_isMonitoringImpact || _isMonitoringInactivity ||
+        _isLiveTrackingActive || _isAlarmActive) {
+      return true;
+    }
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      await prefs.reload();
+      if (prefs.getBool('beacon_active') ?? false) return true;
+    } catch (_) {
+      return true; // si no se pueden leer prefs, pecar de seguir viva
+    }
+    return false;
+  }
+
+  // Detiene el foreground service (liberando el wakelock permanente del plugin)
+  // si no queda ningún motivo para seguir vivo. Devuelve true si detuvo.
+  Future<bool> _stopIfIdle(String reason) async {
+    if (await _shouldStayAlive()) return false;
+    _logSentinel("SYLVIA SERVICE: 🌙 Nada activo ($reason) → deteniendo servicio y liberando wakelock");
+    _accSub?.cancel(); _accSub = null;
+    _rawAccSub?.cancel(); _rawAccSub = null;
+    _inactivityCheckTimer?.cancel();
+    _zombieTimer?.cancel();
+    _yellowTimer?.cancel();
+    _shieldTimer?.cancel();
+    await _cancelInactivityAlarmClock();
+    await _cancelLiveTrackingAlarm();
+    try { await flutterLocalNotificationsPlugin.cancelAll(); } catch (_) {}
+    // El wakelock del plugin (estático, PARTIAL_WAKE_LOCK) solo se libera cuando
+    // el PROCESO muere: el plugin hace acquire() pero nunca release(). Por eso
+    // hay que detener el servicio de verdad (stopSelf → isManuallyStopped, sin
+    // watchdog que lo reviva), igual que el handler de "cerrar". Con la UI en
+    // primer plano el proceso no muere aún (la UI lo sostiene); el wakelock se
+    // suelta en cuanto la app pasa a segundo plano / se cierra. NO usar
+    // setAsBackgroundService: dejaba config.isForeground=false persistido y al
+    // rearrancar tras boot el servicio no llamaba startForeground → crash; y la
+    // re-promoción que lo arreglaba reemitía la notif del plugin (hojita + sonido).
+    service.stopSelf();
+    return true;
+  }
+
   Future<void> _loadConfigFromDisk() async {
     try {
       final prefs = await SharedPreferences.getInstance();
@@ -1413,6 +1464,20 @@ void onStart(ServiceInstance service) async {
       }
 
       print("SYLVIA BOOT: Contactos: ${_recipients.length}, Fall: $savedFall, Inactivity: $savedInactivity, LiveTracking: $_isLiveTrackingActive");
+
+      // Red de seguridad: si el servicio arranca por cualquier vía sin nada que
+      // vigilar (OksigeniaBootReceiver ya gatea el boot, pero el watchdog u otro
+      // camino podrían levantarlo), parar ANTES de mostrar "System Ready" para
+      // no mantener el wakelock permanente del plugin drenando batería en vacío.
+      final bool bootBeacon = prefs.getBool('beacon_active') ?? false;
+      final bool bootAlarm = prefs.getBool('is_alarm_active') ?? false;
+      if (!savedFall && !savedInactivity && !_isLiveTrackingActive &&
+          !bootBeacon && !bootAlarm) {
+        _logSentinel("SYLVIA BOOT: 🌙 Nada activo al arrancar → deteniendo (no revivir en vacío)");
+        try { await flutterLocalNotificationsPlugin.cancelAll(); } catch (_) {}
+        service.stopSelf();
+        return;
+      }
 
       flutterLocalNotificationsPlugin.show(
           id: notificationId,
@@ -1545,11 +1610,14 @@ void onStart(ServiceInstance service) async {
         _rawAccSub?.cancel();
         _rawAccSub = null;
         _cancelInactivityAlarmClock();
+        // Sensor apagado: si tampoco hay live-tracking/beacon/alarma, Sylvia no
+        // tiene nada que vigilar → parar y liberar el wakelock permanente
+        // (antes seguía viva drenando batería con el monitoreo desactivado).
+        if (await _stopIfIdle('monitoring toggles off')) return;
       }
-      // El checker de 5s NUNCA se cancela aquí: además de la inactividad
-      // atiende el flag del widget de pánico, el Smart Beacon, el watchdog de
-      // live tracking y el auto-resume de pausas. La lógica de inactividad ya
-      // está gateada internamente por _isMonitoringInactivity.
+      // El checker de 5s NUNCA se cancela aquí: atiende el Smart Beacon, el
+      // watchdog de live tracking y el auto-resume de pausas. La lógica de
+      // inactividad ya está gateada internamente por _isMonitoringInactivity.
       _startInactivityChecker();
     });
 

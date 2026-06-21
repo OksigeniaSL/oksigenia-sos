@@ -1,4 +1,4 @@
-# Oksigenia SOS 🏔️ v4.2.3 "Running"
+# Oksigenia SOS 🏔️ v4.2.4 "Running"
 
 **The Ultimate Outdoor Guardian | FOSS | Privacy-First | Autonomous**
 
@@ -42,6 +42,12 @@ The interface is designed for high-stress situations. High contrast, large touch
 |:---:|:---:|
 | <img src="screenshots/main_testmode_en.jpg" width="180" /> | <img src="screenshots/lang_en.jpg" width="180" /> |
 | *Safe testing environment* | *11 native languages* |
+
+---
+
+## 🔋 What's New in v4.2.4: battery fix
+
+When you turn monitoring off, the background service now stops completely and releases its wakelock, instead of staying alive and keeping the device awake. Before, with detection disabled, it could quietly drain the battery — hours of charge lost outdoors with nothing watching in return. After a reboot it now revives on its own only if monitoring was actually on. The persistent notification no longer beeps on every action, and the (rarely used) home-screen panic widget was removed since its background polling was part of the drain. Validated on device; same signing key, updates cleanly.
 
 ---
 

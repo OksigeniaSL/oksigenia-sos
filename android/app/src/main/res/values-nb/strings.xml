@@ -1,6 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="widget_panic_description">Oksigenia panikk-SOS</string>
     <string name="widget_status_description">Oksigenia monitorstatus</string>
     <string name="widget_status_off">Monitor av</string>
     <string name="widget_status_active">Monitor aktiv</string>

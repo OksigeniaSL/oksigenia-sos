@@ -40,9 +40,11 @@
         android:icon="@mipmap/launcher_icon"
         android:enableOnBackInvokedCallback="true">
 
-        <!-- 🟢 FIX CRÍTICO: AÑADIDO INTENT-FILTER PARA ESCUCHAR EL ARRANQUE -->
+        <!-- Boot autostart condicional: arranca Sylvia tras un reinicio SÓLO si
+             hay monitoreo/beacon/alarma activos (autoStartOnBoot del plugin = OFF
+             para no revivir en vacío y drenar batería). Ver OksigeniaBootReceiver. -->
         <receiver
-            android:name="id.flutter.flutter_background_service.BootReceiver"
+            android:name=".OksigeniaBootReceiver"
             android:enabled="true"
             android:exported="true">
             <intent-filter>
@@ -77,18 +79,6 @@
             android:stopWithTask="false"
             tools:replace="android:foregroundServiceType, android:exported, android:stopWithTask" />
             <meta-data android:name="flutterEmbedding" android:value="2" />
-
-        <receiver
-            android:name=".widgets.PanicWidget"
-            android:exported="true"
-            android:label="@string/widget_panic_description">
-            <intent-filter>
-                <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
-            </intent-filter>
-            <meta-data
-                android:name="android.appwidget.provider"
-                android:resource="@xml/widget_panic_info" />
-        </receiver>
 
         <receiver
             android:name=".widgets.StatusWidget"
