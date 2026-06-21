@@ -1,4 +1,4 @@
-# Oksigenia SOS 🏔️ v4.2.4 "Running"
+# Oksigenia SOS 🏔️ v4.2.5 "Running"
 
 **The Ultimate Outdoor Guardian | FOSS | Privacy-First | Autonomous**
 

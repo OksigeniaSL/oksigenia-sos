@@ -6,6 +6,7 @@ plugins {
 
 import java.util.Properties
 import java.io.FileInputStream
+import com.android.build.gradle.internal.api.ApkVariantOutputImpl
 
 // CARGAR EL ARCHIVO key.properties (SOLO SI EXISTE)
 val keystoreProperties = Properties()
@@ -75,6 +76,20 @@ android {
                 getDefaultProguardFile("proguard-android-optimize.txt"),
                 "proguard-rules.pro"
             )
+        }
+    }
+}
+
+// F-Droid versionCode scheme for Flutter split APKs (requested by the F-Droid
+// maintainer): base versionCode * 10 + ABI index, instead of Flutter's default
+// per-ABI offsets (+1000/+2000/+4000). Monotonic and unambiguous.
+val abiCodes = mapOf("armeabi-v7a" to 1, "arm64-v8a" to 2, "x86_64" to 3)
+android.applicationVariants.configureEach {
+    val variant = this
+    variant.outputs.forEach { output ->
+        val abiVersionCode = abiCodes[output.filters.find { it.filterType == "ABI" }?.identifier]
+        if (abiVersionCode != null) {
+            (output as ApkVariantOutputImpl).versionCodeOverride = variant.versionCode * 10 + abiVersionCode
         }
     }
 }
