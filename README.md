@@ -5,10 +5,15 @@
 ![Oksigenia Feature Graphic](metadata/en-US/images/featureGraphic.jpg)
 
 <p align="center">
+  <a href="https://f-droid.org/packages/com.oksigenia.oksigenia_sos">
+    <img src="https://fdroid.gitlab.io/artwork/badge/get-it-on.png" height="60" alt="Get it on F-Droid">
+  </a>
   <a href="https://apt.izzysoft.de/packages/com.oksigenia.oksigenia_sos">
     <img src="https://gitlab.com/IzzyOnDroid/repo/-/raw/master/assets/IzzyOnDroidButtonGreyBorder_nofont.png" height="60" alt="Get it on IzzyOnDroid">
   </a>
 </p>
+
+<p align="center"><sub>Same developer signature on F-Droid, IzzyOnDroid and GitHub — install from any source, update from any other.</sub></p>
 
 ---
 
