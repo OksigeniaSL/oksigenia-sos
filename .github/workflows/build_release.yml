@@ -14,7 +14,14 @@ permissions:
 
 jobs:
   build:
-    runs-on: ubuntu-latest
+    # Pinned (not ubuntu-latest): GitHub migrates the ubuntu-latest label to
+    # Ubuntu 26 between 2026-10-19 and 2026-11-19. This release build's
+    # byte-for-byte reproducibility (IzzyOnDroid/F-Droid) depends on a stable
+    # runner environment, and the Android SDK / build-tools / NDK are NOT pinned
+    # in this workflow — they come from the runner image. ubuntu-24.04 keeps the
+    # exact image that currently reproduces (same one that built v4.3.1). Move up
+    # deliberately, re-verifying RB, never by drift.
+    runs-on: ubuntu-24.04
     steps:
     - uses: actions/checkout@v5
 
