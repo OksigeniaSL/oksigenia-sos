@@ -353,6 +353,14 @@ flutter pub get
 flutter build apk --release --split-per-abi
 ```
 
+### 🧠 How fall detection works
+
+The Smart Sentinel's design and every tuning parameter — the two-stage detector,
+the cadence-CV rhythm check, the per-profile thresholds, the device-specific
+findings, the Smart Beacon and the honestly stated limitations — are documented in
+**[`FALL_DETECTION.md`](FALL_DETECTION.md)**, with the literature and the FOSS
+references it builds on.
+
 ### 📦 Reusable module: `oksigenia_sms`
 
 The permission-minimal SMS engine that powers the SOS lives in its own repository,
