@@ -1,9 +1,9 @@
 /// Activity profiles tune the Smart Sentinel detection to the sport in use.
 ///
-/// Parameter rationale lives in `memory/research_fall_detection.md` — every
-/// value here was either validated empirically (Trekking baseline, P7+P8 logs
-/// 2026-04-30) or derived from the literature (Bourke 2007 thresholds, Musci
-/// 2021 settling windows). Do not edit values without updating that doc.
+/// Parameter rationale lives in `FALL_DETECTION.md` — every value here was
+/// either validated empirically (Trekking baseline, P7+P8 logs 2026-04-30) or
+/// derived from the literature (Bourke 2007 thresholds, Musci 2021 settling
+/// windows). Do not edit values without updating that doc.
 enum ActivityProfile {
   trekking,
   running,
