@@ -1,0 +1,6 @@
+v4.3.2 — Sin ningún acceso a la red
+
+- Eliminada la última llamada de red de la app: una comprobación de versión heredada que pedía un archivo a oksigenia.com cada vez que se abría la app. El archivo ya no existía, así que no hacía nada, pero seguía contactando un servidor.
+- Fuera el permiso de INTERNET: Oksigenia SOS ya no puede conectarse a la red de ninguna forma. Las alertas siempre fueron solo por SMS y lo siguen siendo.
+- Las actualizaciones siguen llegando por F-Droid, IzzyOnDroid y GitHub Releases.
+- Misma firma, un permiso menos y nada más cambia; actualiza sin problemas sobre cualquier instalación previa.

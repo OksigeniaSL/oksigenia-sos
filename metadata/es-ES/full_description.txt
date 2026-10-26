@@ -49,7 +49,7 @@ Sobre los permisos
 Oksigenia SOS pide permisos sensibles porque su trabajo es pedir ayuda cuando tú no puedes. Cada uno corresponde a una función de rescate:
 
 - SMS: envía la alerta — el único canal que funciona en la montaña sin internet.
-- Ubicación, incluido «Permitir siempre» (segundo plano): cuando te caes, el móvil está en el bolsillo con la pantalla apagada, y sin ese acceso Android puede negar un fix GPS fresco justo entonces. Tu posición se lee solo al enviar una alerta o actualización, viaja únicamente dentro del SMS a tus contactos y nunca se sube a ningún sitio. El único uso de red es un chequeo de versión contra un archivo estático en oksigenia.com, sin datos personales ni ubicación.
+- Ubicación, incluido «Permitir siempre» (segundo plano): cuando te caes, el móvil está en el bolsillo con la pantalla apagada, y sin ese acceso Android puede negar un fix GPS fresco justo entonces. Tu posición se lee solo al enviar una alerta o actualización, viaja únicamente dentro del SMS a tus contactos y nunca se sube a ningún sitio. La app no tiene ningún acceso a la red: ni siquiera pide el permiso de INTERNET.
 - Sensores de movimiento / actividad física: detección de caídas e inactividad.
 - Exención de batería: para que Android no mate el servicio de monitorización a mitad de ruta.
 

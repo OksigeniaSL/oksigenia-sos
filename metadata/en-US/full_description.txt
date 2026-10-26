@@ -49,7 +49,7 @@ About the permissions
 Oksigenia SOS asks for sensitive permissions because its job is to call for help when you cannot. Each one maps to a single rescue function:
 
 - SMS: sends the alert. SMS is the only channel that works in the mountains without internet.
-- Location, including "Allow all the time" (background location): when you fall, your phone is in your pocket with the screen off and the app in the background. Without background access, Android can deny a fresh GPS fix at exactly that moment, and the SOS would leave without usable coordinates. Your position is read only when an alert or tracking update is being sent, and it travels exclusively inside the SMS to the contacts you configured — it is never uploaded anywhere. The app's only network use is a version check against a static file on oksigenia.com, which carries no personal data and no location.
+- Location, including "Allow all the time" (background location): when you fall, your phone is in your pocket with the screen off and the app in the background. Without background access, Android can deny a fresh GPS fix at exactly that moment, and the SOS would leave without usable coordinates. Your position is read only when an alert or tracking update is being sent, and it travels exclusively inside the SMS to the contacts you configured — it is never uploaded anywhere. The app has no network access at all: it does not even request the INTERNET permission.
 - Motion sensors / physical activity: fall and inactivity detection.
 - Battery exemption: so Android doesn't kill the monitoring service mid-route.
 

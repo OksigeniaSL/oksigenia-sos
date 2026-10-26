@@ -1,0 +1,6 @@
+v4.3.2 — No network access at all
+
+- Removed the app's last network call: a legacy version check that fetched a file from oksigenia.com every time the app opened. The file no longer existed, so the check did nothing, but it still contacted a server.
+- The INTERNET permission is gone: Oksigenia SOS can no longer connect to the network in any way. Alerts were always SMS-only and still are.
+- Updates keep arriving through F-Droid, IzzyOnDroid and GitHub Releases.
+- Same signing key, one permission fewer, nothing else changes; updates cleanly over any previous install.

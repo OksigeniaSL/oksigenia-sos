@@ -1,4 +1,4 @@
-# Oksigenia SOS 🏔️ v4.3.1 "Running"
+# Oksigenia SOS 🏔️ v4.3.2 "Running"
 
 **The Ultimate Outdoor Guardian | FOSS | Privacy-First | Autonomous**
 
@@ -47,6 +47,12 @@ The interface is designed for high-stress situations. High contrast, large touch
 |:---:|:---:|
 | <img src="screenshots/main_testmode_en.jpg" width="180" /> | <img src="screenshots/lang_en.jpg" width="180" /> |
 | *Safe testing environment* | *11 native languages* |
+
+---
+
+## 🔌 What's New in v4.3.2: no network access at all
+
+v4.3.2 removes the app's last network call. Since v3.8.0 the home screen fetched a small version-check file from oksigenia.com every time the app opened, meant to warn about updates; that file no longer exists, so the check did nothing — but it still contacted a server. It is gone, and with it the `INTERNET` permission: Oksigenia SOS now has **no network access at all**, so the "No Internet / No Servers" promise is enforced by Android itself, not just by our word. Alerts were always SMS-only and still are; updates keep arriving through F-Droid, IzzyOnDroid and GitHub Releases. The design and validated parameters of the fall detector are now documented in [`FALL_DETECTION.md`](FALL_DETECTION.md). Same signing key, one permission fewer, nothing else changes.
 
 ---
 
@@ -368,7 +374,7 @@ The permission-minimal SMS engine that powers the SOS lives in its own repositor
 standalone, Apache-2.0 Flutter plugin that sends a single concatenated Android SMS
 using only `SEND_SMS` (no `READ_PHONE_STATE`), working on Android 12–17 and
 GrapheneOS. The app pins it as a git dependency; it is designed to be reused in any
-Flutter app, and a pub.dev release is planned.
+Flutter app and is published on **[pub.dev](https://pub.dev/packages/oksigenia_sms)**.
 
 ---
 
