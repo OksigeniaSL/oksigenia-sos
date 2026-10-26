@@ -10,8 +10,6 @@ import 'package:oksigenia_sos/logic/sos_logic.dart';
 import 'package:oksigenia_sos/logic/activity_profile.dart';
 import 'package:oksigenia_sos/services/preferences_service.dart';
 import 'package:oksigenia_sos/widgets/main_drawer.dart';
-import 'package:oksigenia_sos/services/remote_config_service.dart';
-import 'package:oksigenia_sos/screens/update_screen.dart';
 import 'package:oksigenia_sos/screens/sent_screen.dart';
 import 'package:vibration/vibration.dart';
 
@@ -87,8 +85,6 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver, Ti
         }
       });
     });
-
-    _checkRemoteConfig();
   }
 
   Future<void> _triggerHaptic() async {
@@ -100,31 +96,6 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver, Ti
   Future<void> _triggerErrorHaptic() async {
     if (await Vibration.hasVibrator() ?? false) {
       Vibration.vibrate(pattern: [0, 50, 50, 50, 50, 50]);
-    }
-  }
-
-  void _checkRemoteConfig() async {
-    final result = await RemoteConfigService().checkStatus();
-    if (!mounted) return;
-
-    if (result['block'] == true) {
-      Navigator.pushReplacement(
-        context, 
-        MaterialPageRoute(builder: (context) => UpdateScreen(updateUrl: result['update_url']))
-      );
-      return;
-    }
-
-    String msgEs = result['message_es'] ?? "";
-    if (msgEs.isNotEmpty && !msgEs.contains("Sistema Oksigenia SOS Activo")) {
-       ScaffoldMessenger.of(context).showSnackBar(
-         SnackBar(
-           content: Text("📢 $msgEs"),
-           backgroundColor: Colors.blue[800],
-           duration: const Duration(seconds: 5),
-           action: SnackBarAction(label: "OK", textColor: Colors.white, onPressed: (){}),
-         )
-       );
     }
   }
 
