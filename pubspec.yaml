@@ -23,7 +23,7 @@ dependencies:
   oksigenia_sms:             # 🟢 envío propio: SMS concatenado sin READ_PHONE_STATE (Android 17/GrapheneOS). Repo propio, commit pineado para RB.
     git:
       url: https://github.com/OksigeniaSL/oksigenia_sms.git
-      ref: c1091ee58ade9abe05afc936b6de88167bb7620e
+      ref: 9580d3fb76b752079a081712a75cfdfc7a62ba29
   
   # Sensors & Audio
   sensors_plus: ^7.0.0       

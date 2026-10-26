@@ -216,5 +216,9 @@
     "homeActionApply": "Bruk",
     "smsBeaconDistance": "fra SOS-punktet.",
     "homeBeaconBanner": "Sender posisjonsoppdateringer til kontakten din etter SOS — trykk for å stoppe",
-    "beaconStopped": "Bevegelsesvarsler stoppet"
+    "beaconStopped": "Bevegelsesvarsler stoppet",
+    "smsLimitBanner": "For lav SMS-grense: SOS-en din blir kanskje ikke sendt",
+    "smsLimitTitle": "Androids SMS-grense er for lav",
+    "smsLimitBody": "Denne telefonen ber om bekreftelse når en app sender mer enn {limit} SMS på kort tid. SOS-en din trenger {needed} ({parts} per kontakt): hvis ingen bekrefter, blir en del ikke sendt.\n\nØk grensen til minst {needed} (i LineageOS: Trust → «SMS message limit») og start telefonen på nytt, fordi Android bare tar den i bruk ved oppstart. Eller bruk færre kontakter eller en kortere tilpasset melding.",
+    "smsLimitBodyAlways": "Denne telefonen ber om bekreftelse før en app sender en SMS («Always confirm»): hvis ingen bekrefter, blir SOS-en din ikke sendt.\n\nVelg en grense på minst {needed} (i LineageOS: Trust → «SMS message limit») og start telefonen på nytt, fordi Android bare tar den i bruk ved oppstart."
 }

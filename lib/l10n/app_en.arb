@@ -243,5 +243,29 @@
     "homeActionApply": "Apply",
     "smsBeaconDistance": "from the SOS point.",
     "homeBeaconBanner": "Sending location updates to your contact after the SOS — tap to stop",
-    "beaconStopped": "Movement alerts stopped"
+    "beaconStopped": "Movement alerts stopped",
+    "smsLimitBanner": "SMS limit too low — your SOS may not get out",
+    "smsLimitTitle": "Android's SMS limit is too low",
+    "smsLimitBody": "This phone asks for confirmation once an app sends more than {limit} SMS in a short time. Your SOS needs {needed} ({parts} per contact): if nobody confirms, part of it will not be sent.\n\nRaise the limit to at least {needed} (on LineageOS: Trust → SMS message limit) and restart the phone, because Android only applies it at startup. Or use fewer contacts or a shorter custom message.",
+    "@smsLimitBody": {
+        "placeholders": {
+            "limit": {
+                "type": "int"
+            },
+            "needed": {
+                "type": "int"
+            },
+            "parts": {
+                "type": "int"
+            }
+        }
+    },
+    "smsLimitBodyAlways": "This phone asks for confirmation before any app sends an SMS (\"Always confirm\"): if nobody confirms, your SOS will not be sent.\n\nChoose a limit of at least {needed} (on LineageOS: Trust → SMS message limit) and restart the phone, because Android only applies it at startup.",
+    "@smsLimitBodyAlways": {
+        "placeholders": {
+            "needed": {
+                "type": "int"
+            }
+        }
+    }
 }

@@ -1,6 +1,6 @@
-v4.3.2 — No network access at all
+v4.3.2 — No network access at all + SMS limit check
 
-- Removed the app's last network call: a legacy version check that fetched a file from oksigenia.com every time the app opened. The file no longer existed, so the check did nothing, but it still contacted a server.
-- The INTERNET permission is gone: Oksigenia SOS can no longer connect to the network in any way. Alerts were always SMS-only and still are.
-- Updates keep arriving through F-Droid, IzzyOnDroid and GitHub Releases.
-- Same signing key, one permission fewer, nothing else changes; updates cleanly over any previous install.
+- SMS limit check: past a per-app limit, Android holds an app's SMS behind an "Allow / Deny" dialog that never times out, so part of an SOS could stay on the phone. The app now reads that limit (LineageOS: Trust → SMS message limit) and warns you if your SOS doesn't fit, telling you what to set. Parts held by that dialog are no longer counted as sent.
+- Removed the app's last network call: a legacy version check that fetched a file from oksigenia.com every time the app opened. The file no longer existed, so it did nothing, but it still contacted a server.
+- The INTERNET permission is gone: Oksigenia SOS can no longer connect to the network in any way. Alerts were always SMS-only and still are; updates keep arriving through F-Droid, IzzyOnDroid and GitHub Releases.
+- Same signing key, one permission fewer; updates cleanly over any previous install.

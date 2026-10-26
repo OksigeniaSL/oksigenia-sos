@@ -19,6 +19,7 @@ import '../utils/phone_utils.dart';
 import '../utils/sms_splitter.dart';
 import 'package:oksigenia_sms/oksigenia_sms.dart';
 import '../utils/geo_links.dart';
+import '../utils/sms_budget.dart';
 import 'preferences_service.dart';
 import 'package:timezone/data/latest_all.dart' as tz;
 import 'package:timezone/timezone.dart' as tz;
@@ -496,23 +497,41 @@ void onStart(ServiceInstance service) async {
   // el statusListener escribe en el log de forma asíncrona cuando llega la
   // confirmación. El listener del plugin es un campo compartido, por eso los
   // envíos SIEMPRE deben ser secuenciales (nunca en paralelo).
-  Future<bool> _sendSmsTracked(String to, String message) async {
+  Future<bool> _sendSmsTracked(String to, String message,
+      {bool overLimit = false}) async {
     // Fase 2 (#12): primario = plugin propio → UN SMS concatenado, sin
     // READ_PHONE_STATE, con resultCode. Si el plugin FALLA (excepción o código
     // de error), fallback al troceo de la Fase 1 (varios SMS, ya validado en
     // v4.3.0). 'unknown' = entregado sin acuse dentro del timeout (ver EXP5) →
     // se cuenta como enviado, sin re-enviar (evita SMS duplicados).
+    // #13: con [overLimit] el envío pasa del límite de SMS de Android, que lo
+    // retiene tras un diálogo «Permitir / Denegar» sin timeout. Sin acuse NO
+    // cuenta como enviado, y no se trocea: el troceo solo encolaría más SMS
+    // detrás del mismo diálogo. Tampoco tras un «limit_exceeded» (alguien
+    // pulsó Denegar).
     try {
-      final r = await OksigeniaSms.send(to: to, message: message);
+      final r = await OksigeniaSms.send(
+          to: to,
+          message: message,
+          timeout: Duration(seconds: overLimit ? 8 : 20));
       if (r.status == OksigeniaSmsStatus.failed) {
+        if (overLimit || r.error == 'limit_exceeded') {
+          _logSentinel("SYLVIA SMS: ⛔ límite de SMS de Android (${r.error}) a $to — sin troceo");
+          return false;
+        }
         _logSentinel("SYLVIA SMS: ⚠️ plugin falló (${r.error}) → fallback a troceo");
         return _sendSplitFallback(to, message);
+      }
+      if (r.status == OksigeniaSmsStatus.unknown && overLimit) {
+        _logSentinel("SYLVIA SMS: ⏸️ retenido por el límite de SMS de Android (esperando confirmación) a $to");
+        return false;
       }
       _logSentinel("SYLVIA SMS: 📶 ${r.status.name} (${r.okParts}/${r.parts}) a $to");
       return true;
     } catch (e) {
       _logSentinel("SYLVIA SMS: ❌ excepción del plugin ($e) → fallback a troceo");
-      return _sendSplitFallback(to, message);
+      final bool ok = await _sendSplitFallback(to, message);
+      return ok && !overLimit;
     }
   }
 
@@ -734,7 +753,8 @@ void onStart(ServiceInstance service) async {
 
     // #12: sin emojis en el cuerpo del SMS — fuerzan UCS-2 (67 chars/SMS) y
     // multiplican las piezas; en texto plano el SMS es GSM (152). Ver sms_splitter.
-    String msgBody = "SOS OKSIGENIA";
+    // Mismo formato que worstCaseSosBody (sms_budget.dart): si cambia, cambiar ambos.
+    String msgBody = sosSmsHeader;
 
     int batteryLevel = 0;
     try {
@@ -793,12 +813,26 @@ void onStart(ServiceInstance service) async {
       return -1;
     }
 
+    // #13: Android cuenta cada parte de cada SMS contra su límite por app; las
+    // que lo pasan esperan tras un diálogo de confirmación sin timeout. Se
+    // calcula aquí qué contactos caen por encima para no darlos por enviados.
+    // Todo SMS tiene al menos una parte: con «Confirmar siempre» (límite 0) un
+    // recuento fallido no puede dejar pasar el envío como si cupiera.
+    OksigeniaSmsRateLimit? smsLimit;
+    int partsPerContact = 1;
+    try { smsLimit = await OksigeniaSms.rateLimit(); } catch (_) {}
+    try { partsPerContact = max(1, await OksigeniaSms.partCount(msgBody)); } catch (_) {}
+    _logSentinel("SYLVIA SMS: $smsLimit · $partsPerContact partes × ${_recipients.length} contactos");
+
     int sentCount = 0;
+    int burstParts = 0;
     for (String number in _recipients) {
       final target = normalizePhoneE164(number);
+      burstParts += partsPerContact;
+      final bool overLimit = smsLimit != null && !smsLimit.allows(burstParts);
       // Secuencial a propósito: el statusListener del plugin es un único campo
       // compartido; enviar en paralelo cruzaría las confirmaciones.
-      if (await _sendSmsTracked(target, msgBody)) {
+      if (await _sendSmsTracked(target, msgBody, overLimit: overLimit)) {
         sentCount++;
       }
     }

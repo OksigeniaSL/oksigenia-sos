@@ -719,4 +719,21 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get beaconStopped => 'Avisos de movimiento detenidos';
+
+  @override
+  String get smsLimitBanner =>
+      'Límite de SMS demasiado bajo: tu SOS podría no salir';
+
+  @override
+  String get smsLimitTitle => 'El límite de SMS de Android es demasiado bajo';
+
+  @override
+  String smsLimitBody(int limit, int needed, int parts) {
+    return 'Este móvil pide confirmación cuando una app envía más de $limit SMS en poco tiempo. Tu SOS necesita $needed ($parts por contacto): si nadie lo confirma, parte no se enviará.\n\nSube el límite al menos a $needed (en LineageOS: Trust → Límite de mensajes SMS) y reinicia el móvil, porque Android solo lo aplica al arrancar. O usa menos contactos o un mensaje personalizado más corto.';
+  }
+
+  @override
+  String smsLimitBodyAlways(int needed) {
+    return 'Este móvil pide confirmación antes de que cualquier app envíe un SMS («Confirmar siempre»): si nadie lo confirma, tu SOS no se enviará.\n\nElige un límite de al menos $needed (en LineageOS: Trust → Límite de mensajes SMS) y reinicia el móvil, porque Android solo lo aplica al arrancar.';
+  }
 }
