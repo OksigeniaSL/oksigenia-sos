@@ -718,4 +718,21 @@ class AppLocalizationsNb extends AppLocalizations {
 
   @override
   String get beaconStopped => 'Bevegelsesvarsler stoppet';
+
+  @override
+  String get smsLimitBanner =>
+      'For lav SMS-grense: SOS-en din blir kanskje ikke sendt';
+
+  @override
+  String get smsLimitTitle => 'Androids SMS-grense er for lav';
+
+  @override
+  String smsLimitBody(int limit, int needed, int parts) {
+    return 'Denne telefonen ber om bekreftelse når en app sender mer enn $limit SMS på kort tid. SOS-en din trenger $needed ($parts per kontakt): hvis ingen bekrefter, blir en del ikke sendt.\n\nØk grensen til minst $needed (i LineageOS: Trust → «SMS message limit») og start telefonen på nytt for sikkerhets skyld: på noen telefoner trer endringen først i kraft etter omstart. Eller bruk færre kontakter eller en kortere tilpasset melding.';
+  }
+
+  @override
+  String smsLimitBodyAlways(int needed) {
+    return 'Denne telefonen ber om bekreftelse før en app sender en SMS («Always confirm»): hvis ingen bekrefter, blir SOS-en din ikke sendt.\n\nVelg en grense på minst $needed (i LineageOS: Trust → «SMS message limit») og start telefonen på nytt for sikkerhets skyld: på noen telefoner trer endringen først i kraft etter omstart.';
+  }
 }

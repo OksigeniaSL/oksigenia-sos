@@ -1,7 +1,7 @@
 name: oksigenia_sos
 description: "Outdoor Emergency Assistant"
 publish_to: 'none'
-version: 4.3.1+43100
+version: 4.3.2+43200
 
 environment:
   sdk: '>=3.2.0 <4.0.0'
@@ -23,7 +23,7 @@ dependencies:
   oksigenia_sms:             # 🟢 envío propio: SMS concatenado sin READ_PHONE_STATE (Android 17/GrapheneOS). Repo propio, commit pineado para RB.
     git:
       url: https://github.com/OksigeniaSL/oksigenia_sms.git
-      ref: c1091ee58ade9abe05afc936b6de88167bb7620e
+      ref: 9580d3fb76b752079a081712a75cfdfc7a62ba29
   
   # Sensors & Audio
   sensors_plus: ^7.0.0       
@@ -34,7 +34,6 @@ dependencies:
   shared_preferences: ^2.5.4 
   cupertino_icons: ^1.0.8
   battery_plus: ^7.0.0
-  http: ^1.6.0
   package_info_plus: ^9.0.0
   provider: ^6.1.5+1
   flutter_local_notifications: ^20.0.0

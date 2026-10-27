@@ -21,7 +21,8 @@ import '../services/preferences_service.dart';
 import '../utils/phone_utils.dart';
 import '../utils/sms_splitter.dart';
 import '../utils/geo_links.dart';
-import '../screens/settings_screen.dart';  
+import '../utils/sms_budget.dart';
+import '../screens/settings_screen.dart';
 import '../screens/alarm_screen.dart';
 import '../screens/sent_screen.dart';
 import '../screens/home_screen.dart';
@@ -95,8 +96,14 @@ class SOSLogic extends ChangeNotifier with WidgetsBindingObserver {
 
   bool _smsPermissionOk = true;
   bool _notificationPermissionOk = true;
+  // #13: cuánto SMS cuesta un SOS frente al límite por app de Android. null =
+  // aún sin calcular o el sistema no lo dice (se asume que cabe).
+  SmsBudget? _smsBudget;
+  DateTime _smsBudgetCheckedAt = DateTime.fromMillisecondsSinceEpoch(0);
 
   int get batteryLevel => _batteryLevel;
+  SmsBudget? get smsBudget => _smsBudget;
+  bool get smsRateLimitOk => _smsBudget?.ok ?? true;
   double get gpsAccuracy => _gpsAccuracy;
   bool get sensorsPermissionOk => _sensorsPermissionOk;
   bool get batteryOptimizationOk => _batteryOptimizationOk;
@@ -334,6 +341,7 @@ class SOSLogic extends ChangeNotifier with WidgetsBindingObserver {
       try {
         _fullScreenIntentOk = await platform.invokeMethod('canUseFullScreenIntent') ?? true;
       } catch (_) {}
+      await refreshSmsBudget();
       if (_status != SOSStatus.locationFixed) _gpsAccuracy = 0.0;
 
       // Estado del beacon: lo escribe Sylvia en otro isolate, así que recargamos
@@ -968,19 +976,34 @@ class SOSLogic extends ChangeNotifier with WidgetsBindingObserver {
   // multipart lanza getGroupIdLevel1/READ_PHONE_STATE en Android 17/GrapheneOS.
   // Troceo sin partir enlaces (sms_splitter). Devuelve true si salió al menos la
   // primera pieza (la crítica: SOS + coordenadas).
-  Future<bool> _sendSmsChunked(String to, String message) async {
+  Future<bool> _sendSmsChunked(String to, String message,
+      {bool overLimit = false}) async {
     // Fase 2 (#12): primario = plugin propio (1 SMS concatenado, sin permiso
     // extra, con resultCode); fallback al troceo de la Fase 1 si el plugin falla.
+    // #13: con [overLimit], igual que _sendSmsTracked en Sylvia: lo retenido
+    // por el límite de SMS de Android no cuenta como enviado ni se trocea.
     try {
-      final r = await OksigeniaSms.send(to: to, message: message);
+      final r = await OksigeniaSms.send(
+          to: to,
+          message: message,
+          timeout: Duration(seconds: overLimit ? 8 : 20));
       if (r.status == OksigeniaSmsStatus.failed) {
+        if (overLimit || r.error == 'limit_exceeded') {
+          _logSmsDiag("UI SMS: límite de SMS de Android (${r.error}) — sin troceo");
+          return false;
+        }
         _logSmsDiag("UI SMS: plugin falló (${r.error}) → fallback a troceo");
         return _sendSplitFallbackUi(to, message);
+      }
+      if (r.status == OksigeniaSmsStatus.unknown && overLimit) {
+        _logSmsDiag("UI SMS: retenido por el límite de SMS de Android (esperando confirmación)");
+        return false;
       }
       return true; // sent | unknown (entregado; ver EXP5)
     } catch (e) {
       _logSmsDiag("UI SMS: excepción del plugin ($e) → fallback a troceo");
-      return _sendSplitFallbackUi(to, message);
+      final bool ok = await _sendSplitFallbackUi(to, message);
+      return ok && !overLimit;
     }
   }
 
@@ -1170,6 +1193,26 @@ class SOSLogic extends ChangeNotifier with WidgetsBindingObserver {
     try { Vibration.cancel(); } catch(_) {}
   }
 
+  // Nota del SOS cuando el usuario no ha escrito la suya: el mensaje de ayuda en
+  // el idioma de la app.
+  Future<String> _defaultSosNote() async {
+    final sharedPrefs = await SharedPreferences.getInstance();
+    final String langCode = sharedPrefs.getString('language_code') ?? 'en';
+    final t = await AppLocalizations.delegate.load(Locale(langCode));
+    return t.smsHelpMessage.isEmpty ? "HELP!" : t.smsHelpMessage;
+  }
+
+  /// #13: recalcula si el SOS cabe en el límite de SMS de Android (contactos ×
+  /// partes del peor SOS posible). Barato, pero se espacia 15 s salvo [force].
+  Future<void> refreshSmsBudget({bool force = false}) async {
+    if (!force && DateTime.now().difference(_smsBudgetCheckedAt).inSeconds < 15) return;
+    _smsBudgetCheckedAt = DateTime.now();
+    final prefs = PreferencesService();
+    final String custom = prefs.getSosMessage();
+    final String note = custom.isNotEmpty ? custom : await _defaultSosNote();
+    _smsBudget = await sosSmsBudget(contacts: prefs.getContacts().length, note: note);
+  }
+
   Future<void> sendSOS() async {
     final prefs = PreferencesService();
     final List<String> recipients = prefs.getContacts();
@@ -1187,17 +1230,11 @@ class SOSLogic extends ChangeNotifier with WidgetsBindingObserver {
 
     // Nota (personalizada o de ayuda), colocada tras el enlace de Maps para que
     // las coordenadas viajen en el primer SMS.
-    String note = customNote;
-    if (note.isEmpty) {
-      final sharedPrefs = await SharedPreferences.getInstance();
-      String langCode = sharedPrefs.getString('language_code') ?? 'en';
-      final t = await AppLocalizations.delegate.load(Locale(langCode));
-      note = t.smsHelpMessage;
-      if (note.isEmpty) note = "HELP!";
-    }
+    final String note = customNote.isNotEmpty ? customNote : await _defaultSosNote();
 
     // #12: sin emojis en el cuerpo (fuerzan UCS-2 → más piezas). Ver sms_splitter.
-    String msgBody = "SOS OKSIGENIA";
+    // Mismo formato que worstCaseSosBody (sms_budget.dart): si cambia, cambiar ambos.
+    String msgBody = sosSmsHeader;
 
     Position? sosPos;
     try {
@@ -1228,9 +1265,21 @@ class SOSLogic extends ChangeNotifier with WidgetsBindingObserver {
       msgBody += "\nBat: $batteryLevel% (No Loc)";
     }
 
+    // #13: qué contactos caen por encima del límite de SMS de Android (ver
+    // _enviarSMSZombie en Sylvia).
+    OksigeniaSmsRateLimit? smsLimit;
+    int partsPerContact = 1; // mínimo una parte (ver Sylvia)
+    try { smsLimit = await OksigeniaSms.rateLimit(); } catch (_) {}
+    try { partsPerContact = max(1, await OksigeniaSms.partCount(msgBody)); } catch (_) {}
+
     int successCount = 0;
+    int burstParts = 0;
     for (String number in recipients) {
-      if (await _sendSmsChunked(normalizePhoneE164(number), msgBody)) successCount++;
+      burstParts += partsPerContact;
+      final bool overLimit = smsLimit != null && !smsLimit.allows(burstParts);
+      if (await _sendSmsChunked(normalizePhoneE164(number), msgBody, overLimit: overLimit)) {
+        successCount++;
+      }
     }
     if (successCount < recipients.length) {
       _logSmsDiag("UI SOS: sólo $successCount/${recipients.length} contactos recibieron el SOS");

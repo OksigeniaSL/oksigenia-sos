@@ -1423,6 +1423,30 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Movement alerts stopped'**
   String get beaconStopped;
+
+  /// No description provided for @smsLimitBanner.
+  ///
+  /// In en, this message translates to:
+  /// **'SMS limit too low — your SOS may not get out'**
+  String get smsLimitBanner;
+
+  /// No description provided for @smsLimitTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Android\'s SMS limit is too low'**
+  String get smsLimitTitle;
+
+  /// No description provided for @smsLimitBody.
+  ///
+  /// In en, this message translates to:
+  /// **'This phone asks for confirmation once an app sends more than {limit} SMS in a short time. Your SOS needs {needed} ({parts} per contact): if nobody confirms, part of it will not be sent.\n\nRaise the limit to at least {needed} (on LineageOS: Trust → SMS message limit) and restart the phone to be sure: on some phones the change only takes effect after a restart. Or use fewer contacts or a shorter custom message.'**
+  String smsLimitBody(int limit, int needed, int parts);
+
+  /// No description provided for @smsLimitBodyAlways.
+  ///
+  /// In en, this message translates to:
+  /// **'This phone asks for confirmation before any app sends an SMS (\"Always confirm\"): if nobody confirms, your SOS will not be sent.\n\nChoose a limit of at least {needed} (on LineageOS: Trust → SMS message limit) and restart the phone to be sure: on some phones the change only takes effect after a restart.'**
+  String smsLimitBodyAlways(int needed);
 }
 
 class _AppLocalizationsDelegate

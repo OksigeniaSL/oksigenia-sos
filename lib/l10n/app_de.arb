@@ -216,5 +216,9 @@
     "homeActionApply": "Anwenden",
     "smsBeaconDistance": "vom SOS-Punkt entfernt.",
     "homeBeaconBanner": "Standort-Updates an deinen Kontakt nach dem SOS — zum Stoppen tippen",
-    "beaconStopped": "Bewegungsmeldungen gestoppt"
+    "beaconStopped": "Bewegungsmeldungen gestoppt",
+    "smsLimitBanner": "SMS-Limit zu niedrig: Ihr SOS wird eventuell nicht gesendet",
+    "smsLimitTitle": "Das SMS-Limit von Android ist zu niedrig",
+    "smsLimitBody": "Dieses Telefon verlangt eine Bestätigung, sobald eine App mehr als {limit} SMS in kurzer Zeit sendet. Ihr SOS braucht {needed} ({parts} pro Kontakt): Bestätigt niemand, wird ein Teil nicht gesendet.\n\nErhöhen Sie das Limit auf mindestens {needed} (unter LineageOS: Trust → SMS-Begrenzung) und starten Sie das Telefon sicherheitshalber neu: Auf manchen Telefonen wirkt die Änderung erst nach einem Neustart. Oder verwenden Sie weniger Kontakte oder eine kürzere eigene Nachricht.",
+    "smsLimitBodyAlways": "Dieses Telefon verlangt vor jeder SMS einer App eine Bestätigung („Immer bestätigen“): Bestätigt niemand, wird Ihr SOS nicht gesendet.\n\nWählen Sie ein Limit von mindestens {needed} (unter LineageOS: Trust → SMS-Begrenzung) und starten Sie das Telefon sicherheitshalber neu: Auf manchen Telefonen wirkt die Änderung erst nach einem Neustart."
 }

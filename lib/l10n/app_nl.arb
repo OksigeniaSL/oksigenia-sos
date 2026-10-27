@@ -216,5 +216,9 @@
     "homeActionApply": "Toepassen",
     "smsBeaconDistance": "vanaf het SOS-punt.",
     "homeBeaconBanner": "Locatie-updates naar je contact na de SOS — tik om te stoppen",
-    "beaconStopped": "Bewegingsmeldingen gestopt"
+    "beaconStopped": "Bewegingsmeldingen gestopt",
+    "smsLimitBanner": "Sms-limiet te laag: je SOS komt mogelijk niet aan",
+    "smsLimitTitle": "De sms-limiet van Android is te laag",
+    "smsLimitBody": "Deze telefoon vraagt om bevestiging zodra een app meer dan {limit} sms'jes in korte tijd verstuurt. Je SOS heeft er {needed} nodig ({parts} per contact): als niemand bevestigt, wordt een deel niet verzonden.\n\nVerhoog de limiet naar minstens {needed} (in LineageOS: Trust → Limiet sms-berichten) en herstart de telefoon voor de zekerheid: op sommige telefoons werkt de wijziging pas na een herstart. Of gebruik minder contacten of een korter aangepast bericht.",
+    "smsLimitBodyAlways": "Deze telefoon vraagt om bevestiging voordat een app een sms verstuurt ('Altijd bevestigen'): als niemand bevestigt, wordt je SOS niet verzonden.\n\nKies een limiet van minstens {needed} (in LineageOS: Trust → Limiet sms-berichten) en herstart de telefoon voor de zekerheid: op sommige telefoons werkt de wijziging pas na een herstart."
 }

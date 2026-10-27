@@ -10,8 +10,6 @@ import 'package:oksigenia_sos/logic/sos_logic.dart';
 import 'package:oksigenia_sos/logic/activity_profile.dart';
 import 'package:oksigenia_sos/services/preferences_service.dart';
 import 'package:oksigenia_sos/widgets/main_drawer.dart';
-import 'package:oksigenia_sos/services/remote_config_service.dart';
-import 'package:oksigenia_sos/screens/update_screen.dart';
 import 'package:oksigenia_sos/screens/sent_screen.dart';
 import 'package:vibration/vibration.dart';
 
@@ -87,8 +85,6 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver, Ti
         }
       });
     });
-
-    _checkRemoteConfig();
   }
 
   Future<void> _triggerHaptic() async {
@@ -100,31 +96,6 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver, Ti
   Future<void> _triggerErrorHaptic() async {
     if (await Vibration.hasVibrator() ?? false) {
       Vibration.vibrate(pattern: [0, 50, 50, 50, 50, 50]);
-    }
-  }
-
-  void _checkRemoteConfig() async {
-    final result = await RemoteConfigService().checkStatus();
-    if (!mounted) return;
-
-    if (result['block'] == true) {
-      Navigator.pushReplacement(
-        context, 
-        MaterialPageRoute(builder: (context) => UpdateScreen(updateUrl: result['update_url']))
-      );
-      return;
-    }
-
-    String msgEs = result['message_es'] ?? "";
-    if (msgEs.isNotEmpty && !msgEs.contains("Sistema Oksigenia SOS Activo")) {
-       ScaffoldMessenger.of(context).showSnackBar(
-         SnackBar(
-           content: Text("📢 $msgEs"),
-           backgroundColor: Colors.blue[800],
-           duration: const Duration(seconds: 5),
-           action: SnackBarAction(label: "OK", textColor: Colors.white, onPressed: (){}),
-         )
-       );
     }
   }
 
@@ -708,6 +679,10 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver, Ti
                 if (mounted) _showFullScreenIntentDialog(context, l10n);
                 return;
               }
+              // #13: el límite de SMS de Android avisa pero no bloquea: fuera de
+              // LineageOS solo se cambia por adb, y bloquear dejaría sin vigilancia.
+              await _sosLogic.refreshSmsBudget(force: true);
+              if (context.mounted && !_sosLogic.smsRateLimitOk) _showSmsLimitDialog(context, l10n);
             }
             onChanged(newValue);
           },
@@ -807,6 +782,13 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver, Ti
       level = _AlertLevel.critical;
       text = l10n.permSmsMissing;
       icon = Icons.sms_failed_outlined;
+    } else if (!_sosLogic.smsRateLimitOk) {
+      // #13: el SOS no cabe en el límite de SMS de Android; lo que sobra espera
+      // a una confirmación que nadie dará si el usuario está inconsciente.
+      level = _AlertLevel.critical;
+      text = l10n.smsLimitBanner;
+      icon = Icons.speed;
+      onTap = () => _showSmsLimitDialog(context, l10n);
     } else if (!_sosLogic.sensorsPermissionOk) {
       level = _AlertLevel.critical;
       text = l10n.homeAlertSensorPermDenied;
@@ -1515,6 +1497,21 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver, Ti
         actions: [
           TextButton(onPressed: () => Navigator.pop(ctx), child: const Text("OK")),
           ElevatedButton(onPressed: () { Navigator.pop(ctx); _sosLogic.requestBackgroundLocation(); }, child: Text(l10n.btnEnableBgLocation)),
+        ]
+      ));
+  }
+
+  void _showSmsLimitDialog(BuildContext context, AppLocalizations l10n) {
+    final budget = _sosLogic.smsBudget;
+    if (budget == null) return;
+    final String body = budget.limit.alwaysConfirm
+        ? l10n.smsLimitBodyAlways(budget.needed)
+        : l10n.smsLimitBody(budget.limit.effectiveMaxCount, budget.needed, budget.partsPerContact);
+    showDialog(context: context, builder: (ctx) => AlertDialog(
+        title: Row(children: [const Icon(Icons.speed, color: Colors.redAccent), const SizedBox(width: 10), Expanded(child: Text(l10n.smsLimitTitle))]),
+        content: SingleChildScrollView(child: Text(body)),
+        actions: [
+          TextButton(onPressed: () => Navigator.pop(ctx), child: const Text("OK")),
         ]
       ));
   }

@@ -720,4 +720,21 @@ class AppLocalizationsNl extends AppLocalizations {
 
   @override
   String get beaconStopped => 'Bewegingsmeldingen gestopt';
+
+  @override
+  String get smsLimitBanner =>
+      'Sms-limiet te laag: je SOS komt mogelijk niet aan';
+
+  @override
+  String get smsLimitTitle => 'De sms-limiet van Android is te laag';
+
+  @override
+  String smsLimitBody(int limit, int needed, int parts) {
+    return 'Deze telefoon vraagt om bevestiging zodra een app meer dan $limit sms\'jes in korte tijd verstuurt. Je SOS heeft er $needed nodig ($parts per contact): als niemand bevestigt, wordt een deel niet verzonden.\n\nVerhoog de limiet naar minstens $needed (in LineageOS: Trust → Limiet sms-berichten) en herstart de telefoon voor de zekerheid: op sommige telefoons werkt de wijziging pas na een herstart. Of gebruik minder contacten of een korter aangepast bericht.';
+  }
+
+  @override
+  String smsLimitBodyAlways(int needed) {
+    return 'Deze telefoon vraagt om bevestiging voordat een app een sms verstuurt (\'Altijd bevestigen\'): als niemand bevestigt, wordt je SOS niet verzonden.\n\nKies een limiet van minstens $needed (in LineageOS: Trust → Limiet sms-berichten) en herstart de telefoon voor de zekerheid: op sommige telefoons werkt de wijziging pas na een herstart.';
+  }
 }

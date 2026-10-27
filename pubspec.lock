@@ -423,7 +423,7 @@ packages:
     source: hosted
     version: "1.0.3"
   http:
-    dependency: "direct main"
+    dependency: transitive
     description:
       name: http
       sha256: "87721a4a50b19c7f1d49001e51409bddc46303966ce89a65af4f4e6004896412"
@@ -570,11 +570,11 @@ packages:
     dependency: "direct main"
     description:
       path: "."
-      ref: c1091ee58ade9abe05afc936b6de88167bb7620e
-      resolved-ref: c1091ee58ade9abe05afc936b6de88167bb7620e
+      ref: "9580d3fb76b752079a081712a75cfdfc7a62ba29"
+      resolved-ref: "9580d3fb76b752079a081712a75cfdfc7a62ba29"
       url: "https://github.com/OksigeniaSL/oksigenia_sms.git"
     source: git
-    version: "0.1.0"
+    version: "0.2.0"
   package_config:
     dependency: transitive
     description:
