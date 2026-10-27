@@ -1,0 +1,82 @@
+# SPDX-License-Identifier: Apache-2.0
+# Copyright 2026 Oksigenia S.L.
+#
+# Completes the pending OpenTimestamps proofs in provenance/ once a day and
+# commits them as Oksigenia SL <dev@oksigenia.cc>. Copy to .github/workflows/.
+# DELIVERY says where the commit goes:
+#   push    straight to the default branch, which must accept pushes from
+#           GitHub Actions;
+#   branch  to the provenance-upgrade branch, plus an issue asking to merge it
+#           by pull request. For default branches that only some accounts may
+#           push to, or that require checks (pushes from GitHub Actions do not
+#           run them). The job closes the issue once the default branch has
+#           the proofs.
+name: provenance-upgrade
+
+on:
+  schedule:
+    - cron: "17 5 * * *"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+  issues: write
+
+concurrency: provenance-upgrade
+
+env:
+  DELIVERY: push
+
+jobs:
+  upgrade:
+    runs-on: ubuntu-24.04
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v7
+        with:
+          ref: ${{ github.event.repository.default_branch }}
+
+      - name: Install the OpenTimestamps client
+        run: |
+          python3 -m venv "$RUNNER_TEMP/ots"
+          "$RUNNER_TEMP/ots/bin/pip" install -q --require-hashes -r provenance/ots-requirements.txt
+          echo "OTS=$RUNNER_TEMP/ots/bin/ots" >> "$GITHUB_ENV"
+
+      - name: Upgrade pending proofs
+        run: bash provenance/upgrade.sh
+
+      - name: Commit completed proofs
+        env:
+          GH_TOKEN: ${{ github.token }}
+          BASE: ${{ github.event.repository.default_branch }}
+        run: |
+          branch=provenance-upgrade
+          title="Completed OpenTimestamps proofs are waiting on the $branch branch"
+          issue=""
+          if [ "$DELIVERY" = branch ]; then
+            issue=$(gh issue list --state open --limit 500 --json number,title \
+              --jq "map(select(.title == \"$title\"))[0].number // empty")
+          fi
+          if [ -z "$(git status --porcelain -- provenance)" ]; then
+            echo "No proof changed."
+            [ -z "$issue" ] || gh issue close "$issue" -c "$BASE has the completed proofs."
+            exit 0
+          fi
+          # Pushing again would leave an open pull request without its checks.
+          if [ "$DELIVERY" = branch ] && git fetch -q --depth 1 origin "$branch" 2>/dev/null \
+              && git diff --quiet FETCH_HEAD -- provenance; then
+            echo "The completed proofs are already on $branch."
+            exit 0
+          fi
+          git config user.name "Oksigenia SL"
+          git config user.email dev@oksigenia.cc
+          git add -- provenance
+          git commit -q -m "Complete OpenTimestamps proofs" \
+            -m "Bitcoin attestations added by the daily provenance-upgrade job."
+          if [ "$DELIVERY" = push ]; then
+            git push origin "HEAD:$BASE"
+            exit 0
+          fi
+          git push -f origin "HEAD:refs/heads/$branch"
+          [ -n "$issue" ] || gh issue create --title "$title" --body \
+            "The daily provenance-upgrade job anchored pending OpenTimestamps proofs in Bitcoin and left them on the \`$branch\` branch, because it does not push to \`$BASE\`. Merge that branch with a pull request. The job closes this issue once \`$BASE\` has the proofs."
