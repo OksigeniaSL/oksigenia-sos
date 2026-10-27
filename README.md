@@ -54,7 +54,7 @@ The interface is designed for high-stress situations. High contrast, large touch
 
 **SMS limit check ([#13](https://github.com/OksigeniaSL/oksigenia-sos/issues/13)).** Android caps how many SMS parts an app may send in a short time; past the cap it holds the rest behind an "Allow / Deny" dialog that never times out — so with nobody able to tap it, part of an SOS could silently stay on the phone. The default cap (30) is plenty, but LineageOS lets you lower it (*Trust → SMS message limit*, down to "Always confirm"). v4.3.2 reads that limit, works out what your SOS needs (contacts × SMS parts) and, if it doesn't fit, shows a red banner and a warning when you arm monitoring, with the number to set. And an SOS part held behind that dialog is no longer counted as sent: the app tells you the truth instead of "SOS sent".
 
-**No network access at all.** v4.3.2 removes the app's last network call. Since v3.8.0 the home screen fetched a small version-check file from oksigenia.com every time the app opened, meant to warn about updates; that file no longer exists, so the check did nothing — but it still contacted a server. It is gone, and with it the `INTERNET` permission: Oksigenia SOS now has **no network access at all**, so the "No Internet / No Servers" promise is enforced by Android itself, not just by our word. Alerts were always SMS-only and still are; updates keep arriving through F-Droid, IzzyOnDroid and GitHub Releases. The design and validated parameters of the fall detector are now documented in [`FALL_DETECTION.md`](FALL_DETECTION.md). Same signing key, one permission fewer.
+**No network access at all.** v4.3.2 removes the app's last network call. Since v3.8.0 the home screen fetched a small version-check file from oksigenia.com every time the app opened, meant to warn about updates; that file no longer exists, so the check did nothing — but it still contacted a server. It is gone, and with it the `INTERNET` permission: Oksigenia SOS now has **no network access at all**, so the "No Internet / No Servers" promise is enforced by Android itself, not just by our word. Alerts were always SMS-only and still are; updates keep arriving through F-Droid, IzzyOnDroid and GitHub Releases. The design and validated parameters of the fall detector are now documented in [`FALL_DETECTION.md`](FALL_DETECTION.md). Validated on device (Pixel 8 / GrapheneOS / Android 17): no `INTERNET` permission, the SMS-limit warning, and an SOS held by the system dialog reported as not sent. Same signing key, one permission fewer.
 
 ---
 
@@ -326,7 +326,7 @@ These settings are **required** for Oksigenia SOS to function reliably in the fi
 
 ### 📨 4. SMS message limit — high enough for your SOS (LineageOS and others)
 * **Why?** Android counts every SMS part an app sends; past a per-app limit it holds the rest behind an "Allow / Deny" dialog that never times out. If you can't tap it, part of your SOS never leaves. The default (30) is plenty, but LineageOS lets you lower it, down to "Always confirm".
-* **How:** On LineageOS: **Trust → SMS message limit** → pick at least what the app asks for, then **restart the phone** (Android only reads the limit at startup).
+* **How:** On LineageOS: **Trust → SMS message limit** → pick at least what the app asks for, then **restart the phone** to be sure: on some phones (GrapheneOS, for one) the change only takes effect after a restart.
 * The app checks this for you: if your SOS doesn't fit, a red banner on the home screen tells you how many SMS it needs.
 
 ---

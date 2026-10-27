@@ -724,11 +724,11 @@ class AppLocalizationsDe extends AppLocalizations {
 
   @override
   String smsLimitBody(int limit, int needed, int parts) {
-    return 'Dieses Telefon verlangt eine Bestätigung, sobald eine App mehr als $limit SMS in kurzer Zeit sendet. Ihr SOS braucht $needed ($parts pro Kontakt): Bestätigt niemand, wird ein Teil nicht gesendet.\n\nErhöhen Sie das Limit auf mindestens $needed (unter LineageOS: Trust → SMS-Begrenzung) und starten Sie das Telefon neu, da Android es nur beim Start übernimmt. Oder verwenden Sie weniger Kontakte oder eine kürzere eigene Nachricht.';
+    return 'Dieses Telefon verlangt eine Bestätigung, sobald eine App mehr als $limit SMS in kurzer Zeit sendet. Ihr SOS braucht $needed ($parts pro Kontakt): Bestätigt niemand, wird ein Teil nicht gesendet.\n\nErhöhen Sie das Limit auf mindestens $needed (unter LineageOS: Trust → SMS-Begrenzung) und starten Sie das Telefon sicherheitshalber neu: Auf manchen Telefonen wirkt die Änderung erst nach einem Neustart. Oder verwenden Sie weniger Kontakte oder eine kürzere eigene Nachricht.';
   }
 
   @override
   String smsLimitBodyAlways(int needed) {
-    return 'Dieses Telefon verlangt vor jeder SMS einer App eine Bestätigung („Immer bestätigen“): Bestätigt niemand, wird Ihr SOS nicht gesendet.\n\nWählen Sie ein Limit von mindestens $needed (unter LineageOS: Trust → SMS-Begrenzung) und starten Sie das Telefon neu, da Android es nur beim Start übernimmt.';
+    return 'Dieses Telefon verlangt vor jeder SMS einer App eine Bestätigung („Immer bestätigen“): Bestätigt niemand, wird Ihr SOS nicht gesendet.\n\nWählen Sie ein Limit von mindestens $needed (unter LineageOS: Trust → SMS-Begrenzung) und starten Sie das Telefon sicherheitshalber neu: Auf manchen Telefonen wirkt die Änderung erst nach einem Neustart.';
   }
 }

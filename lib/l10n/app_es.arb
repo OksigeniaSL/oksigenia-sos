@@ -219,6 +219,6 @@
     "beaconStopped": "Avisos de movimiento detenidos",
     "smsLimitBanner": "Límite de SMS demasiado bajo: tu SOS podría no salir",
     "smsLimitTitle": "El límite de SMS de Android es demasiado bajo",
-    "smsLimitBody": "Este móvil pide confirmación cuando una app envía más de {limit} SMS en poco tiempo. Tu SOS necesita {needed} ({parts} por contacto): si nadie lo confirma, parte no se enviará.\n\nSube el límite al menos a {needed} (en LineageOS: Trust → Límite de mensajes SMS) y reinicia el móvil, porque Android solo lo aplica al arrancar. O usa menos contactos o un mensaje personalizado más corto.",
-    "smsLimitBodyAlways": "Este móvil pide confirmación antes de que cualquier app envíe un SMS («Confirmar siempre»): si nadie lo confirma, tu SOS no se enviará.\n\nElige un límite de al menos {needed} (en LineageOS: Trust → Límite de mensajes SMS) y reinicia el móvil, porque Android solo lo aplica al arrancar."
+    "smsLimitBody": "Este móvil pide confirmación cuando una app envía más de {limit} SMS en poco tiempo. Tu SOS necesita {needed} ({parts} por contacto): si nadie lo confirma, parte no se enviará.\n\nSube el límite al menos a {needed} (en LineageOS: Trust → Límite de mensajes SMS) y reinicia el móvil para asegurarte: en algunos móviles el cambio solo se aplica tras reiniciar. O usa menos contactos o un mensaje personalizado más corto.",
+    "smsLimitBodyAlways": "Este móvil pide confirmación antes de que cualquier app envíe un SMS («Confirmar siempre»): si nadie lo confirma, tu SOS no se enviará.\n\nElige un límite de al menos {needed} (en LineageOS: Trust → Límite de mensajes SMS) y reinicia el móvil para asegurarte: en algunos móviles el cambio solo se aplica tras reiniciar."
 }

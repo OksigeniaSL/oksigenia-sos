@@ -219,6 +219,6 @@
     "beaconStopped": "Rörelseaviseringar stoppade",
     "smsLimitBanner": "För låg SMS-gräns: ditt SOS kanske inte skickas",
     "smsLimitTitle": "Androids SMS-gräns är för låg",
-    "smsLimitBody": "Den här telefonen begär bekräftelse när en app skickar fler än {limit} SMS på kort tid. Ditt SOS behöver {needed} ({parts} per kontakt): om ingen bekräftar skickas inte allt.\n\nHöj gränsen till minst {needed} (i LineageOS: Trust → Gräns för SMS-meddelande) och starta om telefonen, eftersom Android bara tillämpar den vid start. Eller använd färre kontakter eller ett kortare anpassat meddelande.",
-    "smsLimitBodyAlways": "Den här telefonen begär bekräftelse innan en app skickar något SMS ('Bekräfta alltid'): om ingen bekräftar skickas inte ditt SOS.\n\nVälj en gräns på minst {needed} (i LineageOS: Trust → Gräns för SMS-meddelande) och starta om telefonen, eftersom Android bara tillämpar den vid start."
+    "smsLimitBody": "Den här telefonen begär bekräftelse när en app skickar fler än {limit} SMS på kort tid. Ditt SOS behöver {needed} ({parts} per kontakt): om ingen bekräftar skickas inte allt.\n\nHöj gränsen till minst {needed} (i LineageOS: Trust → Gräns för SMS-meddelande) och starta om telefonen för säkerhets skull: på vissa telefoner gäller ändringen först efter en omstart. Eller använd färre kontakter eller ett kortare anpassat meddelande.",
+    "smsLimitBodyAlways": "Den här telefonen begär bekräftelse innan en app skickar något SMS ('Bekräfta alltid'): om ingen bekräftar skickas inte ditt SOS.\n\nVälj en gräns på minst {needed} (i LineageOS: Trust → Gräns för SMS-meddelande) och starta om telefonen för säkerhets skull: på vissa telefoner gäller ändringen först efter en omstart."
 }

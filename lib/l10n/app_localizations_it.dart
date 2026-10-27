@@ -734,11 +734,11 @@ class AppLocalizationsIt extends AppLocalizations {
 
   @override
   String smsLimitBody(int limit, int needed, int parts) {
-    return 'Questo telefono chiede conferma quando un\'app invia più di $limit SMS in poco tempo. Il tuo SOS ne richiede $needed ($parts per contatto): se nessuno conferma, una parte non verrà inviata.\n\nAlza il limite ad almeno $needed (su LineageOS: Trust → Limite invio SMS) e riavvia il telefono, perché Android lo applica solo all\'avvio. Oppure usa meno contatti o un messaggio personalizzato più breve.';
+    return 'Questo telefono chiede conferma quando un\'app invia più di $limit SMS in poco tempo. Il tuo SOS ne richiede $needed ($parts per contatto): se nessuno conferma, una parte non verrà inviata.\n\nAlza il limite ad almeno $needed (su LineageOS: Trust → Limite invio SMS) e riavvia il telefono per sicurezza: su alcuni telefoni la modifica si applica solo dopo il riavvio. Oppure usa meno contatti o un messaggio personalizzato più breve.';
   }
 
   @override
   String smsLimitBodyAlways(int needed) {
-    return 'Questo telefono chiede conferma prima che un\'app invii qualsiasi SMS («Conferma sempre»): se nessuno conferma, il tuo SOS non verrà inviato.\n\nScegli un limite di almeno $needed (su LineageOS: Trust → Limite invio SMS) e riavvia il telefono, perché Android lo applica solo all\'avvio.';
+    return 'Questo telefono chiede conferma prima che un\'app invii qualsiasi SMS («Conferma sempre»): se nessuno conferma, il tuo SOS non verrà inviato.\n\nScegli un limite di almeno $needed (su LineageOS: Trust → Limite invio SMS) e riavvia il telefono per sicurezza: su alcuni telefoni la modifica si applica solo dopo il riavvio.';
   }
 }
