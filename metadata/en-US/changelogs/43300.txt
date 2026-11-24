@@ -1,0 +1,6 @@
+v4.3.3 — Protection no longer stops after 6 hours
+
+- Fixed: on recent Android versions (the limit arrived with Android 15), the system could close Oksigenia SOS after 6 hours of monitoring without opening the app, with no warning, leaving you unprotected. It affected every activity profile. The monitoring service now uses the service type meant for exercise apps, which has no time limit.
+- If you can't update yet: opening the app before 6 hours have passed restarts Android's count.
+- Permissions: FOREGROUND_SERVICE_DATA_SYNC is replaced by FOREGROUND_SERVICE_HEALTH, a normal permission that only allows this type of service. It gives no access to any health data.
+- Same signing key; updates cleanly over any previous install.

@@ -1,4 +1,4 @@
-# Oksigenia SOS 🏔️ v4.3.2 "Running"
+# Oksigenia SOS 🏔️ v4.3.3 "Running"
 
 **The Ultimate Outdoor Guardian | FOSS | Privacy-First | Autonomous**
 
@@ -47,6 +47,12 @@ The interface is designed for high-stress situations. High contrast, large touch
 |:---:|:---:|
 | <img src="screenshots/main_testmode_en.jpg" width="180" /> | <img src="screenshots/lang_en.jpg" width="180" /> |
 | *Safe testing environment* | *11 native languages* |
+
+---
+
+## ⏱️ What's New in v4.3.3: protection no longer stops after 6 hours
+
+Since Android 15, the system gives `dataSync` foreground services 6 hours in every 24 and crashes the app if they don't stop. The monitoring service declared `dataSync|mediaPlayback`, and combining types doesn't avoid the limit: after 6 hours without opening the app, Android could close Oksigenia SOS with no warning, whatever the profile. The service is now `health|mediaPlayback`: the type meant for exercise apps, with no time limit. `FOREGROUND_SERVICE_HEALTH` replaces `FOREGROUND_SERVICE_DATA_SYNC`; it is a normal permission and gives no access to any health data. Validated on device (Pixel 7a / GrapheneOS / Android 17) with the system limit shortened to 60 seconds: v4.3.2 was closed 71 seconds after going to the background, and v4.3.3 was still monitoring at 180 seconds, when the test ended. Starting by itself after a reboot and the alarm sounding with the screen locked were checked on the same phone. Same signing key, updates cleanly.
 
 ---
 
