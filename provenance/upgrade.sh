@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # SPDX-License-Identifier: Apache-2.0
-# Copyright 2026 Oksigenia S.L.
+# Copyright 2026 Oksigenia SL
 #
 # Complete the pending OpenTimestamps proofs of the repository you are in
 # with their Bitcoin attestation. A fresh seal stays pending for a few hours;

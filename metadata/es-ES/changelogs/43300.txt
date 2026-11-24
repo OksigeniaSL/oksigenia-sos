@@ -1,0 +1,6 @@
+v4.3.3 — La protección ya no se corta a las 6 horas
+
+- Corregido: en versiones recientes de Android (el límite llegó con Android 15), el sistema podía cerrar Oksigenia SOS tras 6 horas de vigilancia sin abrir la app, sin avisar, y te dejaba sin protección. Afectaba a todos los perfiles de actividad. El servicio de vigilancia usa ahora el tipo pensado para apps de ejercicio, que no tiene límite de tiempo.
+- Si aún no puedes actualizar: abrir la app antes de que pasen 6 horas reinicia la cuenta de Android.
+- Permisos: FOREGROUND_SERVICE_HEALTH sustituye a FOREGROUND_SERVICE_DATA_SYNC. Es un permiso normal que solo autoriza este tipo de servicio; no da acceso a ningún dato de salud.
+- Misma firma; actualiza sin problemas sobre cualquier instalación previa.

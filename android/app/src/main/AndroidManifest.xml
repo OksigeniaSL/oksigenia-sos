@@ -11,7 +11,7 @@
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE_MEDIA_PLAYBACK" />
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE_LOCATION" />
-    <uses-permission android:name="android.permission.FOREGROUND_SERVICE_DATA_SYNC" />
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE_HEALTH" />
     <uses-permission android:name="android.permission.ACTIVITY_RECOGNITION" />
     <uses-permission android:name="android.permission.REQUEST_IGNORE_BATTERY_OPTIMIZATIONS" />
     <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
@@ -70,9 +70,13 @@
             </intent-filter>
         </activity>
 
+        <!-- Never dataSync here: since Android 15 the system stops dataSync services after
+             6 h in 24 h and crashes the app 10 s later, also when combined with other types.
+             health has no time limit, may start from BOOT_COMPLETED, and only needs
+             HIGH_SAMPLING_RATE_SENSORS (declared above), not a runtime grant. -->
         <service
             android:name="id.flutter.flutter_background_service.BackgroundService"
-            android:foregroundServiceType="dataSync|mediaPlayback"
+            android:foregroundServiceType="health|mediaPlayback"
             android:enabled="true"
             android:exported="true"
             android:stopWithTask="false"

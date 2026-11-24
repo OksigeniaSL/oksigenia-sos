@@ -1,5 +1,5 @@
 # SPDX-License-Identifier: Apache-2.0
-# Copyright 2026 Oksigenia S.L.
+# Copyright 2026 Oksigenia SL
 #
 # Completes the pending OpenTimestamps proofs in provenance/ once a day and
 # commits them as Oksigenia SL <dev@oksigenia.cc>. Copy to .github/workflows/.

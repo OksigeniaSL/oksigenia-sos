@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # SPDX-License-Identifier: Apache-2.0
-# Copyright 2026 Oksigenia S.L.
+# Copyright 2026 Oksigenia SL
 #
 # Seal the current commit of the repository you are in:
 #   1. write <dir>/<name>-<date>.manifest.txt (repository, commit, git tree,
@@ -16,7 +16,7 @@
 #                      Default: git config user.signingkey.
 #   PROVENANCE_DIR     folder for the proofs (default: provenance)
 #   PROVENANCE_NAME    manifest prefix (default: the repository name)
-#   PROVENANCE_HOLDER  owner named in the manifest (default: Oksigenia S.L.)
+#   PROVENANCE_HOLDER  owner named in the manifest (default: Oksigenia SL)
 #   OTS                OpenTimestamps client (default: ots)
 set -euo pipefail
 
@@ -26,7 +26,7 @@ root=$(git rev-parse --show-toplevel)
 cd "$root"
 dir=${PROVENANCE_DIR:-provenance}
 ots=${OTS:-ots}
-holder=${PROVENANCE_HOLDER:-Oksigenia S.L.}
+holder=${PROVENANCE_HOLDER:-Oksigenia SL}
 key=${PROVENANCE_KEY:-$(git config --get user.signingkey || true)}
 signers="$dir/allowed_signers"
 
