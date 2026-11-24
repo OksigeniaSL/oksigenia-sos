@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # SPDX-License-Identifier: Apache-2.0
-# Copyright 2026 Oksigenia S.L.
+# Copyright 2026 Oksigenia SL
 #
 # Check every seal of the repository you are in:
 #   - each manifest's tree matches its commit;
