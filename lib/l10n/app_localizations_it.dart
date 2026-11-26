@@ -342,7 +342,7 @@ class AppLocalizationsIt extends AppLocalizations {
 
   @override
   String get dialogPermissionStep2 =>
-      '2. Nella nuova schermata, tocca i 3 puntini (⠇) in alto a derecha.';
+      '2. Nella nuova schermata, tocca i 3 puntini (⠇) in alto a destra.';
 
   @override
   String get dialogPermissionStep3 =>
