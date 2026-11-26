@@ -605,7 +605,7 @@ class AppLocalizationsNb extends AppLocalizations {
   String get sentinelYellow => 'Støt oppdaget · analyserer...';
 
   @override
-  String get sentinelOrange => 'Alarm rett rundt hjørnet!';
+  String get sentinelOrange => 'Alarm om få sekunder!';
 
   @override
   String get sentinelRed => 'ALARM AKTIV';

@@ -184,7 +184,7 @@
     "whyPermsFullScreen": "Viser alarmen over låseskjermen så du kan reagere uten å låse opp.",
     "sentinelGreen": "System aktivt",
     "sentinelYellow": "Støt oppdaget · analyserer...",
-    "sentinelOrange": "Alarm rett rundt hjørnet!",
+    "sentinelOrange": "Alarm om få sekunder!",
     "sentinelRed": "ALARM AKTIV",
     "activityProfileTitle": "Aktivitetsprofil",
     "activityProfileSubtitle": "Tilpasser Smart Sentinel-deteksjon til sporten din. Velg det nærmeste — feil profil gir falske alarmer eller overser ekte fall.",
