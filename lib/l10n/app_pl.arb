@@ -135,7 +135,7 @@
     "whyPermsBgLocation": "Pobiera Twoją pozycję GPS przy wygaszonym ekranie lub aplikacji w tle — dokładnie wtedy, gdy uruchamia się SOS. Lokalizacja jest wysyłana wyłącznie w SMS-ie SOS do Twoich kontaktów; w żaden inny sposób nie opuszcza telefonu.",
     "btnEnableBgLocation": "Zawsze zezwalaj",
     "permLocMissing": "Brak uprawnienia lokalizacji",
-    "slideStopSystem": "PRZESUŃ, ABY ZATRZYMAĆ",
+    "slideStopSystem": "PRZYTRZYMAJ: WYŁĄCZ WSZYSTKO",
     "onboardingTitle": "Skonfiguruj system bezpieczeństwa",
     "onboardingSubtitle": "Te uprawnienia są niezbędne, aby Oksigenia SOS chroniła cię w terenie.",
     "onboardingGrant": "ZEZWÓL",

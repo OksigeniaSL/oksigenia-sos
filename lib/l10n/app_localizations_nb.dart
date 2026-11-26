@@ -440,7 +440,7 @@ class AppLocalizationsNb extends AppLocalizations {
   String get permLocMissing => 'Mangler posisjonstillatelse';
 
   @override
-  String get slideStopSystem => 'DRA FOR Å STOPPE SYSTEM';
+  String get slideStopSystem => 'HOLD FOR Å STOPPE ALT';
 
   @override
   String get onboardingTitle => 'Konfigurer sikkerhetssystemet';

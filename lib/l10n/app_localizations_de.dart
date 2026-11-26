@@ -436,7 +436,7 @@ class AppLocalizationsDe extends AppLocalizations {
   String get permLocMissing => 'Standortberechtigung fehlt';
 
   @override
-  String get slideStopSystem => 'WISCHEN ZUM STOPPEN';
+  String get slideStopSystem => 'HALTEN, UM ALLES ZU STOPPEN';
 
   @override
   String get onboardingTitle => 'Sicherheitssystem einrichten';

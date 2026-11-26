@@ -935,7 +935,7 @@ abstract class AppLocalizations {
   /// No description provided for @slideStopSystem.
   ///
   /// In en, this message translates to:
-  /// **'SLIDE TO STOP SYSTEM'**
+  /// **'HOLD TO STOP ALL MONITORING'**
   String get slideStopSystem;
 
   /// No description provided for @onboardingTitle.

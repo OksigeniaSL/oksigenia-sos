@@ -441,7 +441,7 @@ class AppLocalizationsEs extends AppLocalizations {
   String get permLocMissing => 'Falta Permiso de Ubicación';
 
   @override
-  String get slideStopSystem => 'DESLIZA PARA APAGAR';
+  String get slideStopSystem => 'MANTÉN PARA APAGAR TODO';
 
   @override
   String get onboardingTitle => 'Configura tu sistema de seguridad';

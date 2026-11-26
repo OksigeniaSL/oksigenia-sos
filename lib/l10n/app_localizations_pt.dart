@@ -436,7 +436,7 @@ class AppLocalizationsPt extends AppLocalizations {
   String get permLocMissing => 'Falta Permissão Localização';
 
   @override
-  String get slideStopSystem => 'DESLIZE P/ PARAR';
+  String get slideStopSystem => 'SEGURE PARA PARAR TUDO';
 
   @override
   String get onboardingTitle => 'Configurar o seu sistema de segurança';

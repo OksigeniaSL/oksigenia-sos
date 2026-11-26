@@ -446,7 +446,7 @@ class AppLocalizationsIt extends AppLocalizations {
   String get permLocMissing => 'Permesso posizione mancante';
 
   @override
-  String get slideStopSystem => 'SCORRI PER SPEGNERE';
+  String get slideStopSystem => 'TIENI PREMUTO: SPEGNI TUTTO';
 
   @override
   String get onboardingTitle => 'Configura il tuo sistema di sicurezza';

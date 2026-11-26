@@ -135,7 +135,7 @@
     "whyPermsBgLocation": "Bepaalt je GPS-positie terwijl het scherm uit is of de app op de achtergrond draait — precies wanneer een SOS afgaat. De locatie wordt alleen verzonden in de SOS-sms naar je contacten; ze verlaat je telefoon verder nooit.",
     "btnEnableBgLocation": "Altijd toestaan",
     "permLocMissing": "Locatietoestemming ontbreekt",
-    "slideStopSystem": "VEEG OM TE STOPPEN",
+    "slideStopSystem": "HOUD INGEDRUKT: ALLES STOPPEN",
     "onboardingTitle": "Configureer uw veiligheidssysteem",
     "onboardingSubtitle": "Deze toestemmingen zijn essentieel om u te beschermen in het veld.",
     "onboardingGrant": "VERLENEN",

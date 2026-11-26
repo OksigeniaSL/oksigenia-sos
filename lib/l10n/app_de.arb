@@ -135,7 +135,7 @@
     "whyPermsBgLocation": "Ermittelt deine GPS-Position bei ausgeschaltetem Bildschirm oder App im Hintergrund — genau dann, wenn ein SOS auslöst. Der Standort wird ausschließlich in der SOS-SMS an deine Kontakte gesendet und verlässt das Telefon sonst nie.",
     "btnEnableBgLocation": "Immer zulassen",
     "permLocMissing": "Standortberechtigung fehlt",
-    "slideStopSystem": "WISCHEN ZUM STOPPEN",
+    "slideStopSystem": "HALTEN, UM ALLES ZU STOPPEN",
     "onboardingTitle": "Sicherheitssystem einrichten",
     "onboardingSubtitle": "Diese Berechtigungen sind notwendig, damit Oksigenia SOS Sie schützen kann.",
     "onboardingGrant": "ERLAUBEN",

@@ -442,7 +442,7 @@ class AppLocalizationsNl extends AppLocalizations {
   String get permLocMissing => 'Locatietoestemming ontbreekt';
 
   @override
-  String get slideStopSystem => 'VEEG OM TE STOPPEN';
+  String get slideStopSystem => 'HOUD INGEDRUKT: ALLES STOPPEN';
 
   @override
   String get onboardingTitle => 'Configureer uw veiligheidssysteem';

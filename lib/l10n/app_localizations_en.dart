@@ -439,7 +439,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get permLocMissing => 'Missing Location Permission';
 
   @override
-  String get slideStopSystem => 'SLIDE TO STOP SYSTEM';
+  String get slideStopSystem => 'HOLD TO STOP ALL MONITORING';
 
   @override
   String get onboardingTitle => 'Configure your safety system';

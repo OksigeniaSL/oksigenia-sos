@@ -440,7 +440,7 @@ class AppLocalizationsRu extends AppLocalizations {
   String get permLocMissing => 'Нет разрешения геолокации';
 
   @override
-  String get slideStopSystem => 'ПЕРЕТАЩИ, ЧТОБЫ ОСТАНОВИТЬ';
+  String get slideStopSystem => 'УДЕРЖИВАЙТЕ: ВЫКЛЮЧИТЬ ВСЁ';
 
   @override
   String get onboardingTitle => 'Настрой систему безопасности';

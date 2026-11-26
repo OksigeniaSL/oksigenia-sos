@@ -439,7 +439,7 @@ class AppLocalizationsPl extends AppLocalizations {
   String get permLocMissing => 'Brak uprawnienia lokalizacji';
 
   @override
-  String get slideStopSystem => 'PRZESUŃ, ABY ZATRZYMAĆ';
+  String get slideStopSystem => 'PRZYTRZYMAJ: WYŁĄCZ WSZYSTKO';
 
   @override
   String get onboardingTitle => 'Skonfiguruj system bezpieczeństwa';

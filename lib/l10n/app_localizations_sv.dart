@@ -441,7 +441,7 @@ class AppLocalizationsSv extends AppLocalizations {
   String get permLocMissing => 'Platsbehörighet saknas';
 
   @override
-  String get slideStopSystem => 'DRA FÖR ATT STOPPA';
+  String get slideStopSystem => 'HÅLL FÖR ATT STOPPA ALLT';
 
   @override
   String get onboardingTitle => 'Konfigurera ditt säkerhetssystem';

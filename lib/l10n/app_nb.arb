@@ -135,7 +135,7 @@
     "whyPermsBgLocation": "Henter GPS-posisjonen din når skjermen er av eller appen er i bakgrunnen — akkurat når en SOS utløses. Posisjonen sendes kun i SOS-SMS-en til kontaktene dine; den forlater aldri telefonen på annen måte.",
     "btnEnableBgLocation": "Tillat alltid",
     "permLocMissing": "Mangler posisjonstillatelse",
-    "slideStopSystem": "DRA FOR Å STOPPE SYSTEM",
+    "slideStopSystem": "HOLD FOR Å STOPPE ALT",
     "onboardingTitle": "Konfigurer sikkerhetssystemet",
     "onboardingSubtitle": "Disse tillatelsene er nødvendige for at Oksigenia SOS skal beskytte deg ute.",
     "onboardingGrant": "GI TILGANG",
