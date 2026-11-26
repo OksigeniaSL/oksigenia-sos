@@ -708,7 +708,7 @@ class AppLocalizationsRu extends AppLocalizations {
 
   @override
   String get homeProfileNoFallWarning =>
-      'Этот профиль НЕ обнаруживает падения. SOS должен быть активирован вручную.';
+      'Этот профиль НЕ обнаруживает падения. Включите Монитор бездействия; кнопка SOS работает всегда.';
 
   @override
   String get homeActionApply => 'Применить';

@@ -710,7 +710,7 @@ class AppLocalizationsNl extends AppLocalizations {
 
   @override
   String get homeProfileNoFallWarning =>
-      'Dit profiel detecteert GEEN vallen. SOS moet handmatig worden geactiveerd.';
+      'Dit profiel detecteert GEEN vallen. Zet de Inactiviteitsmonitor aan; de SOS-knop werkt altijd.';
 
   @override
   String get homeActionApply => 'Toepassen';

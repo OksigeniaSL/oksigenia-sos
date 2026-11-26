@@ -707,7 +707,7 @@ class AppLocalizationsPl extends AppLocalizations {
 
   @override
   String get homeProfileNoFallWarning =>
-      'Ten profil NIE wykrywa upadków. SOS musi być uruchomiony ręcznie.';
+      'Ten profil NIE wykrywa upadków. Włącz Monitor bezruchu; przycisk SOS działa zawsze.';
 
   @override
   String get homeActionApply => 'Zastosuj';

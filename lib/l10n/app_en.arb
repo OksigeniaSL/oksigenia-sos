@@ -240,7 +240,7 @@
         }
     },
     "homeConfirmValueOff": "OFF",
-    "homeProfileNoFallWarning": "This profile does NOT detect falls. SOS must be triggered manually.",
+    "homeProfileNoFallWarning": "This profile does NOT detect falls. Turn on the Inactivity Monitor; the SOS button always works.",
     "homeActionApply": "Apply",
     "smsBeaconDistance": "from the SOS point.",
     "homeBeaconBanner": "Sending location updates to your contact after the SOS — tap to stop",

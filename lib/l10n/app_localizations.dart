@@ -1403,7 +1403,7 @@ abstract class AppLocalizations {
   /// No description provided for @homeProfileNoFallWarning.
   ///
   /// In en, this message translates to:
-  /// **'This profile does NOT detect falls. SOS must be triggered manually.'**
+  /// **'This profile does NOT detect falls. Turn on the Inactivity Monitor; the SOS button always works.'**
   String get homeProfileNoFallWarning;
 
   /// No description provided for @homeActionApply.

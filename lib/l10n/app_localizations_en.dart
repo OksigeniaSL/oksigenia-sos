@@ -706,7 +706,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get homeProfileNoFallWarning =>
-      'This profile does NOT detect falls. SOS must be triggered manually.';
+      'This profile does NOT detect falls. Turn on the Inactivity Monitor; the SOS button always works.';
 
   @override
   String get homeActionApply => 'Apply';

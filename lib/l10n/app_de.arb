@@ -213,7 +213,7 @@
     "homeConfirmTitleGps": "GPS-Intervall",
     "homeConfirmValueOn": "AN · {threshold}G",
     "homeConfirmValueOff": "AUS",
-    "homeProfileNoFallWarning": "Dieses Profil erkennt KEINE Stürze. SOS muss manuell ausgelöst werden.",
+    "homeProfileNoFallWarning": "Dieses Profil erkennt KEINE Stürze. Schalten Sie den Inaktivitätsmonitor ein; die SOS-Taste funktioniert immer.",
     "homeActionApply": "Anwenden",
     "smsBeaconDistance": "vom SOS-Punkt entfernt.",
     "homeBeaconBanner": "Standort-Updates an deinen Kontakt nach dem SOS — zum Stoppen tippen",

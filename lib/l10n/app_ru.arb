@@ -213,7 +213,7 @@
     "homeConfirmTitleGps": "Интервал GPS",
     "homeConfirmValueOn": "ВКЛ · {threshold}G",
     "homeConfirmValueOff": "ВЫКЛ",
-    "homeProfileNoFallWarning": "Этот профиль НЕ обнаруживает падения. SOS должен быть активирован вручную.",
+    "homeProfileNoFallWarning": "Этот профиль НЕ обнаруживает падения. Включите Монитор бездействия; кнопка SOS работает всегда.",
     "homeActionApply": "Применить",
     "smsBeaconDistance": "от точки SOS.",
     "homeBeaconBanner": "Отправка местоположения контакту после SOS — нажмите, чтобы остановить",

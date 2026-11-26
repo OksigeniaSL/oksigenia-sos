@@ -213,7 +213,7 @@
     "homeConfirmTitleGps": "Interwał GPS",
     "homeConfirmValueOn": "WŁ · {threshold}G",
     "homeConfirmValueOff": "WYŁ",
-    "homeProfileNoFallWarning": "Ten profil NIE wykrywa upadków. SOS musi być uruchomiony ręcznie.",
+    "homeProfileNoFallWarning": "Ten profil NIE wykrywa upadków. Włącz Monitor bezruchu; przycisk SOS działa zawsze.",
     "homeActionApply": "Zastosuj",
     "smsBeaconDistance": "od punktu SOS.",
     "homeBeaconBanner": "Wysyłanie lokalizacji do kontaktu po SOS — dotknij, aby zatrzymać",

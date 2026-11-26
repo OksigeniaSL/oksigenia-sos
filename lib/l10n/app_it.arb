@@ -213,7 +213,7 @@
     "homeConfirmTitleGps": "Intervallo GPS",
     "homeConfirmValueOn": "ON · {threshold}G",
     "homeConfirmValueOff": "OFF",
-    "homeProfileNoFallWarning": "Questo profilo NON rileva cadute. Il SOS deve essere attivato manualmente.",
+    "homeProfileNoFallWarning": "Questo profilo NON rileva cadute. Attiva il Monitor Inattività; il pulsante SOS funziona sempre.",
     "homeActionApply": "Applica",
     "smsBeaconDistance": "dal punto del SOS.",
     "homeBeaconBanner": "Invio della posizione al contatto dopo l'SOS — tocca per fermare",

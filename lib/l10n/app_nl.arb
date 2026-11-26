@@ -213,7 +213,7 @@
     "homeConfirmTitleGps": "GPS-interval",
     "homeConfirmValueOn": "AAN · {threshold}G",
     "homeConfirmValueOff": "UIT",
-    "homeProfileNoFallWarning": "Dit profiel detecteert GEEN vallen. SOS moet handmatig worden geactiveerd.",
+    "homeProfileNoFallWarning": "Dit profiel detecteert GEEN vallen. Zet de Inactiviteitsmonitor aan; de SOS-knop werkt altijd.",
     "homeActionApply": "Toepassen",
     "smsBeaconDistance": "vanaf het SOS-punt.",
     "homeBeaconBanner": "Locatie-updates naar je contact na de SOS — tik om te stoppen",

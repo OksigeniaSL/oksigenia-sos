@@ -708,7 +708,7 @@ class AppLocalizationsNb extends AppLocalizations {
 
   @override
   String get homeProfileNoFallWarning =>
-      'Denne profilen oppdager IKKE fall. SOS må utløses manuelt.';
+      'Denne profilen oppdager IKKE fall. Slå på Inaktivitetsmonitoren; SOS-knappen fungerer alltid.';
 
   @override
   String get homeActionApply => 'Bruk';

@@ -708,7 +708,7 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get homeProfileNoFallWarning =>
-      'Ce profil NE détecte PAS les chutes. Le SOS doit être déclenché manuellement.';
+      'Ce profil NE détecte PAS les chutes. Activez le Moniteur d\'Inactivité ; le bouton SOS fonctionne toujours.';
 
   @override
   String get homeActionApply => 'Appliquer';

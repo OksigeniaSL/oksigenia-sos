@@ -709,7 +709,7 @@ class AppLocalizationsSv extends AppLocalizations {
 
   @override
   String get homeProfileNoFallWarning =>
-      'Denna profil upptäcker INTE fall. SOS måste utlösas manuellt.';
+      'Denna profil upptäcker INTE fall. Slå på Inaktivitetsmonitorn; SOS-knappen fungerar alltid.';
 
   @override
   String get homeActionApply => 'Tillämpa';

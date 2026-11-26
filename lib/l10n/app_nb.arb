@@ -213,7 +213,7 @@
     "homeConfirmTitleGps": "GPS-intervall",
     "homeConfirmValueOn": "PÅ · {threshold}G",
     "homeConfirmValueOff": "AV",
-    "homeProfileNoFallWarning": "Denne profilen oppdager IKKE fall. SOS må utløses manuelt.",
+    "homeProfileNoFallWarning": "Denne profilen oppdager IKKE fall. Slå på Inaktivitetsmonitoren; SOS-knappen fungerer alltid.",
     "homeActionApply": "Bruk",
     "smsBeaconDistance": "fra SOS-punktet.",
     "homeBeaconBanner": "Sender posisjonsoppdateringer til kontakten din etter SOS — trykk for å stoppe",
