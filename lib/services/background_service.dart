@@ -16,6 +16,7 @@ import 'package:battery_plus/battery_plus.dart';
 import 'package:path_provider/path_provider.dart';
 import '../logic/activity_profile.dart';
 import '../utils/phone_utils.dart';
+import '../utils/sentinel_log.dart';
 import 'package:oksigenia_sms/oksigenia_sms.dart';
 import '../utils/geo_links.dart';
 import '../utils/sms_budget.dart';
@@ -44,11 +45,15 @@ final Battery _battery = Battery();
 // File logger for Smart Sentinel events. Writes to external scoped storage so
 // we can pull it without run-as (release APKs block run-as):
 //   adb pull /sdcard/Android/data/com.oksigenia.oksigenia_sos/files/sentinel.log
+// At about 2 MB it rotates to sentinel.log.1 (one older file is kept).
 // On first run after upgrading, migrates any pre-existing internal log.
 File? _sentinelLogFile;
 bool _sentinelLogMigrated = false;
 
-void _logSentinel(String line) {
+void _logSentinel(String rawLine) {
+  // No contact numbers and no exact positions, in the file or in logcat: the
+  // log sits in external storage and users paste it into public issues.
+  final String line = scrubLogLine(rawLine);
   print(line);
   // El timestamp se captura AQUÍ (no dentro del append encolado) para que la
   // hora refleje el evento y no el momento en que la cola llegó a escribirlo.
@@ -95,8 +100,7 @@ Future<void> _sentinelLogAppend(String line) async {
         }
       }
     }
-    await _sentinelLogFile!
-        .writeAsString('$line\n', mode: FileMode.append, flush: true);
+    await appendToRotatingLog(_sentinelLogFile!, line);
   } catch (e) {
     print("SENTINEL LOG err: $e");
   }
@@ -674,7 +678,7 @@ void onStart(ServiceInstance service) async {
       await p.setInt('beacon_last_ts', now);
       await p.setInt('beacon_count', 0);
       await p.setBool('beacon_origin_pending', false);
-      _logSentinel("SYLVIA SERVICE: 📍 Beacon activated at ${originPos.latitude.toStringAsFixed(5)},${originPos.longitude.toStringAsFixed(5)}");
+      _logSentinel("SYLVIA SERVICE: 📍 Beacon activated at ${logPosition(originPos.latitude, originPos.longitude)}");
     } catch (e) {
       print("SYLVIA: Beacon activate error: $e");
     }

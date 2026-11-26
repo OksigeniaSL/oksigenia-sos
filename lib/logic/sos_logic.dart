@@ -19,6 +19,7 @@ import 'package:oksigenia_sms/oksigenia_sms.dart';
 import 'activity_profile.dart';
 import '../services/preferences_service.dart';
 import '../utils/phone_utils.dart';
+import '../utils/sentinel_log.dart';
 import '../utils/geo_links.dart';
 import '../utils/sms_budget.dart';
 import '../utils/sms_splitter.dart';
@@ -989,15 +990,16 @@ class SOSLogic extends ChangeNotifier with WidgetsBindingObserver {
   // real de un fallo de SMS quedaba en logcat, invisible en el sentinel.log que
   // revisa el usuario (bug #12: "no vi nada en el log"). Escribe el motivo en el
   // MISMO archivo que Sylvia (mismo path externo), SIN PII: nunca el número del
-  // contacto (el usuario puede pegar el log en público). Diagnóstico esporádico
-  // → append simple con flush.
+  // contacto (el usuario puede pegar el log en público); scrubLogLine lo
+  // garantiza aunque el texto de una excepción lo traiga. Diagnóstico
+  // esporádico → append con flush, con la misma rotación que Sylvia.
   Future<void> _logSmsDiag(String line) async {
     try {
       Directory? dir = await getExternalStorageDirectory();
       dir ??= await getApplicationDocumentsDirectory();
       final ts = DateTime.now().toIso8601String();
-      await File('${dir.path}/sentinel.log')
-          .writeAsString('$ts $line\n', mode: FileMode.append, flush: true);
+      await appendToRotatingLog(
+          File('${dir.path}/sentinel.log'), '$ts ${scrubLogLine(line)}');
     } catch (_) {}
   }
 
