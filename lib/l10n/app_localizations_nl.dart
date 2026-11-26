@@ -277,7 +277,7 @@ class AppLocalizationsNl extends AppLocalizations {
 
   @override
   String get warningKeepAlive =>
-      '⚠️ BELANGRIJK: Sluit de app niet door te vegen. Laat het op de achtergrond zodat het automatisch kan herstarten.';
+      'Laat de app op de achtergrond open. Als je de app uit de recente apps wegveegt, kan de bescherming stoppen.';
 
   @override
   String get aboutTitle => 'Over';

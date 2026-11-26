@@ -276,7 +276,7 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get warningKeepAlive =>
-      '⚠️ IMPORTANTE: No cierres la app deslizando (Multitarea). Déjala en 2º plano para que reinicie sola si apagas el móvil.';
+      'Deja la app abierta en segundo plano. Si la quitas de las apps recientes deslizándola, la protección puede detenerse.';
 
   @override
   String get aboutTitle => 'Acerca de';

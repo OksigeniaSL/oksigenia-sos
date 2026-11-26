@@ -83,7 +83,7 @@
     "donateClose": "SCHLIESSEN",
     "alertSendingIn": "Warnung wird gesendet...",
     "alertCancel": "ABBRECHEN",
-    "warningKeepAlive": "⚠️ WICHTIG: Schließen Sie die App (Task-Manager) nicht durch Wischen. Lassen Sie sie im Hintergrund, damit sie automatisch neu gestartet werden kann.",
+    "warningKeepAlive": "Lassen Sie die App im Hintergrund geöffnet. Wenn Sie sie aus den zuletzt verwendeten Apps wegwischen, kann der Schutz aufhören.",
     "aboutTitle": "Über",
     "aboutVersion": "Version",
     "aboutDisclaimer": "Rechtliche Hinweise",

@@ -271,7 +271,7 @@ class AppLocalizationsDe extends AppLocalizations {
 
   @override
   String get warningKeepAlive =>
-      '⚠️ WICHTIG: Schließen Sie die App (Task-Manager) nicht durch Wischen. Lassen Sie sie im Hintergrund, damit sie automatisch neu gestartet werden kann.';
+      'Lassen Sie die App im Hintergrund geöffnet. Wenn Sie sie aus den zuletzt verwendeten Apps wegwischen, kann der Schutz aufhören.';
 
   @override
   String get aboutTitle => 'Über';

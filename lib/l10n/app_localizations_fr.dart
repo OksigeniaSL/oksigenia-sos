@@ -273,7 +273,7 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get warningKeepAlive =>
-      '⚠️ IMPORTANT : Ne fermez pas l\'application (Gestionnaire de tâches) en la faisant glisser. Laissez-la en arrière-plan pour qu\'elle puisse redémarrer automatiquement.';
+      'Laissez l\'application ouverte en arrière-plan. Si vous la balayez hors des applications récentes, la protection peut s\'arrêter.';
 
   @override
   String get aboutTitle => 'À propos';

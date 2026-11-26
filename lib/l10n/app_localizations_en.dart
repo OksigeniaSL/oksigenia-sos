@@ -275,7 +275,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get warningKeepAlive =>
-      '⚠️ IMPORTANT: Do not swipe-close the app (Task Manager). Leave it in background so it can auto-restart.';
+      'Keep the app open in the background. If you swipe it away from recent apps, protection may stop.';
 
   @override
   String get aboutTitle => 'About';

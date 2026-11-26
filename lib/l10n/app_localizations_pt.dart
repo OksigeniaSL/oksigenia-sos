@@ -271,7 +271,7 @@ class AppLocalizationsPt extends AppLocalizations {
 
   @override
   String get warningKeepAlive =>
-      '⚠️ IMPORTANTE: Não feche a aplicação deslizando o dedo (Gestor de Tarefas). Deixe-a em segundo plano para que possa reiniciar automaticamente.';
+      'Deixe a aplicação aberta em segundo plano. Se a fechar deslizando-a nas aplicações recentes, a proteção pode parar.';
 
   @override
   String get aboutTitle => 'Sobre';

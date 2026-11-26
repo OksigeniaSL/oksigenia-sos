@@ -83,7 +83,7 @@
     "donateClose": "ZAMKNIJ",
     "alertSendingIn": "Wysyłam alert za...",
     "alertCancel": "ANULUJ",
-    "warningKeepAlive": "⚠️ WAŻNE: Nie zamykaj aplikacji przesuwając (Menedżer zadań). Zostaw w tle, aby mogła się sama uruchomić.",
+    "warningKeepAlive": "Zostaw aplikację otwartą w tle. Jeśli usuniesz ją z ostatnich aplikacji przesunięciem, ochrona może przestać działać.",
     "aboutTitle": "O aplikacji",
     "aboutVersion": "Wersja",
     "aboutDisclaimer": "Informacja prawna",

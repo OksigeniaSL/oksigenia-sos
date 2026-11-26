@@ -274,7 +274,7 @@ class AppLocalizationsPl extends AppLocalizations {
 
   @override
   String get warningKeepAlive =>
-      '⚠️ WAŻNE: Nie zamykaj aplikacji przesuwając (Menedżer zadań). Zostaw w tle, aby mogła się sama uruchomić.';
+      'Zostaw aplikację otwartą w tle. Jeśli usuniesz ją z ostatnich aplikacji przesunięciem, ochrona może przestać działać.';
 
   @override
   String get aboutTitle => 'O aplikacji';

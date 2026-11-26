@@ -623,7 +623,7 @@ abstract class AppLocalizations {
   /// No description provided for @warningKeepAlive.
   ///
   /// In en, this message translates to:
-  /// **'⚠️ IMPORTANT: Do not swipe-close the app (Task Manager). Leave it in background so it can auto-restart.'**
+  /// **'Keep the app open in the background. If you swipe it away from recent apps, protection may stop.'**
   String get warningKeepAlive;
 
   /// No description provided for @aboutTitle.

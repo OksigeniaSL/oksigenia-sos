@@ -83,7 +83,7 @@
     "donateClose": "FECHAR",
     "alertSendingIn": "A enviar alerta em...",
     "alertCancel": "CANCELAR",
-    "warningKeepAlive": "⚠️ IMPORTANTE: Não feche a aplicação deslizando o dedo (Gestor de Tarefas). Deixe-a em segundo plano para que possa reiniciar automaticamente.",
+    "warningKeepAlive": "Deixe a aplicação aberta em segundo plano. Se a fechar deslizando-a nas aplicações recentes, a proteção pode parar.",
     "aboutTitle": "Sobre",
     "aboutVersion": "Versão",
     "aboutDisclaimer": "Aviso Legal",

@@ -276,7 +276,7 @@ class AppLocalizationsSv extends AppLocalizations {
 
   @override
   String get warningKeepAlive =>
-      '⚠️ VIKTIGT: Stäng inte appen genom att svepa bort den. Lämna den i bakgrunden så den kan starta om automatiskt.';
+      'Låt appen vara öppen i bakgrunden. Om du sveper bort den från senaste appar kan skyddet sluta fungera.';
 
   @override
   String get aboutTitle => 'Om';

@@ -276,7 +276,7 @@ class AppLocalizationsRu extends AppLocalizations {
 
   @override
   String get warningKeepAlive =>
-      '⚠️ ВАЖНО: не закрывай приложение свайпом (диспетчер задач). Оставь в фоне, чтобы оно могло само перезапуститься.';
+      'Оставьте приложение открытым в фоне. Если вы смахнёте его из недавних приложений, защита может прекратиться.';
 
   @override
   String get aboutTitle => 'О приложении';

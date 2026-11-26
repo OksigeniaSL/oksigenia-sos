@@ -84,7 +84,7 @@
     "donateClose": "SLUITEN",
     "alertSendingIn": "Alarm verzenden over...",
     "alertCancel": "ANNULEREN",
-    "warningKeepAlive": "⚠️ BELANGRIJK: Sluit de app niet door te vegen. Laat het op de achtergrond zodat het automatisch kan herstarten.",
+    "warningKeepAlive": "Laat de app op de achtergrond open. Als je de app uit de recente apps wegveegt, kan de bescherming stoppen.",
     "aboutTitle": "Over",
     "aboutVersion": "Versie",
     "aboutDisclaimer": "Juridische Disclaimer",

@@ -280,7 +280,7 @@ class AppLocalizationsIt extends AppLocalizations {
 
   @override
   String get warningKeepAlive =>
-      '⚠️ IMPORTANTE: Non chiudere l\'app trascinandola via (Task Manager). Lasciala in background affinché possa riavviarsi.';
+      'Lascia l\'app aperta in background. Se la chiudi scorrendola via dalle app recenti, la protezione potrebbe fermarsi.';
 
   @override
   String get aboutTitle => 'Informazioni';

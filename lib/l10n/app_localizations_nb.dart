@@ -275,7 +275,7 @@ class AppLocalizationsNb extends AppLocalizations {
 
   @override
   String get warningKeepAlive =>
-      '⚠️ VIKTIG: Ikke sveip-lukk appen (Oppgavebehandling). La den ligge i bakgrunnen så den kan starte automatisk.';
+      'La appen være åpen i bakgrunnen. Hvis du sveiper den bort fra nylige apper, kan beskyttelsen stoppe.';
 
   @override
   String get aboutTitle => 'Om';
