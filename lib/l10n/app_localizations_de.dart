@@ -40,7 +40,7 @@ class AppLocalizationsDe extends AppLocalizations {
 
   @override
   String get statusSendFailedBody =>
-      'Es konnte keine SMS gesendet werden. Prüfe Empfang und Kontakte, dann erneut versuchen.';
+      'Es konnte keine SMS gesendet werden. Prüfen Sie Empfang und Kontakte und versuchen Sie es dann erneut.';
 
   @override
   String get statusSendRetrying =>
@@ -423,11 +423,11 @@ class AppLocalizationsDe extends AppLocalizations {
 
   @override
   String get bgLocationDialogBody =>
-      'Wenn der Alarm auslöst, steckt das Handy meist mit ausgeschaltetem Bildschirm in der Tasche. Damit das SOS in diesem Moment mit deiner genauen Position rausgeht, verlangt Android die Standortstufe „Immer zulassen“.\n\nDein Standort verlässt das Telefon nie: kein Internet, keine Cloud, keine Tracker — er reist nur in der SOS-SMS an deine eigenen Kontakte.\n\nWähle auf dem nächsten Bildschirm „Immer zulassen“.';
+      'Wenn der Alarm auslöst, steckt das Handy meist mit ausgeschaltetem Bildschirm in der Tasche. Damit das SOS in diesem Moment mit Ihrer genauen Position rausgeht, verlangt Android die Standortstufe „Immer zulassen“.\n\nIhr Standort verlässt das Telefon nie: kein Internet, keine Cloud, keine Tracker — er reist nur in der SOS-SMS an Ihre eigenen Kontakte.\n\nWählen Sie auf dem nächsten Bildschirm „Immer zulassen“.';
 
   @override
   String get whyPermsBgLocation =>
-      'Ermittelt deine GPS-Position bei ausgeschaltetem Bildschirm oder App im Hintergrund — genau dann, wenn ein SOS auslöst. Der Standort wird ausschließlich in der SOS-SMS an deine Kontakte gesendet und verlässt das Telefon sonst nie.';
+      'Ermittelt Ihre GPS-Position bei ausgeschaltetem Bildschirm oder App im Hintergrund — genau dann, wenn ein SOS auslöst. Der Standort wird ausschließlich in der SOS-SMS an Ihre Kontakte gesendet und verlässt das Telefon sonst nie.';
 
   @override
   String get btnEnableBgLocation => 'Immer zulassen';
@@ -611,7 +611,7 @@ class AppLocalizationsDe extends AppLocalizations {
 
   @override
   String get activityProfileSubtitle =>
-      'Passt die Smart-Sentinel-Erkennung an deinen Sport an. Wähle das ähnlichste — falsches Profil verursacht Fehlalarme oder verpasst echte Stürze.';
+      'Passt die Smart-Sentinel-Erkennung an Ihren Sport an. Wählen Sie das ähnlichste — falsches Profil verursacht Fehlalarme oder verpasst echte Stürze.';
 
   @override
   String get profileTrekking => 'Wandern / Trekking';
@@ -653,7 +653,7 @@ class AppLocalizationsDe extends AppLocalizations {
 
   @override
   String get profileKayakDesc =>
-      'Automatische Sturzerkennung ist DEAKTIVIERT — Wasser dämpft Aufprälle und Schwimmbewegung ist nicht aussagekräftig. Nutze den Inaktivitätsmonitor und manuellen SOS.';
+      'Automatische Sturzerkennung ist DEAKTIVIERT — Wasser dämpft Aufprälle und Schwimmbewegung ist nicht aussagekräftig. Nutzen Sie den Inaktivitätsmonitor und den manuellen SOS.';
 
   @override
   String get profileEquitation => 'Reiten';
@@ -715,7 +715,7 @@ class AppLocalizationsDe extends AppLocalizations {
 
   @override
   String get homeBeaconBanner =>
-      'Standort-Updates an deinen Kontakt nach dem SOS — zum Stoppen tippen';
+      'Standort-Updates an Ihren Kontakt nach dem SOS — zum Stoppen tippen';
 
   @override
   String get beaconStopped => 'Bewegungsmeldungen gestoppt';
@@ -739,14 +739,14 @@ class AppLocalizationsDe extends AppLocalizations {
 
   @override
   String get homeAlertProfileNoImpact =>
-      'NICHT GESCHÜTZT — dieses Profil erkennt keine Stürze. Schalte den Inaktivitätsmonitor ein.';
+      'NICHT GESCHÜTZT — dieses Profil erkennt keine Stürze. Schalten Sie den Inaktivitätsmonitor ein.';
 
   @override
   String get contactCheckTitle => 'Stimmt die Ländervorwahl?';
 
   @override
   String contactCheckBody(String number) {
-    return 'Dein SOS geht an $number. Wenn die Ländervorwahl falsch ist, gib die Nummer mit + und Ländervorwahl ein.';
+    return 'Ihr SOS geht an $number. Wenn die Ländervorwahl falsch ist, geben Sie die Nummer mit + und Ländervorwahl ein.';
   }
 
   @override
