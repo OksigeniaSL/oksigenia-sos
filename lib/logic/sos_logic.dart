@@ -66,6 +66,13 @@ class SOSLogic extends ChangeNotifier with WidgetsBindingObserver {
 
   double _visualGForce = 1.0;
   DateTime _lastMovementTime = DateTime.now();
+  // The accelerometer listener used to call notifyListeners() on every sample
+  // (50-200 a second), also with the app in the background: the UI isolate
+  // never rested (about 22 % of a core measured with monitoring armed). Only
+  // the G gauge needs those notifications, so they go out at most 10 times a
+  // second and not at all while the app is not on screen.
+  bool _appResumed = true;
+  DateTime _lastGaugeNotify = DateTime.fromMillisecondsSinceEpoch(0);
   
   DateTime _lastSensorPacket = DateTime.now();
   bool _isWarmingUp = false;
@@ -265,6 +272,9 @@ class SOSLogic extends ChangeNotifier with WidgetsBindingObserver {
 
     WidgetsBinding.instance.removeObserver(this);
     WidgetsBinding.instance.addObserver(this);
+    // Unknown (null) before the first frame: taken as on screen.
+    _appResumed = (WidgetsBinding.instance.lifecycleState ?? AppLifecycleState.resumed) ==
+        AppLifecycleState.resumed;
     
     // 🟢 FIX: Limpieza de buffer. Forzamos 1.0G visualmente al inicio.
     _visualGForce = 1.0;
@@ -454,6 +464,7 @@ class SOSLogic extends ChangeNotifier with WidgetsBindingObserver {
 
   @override
   void didChangeAppLifecycleState(AppLifecycleState state) {
+    _appResumed = state == AppLifecycleState.resumed;
     if (state == AppLifecycleState.resumed) {
       if (_status == SOSStatus.preAlert || _status == SOSStatus.sent) return;
       
@@ -761,6 +772,17 @@ class SOSLogic extends ChangeNotifier with WidgetsBindingObserver {
     } catch (e) { debugPrint("Passive GPS Error: $e"); }
   }
 
+  // Repaint request for the G gauge: at most 10 a second, none in the
+  // background. The stream itself and the inactivity clock it feeds keep
+  // running as before; every state change still notifies on its own.
+  void _notifyGauge() {
+    if (!_appResumed) return;
+    final DateTime now = DateTime.now();
+    if (now.difference(_lastGaugeNotify).inMilliseconds < 100) return;
+    _lastGaugeNotify = now;
+    notifyListeners();
+  }
+
   void _startGForceMonitoring() {
     _accelerometerSubscription?.cancel();
     _isWarmingUp = true;
@@ -805,7 +827,7 @@ class SOSLogic extends ChangeNotifier with WidgetsBindingObserver {
               DateTime.now().difference(streamStart).inMilliseconds < 4000;
           if (_isWarmingUp || sensorWarmup) {
             _visualGForce = 1.0;
-            notifyListeners();
+            _notifyGauge();
             return;
           }
 
@@ -815,7 +837,7 @@ class SOSLogic extends ChangeNotifier with WidgetsBindingObserver {
             _visualGForce = (_visualGForce * 0.90) + (instantG * 0.10);
           }
 
-          notifyListeners();
+          _notifyGauge();
 
           if (_uiCooldown) return;
           if (_status == SOSStatus.sent) return;
