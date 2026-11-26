@@ -24,6 +24,12 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver, Ti
   late AnimationController _sosHoldController;
   late AnimationController _stopHoldController;
   late AnimationController _liveTrackingHoldController;
+  // TalkBack turns "double-tap and hold" into one long-press action, never a
+  // held finger, so the pointer-driven holds below could not be started and a
+  // screen-reader user could not send an SOS. The action now starts the same
+  // countdown, and a double-tap while it runs stops it.
+  bool _sosA11yHold = false;
+  bool _stopA11yHold = false;
 
   @override
   void initState() {
@@ -45,6 +51,7 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver, Ti
       if (status == AnimationStatus.completed) {
         _triggerHaptic();
         _sosHoldController.reset();
+        if (_sosA11yHold && mounted) setState(() => _sosA11yHold = false);
         _sosLogic.sendSOS();
       }
     });
@@ -56,6 +63,7 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver, Ti
     _stopHoldController.addStatusListener((status) async {
       if (status == AnimationStatus.completed) {
         _triggerHaptic();
+        _stopA11yHold = false;
         await _sosLogic.stopSystem();
         if (mounted) SystemNavigator.pop();
       }
@@ -92,6 +100,43 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver, Ti
     if (await Vibration.hasVibrator() ?? false) {
       Vibration.vibrate(pattern: [0, 50, 50, 50]);
     }
+  }
+
+  void _showNoContactSnack(AppLocalizations l10n) {
+    _triggerErrorHaptic();
+    ScaffoldMessenger.of(context).clearSnackBars();
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Row(
+          children: [
+            const Icon(Icons.error_outline, color: Colors.white),
+            const SizedBox(width: 10),
+            Expanded(
+              child: Text(
+                l10n.errorNoContact,
+                style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 15),
+                maxLines: 2,
+                overflow: TextOverflow.ellipsis,
+              ),
+            ),
+          ],
+        ),
+        backgroundColor: Colors.redAccent.shade700,
+        behavior: SnackBarBehavior.floating,
+        margin: const EdgeInsets.all(16),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+        duration: const Duration(seconds: 4),
+        action: SnackBarAction(
+          label: l10n.menuSettings.toUpperCase(),
+          textColor: Colors.white,
+          backgroundColor: Colors.white24,
+          onPressed: () {
+            ScaffoldMessenger.of(context).clearSnackBars();
+            _sosLogic.openSettings(context);
+          }
+        ),
+      )
+    );
   }
 
   Future<void> _triggerErrorHaptic() async {
@@ -337,45 +382,39 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver, Ti
             // 20 px of drift (a shaky thumb) the scroll won the gesture arena
             // and reset the 3 s hold without a word. Pointer events are not
             // part of the arena, so the hold survives a small slide.
-            Listener(
+            // One semantics node for the whole button: TalkBack read "0%, SOS"
+            // (the ring's progress) and had no action to run.
+            Semantics(
+              container: true,
+              button: true,
+              liveRegion: true,
+              label: l10n.sosButton,
+              value: _sosA11yHold ? l10n.a11ySosCountdown : null,
+              hint: l10n.a11ySosHint,
+              onLongPressHint: l10n.a11ySosLongPress,
+              onLongPress: () {
+                if (_sosLogic.emergencyContact == null) {
+                  _showNoContactSnack(l10n);
+                  return;
+                }
+                setState(() => _sosA11yHold = true);
+                _sosHoldController.forward();
+              },
+              onTap: _sosA11yHold
+                  ? () {
+                      setState(() => _sosA11yHold = false);
+                      _sosHoldController.reverse();
+                    }
+                  : null,
+              excludeSemantics: true,
+              child: Listener(
               behavior: HitTestBehavior.opaque,
               onPointerDown: (_) {
+                // A real finger takes over from a screen-reader countdown.
+                if (_sosA11yHold) setState(() => _sosA11yHold = false);
                 if (_sosLogic.emergencyContact == null) {
-                  _triggerErrorHaptic();
-                  ScaffoldMessenger.of(context).clearSnackBars();
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(
-                      content: Row(
-                        children: [
-                          const Icon(Icons.error_outline, color: Colors.white),
-                          const SizedBox(width: 10),
-                          Expanded(
-                            child: Text(
-                              l10n.errorNoContact,
-                              style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 15),
-                              maxLines: 2,
-                              overflow: TextOverflow.ellipsis,
-                            ),
-                          ),
-                        ],
-                      ),
-                      backgroundColor: Colors.redAccent.shade700,
-                      behavior: SnackBarBehavior.floating,
-                      margin: const EdgeInsets.all(16),
-                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-                      duration: const Duration(seconds: 4),
-                      action: SnackBarAction(
-                        label: l10n.menuSettings.toUpperCase(),
-                        textColor: Colors.white,
-                        backgroundColor: Colors.white24,
-                        onPressed: () {
-                          ScaffoldMessenger.of(context).clearSnackBars();
-                          _sosLogic.openSettings(context);
-                        }
-                      ),
-                    )
-                  );
-                  return; 
+                  _showNoContactSnack(l10n);
+                  return;
                 }
                 _sosHoldController.forward();
               },
@@ -449,12 +488,15 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver, Ti
                   ),
                 ],
               ),
-            ),
+            )),
 
             const SizedBox(height: 15),
-            Text(
-              "${l10n.toastHoldToSOS} (3s)", 
-              style: const TextStyle(color: Colors.grey)
+            // The button's own hint already says this to screen readers.
+            ExcludeSemantics(
+              child: Text(
+                "${l10n.toastHoldToSOS} (3s)",
+                style: const TextStyle(color: Colors.grey)
+              ),
             ),
             
             // TEST MODE BANNER
@@ -534,10 +576,33 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver, Ti
             const SizedBox(height: 30),
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 30, vertical: 10),
+              // Same screen-reader treatment as the SOS button.
+              child: Semantics(
+                container: true,
+                button: true,
+                liveRegion: true,
+                label: l10n.a11yStopLabel,
+                value: _stopA11yHold ? l10n.a11yStopCountdown : null,
+                hint: l10n.a11yStopHint,
+                onLongPressHint: l10n.a11yStopLongPress,
+                onLongPress: () {
+                  setState(() => _stopA11yHold = true);
+                  _stopHoldController.forward();
+                },
+                onTap: _stopA11yHold
+                    ? () {
+                        setState(() => _stopA11yHold = false);
+                        _stopHoldController.reverse();
+                      }
+                    : null,
+                excludeSemantics: true,
               // Listener for the same reason as the SOS button.
               child: Listener(
                 behavior: HitTestBehavior.opaque,
-                onPointerDown: (_) => _stopHoldController.forward(),
+                onPointerDown: (_) {
+                  if (_stopA11yHold) setState(() => _stopA11yHold = false);
+                  _stopHoldController.forward();
+                },
                 onPointerUp: (_) {
                   if (_stopHoldController.status != AnimationStatus.completed) {
                     _stopHoldController.reverse();
@@ -582,8 +647,9 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver, Ti
                   ),
                 ),
               ),
+              ),
             ),
-            
+
             const SizedBox(height: 20),
 
             if (_sosLogic.status == SOSStatus.error) ...[

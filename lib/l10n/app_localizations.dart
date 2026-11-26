@@ -1472,6 +1472,48 @@ abstract class AppLocalizations {
   /// **'PAUSED until {time}'**
   String homeAlertPaused(String time);
 
+  /// Screen-reader hint of the SOS button.
+  ///
+  /// In en, this message translates to:
+  /// **'Hold for 3 seconds to send an alert to your contacts'**
+  String get a11ySosHint;
+
+  /// Screen readers say 'Double-tap and hold to …' followed by this (infinitive, lower case).
+  ///
+  /// In en, this message translates to:
+  /// **'send an SOS'**
+  String get a11ySosLongPress;
+
+  /// Read by screen readers while the SOS countdown started from an accessibility long press runs.
+  ///
+  /// In en, this message translates to:
+  /// **'SOS in 3 seconds. Double-tap to cancel.'**
+  String get a11ySosCountdown;
+
+  /// Screen-reader name of the hold-to-stop control at the bottom of Home.
+  ///
+  /// In en, this message translates to:
+  /// **'Stop Oksigenia SOS'**
+  String get a11yStopLabel;
+
+  /// Screen-reader hint of the hold-to-stop control.
+  ///
+  /// In en, this message translates to:
+  /// **'Hold for 2 seconds. Stops all monitoring and closes the app.'**
+  String get a11yStopHint;
+
+  /// Screen readers say 'Double-tap and hold to …' followed by this (infinitive, lower case).
+  ///
+  /// In en, this message translates to:
+  /// **'stop monitoring and close the app'**
+  String get a11yStopLongPress;
+
+  /// Read by screen readers while the stop countdown started from an accessibility long press runs.
+  ///
+  /// In en, this message translates to:
+  /// **'Closing in 2 seconds. Double-tap to cancel.'**
+  String get a11yStopCountdown;
+
   /// No description provided for @contactCheckTitle.
   ///
   /// In en, this message translates to:

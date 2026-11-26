@@ -753,6 +753,31 @@ class AppLocalizationsNb extends AppLocalizations {
   }
 
   @override
+  String get a11ySosHint =>
+      'Hold inne i 3 sekunder for å varsle kontaktene dine';
+
+  @override
+  String get a11ySosLongPress => 'sende en SOS';
+
+  @override
+  String get a11ySosCountdown =>
+      'SOS om 3 sekunder. Dobbelttrykk for å avbryte.';
+
+  @override
+  String get a11yStopLabel => 'Slå av Oksigenia SOS';
+
+  @override
+  String get a11yStopHint =>
+      'Hold inne i 2 sekunder. Stopper all overvåking og lukker appen.';
+
+  @override
+  String get a11yStopLongPress => 'stoppe overvåkingen og lukke appen';
+
+  @override
+  String get a11yStopCountdown =>
+      'Slås av om 2 sekunder. Dobbelttrykk for å avbryte.';
+
+  @override
   String get contactCheckTitle => 'Er landskoden riktig?';
 
   @override

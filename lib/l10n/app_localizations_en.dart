@@ -750,6 +750,29 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
+  String get a11ySosHint =>
+      'Hold for 3 seconds to send an alert to your contacts';
+
+  @override
+  String get a11ySosLongPress => 'send an SOS';
+
+  @override
+  String get a11ySosCountdown => 'SOS in 3 seconds. Double-tap to cancel.';
+
+  @override
+  String get a11yStopLabel => 'Stop Oksigenia SOS';
+
+  @override
+  String get a11yStopHint =>
+      'Hold for 2 seconds. Stops all monitoring and closes the app.';
+
+  @override
+  String get a11yStopLongPress => 'stop monitoring and close the app';
+
+  @override
+  String get a11yStopCountdown => 'Closing in 2 seconds. Double-tap to cancel.';
+
+  @override
   String get contactCheckTitle => 'Is the country code right?';
 
   @override

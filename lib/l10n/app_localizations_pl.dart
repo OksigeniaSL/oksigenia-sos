@@ -752,6 +752,31 @@ class AppLocalizationsPl extends AppLocalizations {
   }
 
   @override
+  String get a11ySosHint =>
+      'Przytrzymaj 3 sekundy, aby powiadomić swoje kontakty';
+
+  @override
+  String get a11ySosLongPress => 'wysłać SOS';
+
+  @override
+  String get a11ySosCountdown =>
+      'SOS za 3 sekundy. Stuknij dwukrotnie, aby anulować.';
+
+  @override
+  String get a11yStopLabel => 'Wyłącz Oksigenia SOS';
+
+  @override
+  String get a11yStopHint =>
+      'Przytrzymaj 2 sekundy. Wyłącza całe monitorowanie i zamyka aplikację.';
+
+  @override
+  String get a11yStopLongPress => 'wyłączyć monitorowanie i zamknąć aplikację';
+
+  @override
+  String get a11yStopCountdown =>
+      'Wyłączenie za 2 sekundy. Stuknij dwukrotnie, aby anulować.';
+
+  @override
   String get contactCheckTitle => 'Czy numer kierunkowy kraju jest poprawny?';
 
   @override

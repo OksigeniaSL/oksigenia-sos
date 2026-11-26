@@ -752,6 +752,31 @@ class AppLocalizationsFr extends AppLocalizations {
   }
 
   @override
+  String get a11ySosHint => 'Maintenez 3 secondes pour alerter vos contacts';
+
+  @override
+  String get a11ySosLongPress => 'envoyer un SOS';
+
+  @override
+  String get a11ySosCountdown =>
+      'SOS dans 3 secondes. Touchez deux fois pour annuler.';
+
+  @override
+  String get a11yStopLabel => 'Arrêter Oksigenia SOS';
+
+  @override
+  String get a11yStopHint =>
+      'Maintenez 2 secondes. Arrête toute la surveillance et ferme l\'application.';
+
+  @override
+  String get a11yStopLongPress =>
+      'arrêter la surveillance et fermer l\'application';
+
+  @override
+  String get a11yStopCountdown =>
+      'Arrêt dans 2 secondes. Touchez deux fois pour annuler.';
+
+  @override
   String get contactCheckTitle => 'L\'indicatif du pays est-il correct ?';
 
   @override
