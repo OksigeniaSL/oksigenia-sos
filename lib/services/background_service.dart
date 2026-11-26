@@ -16,6 +16,7 @@ import 'package:another_telephony/telephony.dart';
 import 'package:battery_plus/battery_plus.dart';
 import 'package:path_provider/path_provider.dart';
 import '../logic/activity_profile.dart';
+import '../utils/beacon_fix.dart';
 import '../utils/phone_utils.dart';
 import '../utils/sentinel_log.dart';
 import 'package:oksigenia_sms/oksigenia_sms.dart';
@@ -1005,6 +1006,35 @@ void onStart(ServiceInstance service) async {
     }
   }
 
+  // Fresh fixes for the beacon, from a short-lived position stream (one fix
+  // about every 2 s). [onFix] sees each one and returns true when it has what
+  // it needs; the stream is closed then, on an error, or after [window].
+  Future<void> beaconFixes(Duration window, bool Function(Position) onFix) async {
+    final Completer<void> done = Completer<void>();
+    void finish() {
+      if (!done.isCompleted) done.complete();
+    }
+
+    StreamSubscription<Position>? sub;
+    final Timer timer = Timer(window, finish);
+    try {
+      sub = Geolocator.getPositionStream(
+        locationSettings: AndroidSettings(
+            accuracy: LocationAccuracy.high,
+            distanceFilter: 0,
+            intervalDuration: const Duration(seconds: 2)),
+      ).listen((fix) {
+        if (!done.isCompleted && onFix(fix)) finish();
+      }, onError: (_) => finish());
+      await done.future;
+    } catch (_) {
+      // No location service or no permission: this probe finds nothing.
+    } finally {
+      timer.cancel();
+      try { await sub?.cancel(); } catch (_) {}
+    }
+  }
+
   Future<void> _beaconTick() async {
     // A3: el checker de 5s invoca esto sin await; dos ticks podían solaparse
     // (ambos pasar el check de intervalo antes de escribir beacon_last_ts) y
@@ -1030,30 +1060,51 @@ void onStart(ServiceInstance service) async {
         return;
       }
 
+      // A new alarm is counting down or sending: its SOS carries a fresh
+      // position and re-arms the beacon, so this round would only compete with
+      // it for the GPS and the SMS limit.
+      if (_isAlarmActive) return;
+
       // M5: origen pendiente (el SOS salió sin GPS). Establecerlo con el primer
       // fix disponible y enviarlo — sin esperar al umbral de 300 m ni al de 5 min.
       if (p.getBool('beacon_origin_pending') ?? false) {
         if (DateTime.now().difference(_beaconLastProbe).inSeconds < 60) return;
         _beaconLastProbe = DateTime.now();
+        // Best: an accurate, recent fix. Failing that, the most accurate recent
+        // one of the window. Last resort, the last known position: the SOS
+        // left with no position at all, so even an old one tells the contacts
+        // more than nothing, as long as the SMS says how old and how accurate.
         Position? fp;
-        try {
-          fp = await Geolocator.getCurrentPosition(
-              locationSettings: const LocationSettings(
-                  accuracy: LocationAccuracy.high, timeLimit: Duration(seconds: 15)));
-        } catch (_) {
-          fp = await Geolocator.getLastKnownPosition();
+        bool fpIsStale = false;
+        await beaconFixes(const Duration(seconds: 25), (fix) {
+          final int age = DateTime.now().difference(fix.timestamp).inSeconds;
+          if (age >= beaconMaxFixAgeSeconds) return false;
+          // An accuracy of 0 is "unknown": the worst there is.
+          double radius(Position x) => x.accuracy > 0 ? x.accuracy : double.infinity;
+          if (fp == null || radius(fix) < radius(fp!)) fp = fix;
+          return beaconFixUsable(accuracyM: fix.accuracy, ageSeconds: age);
+        });
+        if (fp == null) {
+          try { fp = await Geolocator.getLastKnownPosition(); } catch (_) {}
+          fpIsStale = fp != null;
         }
-        if (fp == null) return;
-        await p.setDouble('beacon_origin_lat', fp.latitude);
-        await p.setDouble('beacon_origin_lon', fp.longitude);
-        await p.setDouble('beacon_last_lat', fp.latitude);
-        await p.setDouble('beacon_last_lon', fp.longitude);
+        final Position? origin = fp;
+        if (origin == null) return;
+        // The UI may have stopped the beacon, or an alarm started, meanwhile.
+        await p.reload();
+        if (!(p.getBool('beacon_active') ?? false) || _isAlarmActive) return;
+        await p.setDouble('beacon_origin_lat', origin.latitude);
+        await p.setDouble('beacon_origin_lon', origin.longitude);
+        await p.setDouble('beacon_last_lat', origin.latitude);
+        await p.setDouble('beacon_last_lon', origin.longitude);
         await p.setInt('beacon_last_ts', DateTime.now().millisecondsSinceEpoch);
         await p.setInt('beacon_count', count + 1);
         await p.setBool('beacon_origin_pending', false);
         final header = _texts['smsBeaconHeader'] ??
             'OKSIGENIA SOS - follow-up (NOT a new alarm):';
-        String msg = "$header\n${geoLinks(fp.latitude, fp.longitude)}";
+        final int originAge = DateTime.now().difference(origin.timestamp).inSeconds;
+        String msg = "$header\n${geoLinks(origin.latitude, origin.longitude)}";
+        msg += "\n${smsFixQuality(origin.accuracy, originAge, stale: fpIsStale)}";
         if (_recipients.isEmpty) {
           _recipients = p.getStringList(PreferencesService.keyContacts) ?? [];
           if (_recipients.isEmpty) return;
@@ -1061,7 +1112,8 @@ void onStart(ServiceInstance service) async {
         for (final number in _recipients) {
           await _sendSmsTracked(normalizePhoneE164(number), msg);
         }
-        _logSentinel("SYLVIA SERVICE: 📍 Beacon origin established from first post-SOS fix");
+        _logSentinel("SYLVIA SERVICE: 📍 Beacon origin established from first post-SOS fix "
+            "(acc ${origin.accuracy.toStringAsFixed(0)}m, ${fpIsStale ? 'last known, ' : ''}${originAge}s old)");
         return;
       }
 
@@ -1075,24 +1127,44 @@ void onStart(ServiceInstance service) async {
       if (DateTime.now().difference(_beaconLastProbe).inSeconds < 60) return;
       _beaconLastProbe = DateTime.now();
 
-      Position? pos;
-      try {
-        pos = await Geolocator.getCurrentPosition(
-            locationSettings: const LocationSettings(
-                accuracy: LocationAccuracy.high, timeLimit: Duration(seconds: 5)));
-      } catch (_) {
-        pos = await Geolocator.getLastKnownPosition();
-      }
-      if (pos == null) return;
-
+      // A move is only real when two fixes in a row say so, each accurate to
+      // 100 m and under a minute old (BeaconMoveCheck). Before, one fix of any
+      // accuracy or age decided, and when the GPS timed out the last known
+      // position did: a first network fix hundreds of metres off sent a wrong
+      // "new location", became the reference, and the next good fix "moved"
+      // back, up to twenty times.
       final lastLat = p.getDouble('beacon_last_lat') ?? 0;
       final lastLon = p.getDouble('beacon_last_lon') ?? 0;
-      final delta = Geolocator.distanceBetween(lastLat, lastLon, pos.latitude, pos.longitude);
-      if (delta < _beaconDistanceM) return;
+      final BeaconMoveCheck move = BeaconMoveCheck(
+          refLat: lastLat, refLon: lastLon, thresholdM: _beaconDistanceM);
+      Position? pos;
+      await beaconFixes(const Duration(seconds: 25), (fix) {
+        final BeaconMove verdict = move.add(
+            lat: fix.latitude,
+            lon: fix.longitude,
+            accuracyM: fix.accuracy,
+            time: fix.timestamp,
+            now: DateTime.now());
+        if (verdict == BeaconMove.moved) pos = fix;
+        return verdict != BeaconMove.undecided;
+      });
+      final Position? moved = pos;
+      if (move.result != BeaconMove.moved || moved == null) {
+        if (move.result == BeaconMove.undecided && move.candidateDistanceM > 0) {
+          _logSentinel("SYLVIA SERVICE: 📍 Beacon: a fix ${move.candidateDistanceM.toStringAsFixed(0)}m away, not confirmed by a second one. No update.");
+        }
+        return;
+      }
+      final double delta = move.distanceM;
+
+      // The probe took up to 25 s: the UI may have stopped the beacon, or a new
+      // alarm may have started (its SOS carries the position).
+      await p.reload();
+      if (!(p.getBool('beacon_active') ?? false) || _isAlarmActive) return;
 
       final originLat = p.getDouble('beacon_origin_lat') ?? 0;
       final originLon = p.getDouble('beacon_origin_lon') ?? 0;
-      final totalDist = Geolocator.distanceBetween(originLat, originLon, pos.latitude, pos.longitude);
+      final totalDist = metersBetween(originLat, originLon, moved.latitude, moved.longitude);
 
       // Mensaje autoexplicativo para quien lo recibe: el destinatario no debe
       // confundir un aviso de movimiento con una nueva alarma SOS (feedback
@@ -1101,7 +1173,9 @@ void onStart(ServiceInstance service) async {
           'OKSIGENIA SOS - follow-up (NOT a new alarm):';
       final distSuffix = _texts['smsBeaconDistance'] ?? 'from the SOS point.';
       String msg = "$header\n${totalDist.toStringAsFixed(0)} m $distSuffix";
-      msg += "\n${geoLinks(pos.latitude, pos.longitude)}";
+      msg += "\n${geoLinks(moved.latitude, moved.longitude)}";
+      // How far to trust it. Plain text and "/" as in the SOS: GSM-7 only.
+      msg += "\n${smsFixQuality(moved.accuracy, DateTime.now().difference(moved.timestamp).inSeconds)}";
 
       if (_recipients.isEmpty) {
         _recipients = p.getStringList(PreferencesService.keyContacts) ?? [];
@@ -1111,11 +1185,11 @@ void onStart(ServiceInstance service) async {
         await _sendSmsTracked(normalizePhoneE164(number), msg);
       }
 
-      await p.setDouble('beacon_last_lat', pos.latitude);
-      await p.setDouble('beacon_last_lon', pos.longitude);
-      await p.setInt('beacon_last_ts', now);
+      await p.setDouble('beacon_last_lat', moved.latitude);
+      await p.setDouble('beacon_last_lon', moved.longitude);
+      await p.setInt('beacon_last_ts', DateTime.now().millisecondsSinceEpoch);
       await p.setInt('beacon_count', count + 1);
-      _logSentinel("SYLVIA SERVICE: 📍 Beacon update #${count + 1} sent (delta ${delta.toStringAsFixed(0)}m, total ${totalDist.toStringAsFixed(0)}m)");
+      _logSentinel("SYLVIA SERVICE: 📍 Beacon update #${count + 1} sent (delta ${delta.toStringAsFixed(0)}m, total ${totalDist.toStringAsFixed(0)}m, acc ${moved.accuracy.toStringAsFixed(0)}m)");
     } catch (e) {
       print("SYLVIA: Beacon tick error: $e");
     } finally {
