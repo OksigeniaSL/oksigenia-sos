@@ -146,7 +146,8 @@ later. Constants (`lib/services/background_service.dart`):
 ## Three-test validation protocol
 
 Any parameter change must pass all three before merging, with the sentinel log pulled from the device
-(`adb run-as … cat app_flutter/sentinel.log`):
+(`adb pull /sdcard/Android/data/com.oksigenia.oksigenia_sos/files/sentinel.log`; release builds block
+`run-as`):
 
 1. Impact + walking, phone in hand.
 2. Impact + walking, phone in pocket.
