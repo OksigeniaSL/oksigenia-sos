@@ -756,4 +756,41 @@ class AppLocalizationsPl extends AppLocalizations {
 
   @override
   String get contactCheckEdit => 'Popraw';
+
+  @override
+  String get onboardingPermLocation => 'GPS / Lokalizacja';
+
+  @override
+  String get onboardingPermNotifications => 'Powiadomienia';
+
+  @override
+  String get onboardingPermActivity => 'Aktywność fizyczna';
+
+  @override
+  String get onboardingPermSensors => 'Czujniki ruchu';
+
+  @override
+  String get onboardingSettingsLocation => 'Lokalizacja';
+
+  @override
+  String get onboardingSettingsSensors => 'Czujniki';
+
+  @override
+  String onboardingSettingsPath(String permission) {
+    return 'Ustawienia → Aplikacje → Oksigenia SOS → Uprawnienia → $permission';
+  }
+
+  @override
+  String get onboardingSmsStep1Done =>
+      'Krok 1 gotowy: Android wyświetlił ostrzeżenie bezpieczeństwa.';
+
+  @override
+  String get onboardingSmsStep2 => '2. Otwórz Ustawienia (przycisk poniżej).';
+
+  @override
+  String get onboardingSmsStep3 =>
+      '3. Dotknij ⋮ (w prawym górnym rogu) → „Zezwól na ograniczone ustawienia” → PIN.';
+
+  @override
+  String get onboardingSmsStep4 => '4. Uprawnienia → SMS → Zezwalaj.';
 }

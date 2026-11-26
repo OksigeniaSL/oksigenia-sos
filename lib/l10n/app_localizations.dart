@@ -1483,6 +1483,72 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Correct it'**
   String get contactCheckEdit;
+
+  /// No description provided for @onboardingPermLocation.
+  ///
+  /// In en, this message translates to:
+  /// **'GPS / Location'**
+  String get onboardingPermLocation;
+
+  /// No description provided for @onboardingPermNotifications.
+  ///
+  /// In en, this message translates to:
+  /// **'Notifications'**
+  String get onboardingPermNotifications;
+
+  /// No description provided for @onboardingPermActivity.
+  ///
+  /// In en, this message translates to:
+  /// **'Physical activity'**
+  String get onboardingPermActivity;
+
+  /// No description provided for @onboardingPermSensors.
+  ///
+  /// In en, this message translates to:
+  /// **'Motion sensors'**
+  String get onboardingPermSensors;
+
+  /// No description provided for @onboardingSettingsLocation.
+  ///
+  /// In en, this message translates to:
+  /// **'Location'**
+  String get onboardingSettingsLocation;
+
+  /// No description provided for @onboardingSettingsSensors.
+  ///
+  /// In en, this message translates to:
+  /// **'Sensors'**
+  String get onboardingSettingsSensors;
+
+  /// No description provided for @onboardingSettingsPath.
+  ///
+  /// In en, this message translates to:
+  /// **'Settings → Apps → Oksigenia SOS → Permissions → {permission}'**
+  String onboardingSettingsPath(String permission);
+
+  /// No description provided for @onboardingSmsStep1Done.
+  ///
+  /// In en, this message translates to:
+  /// **'Step 1 done: Android has shown its security notice.'**
+  String get onboardingSmsStep1Done;
+
+  /// No description provided for @onboardingSmsStep2.
+  ///
+  /// In en, this message translates to:
+  /// **'2. Open Settings (button below).'**
+  String get onboardingSmsStep2;
+
+  /// No description provided for @onboardingSmsStep3.
+  ///
+  /// In en, this message translates to:
+  /// **'3. Tap ⋮ (top right) → \"Allow restricted settings\" → PIN.'**
+  String get onboardingSmsStep3;
+
+  /// No description provided for @onboardingSmsStep4.
+  ///
+  /// In en, this message translates to:
+  /// **'4. Permissions → SMS → Allow.'**
+  String get onboardingSmsStep4;
 }
 
 class _AppLocalizationsDelegate

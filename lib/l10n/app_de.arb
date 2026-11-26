@@ -226,5 +226,16 @@
     "contactCheckTitle": "Stimmt die Ländervorwahl?",
     "contactCheckBody": "Dein SOS geht an {number}. Wenn die Ländervorwahl falsch ist, gib die Nummer mit + und Ländervorwahl ein.",
     "contactCheckSave": "Ja, speichern",
-    "contactCheckEdit": "Korrigieren"
+    "contactCheckEdit": "Korrigieren",
+    "onboardingPermLocation": "GPS / Standort",
+    "onboardingPermNotifications": "Benachrichtigungen",
+    "onboardingPermActivity": "Körperliche Aktivität",
+    "onboardingPermSensors": "Bewegungssensoren",
+    "onboardingSettingsLocation": "Standort",
+    "onboardingSettingsSensors": "Sensoren",
+    "onboardingSettingsPath": "Einstellungen → Apps → Oksigenia SOS → Berechtigungen → {permission}",
+    "onboardingSmsStep1Done": "Schritt 1 erledigt: Android hat seinen Sicherheitshinweis angezeigt.",
+    "onboardingSmsStep2": "2. Öffnen Sie die Einstellungen (Schaltfläche unten).",
+    "onboardingSmsStep3": "3. Tippen Sie auf ⋮ (oben rechts) → „Eingeschränkte Einstellungen zulassen“ → PIN.",
+    "onboardingSmsStep4": "4. Berechtigungen → SMS → Zulassen."
 }

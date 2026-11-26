@@ -757,4 +757,41 @@ class AppLocalizationsNb extends AppLocalizations {
 
   @override
   String get contactCheckEdit => 'Rett';
+
+  @override
+  String get onboardingPermLocation => 'GPS / Posisjon';
+
+  @override
+  String get onboardingPermNotifications => 'Varsler';
+
+  @override
+  String get onboardingPermActivity => 'Fysisk aktivitet';
+
+  @override
+  String get onboardingPermSensors => 'Bevegelsessensorer';
+
+  @override
+  String get onboardingSettingsLocation => 'Posisjon';
+
+  @override
+  String get onboardingSettingsSensors => 'Sensorer';
+
+  @override
+  String onboardingSettingsPath(String permission) {
+    return 'Innstillinger → Apper → Oksigenia SOS → Tillatelser → $permission';
+  }
+
+  @override
+  String get onboardingSmsStep1Done =>
+      'Trinn 1 ferdig: Android har vist sikkerhetsvarselet sitt.';
+
+  @override
+  String get onboardingSmsStep2 => '2. Åpne Innstillinger (knappen nedenfor).';
+
+  @override
+  String get onboardingSmsStep3 =>
+      '3. Trykk på ⋮ (øverst til høyre) → «Tillat begrensede innstillinger» → PIN-kode.';
+
+  @override
+  String get onboardingSmsStep4 => '4. Tillatelser → SMS → Tillat.';
 }

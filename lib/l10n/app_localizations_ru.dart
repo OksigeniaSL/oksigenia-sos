@@ -757,4 +757,41 @@ class AppLocalizationsRu extends AppLocalizations {
 
   @override
   String get contactCheckEdit => 'Исправить';
+
+  @override
+  String get onboardingPermLocation => 'GPS / Местоположение';
+
+  @override
+  String get onboardingPermNotifications => 'Уведомления';
+
+  @override
+  String get onboardingPermActivity => 'Физическая активность';
+
+  @override
+  String get onboardingPermSensors => 'Датчики движения';
+
+  @override
+  String get onboardingSettingsLocation => 'Местоположение';
+
+  @override
+  String get onboardingSettingsSensors => 'Датчики';
+
+  @override
+  String onboardingSettingsPath(String permission) {
+    return 'Настройки → Приложения → Oksigenia SOS → Разрешения → $permission';
+  }
+
+  @override
+  String get onboardingSmsStep1Done =>
+      'Шаг 1 выполнен: Android показал предупреждение безопасности.';
+
+  @override
+  String get onboardingSmsStep2 => '2. Откройте Настройки (кнопка ниже).';
+
+  @override
+  String get onboardingSmsStep3 =>
+      '3. Нажмите ⋮ (вверху справа) → «Разрешить ограниченные настройки» → PIN-код.';
+
+  @override
+  String get onboardingSmsStep4 => '4. Разрешения → SMS → Разрешить.';
 }

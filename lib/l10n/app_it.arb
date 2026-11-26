@@ -226,5 +226,16 @@
     "contactCheckTitle": "Il prefisso del paese è corretto?",
     "contactCheckBody": "Il tuo SOS sarà inviato al {number}. Se il prefisso è sbagliato, scrivi il numero con + e il prefisso del paese.",
     "contactCheckSave": "Sì, salva",
-    "contactCheckEdit": "Correggi"
+    "contactCheckEdit": "Correggi",
+    "onboardingPermLocation": "GPS / Posizione",
+    "onboardingPermNotifications": "Notifiche",
+    "onboardingPermActivity": "Attività fisica",
+    "onboardingPermSensors": "Sensori di movimento",
+    "onboardingSettingsLocation": "Posizione",
+    "onboardingSettingsSensors": "Sensori",
+    "onboardingSettingsPath": "Impostazioni → App → Oksigenia SOS → Autorizzazioni → {permission}",
+    "onboardingSmsStep1Done": "Passo 1 fatto: Android ha mostrato il suo avviso di sicurezza.",
+    "onboardingSmsStep2": "2. Apri Impostazioni (pulsante qui sotto).",
+    "onboardingSmsStep3": "3. Tocca ⋮ (in alto a destra) → «Consenti impostazioni limitate» → PIN.",
+    "onboardingSmsStep4": "4. Autorizzazioni → SMS → Consenti."
 }

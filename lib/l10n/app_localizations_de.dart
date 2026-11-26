@@ -753,4 +753,42 @@ class AppLocalizationsDe extends AppLocalizations {
 
   @override
   String get contactCheckEdit => 'Korrigieren';
+
+  @override
+  String get onboardingPermLocation => 'GPS / Standort';
+
+  @override
+  String get onboardingPermNotifications => 'Benachrichtigungen';
+
+  @override
+  String get onboardingPermActivity => 'Körperliche Aktivität';
+
+  @override
+  String get onboardingPermSensors => 'Bewegungssensoren';
+
+  @override
+  String get onboardingSettingsLocation => 'Standort';
+
+  @override
+  String get onboardingSettingsSensors => 'Sensoren';
+
+  @override
+  String onboardingSettingsPath(String permission) {
+    return 'Einstellungen → Apps → Oksigenia SOS → Berechtigungen → $permission';
+  }
+
+  @override
+  String get onboardingSmsStep1Done =>
+      'Schritt 1 erledigt: Android hat seinen Sicherheitshinweis angezeigt.';
+
+  @override
+  String get onboardingSmsStep2 =>
+      '2. Öffnen Sie die Einstellungen (Schaltfläche unten).';
+
+  @override
+  String get onboardingSmsStep3 =>
+      '3. Tippen Sie auf ⋮ (oben rechts) → „Eingeschränkte Einstellungen zulassen“ → PIN.';
+
+  @override
+  String get onboardingSmsStep4 => '4. Berechtigungen → SMS → Zulassen.';
 }

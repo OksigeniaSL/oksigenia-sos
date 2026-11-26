@@ -226,5 +226,16 @@
     "contactCheckTitle": "L'indicatif du pays est-il correct ?",
     "contactCheckBody": "Votre SOS sera envoyé au {number}. Si l'indicatif n'est pas le bon, écrivez le numéro avec + et son indicatif.",
     "contactCheckSave": "Oui, enregistrer",
-    "contactCheckEdit": "Corriger"
+    "contactCheckEdit": "Corriger",
+    "onboardingPermLocation": "GPS / Position",
+    "onboardingPermNotifications": "Notifications",
+    "onboardingPermActivity": "Activité physique",
+    "onboardingPermSensors": "Capteurs de mouvement",
+    "onboardingSettingsLocation": "Position",
+    "onboardingSettingsSensors": "Capteurs",
+    "onboardingSettingsPath": "Paramètres → Applications → Oksigenia SOS → Autorisations → {permission}",
+    "onboardingSmsStep1Done": "Étape 1 terminée : Android a affiché son avertissement de sécurité.",
+    "onboardingSmsStep2": "2. Ouvrez les Paramètres (bouton ci-dessous).",
+    "onboardingSmsStep3": "3. Appuyez sur ⋮ (en haut à droite) → « Autoriser les paramètres restreints » → code PIN.",
+    "onboardingSmsStep4": "4. Autorisations → SMS → Autoriser."
 }

@@ -226,5 +226,16 @@
     "contactCheckTitle": "Stämmer landsnumret?",
     "contactCheckBody": "Ditt SOS skickas till {number}. Om landsnumret är fel, skriv numret med + och landsnummer.",
     "contactCheckSave": "Ja, spara",
-    "contactCheckEdit": "Rätta"
+    "contactCheckEdit": "Rätta",
+    "onboardingPermLocation": "GPS / Plats",
+    "onboardingPermNotifications": "Aviseringar",
+    "onboardingPermActivity": "Fysisk aktivitet",
+    "onboardingPermSensors": "Rörelsesensorer",
+    "onboardingSettingsLocation": "Plats",
+    "onboardingSettingsSensors": "Sensorer",
+    "onboardingSettingsPath": "Inställningar → Appar → Oksigenia SOS → Behörigheter → {permission}",
+    "onboardingSmsStep1Done": "Steg 1 klart: Android har visat sitt säkerhetsmeddelande.",
+    "onboardingSmsStep2": "2. Öppna Inställningar (knappen nedan).",
+    "onboardingSmsStep3": "3. Tryck på ⋮ (uppe till höger) → 'Tillåt begränsade inställningar' → pinkod.",
+    "onboardingSmsStep4": "4. Behörigheter → SMS → Tillåt."
 }

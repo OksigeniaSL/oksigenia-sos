@@ -754,4 +754,41 @@ class AppLocalizationsPt extends AppLocalizations {
 
   @override
   String get contactCheckEdit => 'Corrigir';
+
+  @override
+  String get onboardingPermLocation => 'GPS / Localização';
+
+  @override
+  String get onboardingPermNotifications => 'Notificações';
+
+  @override
+  String get onboardingPermActivity => 'Atividade física';
+
+  @override
+  String get onboardingPermSensors => 'Sensores de movimento';
+
+  @override
+  String get onboardingSettingsLocation => 'Localização';
+
+  @override
+  String get onboardingSettingsSensors => 'Sensores';
+
+  @override
+  String onboardingSettingsPath(String permission) {
+    return 'Definições → Apps → Oksigenia SOS → Autorizações → $permission';
+  }
+
+  @override
+  String get onboardingSmsStep1Done =>
+      'Passo 1 concluído: o Android já mostrou o aviso de segurança.';
+
+  @override
+  String get onboardingSmsStep2 => '2. Abra as Definições (botão abaixo).';
+
+  @override
+  String get onboardingSmsStep3 =>
+      '3. Toque em ⋮ (canto superior direito) → «Permitir definições restritas» → PIN.';
+
+  @override
+  String get onboardingSmsStep4 => '4. Autorizações → SMS → Permitir.';
 }

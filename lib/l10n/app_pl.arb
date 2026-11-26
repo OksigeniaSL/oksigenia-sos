@@ -226,5 +226,16 @@
     "contactCheckTitle": "Czy numer kierunkowy kraju jest poprawny?",
     "contactCheckBody": "Twój SOS zostanie wysłany na {number}. Jeśli numer kierunkowy jest błędny, wpisz numer z + i kodem kraju.",
     "contactCheckSave": "Tak, zapisz",
-    "contactCheckEdit": "Popraw"
+    "contactCheckEdit": "Popraw",
+    "onboardingPermLocation": "GPS / Lokalizacja",
+    "onboardingPermNotifications": "Powiadomienia",
+    "onboardingPermActivity": "Aktywność fizyczna",
+    "onboardingPermSensors": "Czujniki ruchu",
+    "onboardingSettingsLocation": "Lokalizacja",
+    "onboardingSettingsSensors": "Czujniki",
+    "onboardingSettingsPath": "Ustawienia → Aplikacje → Oksigenia SOS → Uprawnienia → {permission}",
+    "onboardingSmsStep1Done": "Krok 1 gotowy: Android wyświetlił ostrzeżenie bezpieczeństwa.",
+    "onboardingSmsStep2": "2. Otwórz Ustawienia (przycisk poniżej).",
+    "onboardingSmsStep3": "3. Dotknij ⋮ (w prawym górnym rogu) → „Zezwól na ograniczone ustawienia” → PIN.",
+    "onboardingSmsStep4": "4. Uprawnienia → SMS → Zezwalaj."
 }

@@ -759,4 +759,41 @@ class AppLocalizationsNl extends AppLocalizations {
 
   @override
   String get contactCheckEdit => 'Corrigeren';
+
+  @override
+  String get onboardingPermLocation => 'GPS / Locatie';
+
+  @override
+  String get onboardingPermNotifications => 'Meldingen';
+
+  @override
+  String get onboardingPermActivity => 'Fysieke activiteit';
+
+  @override
+  String get onboardingPermSensors => 'Bewegingssensoren';
+
+  @override
+  String get onboardingSettingsLocation => 'Locatie';
+
+  @override
+  String get onboardingSettingsSensors => 'Sensoren';
+
+  @override
+  String onboardingSettingsPath(String permission) {
+    return 'Instellingen → Apps → Oksigenia SOS → Rechten → $permission';
+  }
+
+  @override
+  String get onboardingSmsStep1Done =>
+      'Stap 1 klaar: Android heeft zijn beveiligingsmelding getoond.';
+
+  @override
+  String get onboardingSmsStep2 => '2. Open Instellingen (knop hieronder).';
+
+  @override
+  String get onboardingSmsStep3 =>
+      '3. Tik op ⋮ (rechtsboven) → \'Beperkte instellingen toestaan\' → pincode.';
+
+  @override
+  String get onboardingSmsStep4 => '4. Rechten → SMS → Toestaan.';
 }

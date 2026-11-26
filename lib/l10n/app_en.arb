@@ -274,5 +274,17 @@
     "contactCheckBody": "Your SOS will be texted to {number}. If the country code is wrong, write the number with + and its country code.",
     "@contactCheckBody": {"placeholders": {"number": {"type": "String"}}},
     "contactCheckSave": "Yes, save",
-    "contactCheckEdit": "Correct it"
+    "contactCheckEdit": "Correct it",
+    "onboardingPermLocation": "GPS / Location",
+    "onboardingPermNotifications": "Notifications",
+    "onboardingPermActivity": "Physical activity",
+    "onboardingPermSensors": "Motion sensors",
+    "onboardingSettingsLocation": "Location",
+    "onboardingSettingsSensors": "Sensors",
+    "onboardingSettingsPath": "Settings → Apps → Oksigenia SOS → Permissions → {permission}",
+    "@onboardingSettingsPath": {"placeholders": {"permission": {"type": "String"}}},
+    "onboardingSmsStep1Done": "Step 1 done: Android has shown its security notice.",
+    "onboardingSmsStep2": "2. Open Settings (button below).",
+    "onboardingSmsStep3": "3. Tap ⋮ (top right) → \"Allow restricted settings\" → PIN.",
+    "onboardingSmsStep4": "4. Permissions → SMS → Allow."
 }

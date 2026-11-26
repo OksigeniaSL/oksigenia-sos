@@ -226,5 +226,16 @@
     "contactCheckTitle": "Klopt de landcode?",
     "contactCheckBody": "Je SOS wordt verstuurd naar {number}. Is de landcode fout, typ het nummer dan met + en de landcode.",
     "contactCheckSave": "Ja, opslaan",
-    "contactCheckEdit": "Corrigeren"
+    "contactCheckEdit": "Corrigeren",
+    "onboardingPermLocation": "GPS / Locatie",
+    "onboardingPermNotifications": "Meldingen",
+    "onboardingPermActivity": "Fysieke activiteit",
+    "onboardingPermSensors": "Bewegingssensoren",
+    "onboardingSettingsLocation": "Locatie",
+    "onboardingSettingsSensors": "Sensoren",
+    "onboardingSettingsPath": "Instellingen → Apps → Oksigenia SOS → Rechten → {permission}",
+    "onboardingSmsStep1Done": "Stap 1 klaar: Android heeft zijn beveiligingsmelding getoond.",
+    "onboardingSmsStep2": "2. Open Instellingen (knop hieronder).",
+    "onboardingSmsStep3": "3. Tik op ⋮ (rechtsboven) → 'Beperkte instellingen toestaan' → pincode.",
+    "onboardingSmsStep4": "4. Rechten → SMS → Toestaan."
 }

@@ -226,5 +226,16 @@
     "contactCheckTitle": "Код страны указан верно?",
     "contactCheckBody": "Ваш SOS будет отправлен на {number}. Если код страны неверный, введите номер с + и кодом страны.",
     "contactCheckSave": "Да, сохранить",
-    "contactCheckEdit": "Исправить"
+    "contactCheckEdit": "Исправить",
+    "onboardingPermLocation": "GPS / Местоположение",
+    "onboardingPermNotifications": "Уведомления",
+    "onboardingPermActivity": "Физическая активность",
+    "onboardingPermSensors": "Датчики движения",
+    "onboardingSettingsLocation": "Местоположение",
+    "onboardingSettingsSensors": "Датчики",
+    "onboardingSettingsPath": "Настройки → Приложения → Oksigenia SOS → Разрешения → {permission}",
+    "onboardingSmsStep1Done": "Шаг 1 выполнен: Android показал предупреждение безопасности.",
+    "onboardingSmsStep2": "2. Откройте Настройки (кнопка ниже).",
+    "onboardingSmsStep3": "3. Нажмите ⋮ (вверху справа) → «Разрешить ограниченные настройки» → PIN-код.",
+    "onboardingSmsStep4": "4. Разрешения → SMS → Разрешить."
 }
