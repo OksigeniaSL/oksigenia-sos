@@ -748,6 +748,11 @@ class AppLocalizationsRu extends AppLocalizations {
   String get homeFallUnavailable => 'Недоступно в этом профиле';
 
   @override
+  String homeAlertPaused(String time) {
+    return 'ПАУЗА до $time';
+  }
+
+  @override
   String get contactCheckTitle => 'Код страны указан верно?';
 
   @override

@@ -749,6 +749,11 @@ class AppLocalizationsEs extends AppLocalizations {
   String get homeFallUnavailable => 'No disponible con este perfil';
 
   @override
+  String homeAlertPaused(String time) {
+    return 'EN PAUSA hasta las $time';
+  }
+
+  @override
   String get contactCheckTitle => '¿Es correcto el prefijo del país?';
 
   @override

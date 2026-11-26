@@ -1466,6 +1466,12 @@ abstract class AppLocalizations {
   /// **'Not available in this profile'**
   String get homeFallUnavailable;
 
+  /// Home banner while monitoring is paused. time = local clock time when it resumes by itself (e.g. 14:32).
+  ///
+  /// In en, this message translates to:
+  /// **'PAUSED until {time}'**
+  String homeAlertPaused(String time);
+
   /// No description provided for @contactCheckTitle.
   ///
   /// In en, this message translates to:

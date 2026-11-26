@@ -748,6 +748,11 @@ class AppLocalizationsNb extends AppLocalizations {
   String get homeFallUnavailable => 'Ikke tilgjengelig i denne profilen';
 
   @override
+  String homeAlertPaused(String time) {
+    return 'PAUSET til $time';
+  }
+
+  @override
   String get contactCheckTitle => 'Er landskoden riktig?';
 
   @override

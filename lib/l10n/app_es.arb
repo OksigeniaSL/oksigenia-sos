@@ -224,6 +224,7 @@
     "smsLimitBodyAlways": "Este móvil pide confirmación antes de que cualquier app envíe un SMS («Confirmar siempre»): si nadie lo confirma, tu SOS no se enviará.\n\nElige un límite de al menos {needed} (en LineageOS: Trust → Límite de mensajes SMS) y reinicia el móvil para asegurarte: en algunos móviles el cambio solo se aplica tras reiniciar.",
     "homeAlertProfileNoImpact": "SIN PROTECCIÓN — este perfil no detecta caídas. Activa el Monitor de Inactividad.",
     "homeFallUnavailable": "No disponible con este perfil",
+    "homeAlertPaused": "EN PAUSA hasta las {time}",
     "contactCheckTitle": "¿Es correcto el prefijo del país?",
     "contactCheckBody": "Tu SOS se enviará al {number}. Si el prefijo del país no es ese, escribe el número con + y su prefijo.",
     "contactCheckSave": "Sí, guardar",

@@ -744,6 +744,11 @@ class AppLocalizationsPt extends AppLocalizations {
   String get homeFallUnavailable => 'Indisponível neste perfil';
 
   @override
+  String homeAlertPaused(String time) {
+    return 'EM PAUSA até às $time';
+  }
+
+  @override
   String get contactCheckTitle => 'O indicativo do país está correto?';
 
   @override

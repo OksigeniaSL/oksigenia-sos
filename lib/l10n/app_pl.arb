@@ -224,6 +224,7 @@
     "smsLimitBodyAlways": "Ten telefon prosi o potwierdzenie przed wysłaniem każdego SMS przez aplikację („Zawsze potwierdzaj”): jeśli nikt nie potwierdzi, Twój SOS nie zostanie wysłany.\n\nWybierz limit co najmniej {needed} (w LineageOS: Trust → Limit wiadomości SMS) i na wszelki wypadek uruchom telefon ponownie: na niektórych telefonach zmiana działa dopiero po ponownym uruchomieniu.",
     "homeAlertProfileNoImpact": "BRAK OCHRONY — ten profil nie wykrywa upadków. Włącz Monitor bezruchu.",
     "homeFallUnavailable": "Niedostępne w tym profilu",
+    "homeAlertPaused": "WSTRZYMANE do {time}",
     "contactCheckTitle": "Czy numer kierunkowy kraju jest poprawny?",
     "contactCheckBody": "Twój SOS zostanie wysłany na {number}. Jeśli numer kierunkowy jest błędny, wpisz numer z + i kodem kraju.",
     "contactCheckSave": "Tak, zapisz",

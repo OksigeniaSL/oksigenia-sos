@@ -749,6 +749,11 @@ class AppLocalizationsSv extends AppLocalizations {
   String get homeFallUnavailable => 'Inte tillgängligt i den här profilen';
 
   @override
+  String homeAlertPaused(String time) {
+    return 'PAUSAD till $time';
+  }
+
+  @override
   String get contactCheckTitle => 'Stämmer landsnumret?';
 
   @override

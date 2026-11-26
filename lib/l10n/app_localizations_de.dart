@@ -744,6 +744,11 @@ class AppLocalizationsDe extends AppLocalizations {
   String get homeFallUnavailable => 'In diesem Profil nicht verfügbar';
 
   @override
+  String homeAlertPaused(String time) {
+    return 'PAUSIERT bis $time';
+  }
+
+  @override
   String get contactCheckTitle => 'Stimmt die Ländervorwahl?';
 
   @override

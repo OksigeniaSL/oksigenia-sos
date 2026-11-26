@@ -224,6 +224,7 @@
     "smsLimitBodyAlways": "Dieses Telefon verlangt vor jeder SMS einer App eine Bestätigung („Immer bestätigen“): Bestätigt niemand, wird Ihr SOS nicht gesendet.\n\nWählen Sie ein Limit von mindestens {needed} (unter LineageOS: Trust → SMS-Begrenzung) und starten Sie das Telefon sicherheitshalber neu: Auf manchen Telefonen wirkt die Änderung erst nach einem Neustart.",
     "homeAlertProfileNoImpact": "NICHT GESCHÜTZT — dieses Profil erkennt keine Stürze. Schalte den Inaktivitätsmonitor ein.",
     "homeFallUnavailable": "In diesem Profil nicht verfügbar",
+    "homeAlertPaused": "PAUSIERT bis {time}",
     "contactCheckTitle": "Stimmt die Ländervorwahl?",
     "contactCheckBody": "Dein SOS geht an {number}. Wenn die Ländervorwahl falsch ist, gib die Nummer mit + und Ländervorwahl ein.",
     "contactCheckSave": "Ja, speichern",

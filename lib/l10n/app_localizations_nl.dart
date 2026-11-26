@@ -750,6 +750,11 @@ class AppLocalizationsNl extends AppLocalizations {
   String get homeFallUnavailable => 'Niet beschikbaar in dit profiel';
 
   @override
+  String homeAlertPaused(String time) {
+    return 'GEPAUZEERD tot $time';
+  }
+
+  @override
   String get contactCheckTitle => 'Klopt de landcode?';
 
   @override

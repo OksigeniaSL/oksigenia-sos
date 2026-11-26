@@ -747,6 +747,11 @@ class AppLocalizationsPl extends AppLocalizations {
   String get homeFallUnavailable => 'Niedostępne w tym profilu';
 
   @override
+  String homeAlertPaused(String time) {
+    return 'WSTRZYMANE do $time';
+  }
+
+  @override
   String get contactCheckTitle => 'Czy numer kierunkowy kraju jest poprawny?';
 
   @override

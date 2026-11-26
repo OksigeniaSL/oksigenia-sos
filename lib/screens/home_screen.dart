@@ -395,7 +395,11 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver, Ti
                       // Green only when something automatic really watches:
                       // the fall switch alone in paragliding is not enough.
                       final bool monitoring = _sosLogic.protectionEffective;
-                      final Color glowColor = monitoring ? _sosLogic.sentinelColor : Colors.red;
+                      final Color glowColor = !monitoring
+                          ? Colors.red
+                          : _sosLogic.isMonitoringPaused
+                              ? Colors.orange
+                              : _sosLogic.sentinelColor;
                       final double glowSpread = monitoring && _sosLogic.sentinelState != SentinelState.green
                           ? 5 + (_pulseController.value * 8)
                           : 5;
@@ -783,6 +787,27 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver, Ti
     );
   }
 
+  // Wall-clock time the pause ends, to the nearest minute, in the user's
+  // 12/24 h format.
+  String _pauseEndClock(BuildContext context) {
+    final DateTime end = DateTime.now()
+        .add(Duration(seconds: _sosLogic.pauseRemainingSeconds + 30));
+    return MaterialLocalizations.of(context).formatTimeOfDay(
+      TimeOfDay.fromDateTime(end),
+      alwaysUse24HourFormat: MediaQuery.of(context).alwaysUse24HourFormat,
+    );
+  }
+
+  void _resumeFromBanner(AppLocalizations l10n) {
+    _sosLogic.resumeMonitoring();
+    ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+      content: Text(l10n.pauseResumedMsg, style: const TextStyle(color: Colors.white)),
+      backgroundColor: Colors.green[700],
+      behavior: SnackBarBehavior.floating,
+      duration: const Duration(seconds: 2),
+    ));
+  }
+
   // Single conditional banner — replaces the old StatusPill + SentinelBadge
   // pair. Stays silent when everything is fine (the hero card already proves
   // the app is configured). Shouts only when there's something to act on:
@@ -797,8 +822,10 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver, Ti
     IconData icon = Icons.info_outline;
     VoidCallback? onTap;
     bool isBeacon = false;
+    bool isPaused = false;
 
-    // Order matters: emergency > permissions > sentinel state > idle.
+    // Order matters: emergency > permissions > beacon > nothing really
+    // watching (no contact, profile without falls) > paused > warnings > idle.
     if (_sosLogic.status == SOSStatus.preAlert) {
       level = _AlertLevel.critical;
       text = "🚨 SOS";
@@ -838,6 +865,26 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver, Ti
         await _sosLogic.stopBeacon();
         if (mounted) _showSuccessToast(context, l10n.beaconStopped);
       };
+    } else if (monitoring && _sosLogic.emergencyContact == null) {
+      // Armed with nobody to text (e.g. the last contact was deleted): it
+      // must not look protected.
+      level = _AlertLevel.critical;
+      text = l10n.noContacts;
+      icon = Icons.person_off_outlined;
+      onTap = () => _sosLogic.openSettings(context);
+    } else if (monitoring && !_sosLogic.protectionEffective) {
+      // Fall detection switched on in a profile without it, inactivity off:
+      // nothing automatic is watching.
+      level = _AlertLevel.critical;
+      text = l10n.homeAlertProfileNoImpact;
+      icon = Icons.shield_outlined;
+    } else if (monitoring && _sosLogic.isMonitoringPaused) {
+      // Paused looked exactly like protected (green halo, no banner). Above
+      // the permission warnings, which can stay for weeks and would hide it.
+      level = _AlertLevel.warning;
+      isPaused = true;
+      text = l10n.homeAlertPaused(_pauseEndClock(context));
+      icon = Icons.pause_circle_filled;
     } else if (!_sosLogic.batteryOptimizationOk) {
       level = _AlertLevel.warning;
       text = l10n.batteryDialogTitle;
@@ -852,19 +899,6 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver, Ti
       level = _AlertLevel.warning;
       text = l10n.fullScreenIntentTitle;
       icon = Icons.warning_amber_rounded;
-    } else if (monitoring && _sosLogic.emergencyContact == null) {
-      // Armed with nobody to text (e.g. the last contact was deleted): it
-      // must not look protected.
-      level = _AlertLevel.critical;
-      text = l10n.noContacts;
-      icon = Icons.person_off_outlined;
-      onTap = () => _sosLogic.openSettings(context);
-    } else if (monitoring && !_sosLogic.protectionEffective) {
-      // Fall detection switched on in a profile without it, inactivity off:
-      // nothing automatic is watching.
-      level = _AlertLevel.critical;
-      text = l10n.homeAlertProfileNoImpact;
-      icon = Icons.shield_outlined;
     } else if (!monitoring) {
       level = _AlertLevel.warning;
       text = l10n.homeAlertNotArmed;
@@ -892,14 +926,29 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver, Ti
           Icon(icon, color: color, size: 20),
           const SizedBox(width: 10),
           Expanded(
-            child: Text(
-              text,
-              style: TextStyle(
-                color: color,
-                fontWeight: FontWeight.bold,
-                fontSize: 13,
-                letterSpacing: 0.3,
-              ),
+            // Wrap: the resume button sits at the end of the line, or drops
+            // below the text when a large font leaves no room for both.
+            child: Wrap(
+              alignment: WrapAlignment.spaceBetween,
+              crossAxisAlignment: WrapCrossAlignment.center,
+              children: [
+                Text(
+                  text,
+                  style: TextStyle(
+                    color: color,
+                    fontWeight: FontWeight.bold,
+                    fontSize: 13,
+                    letterSpacing: 0.3,
+                  ),
+                ),
+                if (isPaused)
+                  TextButton(
+                    onPressed: () => _resumeFromBanner(l10n),
+                    style: TextButton.styleFrom(foregroundColor: Colors.white),
+                    child: Text(l10n.pauseResumeNow,
+                        style: const TextStyle(fontWeight: FontWeight.bold)),
+                  ),
+              ],
             ),
           ),
         ],
