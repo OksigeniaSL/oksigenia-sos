@@ -20,6 +20,7 @@ import 'package:oksigenia_sms/oksigenia_sms.dart';
 import '../utils/geo_links.dart';
 import '../utils/sms_budget.dart';
 import '../utils/sms_splitter.dart';
+import '../utils/sms_text.dart';
 import '../utils/sos_sms.dart';
 import 'preferences_service.dart';
 import 'package:timezone/data/latest_all.dart' as tz;
@@ -523,7 +524,7 @@ void onStart(ServiceInstance service) async {
       }
       if (pos != null) {
         msgBody += "\n${geoLinks(pos.latitude, pos.longitude)}";
-        msgBody += "\n\n🔋Bat: $batteryLevel% | 📡Alt: ${pos.altitude.toStringAsFixed(0)}m | 🎯Acc: ${pos.accuracy.toStringAsFixed(0)}m";
+        msgBody += "\n\n🔋Bat: $batteryLevel%$smsFieldSeparator📡Alt: ${pos.altitude.toStringAsFixed(0)}m$smsFieldSeparator🎯Acc: ${pos.accuracy.toStringAsFixed(0)}m";
       } else {
         msgBody += "\n(No GPS)\n\n🔋Bat: $batteryLevel%";
       }
@@ -758,16 +759,14 @@ void onStart(ServiceInstance service) async {
       }
       if (sosPos != null) {
         final int fixAgeSec = DateTime.now().difference(sosPos.timestamp).inSeconds;
-        // Un fix de hace minutos presentado como "posición actual" es peligroso
-        // en un rescate: si viene del lastKnown o es viejo, decir de cuándo es.
-        final String ageNote = (posIsStale || fixAgeSec > 90)
-            ? " | ${(fixAgeSec / 60).round()}min"
-            : "";
         // La nota del usuario justo bajo la cabecera (se lee primero); después
-        // el bloque de ubicación (geo: + Google + OSM) y la línea técnica.
+        // el bloque de ubicación (geo: + Google + OSM) y la línea técnica. Un
+        // fix de hace minutos presentado como "posición actual" es peligroso en
+        // un rescate: si viene del lastKnown o es viejo, la línea dice de
+        // cuándo es.
         msgBody += "\n$note";
         msgBody += "\n${geoLinks(sosPos.latitude, sosPos.longitude)}";
-        msgBody += "\nBat: $batteryLevel% | Alt: ${sosPos.altitude.toStringAsFixed(0)}m | Acc: ${sosPos.accuracy.toStringAsFixed(0)}m$ageNote";
+        msgBody += "\n${sosTechLine(batteryPct: batteryLevel, altitudeM: sosPos.altitude, accuracyM: sosPos.accuracy, fixAgeSeconds: fixAgeSec, stale: posIsStale)}";
       } else {
         msgBody += "\n$note";
         msgBody += "\n(GPS Error/Timeout)";

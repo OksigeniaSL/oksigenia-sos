@@ -22,6 +22,7 @@ import '../utils/phone_utils.dart';
 import '../utils/geo_links.dart';
 import '../utils/sms_budget.dart';
 import '../utils/sms_splitter.dart';
+import '../utils/sms_text.dart';
 import '../utils/sos_sms.dart';
 import '../screens/settings_screen.dart';
 import '../screens/alarm_screen.dart';
@@ -1284,12 +1285,11 @@ class SOSLogic extends ChangeNotifier with WidgetsBindingObserver {
         // An old fix presented as the current position misleads a rescue:
         // say how old it is, as Sylvia does.
         final int fixAgeSec = DateTime.now().difference(sosPos.timestamp).inSeconds;
-        final String ageNote = fixAgeSec > 90 ? " | ${(fixAgeSec / 60).round()}min" : "";
         // La nota del usuario justo bajo la cabecera (se lee primero); después
         // el bloque de ubicación (geo: + Google + OSM) y la línea técnica.
         msgBody += "\n$note";
         msgBody += "\n${geoLinks(sosPos.latitude, sosPos.longitude)}";
-        msgBody += "\nBat: $batteryLevel% | Alt: ${sosPos.altitude.toStringAsFixed(0)}m | Acc: ${sosPos.accuracy.toStringAsFixed(0)}m$ageNote";
+        msgBody += "\n${sosTechLine(batteryPct: batteryLevel, altitudeM: sosPos.altitude, accuracyM: sosPos.accuracy, fixAgeSeconds: fixAgeSec)}";
       } else {
         msgBody += "\n$note";
         msgBody += "\n(GPS Error/Timeout)";
