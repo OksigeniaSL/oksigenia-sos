@@ -156,6 +156,15 @@ class SOSLogic extends ChangeNotifier with WidgetsBindingObserver {
     }
   }
   
+  /// Fall detection that really runs: the switch alone is not enough in the
+  /// profiles without impact detection (paragliding, kayak, horse riding).
+  bool get fallDetectionEffective =>
+      _isFallDetectionActive &&
+      activityProfileConfigs[PreferencesService().getActivityProfile()]!.impactDetectionEnabled;
+
+  /// Something automatic is watching: what "protected" may honestly mean.
+  bool get protectionEffective => fallDetectionEffective || _isInactivityMonitorActive;
+
   String? get emergencyContact {
     final contacts = PreferencesService().getContacts();
     return contacts.isNotEmpty ? contacts.first : null;
@@ -1052,10 +1061,20 @@ class SOSLogic extends ChangeNotifier with WidgetsBindingObserver {
     if (msg.isEmpty) msg = "BATT <5%. Bye. Loc:";
 
     try {
-      Position pos = await Geolocator.getCurrentPosition(timeLimit: const Duration(seconds: 5))
-        .catchError((_) async => await Geolocator.getLastKnownPosition() ?? Position(longitude: 0, latitude: 0, timestamp: DateTime.now(), accuracy: 0, altitude: 0, heading: 0, speed: 0, speedAccuracy: 0, altitudeAccuracy: 0, headingAccuracy: 0));
-
-      msg += "\n${geoLinks(pos.latitude, pos.longitude)}";
+      Position? pos;
+      try {
+        pos = await Geolocator.getCurrentPosition(timeLimit: const Duration(seconds: 5));
+      } catch (_) {
+        pos = await Geolocator.getLastKnownPosition();
+      }
+      // Without any fix this used to send links to 0,0 (Gulf of Guinea).
+      if (pos != null) {
+        final int fixAgeSec = DateTime.now().difference(pos.timestamp).inSeconds;
+        msg += "\n${geoLinks(pos.latitude, pos.longitude)}";
+        if (fixAgeSec > 90) msg += "\n${(fixAgeSec / 60).round()}min";
+      } else {
+        msg += "\n(No Loc)";
+      }
 
       int sent = 0;
       for (String number in recipients) {
@@ -1251,21 +1270,26 @@ class SOSLogic extends ChangeNotifier with WidgetsBindingObserver {
     Position? sosPos;
     try {
       try {
+        // 15 s like Sylvia: 5 s from cold almost always ended in lastKnown.
         final LocationSettings locationSettings = AndroidSettings(
             accuracy: LocationAccuracy.high,
             forceLocationManager: true,
-            timeLimit: const Duration(seconds: 5));
+            timeLimit: const Duration(seconds: 15));
         sosPos = await Geolocator.getCurrentPosition(locationSettings: locationSettings);
       } catch (_) {
         sosPos = await Geolocator.getLastKnownPosition();
       }
       if (sosPos != null) {
         _setStatus(SOSStatus.locationFixed);
+        // An old fix presented as the current position misleads a rescue:
+        // say how old it is, as Sylvia does.
+        final int fixAgeSec = DateTime.now().difference(sosPos.timestamp).inSeconds;
+        final String ageNote = fixAgeSec > 90 ? " | ${(fixAgeSec / 60).round()}min" : "";
         // La nota del usuario justo bajo la cabecera (se lee primero); después
         // el bloque de ubicación (geo: + Google + OSM) y la línea técnica.
         msgBody += "\n$note";
         msgBody += "\n${geoLinks(sosPos.latitude, sosPos.longitude)}";
-        msgBody += "\nBat: $batteryLevel% | Alt: ${sosPos.altitude.toStringAsFixed(0)}m | Acc: ${sosPos.accuracy.toStringAsFixed(0)}m";
+        msgBody += "\nBat: $batteryLevel% | Alt: ${sosPos.altitude.toStringAsFixed(0)}m | Acc: ${sosPos.accuracy.toStringAsFixed(0)}m$ageNote";
       } else {
         msgBody += "\n$note";
         msgBody += "\n(GPS Error/Timeout)";
@@ -1344,26 +1368,14 @@ class SOSLogic extends ChangeNotifier with WidgetsBindingObserver {
         await _audioPlayer!.play(AssetSource('sounds/send.mp3'));
       } catch(e) {}
 
-      int interval = prefs.getUpdateInterval();
-      if (interval > 0) _startPeriodicUpdates(interval, recipients);
+      // The old periodic "still moving" SMS (update_interval, v3.6-v3.8) is
+      // gone: its setting was removed but the pref survived in old installs,
+      // so after an SOS it texted the first contact forever, in English.
     } else {
       _setStatus(SOSStatus.error, "SMS_FAILED");
     }
   }
 
-  void _startPeriodicUpdates(int minutes, List<String> recipients) {
-    if (recipients.isEmpty) return;
-    String target = normalizePhoneE164(recipients.first);
-    _periodicUpdateTimer?.cancel();
-    _periodicUpdateTimer = Timer.periodic(Duration(minutes: minutes), (timer) async {
-      try {
-        Position pos = await Geolocator.getCurrentPosition(timeLimit: const Duration(seconds: 20));
-        String updateMsg = "SEGUIMIENTO Oksigenia: sigo en ruta / still moving.";
-        updateMsg += "\n${geoLinks(pos.latitude, pos.longitude)}";
-        await _sendSmsChunked(target, updateMsg);
-      } catch (e) {}
-    });
-  }
 
   void _setStatus(SOSStatus s, [String? e]) { 
       _status = s; 
@@ -1504,11 +1516,17 @@ class SOSLogic extends ChangeNotifier with WidgetsBindingObserver {
           statusIcon = "paused";
           title = t.statusMonitorStopped;
           content = "---";
+        } else if (!protectionEffective) {
+          // Fall detection on in a profile without it, inactivity off: the
+          // notification must not say "ready" while nothing is watching.
+          statusIcon = "paused";
+          title = t.homeAlertProfileNoImpact;
+          content = "---";
         } else {
-          title = t.statusReady; 
+          title = t.statusReady;
           List<String> activeModes = [];
-          if (_isFallDetectionActive) activeModes.add(t.autoModeLabel); 
-          if (_isInactivityMonitorActive) activeModes.add(t.inactivityModeLabel); 
+          if (fallDetectionEffective) activeModes.add(t.autoModeLabel);
+          if (_isInactivityMonitorActive) activeModes.add(t.inactivityModeLabel);
           content = activeModes.join(" + ");
         }
 

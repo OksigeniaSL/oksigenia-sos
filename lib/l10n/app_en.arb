@@ -268,5 +268,11 @@
                 "type": "int"
             }
         }
-    }
+    },
+    "homeAlertProfileNoImpact": "NOT PROTECTED — this profile has no fall detection. Turn on the Inactivity Monitor.",
+    "contactCheckTitle": "Is the country code right?",
+    "contactCheckBody": "Your SOS will be texted to {number}. If the country code is wrong, write the number with + and its country code.",
+    "@contactCheckBody": {"placeholders": {"number": {"type": "String"}}},
+    "contactCheckSave": "Yes, save",
+    "contactCheckEdit": "Correct it"
 }

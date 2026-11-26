@@ -115,6 +115,12 @@ class _AlarmScreenState extends State<AlarmScreen> with TickerProviderStateMixin
     }
 
     final mq = MediaQuery.of(context);
+    // Short screens (360×640 and similar): with the cancel control pinned at
+    // the bottom, the full-size countdown ended up hidden behind it.
+    final bool compact = mq.size.height < 700;
+    final double ring = compact ? 120 : 180;
+    final double holdRing = compact ? 110 : 150;
+    final double holdButton = compact ? 60 : 80;
     // With a large system font (360×640 at 150-200 %) the cancel control ended
     // up off screen, and the screen could not scroll: no way to stop a false
     // alarm. The scale is capped on this one screen, the content scrolls, and
@@ -135,9 +141,9 @@ class _AlarmScreenState extends State<AlarmScreen> with TickerProviderStateMixin
                     child: Column(
                       mainAxisSize: MainAxisSize.min,
                       children: [
-                  const SizedBox(height: 20),
-                  Icon(Icons.warning_amber_rounded, size: 60, color: textColor),
-                  const SizedBox(height: 15),
+                  SizedBox(height: compact ? 8 : 20),
+                  Icon(Icons.warning_amber_rounded, size: compact ? 40 : 60, color: textColor),
+                  SizedBox(height: compact ? 6 : 15),
 
                   Padding(
                     padding: const EdgeInsets.symmetric(horizontal: 20),
@@ -146,7 +152,7 @@ class _AlarmScreenState extends State<AlarmScreen> with TickerProviderStateMixin
                       textAlign: TextAlign.center,
                       style: TextStyle(
                         color: textColor,
-                        fontSize: 26,
+                        fontSize: compact ? 22 : 26,
                         fontWeight: FontWeight.bold,
                       ),
                     ),
@@ -164,16 +170,16 @@ class _AlarmScreenState extends State<AlarmScreen> with TickerProviderStateMixin
                       ),
                     ),
                   ),
-                  const SizedBox(height: 30),
+                  SizedBox(height: compact ? 12 : 30),
 
                   // RELOJ — o spinner de envío / icono de fallo según estado
                   if (isError)
-                    Icon(Icons.sms_failed_rounded, size: 120, color: textColor)
+                    Icon(Icons.sms_failed_rounded, size: compact ? 72 : 120, color: textColor)
                   else if (isSending)
-                    const SizedBox(
-                      width: 180,
-                      height: 180,
-                      child: Padding(
+                    SizedBox(
+                      width: ring,
+                      height: ring,
+                      child: const Padding(
                         padding: EdgeInsets.all(20),
                         child: CircularProgressIndicator(
                           strokeWidth: 12,
@@ -187,8 +193,8 @@ class _AlarmScreenState extends State<AlarmScreen> with TickerProviderStateMixin
                       alignment: Alignment.center,
                       children: [
                         SizedBox(
-                          width: 180,
-                          height: 180,
+                          width: ring,
+                          height: ring,
                           child: AnimatedBuilder(
                             animation: _countdownController,
                             builder: (context, child) {
@@ -205,7 +211,7 @@ class _AlarmScreenState extends State<AlarmScreen> with TickerProviderStateMixin
                         Text(
                           '${logic.currentCountdownSeconds}',
                           style: TextStyle(
-                            fontSize: 70,
+                            fontSize: compact ? 48 : 70,
                             fontWeight: FontWeight.bold,
                             color: textColor,
                           ),
@@ -213,7 +219,7 @@ class _AlarmScreenState extends State<AlarmScreen> with TickerProviderStateMixin
                       ],
                     ),
 
-                  const SizedBox(height: 40),
+                  SizedBox(height: compact ? 16 : 40),
 
                   if (isError) ...[
                     ElevatedButton.icon(
@@ -262,8 +268,8 @@ class _AlarmScreenState extends State<AlarmScreen> with TickerProviderStateMixin
                             alignment: Alignment.center,
                             children: [
                               SizedBox(
-                                width: 150,
-                                height: 150,
+                                width: holdRing,
+                                height: holdRing,
                                 child: AnimatedBuilder(
                                   animation: _holdController,
                                   builder: (context, child) {
@@ -277,8 +283,8 @@ class _AlarmScreenState extends State<AlarmScreen> with TickerProviderStateMixin
                                 ),
                               ),
                               Container(
-                                width: 80,
-                                height: 80,
+                                width: holdButton,
+                                height: holdButton,
                                 decoration: BoxDecoration(
                                   color: Colors.white,
                                   shape: BoxShape.circle,
@@ -291,7 +297,7 @@ class _AlarmScreenState extends State<AlarmScreen> with TickerProviderStateMixin
                                   ]
                                 ),
                                 child: Center(
-                                  child: Icon(Icons.stop_rounded, color: bgColor, size: 50),
+                                  child: Icon(Icons.stop_rounded, color: bgColor, size: compact ? 38 : 50),
                                 ),
                               ),
                             ],

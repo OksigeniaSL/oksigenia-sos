@@ -57,6 +57,9 @@ class StatusWidget : AppWidgetProvider() {
         }
     }
 
+    private fun profileHasImpactDetection(profile: String): Boolean =
+        profile !in setOf("paragliding", "kayak", "equitation")
+
     private fun renderWidget(context: Context, manager: AppWidgetManager, id: Int) {
         val views = RemoteViews(context.packageName, R.layout.widget_status)
         val prefs = context.getSharedPreferences(FLUTTER_PREFS, Context.MODE_PRIVATE)
@@ -64,7 +67,11 @@ class StatusWidget : AppWidgetProvider() {
         val fallActive = prefs.getBoolean(KEY_FALL, false)
         val inactivityActive = prefs.getBoolean(KEY_INACTIVITY, false)
         val liveTrackingActive = prefs.getBoolean(KEY_LIVE_TRACKING, false)
-        val monitoringActive = fallActive || inactivityActive
+        // Profiles without impact detection ignore the fall switch: it must not
+        // count as protection here either (keep in step with activity_profile.dart).
+        val fallEffective = fallActive && profileHasImpactDetection(
+            prefs.getString(KEY_PROFILE, "trekking") ?: "trekking")
+        val monitoringActive = fallEffective || inactivityActive
         val alarmActive = prefs.getBoolean(KEY_ALARM_ACTIVE, false)
         val sentinelState = prefs.getString(KEY_SENTINEL_STATE, "green") ?: "green"
         val profileName = prefs.getString(KEY_PROFILE, "trekking") ?: "trekking"
@@ -99,7 +106,7 @@ class StatusWidget : AppWidgetProvider() {
 
         // Active modes line: "Caídas · Inactividad 1h · Tracking"
         val parts = mutableListOf<String>()
-        if (fallActive) parts.add(context.getString(R.string.widget_mode_fall))
+        if (fallEffective) parts.add(context.getString(R.string.widget_mode_fall))
         if (inactivityActive) {
             parts.add(
                 context.getString(R.string.widget_mode_inactivity_fmt, formatDuration(inactivityLimitSec))

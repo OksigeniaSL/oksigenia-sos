@@ -739,4 +739,22 @@ class AppLocalizationsRu extends AppLocalizations {
   String smsLimitBodyAlways(int needed) {
     return 'Этот телефон просит подтверждение перед любой отправкой SMS приложением («Подтверждать всегда»): если никто не подтвердит, твой SOS не будет отправлен.\n\nВыбери лимит не меньше $needed (в LineageOS: Trust → Ограничение SMS-сообщений) и на всякий случай перезагрузи телефон: на некоторых телефонах изменение вступает в силу только после перезагрузки.';
   }
+
+  @override
+  String get homeAlertProfileNoImpact =>
+      'НЕТ ЗАЩИТЫ — этот профиль не определяет падения. Включите Монитор бездействия.';
+
+  @override
+  String get contactCheckTitle => 'Код страны указан верно?';
+
+  @override
+  String contactCheckBody(String number) {
+    return 'Ваш SOS будет отправлен на $number. Если код страны неверный, введите номер с + и кодом страны.';
+  }
+
+  @override
+  String get contactCheckSave => 'Да, сохранить';
+
+  @override
+  String get contactCheckEdit => 'Исправить';
 }

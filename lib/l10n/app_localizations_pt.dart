@@ -735,4 +735,22 @@ class AppLocalizationsPt extends AppLocalizations {
   String smsLimitBodyAlways(int needed) {
     return 'Este telemóvel pede confirmação antes de qualquer app enviar um SMS («Confirmar sempre»): se ninguém confirmar, o seu SOS não será enviado.\n\nEscolha um limite de pelo menos $needed (no LineageOS: Trust → Limite de mensagens SMS) e reinicie o telemóvel por precaução: em alguns telemóveis a alteração só se aplica depois de reiniciar.';
   }
+
+  @override
+  String get homeAlertProfileNoImpact =>
+      'SEM PROTEÇÃO — este perfil não deteta quedas. Ative o Monitor de Inatividade.';
+
+  @override
+  String get contactCheckTitle => 'O indicativo do país está correto?';
+
+  @override
+  String contactCheckBody(String number) {
+    return 'O seu SOS será enviado para $number. Se o indicativo estiver errado, escreva o número com + e o indicativo.';
+  }
+
+  @override
+  String get contactCheckSave => 'Sim, guardar';
+
+  @override
+  String get contactCheckEdit => 'Corrigir';
 }

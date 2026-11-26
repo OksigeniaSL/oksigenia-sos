@@ -20,7 +20,7 @@ import androidx.core.content.ContextCompat
  * "active", until the user opened the app.
  *
  * Inexact on purpose (minimal permissions, no exact-alarm permission): Android
- * may delay it (up to ~9 min here), but it keeps running in Doze. The chain ends by itself when
+ * may delay it (about 9 min measured), but it keeps running in Doze. The chain ends by itself when
  * nothing is armed; MainActivity and OksigeniaBootReceiver start it again.
  */
 class OksigeniaWatchdog : BroadcastReceiver() {
@@ -39,8 +39,8 @@ class OksigeniaWatchdog : BroadcastReceiver() {
 
     companion object {
         // Android lets an inexact alarm slip by up to 75 % of its interval: with
-        // 15 min a killed service came back after 25 min on a Pixel 7a. With
-        // 5 min the gap is about 9 min (Doze allows one such alarm per ~9 min).
+        // 15 min a killed service came back after 25 min on a Pixel 7a; with
+        // 5 min it took 8 min 38 s. In Doze the system may batch it further.
         private const val INTERVAL_MS = 5 * 60 * 1000L
         private const val REQUEST_CODE = 7301
         private const val SERVICE = "id.flutter.flutter_background_service.BackgroundService"

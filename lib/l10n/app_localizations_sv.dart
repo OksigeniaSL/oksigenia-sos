@@ -740,4 +740,22 @@ class AppLocalizationsSv extends AppLocalizations {
   String smsLimitBodyAlways(int needed) {
     return 'Den här telefonen begär bekräftelse innan en app skickar något SMS (\'Bekräfta alltid\'): om ingen bekräftar skickas inte ditt SOS.\n\nVälj en gräns på minst $needed (i LineageOS: Trust → Gräns för SMS-meddelande) och starta om telefonen för säkerhets skull: på vissa telefoner gäller ändringen först efter en omstart.';
   }
+
+  @override
+  String get homeAlertProfileNoImpact =>
+      'INTE SKYDDAD — den här profilen upptäcker inte fall. Slå på Inaktivitetsmonitorn.';
+
+  @override
+  String get contactCheckTitle => 'Stämmer landsnumret?';
+
+  @override
+  String contactCheckBody(String number) {
+    return 'Ditt SOS skickas till $number. Om landsnumret är fel, skriv numret med + och landsnummer.';
+  }
+
+  @override
+  String get contactCheckSave => 'Ja, spara';
+
+  @override
+  String get contactCheckEdit => 'Rätta';
 }

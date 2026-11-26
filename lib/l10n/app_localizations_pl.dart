@@ -738,4 +738,22 @@ class AppLocalizationsPl extends AppLocalizations {
   String smsLimitBodyAlways(int needed) {
     return 'Ten telefon prosi o potwierdzenie przed wysłaniem każdego SMS przez aplikację („Zawsze potwierdzaj”): jeśli nikt nie potwierdzi, Twój SOS nie zostanie wysłany.\n\nWybierz limit co najmniej $needed (w LineageOS: Trust → Limit wiadomości SMS) i na wszelki wypadek uruchom telefon ponownie: na niektórych telefonach zmiana działa dopiero po ponownym uruchomieniu.';
   }
+
+  @override
+  String get homeAlertProfileNoImpact =>
+      'BRAK OCHRONY — ten profil nie wykrywa upadków. Włącz Monitor bezruchu.';
+
+  @override
+  String get contactCheckTitle => 'Czy numer kierunkowy kraju jest poprawny?';
+
+  @override
+  String contactCheckBody(String number) {
+    return 'Twój SOS zostanie wysłany na $number. Jeśli numer kierunkowy jest błędny, wpisz numer z + i kodem kraju.';
+  }
+
+  @override
+  String get contactCheckSave => 'Tak, zapisz';
+
+  @override
+  String get contactCheckEdit => 'Popraw';
 }

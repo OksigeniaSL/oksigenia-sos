@@ -741,4 +741,22 @@ class AppLocalizationsNl extends AppLocalizations {
   String smsLimitBodyAlways(int needed) {
     return 'Deze telefoon vraagt om bevestiging voordat een app een sms verstuurt (\'Altijd bevestigen\'): als niemand bevestigt, wordt je SOS niet verzonden.\n\nKies een limiet van minstens $needed (in LineageOS: Trust → Limiet sms-berichten) en herstart de telefoon voor de zekerheid: op sommige telefoons werkt de wijziging pas na een herstart.';
   }
+
+  @override
+  String get homeAlertProfileNoImpact =>
+      'NIET BESCHERMD — dit profiel detecteert geen vallen. Zet de Inactiviteitsmonitor aan.';
+
+  @override
+  String get contactCheckTitle => 'Klopt de landcode?';
+
+  @override
+  String contactCheckBody(String number) {
+    return 'Je SOS wordt verstuurd naar $number. Is de landcode fout, typ het nummer dan met + en de landcode.';
+  }
+
+  @override
+  String get contactCheckSave => 'Ja, opslaan';
+
+  @override
+  String get contactCheckEdit => 'Corrigeren';
 }

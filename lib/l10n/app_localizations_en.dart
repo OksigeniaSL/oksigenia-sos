@@ -736,4 +736,22 @@ class AppLocalizationsEn extends AppLocalizations {
   String smsLimitBodyAlways(int needed) {
     return 'This phone asks for confirmation before any app sends an SMS (\"Always confirm\"): if nobody confirms, your SOS will not be sent.\n\nChoose a limit of at least $needed (on LineageOS: Trust → SMS message limit) and restart the phone to be sure: on some phones the change only takes effect after a restart.';
   }
+
+  @override
+  String get homeAlertProfileNoImpact =>
+      'NOT PROTECTED — this profile has no fall detection. Turn on the Inactivity Monitor.';
+
+  @override
+  String get contactCheckTitle => 'Is the country code right?';
+
+  @override
+  String contactCheckBody(String number) {
+    return 'Your SOS will be texted to $number. If the country code is wrong, write the number with + and its country code.';
+  }
+
+  @override
+  String get contactCheckSave => 'Yes, save';
+
+  @override
+  String get contactCheckEdit => 'Correct it';
 }

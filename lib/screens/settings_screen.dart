@@ -33,19 +33,29 @@ class _SettingsScreenState extends State<SettingsScreen> with WidgetsBindingObse
     _loadData();
     _checkPermissions();
     
-    WidgetsBinding.instance.addPostFrameCallback((_) => _detectCountryPrefix());
+    // No country prefix is prefilled any more. It came from the phone's
+    // language, not its SIM: a Spanish user with the phone in UK English got
+    // «+44» and, typing a Spanish mobile after it, an SOS to a UK number that
+    // does not exist. A number without its prefix is confirmed on saving.
   }
 
-  void _detectCountryPrefix() {
-    if (_phoneController.text.isNotEmpty) return;
-    // Mapa compartido con phone_utils: si el envío sabe normalizar un país,
-    // el prefill debe conocerlo también (y viceversa).
-    final prefix = detectDefaultPrefix();
-    if (prefix != null) {
-      setState(() {
-        _phoneController.text = prefix;
-      });
-    }
+  // A number typed without + or 00 is normalised with a country guessed from
+  // the phone's language. Show the result and let the user confirm it.
+  Future<bool> _confirmDialledNumber(String phone, AppLocalizations l10n) async {
+    if (phone.startsWith('+') || phone.startsWith('00')) return true;
+    final String dialled = normalizePhoneE164(phone);
+    final bool? ok = await showDialog<bool>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: Text(l10n.contactCheckTitle),
+        content: Text(l10n.contactCheckBody(dialled)),
+        actions: [
+          TextButton(onPressed: () => Navigator.pop(ctx, false), child: Text(l10n.contactCheckEdit)),
+          ElevatedButton(onPressed: () => Navigator.pop(ctx, true), child: Text(l10n.contactCheckSave)),
+        ],
+      ),
+    );
+    return ok ?? false;
   }
 
   // 🛡️ VALIDADOR DE NÚMEROS
@@ -112,9 +122,11 @@ class _SettingsScreenState extends State<SettingsScreen> with WidgetsBindingObse
   void dispose() {
     WidgetsBinding.instance.removeObserver(this);
     
-    // Auto-guardado al salir (CON VALIDACIÓN)
+    // Auto-save on dispose only for an unambiguous number (with + or 00); the
+    // normal way out (back) already asked about the others.
     String pendingPhone = _phoneController.text.trim();
-    if (_isValidPhoneNumber(pendingPhone) && !_isDuplicateContact(pendingPhone)) {
+    if ((pendingPhone.startsWith('+') || pendingPhone.startsWith('00')) &&
+        _isValidPhoneNumber(pendingPhone) && !_isDuplicateContact(pendingPhone)) {
        PreferencesService().addContact(pendingPhone);
     }
 
@@ -190,7 +202,7 @@ class _SettingsScreenState extends State<SettingsScreen> with WidgetsBindingObse
     }
   }
 
-  void _addContact() {
+  Future<void> _addContact() async {
     final l10n = AppLocalizations.of(context)!;
 
     // 1. Chequeo de Permisos
@@ -215,15 +227,16 @@ class _SettingsScreenState extends State<SettingsScreen> with WidgetsBindingObse
       return;
     }
 
-    // 3. Añadir si no está repetido
+    // 3. Confirm the country when the number came without its prefix.
+    if (!await _confirmDialledNumber(phone, l10n)) return;
+    if (!mounted) return;
+
+    // 4. Añadir si no está repetido
     if (!_isDuplicateContact(phone)) {
       setState(() {
         _contacts.add(phone);
         _phoneController.clear();
       });
-      // Re-fill the country prefix so contact #2, #3… don't get saved
-      // as raw digits (US carriers silently drop non-E.164 A2P SMS).
-      _detectCountryPrefix();
       PreferencesService().addContact(phone);
     } else {
       ScaffoldMessenger.of(context).showSnackBar(
@@ -291,7 +304,22 @@ class _SettingsScreenState extends State<SettingsScreen> with WidgetsBindingObse
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
 
-    return Scaffold(
+    // Leaving with a number typed but not added goes through the same check
+    // as the + button (country confirmation), instead of a silent auto-save.
+    return PopScope(
+      canPop: false,
+      onPopInvokedWithResult: (didPop, _) async {
+        if (didPop) return;
+        final pending = _phoneController.text.trim();
+        if (pending.isNotEmpty &&
+            _isValidPhoneNumber(pending) &&
+            !_isDuplicateContact(pending)) {
+          await _addContact();
+          if (!mounted || _phoneController.text.trim().isNotEmpty) return;
+        }
+        if (mounted) Navigator.of(context).pop();
+      },
+      child: Scaffold(
       appBar: AppBar(title: Text(l10n.menuSettings)),
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(16.0),
@@ -553,6 +581,6 @@ class _SettingsScreenState extends State<SettingsScreen> with WidgetsBindingObse
           ],
         ),
       ),
-    );
+    ));
   }
 }

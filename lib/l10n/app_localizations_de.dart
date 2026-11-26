@@ -735,4 +735,22 @@ class AppLocalizationsDe extends AppLocalizations {
   String smsLimitBodyAlways(int needed) {
     return 'Dieses Telefon verlangt vor jeder SMS einer App eine Bestätigung („Immer bestätigen“): Bestätigt niemand, wird Ihr SOS nicht gesendet.\n\nWählen Sie ein Limit von mindestens $needed (unter LineageOS: Trust → SMS-Begrenzung) und starten Sie das Telefon sicherheitshalber neu: Auf manchen Telefonen wirkt die Änderung erst nach einem Neustart.';
   }
+
+  @override
+  String get homeAlertProfileNoImpact =>
+      'NICHT GESCHÜTZT — dieses Profil erkennt keine Stürze. Schalte den Inaktivitätsmonitor ein.';
+
+  @override
+  String get contactCheckTitle => 'Stimmt die Ländervorwahl?';
+
+  @override
+  String contactCheckBody(String number) {
+    return 'Dein SOS geht an $number. Wenn die Ländervorwahl falsch ist, gib die Nummer mit + und Ländervorwahl ein.';
+  }
+
+  @override
+  String get contactCheckSave => 'Ja, speichern';
+
+  @override
+  String get contactCheckEdit => 'Korrigieren';
 }

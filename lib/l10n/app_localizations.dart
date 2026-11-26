@@ -1453,6 +1453,36 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'This phone asks for confirmation before any app sends an SMS (\"Always confirm\"): if nobody confirms, your SOS will not be sent.\n\nChoose a limit of at least {needed} (on LineageOS: Trust → SMS message limit) and restart the phone to be sure: on some phones the change only takes effect after a restart.'**
   String smsLimitBodyAlways(int needed);
+
+  /// No description provided for @homeAlertProfileNoImpact.
+  ///
+  /// In en, this message translates to:
+  /// **'NOT PROTECTED — this profile has no fall detection. Turn on the Inactivity Monitor.'**
+  String get homeAlertProfileNoImpact;
+
+  /// No description provided for @contactCheckTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Is the country code right?'**
+  String get contactCheckTitle;
+
+  /// No description provided for @contactCheckBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Your SOS will be texted to {number}. If the country code is wrong, write the number with + and its country code.'**
+  String contactCheckBody(String number);
+
+  /// No description provided for @contactCheckSave.
+  ///
+  /// In en, this message translates to:
+  /// **'Yes, save'**
+  String get contactCheckSave;
+
+  /// No description provided for @contactCheckEdit.
+  ///
+  /// In en, this message translates to:
+  /// **'Correct it'**
+  String get contactCheckEdit;
 }
 
 class _AppLocalizationsDelegate

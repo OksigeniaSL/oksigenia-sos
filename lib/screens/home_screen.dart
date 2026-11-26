@@ -3,7 +3,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:provider/provider.dart'; 
 import 'package:flutter_background_service/flutter_background_service.dart';
-import 'package:wakelock_plus/wakelock_plus.dart';
 import 'package:permission_handler/permission_handler.dart'; 
 import 'package:oksigenia_sos/l10n/app_localizations.dart';
 import 'package:oksigenia_sos/logic/sos_logic.dart';
@@ -33,7 +32,9 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver, Ti
     
     _sosLogic = context.read<SOSLogic>();
     _sosLogic.init();
-    WakelockPlus.enable();
+    // No WakelockPlus.enable() here any more: it kept the screen on for as
+    // long as Home was open, also in a pocket. The alarm wakes the screen by
+    // itself (full-screen intent + wakeScreen).
     
     _sosHoldController = AnimationController(
       vsync: this,
@@ -329,9 +330,13 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver, Ti
             const SizedBox(height: 20),
 
             // BOTÓN SOS
-            GestureDetector(
+            // A Listener, not a pan GestureDetector: the page scrolls, and with
+            // 20 px of drift (a shaky thumb) the scroll won the gesture arena
+            // and reset the 3 s hold without a word. Pointer events are not
+            // part of the arena, so the hold survives a small slide.
+            Listener(
               behavior: HitTestBehavior.opaque,
-              onPanDown: (_) {
+              onPointerDown: (_) {
                 if (_sosLogic.emergencyContact == null) {
                   _triggerErrorHaptic();
                   ScaffoldMessenger.of(context).clearSnackBars();
@@ -371,12 +376,12 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver, Ti
                 }
                 _sosHoldController.forward();
               },
-              onPanEnd: (_) {
+              onPointerUp: (_) {
                 if (_sosHoldController.status != AnimationStatus.completed) {
                   _sosHoldController.reverse();
                 }
               },
-              onPanCancel: () => _sosHoldController.reverse(),
+              onPointerCancel: (_) => _sosHoldController.reverse(),
               
               child: Stack(
                 alignment: Alignment.center,
@@ -516,15 +521,16 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver, Ti
             const SizedBox(height: 30),
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 30, vertical: 10),
-              child: GestureDetector(
+              // Listener for the same reason as the SOS button.
+              child: Listener(
                 behavior: HitTestBehavior.opaque,
-                onPanDown: (_) => _stopHoldController.forward(),
-                onPanEnd: (_) {
+                onPointerDown: (_) => _stopHoldController.forward(),
+                onPointerUp: (_) {
                   if (_stopHoldController.status != AnimationStatus.completed) {
                     _stopHoldController.reverse();
                   }
                 },
-                onPanCancel: () => _stopHoldController.reverse(),
+                onPointerCancel: (_) => _stopHoldController.reverse(),
                 child: ClipRRect(
                   borderRadius: BorderRadius.circular(12),
                   child: SizedBox(
@@ -819,6 +825,19 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver, Ti
       level = _AlertLevel.warning;
       text = l10n.fullScreenIntentTitle;
       icon = Icons.warning_amber_rounded;
+    } else if (monitoring && _sosLogic.emergencyContact == null) {
+      // Armed with nobody to text (e.g. the last contact was deleted): it
+      // must not look protected.
+      level = _AlertLevel.critical;
+      text = l10n.noContacts;
+      icon = Icons.person_off_outlined;
+      onTap = () => _sosLogic.openSettings(context);
+    } else if (monitoring && !_sosLogic.protectionEffective) {
+      // Fall detection switched on in a profile without it, inactivity off:
+      // nothing automatic is watching.
+      level = _AlertLevel.critical;
+      text = l10n.homeAlertProfileNoImpact;
+      icon = Icons.shield_outlined;
     } else if (!monitoring) {
       level = _AlertLevel.warning;
       text = l10n.homeAlertNotArmed;
