@@ -54,6 +54,14 @@ class PreferencesService {
   static const String keySosRetryAttempt = 'sos_retry_attempt';
   static const String keySosRetryUntil = 'sos_retry_until_ms';
 
+  // When the inactivity backstop (scheduled notification 889) is due, in epoch
+  // ms; 0 when none is armed. Sylvia writes it. A Sylvia that starts and finds
+  // it in the recent past raises the alarm itself (the phone was still and the
+  // service was down); the UI only clears it when inactivity is switched off.
+  // A new key on purpose: the old 'inactivity_alarm_scheduled_for' meant "last
+  // re-arm + limit" and the UI started its own silent alarm from it.
+  static const String keyInactivityBackstopDue = 'inactivity_backstop_due_ms';
+
   // How the last SOS went: contacts reached so far and contacts in total.
   // Written by whichever isolate sent it (and by Sylvia after each retry), read
   // by the sent screen, which must not say "sent" when it reached 1 of 3.

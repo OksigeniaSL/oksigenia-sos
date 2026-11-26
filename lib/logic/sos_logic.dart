@@ -193,6 +193,7 @@ class SOSLogic extends ChangeNotifier with WidgetsBindingObserver {
   Map<String, String> _serviceTexts(AppLocalizations l10n) => {
         'alertFallDetected': l10n.alertFallDetected,
         'alertInactivityDetected': l10n.alertInactivityDetected,
+        'alertInactivityBody': l10n.alertInactivityBody,
         'holdToCancel': l10n.holdToCancel,
         'alertSendingIn': l10n.alertSendingIn,
         'statusSent': l10n.statusSent,
@@ -210,6 +211,9 @@ class SOSLogic extends ChangeNotifier with WidgetsBindingObserver {
         'smsBeaconDistance': l10n.smsBeaconDistance,
         // Sylvia fills in the two numbers.
         'sentPartialTitle': l10n.sentPartialTitle('{sent}', '{total}'),
+        'liveTrackingTitle': l10n.liveTrackingTitle,
+        'liveTrackingCardTitle': l10n.liveTrackingCardTitle,
+        'liveTrackingShutdownReminder': l10n.liveTrackingShutdownReminder,
         'smsLiveTrackingHeader': l10n.smsLiveTrackingHeader,
         'smsLiveCheckinHeader': l10n.smsLiveCheckinHeader,
       };
@@ -404,6 +408,7 @@ class SOSLogic extends ChangeNotifier with WidgetsBindingObserver {
         final raw = await SharedPreferences.getInstance();
         await raw.reload();
         _beaconActive = raw.getBool('beacon_active') ?? false;
+        _adoptServiceAlarm(raw);
       } catch (_) {}
 
       bool isSystemArmed = _isFallDetectionActive || _isInactivityMonitorActive;
@@ -431,6 +436,32 @@ class SOSLogic extends ChangeNotifier with WidgetsBindingObserver {
 
       notifyListeners();
     } catch(e) { debugPrint("Health Check Error: $e"); }
+  }
+
+  // Sylvia can start an alarm while this UI is not listening yet: at start-up,
+  // when the inactivity backstop came due with the service down, or when it
+  // resumes a countdown after a respawn. Its onAlarmTriggered is then lost and
+  // the siren sounded with no screen to cancel it from. The 5 s health check
+  // picks the alarm up from what Sylvia leaves in prefs. The alarm, its siren
+  // and its countdown stay Sylvia's: this only shows them. [p] must be freshly
+  // reloaded.
+  void _adoptServiceAlarm(SharedPreferences p) {
+    if (_status != SOSStatus.ready && _status != SOSStatus.locationFixed) return;
+    // Just cancelled: Sylvia may not have cleared its flag yet.
+    if (DateTime.now().difference(_lastCancellationTime).inSeconds < 10) return;
+    if (!(p.getBool('is_alarm_active') ?? false)) return;
+    final int startMs = p.getInt('alarm_start_timestamp') ?? 0;
+    if (startMs <= 0) return;
+    final int remaining =
+        30 - (DateTime.now().millisecondsSinceEpoch - startMs) ~/ 1000;
+    // Over: Sylvia is sending or has sent, there is nothing left to cancel.
+    if (remaining <= 0 || remaining > 30) return;
+    final String causeName = p.getString(PreferencesService.keyAlarmCause) ?? '';
+    final AlertCause cause = AlertCause.values
+        .where((c) => c.name == causeName)
+        .firstOrNull ?? AlertCause.fall;
+    debugPrint("LOGIC: 🚨 Alarma de Sylvia en curso sin pantalla ($causeName, ${remaining}s). Mostrándola.");
+    _triggerPreAlert(cause, startedByService: true, countdown: remaining);
   }
 
   Future<void> requestBatteryOptimizationIgnore() async {
@@ -538,6 +569,9 @@ class SOSLogic extends ChangeNotifier with WidgetsBindingObserver {
     }
 
     final rawPrefs = await SharedPreferences.getInstance();
+    // What follows is written by Sylvia, in another isolate: without a reload
+    // this one only sees its own cached copy.
+    try { await rawPrefs.reload(); } catch (_) {}
 
     // M1 (lado UI): restaurar una pausa en curso tras un respawn. Sylvia ya la
     // restaura por su lado (paused_until en prefs), pero la UI tenía su
@@ -548,17 +582,14 @@ class SOSLogic extends ChangeNotifier with WidgetsBindingObserver {
       _pausedUntil = DateTime.fromMillisecondsSinceEpoch(pausedUntilMs);
     }
 
-    // Check if inactivity AlarmClock fired during Doze (screen was off, Timer was frozen)
-    final int scheduledFor = rawPrefs.getInt('inactivity_alarm_scheduled_for') ?? 0;
-    final bool inactivityWasEnabled = rawPrefs.getBool('inactivity_monitor_enabled') ?? false;
-    if (scheduledFor > 0 &&
-        scheduledFor <= DateTime.now().millisecondsSinceEpoch &&
-        inactivityWasEnabled) {
-      debugPrint("LOGIC: ⏰ AlarmClock de inactividad disparado durante Doze. Activando zombie.");
-      await rawPrefs.setBool('is_alarm_active', true);
-      await rawPrefs.setInt('alarm_start_timestamp', scheduledFor);
-      await rawPrefs.setInt('inactivity_alarm_scheduled_for', 0);
-    }
+    // The UI no longer turns a passed inactivity backstop into an alarm of its
+    // own. It did, by writing is_alarm_active itself and running a countdown
+    // with no siren and no vibration, and after 90 s it sent the SOS: a silent
+    // pre-alarm. A backstop that came due is now Sylvia's business when it
+    // starts (_loadConfigFromDisk): it watches the sensors for 45 s and, if
+    // the phone stays still, raises the normal alarm. The siren and the
+    // countdown are Sylvia's; this UI only shows them, here below, on
+    // onAlarmTriggered or from _adoptServiceAlarm.
 
     bool isZombieAlarming = rawPrefs.getBool('is_alarm_active') ?? false;
 
@@ -583,15 +614,8 @@ class SOSLogic extends ChangeNotifier with WidgetsBindingObserver {
           _status = SOSStatus.preAlert;
           _countdownSeconds = remaining; 
           
-          Future.delayed(const Duration(milliseconds: 500), () {
-              if (oksigeniaNavigatorKey.currentState != null) {
-                oksigeniaNavigatorKey.currentState!.popUntil((route) => route.isFirst);
-                oksigeniaNavigatorKey.currentState!.push(
-                  MaterialPageRoute(builder: (context) => const AlarmScreen())
-                );
-              }
-          });
-          
+          Future.delayed(const Duration(milliseconds: 500), _showAlarmScreen);
+
           _preAlertTimer?.cancel();
           _preAlertTimer = Timer.periodic(const Duration(seconds: 1), (timer) {
             _countdownSeconds--;
@@ -1009,6 +1033,13 @@ class SOSLogic extends ChangeNotifier with WidgetsBindingObserver {
       });
     } else {
       _inactivityTimer?.cancel();
+      // Sylvia clears its backstop when it gets the message. If it is not
+      // running, nobody would, and the next Sylvia to start with inactivity
+      // back on could take the old mark for a backstop that fired.
+      try {
+        (await SharedPreferences.getInstance())
+            .setInt(PreferencesService.keyInactivityBackstopDue, 0);
+      } catch (_) {}
       if (_status == SOSStatus.preAlert && _lastTrigger == AlertCause.inactivity) {
         cancelAlert(); 
       }
@@ -1016,8 +1047,19 @@ class SOSLogic extends ChangeNotifier with WidgetsBindingObserver {
     notifyListeners();
   }
 
-  void _triggerPreAlert(AlertCause cause, {bool startedByService = false}) async {
+  // countdown: seconds left, when the alarm is already counting down in Sylvia
+  // and the UI joins it late (_adoptServiceAlarm).
+  void _triggerPreAlert(AlertCause cause,
+      {bool startedByService = false, int countdown = 30}) async {
     if (_status == SOSStatus.preAlert || _status == SOSStatus.sent) return;
+
+    // State first, before any await: two triggers at once (Sylvia's event and
+    // the UI's own timer, or the alarm picked up from prefs) both passed the
+    // check above, and the second restarted the countdown under another cause.
+    debugPrint("SYLVIA: 🚨 ALARMA ACTIVADA");
+    _lastTrigger = cause;
+    _status = SOSStatus.preAlert;
+    _countdownSeconds = countdown;
 
     // alarm_start_timestamp es de Sylvia (lo escribe _lanzarAlarma) y de él
     // dependen las dos recuperaciones tras kill de proceso — no se borra aquí.
@@ -1026,10 +1068,6 @@ class SOSLogic extends ChangeNotifier with WidgetsBindingObserver {
     final prefs = await SharedPreferences.getInstance();
     await prefs.setString(PreferencesService.keyAlarmCause, cause.name);
 
-    debugPrint("SYLVIA: 🚨 ALARMA ACTIVADA");
-    _lastTrigger = cause;
-    _status = SOSStatus.preAlert;
-    _countdownSeconds = 30;
     _updateSylviaStatus();
     notifyListeners();
 
@@ -1066,11 +1104,26 @@ class SOSLogic extends ChangeNotifier with WidgetsBindingObserver {
     try { await platform.invokeMethod('bringToFront'); } catch(_) {}
 
     await Future.delayed(const Duration(milliseconds: 500));
-    if (oksigeniaNavigatorKey.currentState != null) {
-      await oksigeniaNavigatorKey.currentState!.pushAndRemoveUntil(
-        MaterialPageRoute(builder: (_) => const AlarmScreen()),
-        (route) => route.isFirst,
-      );
+    await _showAlarmScreen();
+  }
+
+  // Puts the alarm screen on top as soon as there is a navigator to push it
+  // on. When the alarm itself opens the app (cold start) the first frame can
+  // come later than the single 500 ms wait there used to be; the push was then
+  // skipped for good and the siren sounded with no screen to cancel it from.
+  // Gives up after about 10 s, or as soon as the alarm is no longer pending.
+  Future<void> _showAlarmScreen() async {
+    for (int attempt = 0; attempt < 50; attempt++) {
+      if (_status != SOSStatus.preAlert) return;
+      final NavigatorState? navigator = oksigeniaNavigatorKey.currentState;
+      if (navigator != null) {
+        navigator.pushAndRemoveUntil(
+          MaterialPageRoute(builder: (_) => const AlarmScreen()),
+          (route) => route.isFirst,
+        );
+        return;
+      }
+      await Future.delayed(const Duration(milliseconds: 200));
     }
   }
 
