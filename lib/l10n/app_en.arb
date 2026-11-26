@@ -13,6 +13,8 @@
     "statusSendRetrying": "Not every contact has it yet (no signal?). Retrying automatically.",
     "pauseNotifResumesIn": "Resumes in {time}",
     "@pauseNotifResumesIn": {"placeholders": {"time": {"type": "String"}}},
+    "smsLiveTrackingHeader": "📍 LIVE TRACKING — Oksigenia SOS",
+    "smsLiveCheckinHeader": "✅ I'M OK — Oksigenia SOS",
     "statusError": "ERROR: {error}",
     "menuWeb": "Official Website",
     "menuSupport": "Tech Support",

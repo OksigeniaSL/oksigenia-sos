@@ -191,6 +191,8 @@ class SOSLogic extends ChangeNotifier with WidgetsBindingObserver {
         'resumeNow': l10n.pauseResumeNow,
         'smsBeaconHeader': l10n.smsBeaconHeader,
         'smsBeaconDistance': l10n.smsBeaconDistance,
+        'smsLiveTrackingHeader': l10n.smsLiveTrackingHeader,
+        'smsLiveCheckinHeader': l10n.smsLiveCheckinHeader,
       };
 
   /// The app's texts for code that has no widget at hand (notifications, SMS).

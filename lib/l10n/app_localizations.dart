@@ -194,6 +194,18 @@ abstract class AppLocalizations {
   /// **'Resumes in {time}'**
   String pauseNotifResumesIn(String time);
 
+  /// No description provided for @smsLiveTrackingHeader.
+  ///
+  /// In en, this message translates to:
+  /// **'📍 LIVE TRACKING — Oksigenia SOS'**
+  String get smsLiveTrackingHeader;
+
+  /// No description provided for @smsLiveCheckinHeader.
+  ///
+  /// In en, this message translates to:
+  /// **'✅ I\'M OK — Oksigenia SOS'**
+  String get smsLiveCheckinHeader;
+
   /// No description provided for @statusError.
   ///
   /// In en, this message translates to:

@@ -12,6 +12,8 @@
     "statusSendFailedBody": "Es konnte keine SMS gesendet werden. Prüfe Empfang und Kontakte, dann erneut versuchen.",
     "statusSendRetrying": "Noch nicht alle Kontakte haben es erhalten (kein Netz?). Wird automatisch erneut versucht.",
     "pauseNotifResumesIn": "Geht in {time} weiter",
+    "smsLiveTrackingHeader": "📍 LIVE-TRACKING — Oksigenia SOS",
+    "smsLiveCheckinHeader": "✅ ALLES OK — Oksigenia SOS",
     "statusError": "FEHLER: {error}",
     "menuWeb": "Offizielle Webseite",
     "menuSupport": "Support",

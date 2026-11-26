@@ -52,6 +52,12 @@ class AppLocalizationsEs extends AppLocalizations {
   }
 
   @override
+  String get smsLiveTrackingHeader => '📍 SEGUIMIENTO EN VIVO — Oksigenia SOS';
+
+  @override
+  String get smsLiveCheckinHeader => '✅ ESTOY BIEN — Oksigenia SOS';
+
+  @override
   String statusError(Object error) {
     return 'ERROR: $error';
   }

@@ -131,6 +131,9 @@ Map<String, String> _texts = {
   'resumeNow': 'Resume now',
   'smsBeaconHeader': 'OKSIGENIA SOS - follow-up (NOT a new alarm):',
   'smsBeaconDistance': 'from the SOS point.',
+  // Routine messages, casual on purpose: these two keep their emojis.
+  'smsLiveTrackingHeader': '📍 LIVE TRACKING — Oksigenia SOS',
+  'smsLiveCheckinHeader': "✅ I'M OK — Oksigenia SOS",
 };
 
 // Smart Beacon: post-SOS position-update SMS protocol.
@@ -519,9 +522,10 @@ void onStart(ServiceInstance service) async {
     int batteryLevel = 0;
     try { batteryLevel = await _battery.batteryLevel; } catch (_) {}
 
-    String header = isCheckin
-        ? "✅ I'M OK — Oksigenia SOS"
-        : "📍 LIVE TRACKING — Oksigenia SOS";
+    // In the app's language: they were fixed English in all eleven.
+    final String header = isCheckin
+        ? (_texts['smsLiveCheckinHeader'] ?? "✅ I'M OK — Oksigenia SOS")
+        : (_texts['smsLiveTrackingHeader'] ?? "📍 LIVE TRACKING — Oksigenia SOS");
 
     String msgBody = header;
     if (_customMessage.isNotEmpty && !isCheckin) {
@@ -530,16 +534,21 @@ void onStart(ServiceInstance service) async {
 
     try {
       Position? pos;
+      bool posIsStale = false;
       try {
         pos = await Geolocator.getCurrentPosition(
             locationSettings: const LocationSettings(
                 accuracy: LocationAccuracy.high, timeLimit: Duration(seconds: 8)));
       } catch (_) {
         pos = await Geolocator.getLastKnownPosition();
+        posIsStale = pos != null;
       }
       if (pos != null) {
+        // A last-known position says how old it is, as in the SOS: sent as
+        // "live" it could be hours old.
+        final int fixAgeSec = DateTime.now().difference(pos.timestamp).inSeconds;
         msgBody += "\n${geoLinks(pos.latitude, pos.longitude)}";
-        msgBody += "\n\n🔋Bat: $batteryLevel%$smsFieldSeparator📡Alt: ${pos.altitude.toStringAsFixed(0)}m$smsFieldSeparator🎯Acc: ${pos.accuracy.toStringAsFixed(0)}m";
+        msgBody += "\n\n🔋Bat: $batteryLevel%$smsFieldSeparator📡Alt: ${pos.altitude.toStringAsFixed(0)}m$smsFieldSeparator🎯${smsFixQuality(pos.accuracy, fixAgeSec, stale: posIsStale)}";
       } else {
         msgBody += "\n(No GPS)\n\n🔋Bat: $batteryLevel%";
       }

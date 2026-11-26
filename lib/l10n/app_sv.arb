@@ -12,6 +12,8 @@
     "statusSendFailedBody": "Inget SMS kunde skickas. Kontrollera täckning och kontakter och försök igen.",
     "statusSendRetrying": "Alla kontakter har inte fått det än (ingen täckning?). Försöker igen automatiskt.",
     "pauseNotifResumesIn": "Återupptas om {time}",
+    "smsLiveTrackingHeader": "📍 LIVESPÅRNING — Oksigenia SOS",
+    "smsLiveCheckinHeader": "✅ ALLT ÄR BRA — Oksigenia SOS",
     "statusError": "FEL: {error}",
     "menuWeb": "Officiell Webbplats",
     "menuSupport": "Teknisk Support",

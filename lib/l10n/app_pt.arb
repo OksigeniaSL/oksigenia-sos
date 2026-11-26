@@ -12,6 +12,8 @@
     "statusSendFailedBody": "Não foi possível enviar nenhum SMS. Verifique a cobertura e os contactos e tente novamente.",
     "statusSendRetrying": "Ainda não chegou a todos os contactos (sem rede?). A tentar novamente automaticamente.",
     "pauseNotifResumesIn": "Retoma em {time}",
+    "smsLiveTrackingHeader": "📍 RASTREAMENTO AO VIVO — Oksigenia SOS",
+    "smsLiveCheckinHeader": "✅ ESTOU BEM — Oksigenia SOS",
     "statusError": "ERRO: {error}",
     "menuWeb": "Site Oficial",
     "menuSupport": "Suporte Técnico",
