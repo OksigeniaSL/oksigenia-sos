@@ -147,7 +147,7 @@
     "fullScreenIntentTitle": "Тревога на экране блокировки",
     "fullScreenIntentBody": "Позволяет тревоге появляться поверх экрана блокировки. Без этого тревога звучит, но экран не загорается. На Android 14+: Настройки → Приложения → Oksigenia SOS → Полноэкранные уведомления.",
     "btnEnableFullScreenIntent": "ВКЛЮЧИТЬ",
-    "pauseMonitoringSheet": "Приостановить мониторинг на...",
+    "pauseMonitoringSheet": "Приостановить весь мониторинг на… (возобновится сам)",
     "pauseTitle": "Мониторинг приостановлен",
     "pauseResumesIn": "⏸ Пауза · осталось {time}",
     "pauseResumeNow": "Возобновить",

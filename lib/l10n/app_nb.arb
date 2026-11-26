@@ -147,7 +147,7 @@
     "fullScreenIntentTitle": "Alarm på låseskjerm",
     "fullScreenIntentBody": "Lar alarmen vises over låseskjermen. Uten dette lyder alarmen, men skjermen våkner ikke. På Android 14+: Innstillinger → Apper → Oksigenia SOS → Fullskjermvarsler.",
     "btnEnableFullScreenIntent": "AKTIVER",
-    "pauseMonitoringSheet": "Sett overvåking på pause i...",
+    "pauseMonitoringSheet": "Sett all overvåking på pause i… (fortsetter av seg selv)",
     "pauseTitle": "Overvåking på pause",
     "pauseResumesIn": "⏸ Pause · {time} igjen",
     "pauseResumeNow": "Gjenoppta nå",

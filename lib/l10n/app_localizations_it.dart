@@ -485,7 +485,8 @@ class AppLocalizationsIt extends AppLocalizations {
   String get btnEnableFullScreenIntent => 'ATTIVA';
 
   @override
-  String get pauseMonitoringSheet => 'Metti in pausa per...';
+  String get pauseMonitoringSheet =>
+      'Metti in pausa tutto il monitoraggio per… (riprende da solo)';
 
   @override
   String get pauseTitle => 'Monitoraggio in pausa';

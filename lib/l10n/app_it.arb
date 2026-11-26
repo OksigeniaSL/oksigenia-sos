@@ -147,7 +147,7 @@
     "fullScreenIntentTitle": "Allarme su Schermo Bloccato",
     "fullScreenIntentBody": "Permette all'allarme di apparire sopra lo schermo bloccato. Senza questo, l'allarme suona ma lo schermo non si accende. Su Android 14+: Impostazioni → App → Oksigenia SOS → Notifiche a schermo intero.",
     "btnEnableFullScreenIntent": "ATTIVA",
-    "pauseMonitoringSheet": "Metti in pausa per...",
+    "pauseMonitoringSheet": "Metti in pausa tutto il monitoraggio per… (riprende da solo)",
     "pauseTitle": "Monitoraggio in pausa",
     "pauseResumesIn": "⏸ In pausa · riprende in {time}",
     "pauseResumeNow": "Riprendi ora",

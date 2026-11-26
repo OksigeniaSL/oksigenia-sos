@@ -475,7 +475,8 @@ class AppLocalizationsPt extends AppLocalizations {
   String get btnEnableFullScreenIntent => 'ATIVAR';
 
   @override
-  String get pauseMonitoringSheet => 'Pausar monitorização por...';
+  String get pauseMonitoringSheet =>
+      'Pausar toda a monitorização durante… (retoma sozinha)';
 
   @override
   String get pauseTitle => 'Monitorização pausada';

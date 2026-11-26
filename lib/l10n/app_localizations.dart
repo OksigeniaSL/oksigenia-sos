@@ -1007,7 +1007,7 @@ abstract class AppLocalizations {
   /// No description provided for @pauseMonitoringSheet.
   ///
   /// In en, this message translates to:
-  /// **'Pause monitoring for...'**
+  /// **'Pause all monitoring for… (resumes by itself)'**
   String get pauseMonitoringSheet;
 
   /// No description provided for @pauseTitle.

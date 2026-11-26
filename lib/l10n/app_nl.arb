@@ -147,7 +147,7 @@
     "fullScreenIntentTitle": "Alarm op vergrendeld scherm",
     "fullScreenIntentBody": "Hiermee kan het alarm boven het vergrendelscherm verschijnen. Zonder dit klinkt het alarm maar wordt het scherm niet gewekt. Op Android 14+: Instellingen → Apps → Oksigenia SOS → Volledig scherm meldingen.",
     "btnEnableFullScreenIntent": "INSCHAKELEN",
-    "pauseMonitoringSheet": "Bewaking pauzeren voor...",
+    "pauseMonitoringSheet": "Alle bewaking pauzeren voor… (hervat vanzelf)",
     "pauseTitle": "Bewaking gepauzeerd",
     "pauseResumesIn": "⏸ Gepauzeerd · hervat in {time}",
     "pauseResumeNow": "Nu hervatten",

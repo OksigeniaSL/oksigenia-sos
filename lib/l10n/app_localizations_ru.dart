@@ -478,7 +478,8 @@ class AppLocalizationsRu extends AppLocalizations {
   String get btnEnableFullScreenIntent => 'ВКЛЮЧИТЬ';
 
   @override
-  String get pauseMonitoringSheet => 'Приостановить мониторинг на...';
+  String get pauseMonitoringSheet =>
+      'Приостановить весь мониторинг на… (возобновится сам)';
 
   @override
   String get pauseTitle => 'Мониторинг приостановлен';

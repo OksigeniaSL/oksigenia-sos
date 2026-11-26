@@ -147,7 +147,7 @@
     "fullScreenIntentTitle": "Alarme sur écran verrouillé",
     "fullScreenIntentBody": "Permet à l'alarme d'apparaître sur l'écran verrouillé. Sans cela, l'alarme sonne mais l'écran ne s'allume pas. Sur Android 14+ : Paramètres → Applications → Oksigenia SOS → Notifications en plein écran.",
     "btnEnableFullScreenIntent": "ACTIVER",
-    "pauseMonitoringSheet": "Mettre en pause pour...",
+    "pauseMonitoringSheet": "Mettre toute la surveillance en pause pendant… (reprend toute seule)",
     "pauseTitle": "Surveillance en pause",
     "pauseResumesIn": "⏸ En pause · reprend dans {time}",
     "pauseResumeNow": "Reprendre maintenant",

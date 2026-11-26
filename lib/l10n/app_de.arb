@@ -147,7 +147,7 @@
     "fullScreenIntentTitle": "Sperrbildschirm-Alarm",
     "fullScreenIntentBody": "Ermöglicht die Anzeige des Alarms auf dem Sperrbildschirm. Ohne diese Berechtigung ertönt der Alarm, aber der Bildschirm wacht nicht auf. Ab Android 14: Einstellungen → Apps → Oksigenia SOS → Vollbild-Benachrichtigungen.",
     "btnEnableFullScreenIntent": "AKTIVIEREN",
-    "pauseMonitoringSheet": "Überwachung pausieren für...",
+    "pauseMonitoringSheet": "Gesamte Überwachung pausieren für… (läuft danach von selbst weiter)",
     "pauseTitle": "Überwachung pausiert",
     "pauseResumesIn": "⏸ Pausiert · noch {time}",
     "pauseResumeNow": "Jetzt fortsetzen",

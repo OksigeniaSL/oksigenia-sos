@@ -147,7 +147,7 @@
     "fullScreenIntentTitle": "Alarme no Ecrã Bloqueado",
     "fullScreenIntentBody": "Permite que o alarme apareça sobre o ecrã bloqueado. Sem isto, o alarme soa mas o ecrã não acende. No Android 14+: Definições → Apps → Oksigenia SOS → Notificações em ecrã completo.",
     "btnEnableFullScreenIntent": "ATIVAR",
-    "pauseMonitoringSheet": "Pausar monitorização por...",
+    "pauseMonitoringSheet": "Pausar toda a monitorização durante… (retoma sozinha)",
     "pauseTitle": "Monitorização pausada",
     "pauseResumesIn": "⏸ Pausado · retoma em {time}",
     "pauseResumeNow": "Retomar agora",

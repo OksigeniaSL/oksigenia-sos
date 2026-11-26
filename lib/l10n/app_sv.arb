@@ -147,7 +147,7 @@
     "fullScreenIntentTitle": "Larm på låsskärmen",
     "fullScreenIntentBody": "Tillåter larmet att visas ovanpå låsskärmen. Utan detta låter larmet men skärmen vaknar inte. På Android 14+: Inställningar → Appar → Oksigenia SOS → Helskärmsaviseringar.",
     "btnEnableFullScreenIntent": "AKTIVERA",
-    "pauseMonitoringSheet": "Pausa övervakning i...",
+    "pauseMonitoringSheet": "Pausa all övervakning i… (återupptas av sig själv)",
     "pauseTitle": "Övervakning pausad",
     "pauseResumesIn": "⏸ Pausad · återupptas om {time}",
     "pauseResumeNow": "Återuppta nu",

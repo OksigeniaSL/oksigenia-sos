@@ -478,7 +478,8 @@ class AppLocalizationsNb extends AppLocalizations {
   String get btnEnableFullScreenIntent => 'AKTIVER';
 
   @override
-  String get pauseMonitoringSheet => 'Sett overvåking på pause i...';
+  String get pauseMonitoringSheet =>
+      'Sett all overvåking på pause i… (fortsetter av seg selv)';
 
   @override
   String get pauseTitle => 'Overvåking på pause';

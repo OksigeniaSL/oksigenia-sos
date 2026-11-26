@@ -480,7 +480,8 @@ class AppLocalizationsNl extends AppLocalizations {
   String get btnEnableFullScreenIntent => 'INSCHAKELEN';
 
   @override
-  String get pauseMonitoringSheet => 'Bewaking pauzeren voor...';
+  String get pauseMonitoringSheet =>
+      'Alle bewaking pauzeren voor… (hervat vanzelf)';
 
   @override
   String get pauseTitle => 'Bewaking gepauzeerd';

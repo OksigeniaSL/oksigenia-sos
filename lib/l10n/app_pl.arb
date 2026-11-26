@@ -147,7 +147,7 @@
     "fullScreenIntentTitle": "Alarm na ekranie blokady",
     "fullScreenIntentBody": "Pozwala alarmowi pojawić się na ekranie blokady. Bez tego alarm dźwięczy, ale ekran się nie budzi. Na Android 14+: Ustawienia → Aplikacje → Oksigenia SOS → Powiadomienia pełnoekranowe.",
     "btnEnableFullScreenIntent": "WŁĄCZ",
-    "pauseMonitoringSheet": "Wstrzymaj monitoring na...",
+    "pauseMonitoringSheet": "Wstrzymaj cały monitoring na… (wznowi się sam)",
     "pauseTitle": "Monitoring wstrzymany",
     "pauseResumesIn": "⏸ Wstrzymano · pozostało {time}",
     "pauseResumeNow": "Wznów teraz",
