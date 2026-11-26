@@ -574,38 +574,49 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver, Ti
                 onPointerCancel: (_) => _stopHoldController.reverse(),
                 child: ClipRRect(
                   borderRadius: BorderRadius.circular(12),
-                  child: SizedBox(
-                    height: 54,
-                    child: AnimatedBuilder(
-                      animation: _stopHoldController,
-                      builder: (context, child) {
-                        return Stack(
-                          children: [
-                            Container(color: Colors.white10),
-                            FractionallySizedBox(
+                  // At least 54 high but grows with the label: at 200 % the
+                  // one-line label overflowed (69 px in English, 222 in
+                  // Russian on a 360 dp phone). It now wraps by words.
+                  child: AnimatedBuilder(
+                    animation: _stopHoldController,
+                    builder: (context, child) {
+                      return Stack(
+                        children: [
+                          Positioned.fill(child: Container(color: Colors.white10)),
+                          Positioned.fill(
+                            child: FractionallySizedBox(
+                              alignment: AlignmentDirectional.centerStart,
                               widthFactor: _stopHoldController.value,
                               child: Container(color: Colors.redAccent),
                             ),
-                            Center(
-                              child: Row(
-                                mainAxisAlignment: MainAxisAlignment.center,
-                                children: [
-                                  const Icon(Icons.power_settings_new, color: Colors.white, size: 20),
-                                  const SizedBox(width: 10),
-                                  Text(
-                                    l10n.slideStopSystem,
-                                    style: const TextStyle(
-                                      color: Colors.white,
-                                      fontSize: 15,
-                                      fontWeight: FontWeight.bold,
-                                    ),
-                                  ),
-                                ],
+                          ),
+                          child!,
+                        ],
+                      );
+                    },
+                    child: ConstrainedBox(
+                      constraints: const BoxConstraints(minHeight: 54),
+                      child: Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            const Icon(Icons.power_settings_new, color: Colors.white, size: 20),
+                            const SizedBox(width: 10),
+                            Flexible(
+                              child: Text(
+                                l10n.slideStopSystem,
+                                textAlign: TextAlign.center,
+                                style: const TextStyle(
+                                  color: Colors.white,
+                                  fontSize: 15,
+                                  fontWeight: FontWeight.bold,
+                                ),
                               ),
                             ),
                           ],
-                        );
-                      },
+                        ),
+                      ),
                     ),
                   ),
                 ),
@@ -650,13 +661,16 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver, Ti
 
   Widget _buildQuickToggle(BuildContext context, String label, bool value, Function(bool) onChanged, IconData icon, {String? subtitle, String? unavailable}) {
     final l10n = AppLocalizations.of(context)!;
+    // Above 150 % the 30 dp side margins left the title so little room that
+    // "Inactividad" broke mid-word; give that room back to the text.
+    final double side = MediaQuery.textScalerOf(context).scale(16) > 24 ? 8 : 30;
 
     if (unavailable != null) {
       // Disabled, not switched off: nothing is written to the preferences.
       return Container(
-        margin: const EdgeInsets.symmetric(horizontal: 30, vertical: 5),
+        margin: EdgeInsets.symmetric(horizontal: side, vertical: 5),
         child: SwitchListTile(
-          title: Text(label, style: const TextStyle(fontWeight: FontWeight.w500, color: Colors.grey)),
+          title: _WholeWordsText(label, style: const TextStyle(fontWeight: FontWeight.w500, color: Colors.grey, fontSize: 16)),
           subtitle: Text(
             unavailable,
             style: const TextStyle(color: Colors.white70, fontSize: 13, fontWeight: FontWeight.bold),
@@ -683,9 +697,9 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver, Ti
     return GestureDetector(
       onLongPress: value ? () => _showPauseSheet(context, l10n) : null,
       child: Container(
-        margin: const EdgeInsets.symmetric(horizontal: 30, vertical: 5),
+        margin: EdgeInsets.symmetric(horizontal: side, vertical: 5),
         child: SwitchListTile(
-          title: Text(label, style: const TextStyle(fontWeight: FontWeight.w500, color: Colors.white)),
+          title: _WholeWordsText(label, style: const TextStyle(fontWeight: FontWeight.w500, color: Colors.white, fontSize: 16)),
           subtitle: effectiveSubtitle != null
               ? Text(
                   effectiveSubtitle,
@@ -1085,6 +1099,8 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver, Ti
     final ActivityProfile current = PreferencesService().getActivityProfile();
     final Color accent = _profileColor(current);
     final bool hasImpact = activityProfileConfigs[current]!.impactDetectionEnabled;
+    // Above 150 % the decorative icon gives its width to the profile name.
+    final bool largeText = MediaQuery.textScalerOf(context).scale(16) > 24;
 
     return Padding(
       padding: const EdgeInsets.fromLTRB(20, 4, 20, 8),
@@ -1102,19 +1118,22 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver, Ti
             ),
             child: Row(
               children: [
-                Icon(_profileIcon(current), size: 36, color: accent),
-                const SizedBox(width: 14),
+                if (!largeText) ...[
+                  Icon(_profileIcon(current), size: 36, color: accent),
+                  const SizedBox(width: 14),
+                ],
                 Expanded(
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Text(
-                        _profileLabel(l10n, current).toUpperCase(),
+                      // Not upper-cased: capitals are wider, and at 200 %
+                      // "SENDERISMO" no longer fitted and broke mid-word.
+                      _WholeWordsText(
+                        _profileLabel(l10n, current),
                         style: TextStyle(
                           color: accent,
                           fontSize: 17,
                           fontWeight: FontWeight.w700,
-                          letterSpacing: 0.6,
                         ),
                       ),
                       const SizedBox(height: 4),
@@ -1400,15 +1419,21 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver, Ti
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Text(l10n.inactivityTitle,
-                  style: const TextStyle(color: Colors.white70, fontSize: 12)),
-              Text("${fmt(elapsed)} / ${fmt(limit)}",
-                  style: const TextStyle(
-                      color: Colors.white, fontWeight: FontWeight.bold, fontSize: 12)),
-            ],
+          // Wrap, not Row: with a large font the time goes under the title
+          // instead of running off the card.
+          SizedBox(
+            width: double.infinity,
+            child: Wrap(
+              alignment: WrapAlignment.spaceBetween,
+              spacing: 8,
+              children: [
+                Text(l10n.inactivityTitle,
+                    style: const TextStyle(color: Colors.white70, fontSize: 12)),
+                Text("${fmt(elapsed)} / ${fmt(limit)}",
+                    style: const TextStyle(
+                        color: Colors.white, fontWeight: FontWeight.bold, fontSize: 12)),
+              ],
+            ),
           ),
           const SizedBox(height: 6),
           ClipRRect(
@@ -1747,3 +1772,41 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver, Ti
 }
 
 enum _AlertLevel { warning, critical }
+
+/// A title that wraps between words but never inside one. Only when a single
+/// word is wider than the whole line (a long name at 200 % on a small phone,
+/// e.g. "Профессиональный") is this one text scaled down, just enough for that
+/// word to fit; everywhere else it keeps the user's font size.
+class _WholeWordsText extends StatelessWidget {
+  const _WholeWordsText(this.text, {required this.style});
+
+  final String text;
+  final TextStyle style;
+
+  @override
+  Widget build(BuildContext context) {
+    return LayoutBuilder(builder: (context, constraints) {
+      final TextScaler scaler = MediaQuery.textScalerOf(context);
+      final TextStyle base = DefaultTextStyle.of(context).style.merge(style);
+      double widest = 0;
+      for (final String word in text.split(RegExp(r'\s+'))) {
+        if (word.isEmpty) continue;
+        final TextPainter tp = TextPainter(
+          text: TextSpan(text: word, style: base),
+          textDirection: Directionality.of(context),
+          textScaler: scaler,
+          maxLines: 1,
+        )..layout();
+        if (tp.width > widest) widest = tp.width;
+        tp.dispose();
+      }
+      final double fit = constraints.maxWidth.isFinite && widest > constraints.maxWidth
+          ? constraints.maxWidth / widest
+          : 1.0;
+      return Text(
+        text,
+        style: fit < 1.0 ? style.copyWith(fontSize: (base.fontSize ?? 14) * fit * 0.98) : style,
+      );
+    });
+  }
+}
