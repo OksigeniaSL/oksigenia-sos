@@ -2,82 +2,124 @@ name: Build Android Release
 
 on:
   push:
-    # Solo se activa con etiquetas de versión. Sin paths-ignore: combinado
-    # con un trigger de tags puede saltarse la build si el commit etiquetado
-    # sólo toca .md — y el commit de release toca changelog/README.
+    # Only version tags. No paths-ignore: combined with a tag trigger it can
+    # skip the build when the tagged commit only touches .md files, and the
+    # release commit touches the changelog and README.
     tags:
       - 'v*'
 
-# Necesario para crear la Release; no depender del default del repo.
+# Nothing gets write access by default; only the release job below does.
 permissions:
-  contents: write
+  contents: read
 
 jobs:
+  # Builds the APKs with no secrets at all: no keystore, no passwords, no
+  # write token. Every third-party action is pinned by commit SHA (a moved tag
+  # could otherwise run foreign code next to the signing key, as in the
+  # tj-actions incident), and checkout doesn't leave the token in .git/config,
+  # where Gradle and the plugins' build scripts could read it.
   build:
-    # Pinned (not ubuntu-latest): GitHub migrates the ubuntu-latest label to
-    # Ubuntu 26 between 2026-10-19 and 2026-11-19. This release build's
-    # byte-for-byte reproducibility (IzzyOnDroid/F-Droid) depends on a stable
-    # runner environment, and the Android SDK / build-tools / NDK are NOT pinned
-    # in this workflow — they come from the runner image. ubuntu-24.04 keeps the
-    # exact image that currently reproduces (same one that built v4.3.1). Move up
-    # deliberately, re-verifying RB, never by drift.
+    # Pinned (not ubuntu-latest): byte-for-byte reproducibility (IzzyOnDroid /
+    # F-Droid) depends on a stable runner image, and the Android SDK,
+    # build-tools and NDK come from that image. Move up deliberately,
+    # re-verifying RB, never by drift.
     runs-on: ubuntu-24.04
     steps:
-    - uses: actions/checkout@v5
+    - uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09 # v5.1.0
+      with:
+        persist-credentials: false
 
     - name: Setup Java
-      uses: actions/setup-java@v5
+      uses: actions/setup-java@b6effb05e454b25005698d916606bdc6ffcbf961 # v5.7.0
       with:
         distribution: 'zulu'
         # JDK 21 to match the F-Droid buildserver default → reproducible build
-        # (F-Droid moved its buildserver to JDK 21; aligning here keeps classes.dex
-        # byte-identical between this release and the F-Droid rebuild).
+        # (classes.dex byte-identical between this release and the F-Droid rebuild).
         java-version: '21'
 
     - name: Setup Flutter
-      uses: subosito/flutter-action@v2
+      uses: subosito/flutter-action@1a449444c387b1966244ae4d4f8c696479add0b2 # v2.23.0
       with:
-        flutter-version: '3.38.7'
+        # Exact version, never "stable": F-Droid and IzzyOnDroid rebuild with
+        # the same one. Changing it means updating their recipes too.
+        flutter-version: '3.47.9'
         channel: 'stable'
 
     - name: Get Dependencies
       run: flutter pub get
 
     # Reproducible Builds — strip the build-id embedded by the linker into
-    # libdartjni.so (transitive `jni` dep). Without this, every build produces
-    # a different .so and the APK fails IzzyOnDroid RB verification.
-    # Reported by IzzySoft in Issue #6 (oksigenia-sos GitHub).
+    # libdartjni.so (transitive `jni` dep, through path_provider_android).
+    # Without this, every build produces a different .so and the APK fails
+    # IzzyOnDroid RB verification. Reported by IzzySoft in Issue #6.
     - name: Patch jni for Reproducible Builds
       run: sed -i -e 's/-Wl,/-Wl,--build-id=none,/' $HOME/.pub-cache/hosted/*/jni-*/src/CMakeLists.txt
 
-    - name: Create Keystore
-      run: |
-        echo "${{ secrets.KEYSTORE_BASE64 }}" | tr -d '\n\r ' | base64 --decode > android/app/upload-keystore.jks
-        echo "storePassword=${{ secrets.KEY_PASSWORD }}" > android/key.properties
-        echo "keyPassword=${{ secrets.ALIAS_PASSWORD }}" >> android/key.properties
-        echo "keyAlias=${{ secrets.KEY_ALIAS }}" >> android/key.properties
-        echo "storeFile=upload-keystore.jks" >> android/key.properties
-
-    - name: Build Split APKs
+    # No android/key.properties here, so build.gradle.kts builds unsigned.
+    - name: Build split APKs (unsigned)
       run: flutter build apk --release --split-per-abi
 
-    # Release body = the F-Droid changelog for this version, so notes live in
-    # one place and the GitHub Release is never empty.
-    - name: Resolve changelog path
-      id: changelog
-      run: |
-        code="$(sed -n -E 's/^version:\s*.+\+([0-9]+).*/\1/p' pubspec.yaml)"
-        echo "path=metadata/en-US/changelogs/${code}.txt" >> "$GITHUB_OUTPUT"
-
-    - name: Create Release
-      uses: softprops/action-gh-release@v2
+    - name: Keep the unsigned APKs for the release job
+      uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
       with:
-        files: build/app/outputs/flutter-apk/app-*-release.apk
-        body_path: ${{ steps.changelog.outputs.path }}
-        draft: false
-        # Tags con sufijo (v4.2.0-beta.1) → pre-release: GitHub no las marca
-        # como "latest" y el crawler de IzzyOnDroid no las publica. Sólo los
-        # tags limpios (v4.2.0) llegan a Izzy.
-        prerelease: ${{ contains(github.ref_name, '-') }}
+        name: unsigned-apks
+        path: build/app/outputs/flutter-apk/app-*-release.apk
+        if-no-files-found: error
+        retention-days: 3
+
+  # Signs and publishes. It runs no build scripts and no third-party action
+  # besides artifact download: the signing key lives only here, in a temporary
+  # file that is removed at the end.
+  release:
+    needs: build
+    runs-on: ubuntu-24.04
+    permissions:
+      contents: write
+    steps:
+    - uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09 # v5.1.0
+      with:
+        persist-credentials: false
+
+    - name: Get the unsigned APKs
+      uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4.3.0
+      with:
+        name: unsigned-apks
+        path: unsigned
+
+    - name: Sign
       env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        KEYSTORE_BASE64: ${{ secrets.KEYSTORE_BASE64 }}
+        KEY_PASSWORD: ${{ secrets.KEY_PASSWORD }}
+        ALIAS_PASSWORD: ${{ secrets.ALIAS_PASSWORD }}
+        KEY_ALIAS: ${{ secrets.KEY_ALIAS }}
+      run: |
+        set -euo pipefail
+        bt=$(ls -d "$ANDROID_HOME"/build-tools/* | sort -V | tail -1)
+        umask 077
+        ks="$RUNNER_TEMP/release.jks"
+        trap 'rm -f "$ks"' EXIT
+        printf '%s' "$KEYSTORE_BASE64" | tr -d '\n\r ' | base64 --decode > "$ks"
+        mkdir -p signed
+        for f in unsigned/app-*-release.apk; do
+          out="signed/$(basename "$f")"
+          "$bt/apksigner" sign --ks "$ks" --ks-key-alias "$KEY_ALIAS" \
+            --ks-pass env:KEY_PASSWORD --key-pass env:ALIAS_PASSWORD \
+            --v4-signing-enabled false --out "$out" "$f"
+          "$bt/apksigner" verify --print-certs "$out" | grep -m1 'SHA-256 digest'
+        done
+
+    # Release body = the F-Droid changelog for this version, so notes live in
+    # one place. Tags with a suffix (v4.4.0-beta.1) become pre-releases, which
+    # GitHub doesn't mark as latest and IzzyOnDroid doesn't publish.
+    - name: Create Release
+      env:
+        GH_TOKEN: ${{ github.token }}
+      run: |
+        set -euo pipefail
+        code="$(sed -n -E 's/^version:\s*.+\+([0-9]+).*/\1/p' pubspec.yaml)"
+        pre=()
+        case "$GITHUB_REF_NAME" in *-*) pre=(--prerelease) ;; esac
+        gh release create "$GITHUB_REF_NAME" signed/app-*-release.apk \
+          --title "$GITHUB_REF_NAME" \
+          --notes-file "metadata/en-US/changelogs/${code}.txt" \
+          --verify-tag "${pre[@]}"
