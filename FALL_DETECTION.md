@@ -6,10 +6,12 @@ empirically on real devices (Pixel 7a and Pixel 8 running GrapheneOS) or derived
 literature. **Do not change a parameter without re-running the three-test protocol below and updating this
 file.**
 
-The goal is honesty about what an offline, smartphone-only fall detector can and cannot do. Lab-trained
-algorithms lose 30–50 % of their sensitivity on real-world falls (Palmerini & Klenk, *Measurement*, 2024;
-Bagalà et al., *PLOS ONE*, 2012). We therefore target **70–85 % real-world sensitivity**, never the 95 %+
-that lab papers claim, and we lean on the user's 30 s cancel window rather than on a perfect classifier.
+The goal is honesty about what an offline, smartphone-only fall detector can and cannot do. Algorithms
+that look near-perfect on simulated falls do much worse on real ones: 13 published algorithms averaged
+57 ± 27 % sensitivity on 29 real-world falls (Bagalà et al., *PLOS ONE*, 2012), and detectors overfit to the
+lab dataset they were tuned on (Silva, Casilari & García-Bermúdez, *Measurement*, 2024). We therefore target
+**70–85 % real-world sensitivity**, never the 95 %+ that lab papers claim, and we lean on the user's 30 s
+cancel window rather than on a perfect classifier.
 
 ## The two-stage detector
 
@@ -130,9 +132,12 @@ later. Constants (`lib/services/background_service.dart`):
 
 ## Literature
 
-- Palmerini & Klenk et al., cross-dataset evaluation, *Measurement* (2024).
+- Silva, Casilari & García-Bermúdez, cross-dataset evaluation of fall detectors, *Measurement* 235:114992
+  (2024).
+- Palmerini, Klenk, Becker & Chiari, fall detection on 143 real-world falls (FARSEEING), *Sensors*
+  20(22):6479 (2020).
 - Bagalà et al., "Evaluation of accelerometer-based fall detection algorithms on real-world falls", *PLOS
-  ONE* (2012).
+  ONE* 7(5):e37062 (2012).
 - Musci et al., online fall detection with recurrent networks, *Sensors* 21/13/4335 (2021) — canonical
   pre-impact / impact / post-impact segmentation with 3.5–3.75 s windows.
 - Casilari et al., review of smartphone-based fall detection, PMC10255727 (2023).
