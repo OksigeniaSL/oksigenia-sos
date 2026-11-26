@@ -96,6 +96,11 @@ class SOSLogic extends ChangeNotifier with WidgetsBindingObserver {
   // Smart Beacon activo tras un SOS: la UI lo refleja para ofrecer un botón
   // visible de parada (antes era imposible apagarlo desde la app).
   bool _beaconActive = false;
+  // How the last SOS went, for the sent screen: contacts reached, contacts in
+  // total, and how many wait in Sylvia's retry queue.
+  int _sentCount = 0;
+  int _sentTotal = 0;
+  int _retryPendingCount = 0;
 
   bool _smsPermissionOk = true;
   bool _notificationPermissionOk = true;
@@ -113,6 +118,11 @@ class SOSLogic extends ChangeNotifier with WidgetsBindingObserver {
   bool get fullScreenIntentOk => _fullScreenIntentOk;
   bool get bgLocationOk => _bgLocationOk;
   bool get beaconActive => _beaconActive;
+  int get sentCount => _sentCount;
+  int get sentTotal => _sentTotal;
+  int get retryPendingCount => _retryPendingCount;
+  /// True when the last SOS has not reached every contact.
+  bool get sentToEveryone => _sentTotal <= 0 || _sentCount >= _sentTotal;
   bool get smsPermissionOk => _smsPermissionOk;
   bool get notificationPermissionOk => _notificationPermissionOk;
   int get inactivityElapsedSeconds => isMonitoringPaused
@@ -191,6 +201,8 @@ class SOSLogic extends ChangeNotifier with WidgetsBindingObserver {
         'resumeNow': l10n.pauseResumeNow,
         'smsBeaconHeader': l10n.smsBeaconHeader,
         'smsBeaconDistance': l10n.smsBeaconDistance,
+        // Sylvia fills in the two numbers.
+        'sentPartialTitle': l10n.sentPartialTitle('{sent}', '{total}'),
         'smsLiveTrackingHeader': l10n.smsLiveTrackingHeader,
         'smsLiveCheckinHeader': l10n.smsLiveCheckinHeader,
       };
@@ -322,7 +334,7 @@ class SOSLogic extends ChangeNotifier with WidgetsBindingObserver {
     }));
 
     _serviceSubscriptions.add(service.on("onSosSent").listen((event) {
-      _onServiceSendResult(((event?["sent"]) ?? 0) as int);
+      _onServiceSendResult(((event?["sent"]) ?? 0) as int, event);
     }));
 
     _startGForceMonitoring();
@@ -640,7 +652,7 @@ class SOSLogic extends ChangeNotifier with WidgetsBindingObserver {
     });
   }
 
-  void _onServiceSendResult(int sentCount) async {
+  void _onServiceSendResult(int sentCount, [Map<String, dynamic>? details]) async {
     // Confirmación de Sylvia. Se acepta también en preAlert: si su zombie
     // ganó la carrera y ya envió, mostrar SentScreen es lo veraz.
     // Also from the error screen: a queued retry that got through later is the
@@ -658,6 +670,14 @@ class SOSLogic extends ChangeNotifier with WidgetsBindingObserver {
       return;
     }
 
+    // What the sent screen will say: Sylvia tells how many contacts have it.
+    final int? reached = (details?["reached"] ?? details?["sent"]) as int?;
+    final int? total = details?["total"] as int?;
+    if (reached != null && total != null) {
+      _sentCount = reached;
+      _sentTotal = total;
+      _retryPendingCount = (details?["pending"] as int?) ?? 0;
+    }
     _setStatus(SOSStatus.sent);
     final sharedPrefs = await SharedPreferences.getInstance();
     await sharedPrefs.setBool('sos_sent_recently', true);
@@ -682,6 +702,32 @@ class SOSLogic extends ChangeNotifier with WidgetsBindingObserver {
           MaterialPageRoute(builder: (context) => const SentScreen())
        );
     }
+  }
+
+  /// Reads how the last SOS went from what both isolates leave in prefs:
+  /// contacts reached, contacts in total, the retry queue and the beacon. The
+  /// sent screen calls it when it opens, which also covers a UI that was not
+  /// running when Sylvia sent.
+  Future<void> refreshSentSummary() async {
+    try {
+      final p = await SharedPreferences.getInstance();
+      await p.reload();
+      final int total = p.getInt(PreferencesService.keySosLastTotal) ?? 0;
+      final int sent = p.getInt(PreferencesService.keySosLastSent) ?? 0;
+      final bool queued = p.getBool(PreferencesService.keySosRetryActive) ?? false;
+      final int pending = queued
+          ? (p.getStringList(PreferencesService.keySosRetryNumbers) ?? const []).length
+          : 0;
+      final bool beacon = p.getBool('beacon_active') ?? false;
+      if (total != _sentTotal || sent != _sentCount ||
+          pending != _retryPendingCount || beacon != _beaconActive) {
+        _sentTotal = total;
+        _sentCount = sent;
+        _retryPendingCount = pending;
+        _beaconActive = beacon;
+        notifyListeners();
+      }
+    } catch (_) {}
   }
 
   Future<void> refreshConfig() async {
@@ -1352,11 +1398,18 @@ class SOSLogic extends ChangeNotifier with WidgetsBindingObserver {
         Vibration.cancel();
       } catch (e) {}
 
+      // How it went, for the sent screen (set before the status changes, so
+      // its first frame is already the honest one).
+      _sentCount = successCount;
+      _sentTotal = recipients.length;
+      _retryPendingCount = pending.length;
       _setStatus(SOSStatus.sent);
 
       final sharedPrefs = await SharedPreferences.getInstance();
       await sharedPrefs.setBool('sos_sent_recently', true);
       await sharedPrefs.setBool('is_alarm_active', false);
+      await sharedPrefs.setInt(PreferencesService.keySosLastSent, successCount);
+      await sharedPrefs.setInt(PreferencesService.keySosLastTotal, recipients.length);
 
       // Smart Beacon: arm post-SOS position-update protocol. Sylvia (service)
       // polls these flags in _beaconTick from the inactivity checker loop.

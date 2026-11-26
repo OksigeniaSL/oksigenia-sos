@@ -58,6 +58,22 @@ class AppLocalizationsRu extends AppLocalizations {
   String get smsLiveCheckinHeader => '✅ Я В ПОРЯДКЕ — Oksigenia SOS';
 
   @override
+  String sentPartialTitle(String sent, String total) {
+    return 'Тревога отправлена $sent из $total контактов';
+  }
+
+  @override
+  String get sentBeaconInfo =>
+      'Если вы переместитесь более чем на 300 м, новое местоположение будет отправлено вашим контактам.';
+
+  @override
+  String get sentStopExplain =>
+      'Кнопка ниже останавливает отправку местоположения и ожидающие повторные попытки. Нажимайте её, только когда будете в безопасности.';
+
+  @override
+  String get btnSafeStop => 'Я В БЕЗОПАСНОСТИ — ОСТАНОВИТЬ';
+
+  @override
   String statusError(Object error) {
     return 'ОШИБКА: $error';
   }

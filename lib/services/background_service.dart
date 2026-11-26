@@ -131,6 +131,7 @@ Map<String, String> _texts = {
   'resumeNow': 'Resume now',
   'smsBeaconHeader': 'OKSIGENIA SOS - follow-up (NOT a new alarm):',
   'smsBeaconDistance': 'from the SOS point.',
+  'sentPartialTitle': 'Alert sent to {sent} of {total} contacts',
   // Routine messages, casual on purpose: these two keep their emojis.
   'smsLiveTrackingHeader': '📍 LIVE TRACKING — Oksigenia SOS',
   'smsLiveCheckinHeader': "✅ I'M OK — Oksigenia SOS",
@@ -505,6 +506,14 @@ void onStart(ServiceInstance service) async {
   Future<bool> _sendSmsTracked(String to, String message,
           {bool overLimit = false}) async =>
       sosSmsDelivered(await _sendSmsOutcome(to, message, overLimit: overLimit));
+
+  // Title of the "sent" notification: it only says "sent" when every contact
+  // has the SOS; otherwise it says how many do.
+  String sentTitle(int reached, int total) => reached >= total
+      ? (_texts['statusSent'] ?? 'Alert sent successfully.')
+      : (_texts['sentPartialTitle'] ?? 'Alert sent to {sent} of {total} contacts')
+          .replaceAll('{sent}', '$reached')
+          .replaceAll('{total}', '$total');
 
   Future<void> _sendLiveTrackingSMS({bool isCheckin = false}) async {
     if (_recipients.isEmpty) {
@@ -960,6 +969,12 @@ void onStart(ServiceInstance service) async {
 
       if (delivered > 0) {
         await p.setBool('sos_sent_recently', true);
+        // The running count of this SOS, for the sent screen and this notice.
+        final int reached = (p.getInt(PreferencesService.keySosLastSent) ?? 0) + delivered;
+        final int total = max(p.getInt(PreferencesService.keySosLastTotal) ?? 0,
+            reached + (stillQueued ? still.length : 0));
+        await p.setInt(PreferencesService.keySosLastSent, reached);
+        await p.setInt(PreferencesService.keySosLastTotal, total);
         if (!(p.getBool('beacon_active') ?? false)) {
           if (pos != null) {
             await _activateBeacon(pos);
@@ -969,14 +984,19 @@ void onStart(ServiceInstance service) async {
         }
         flutterLocalNotificationsPlugin.show(
           id: notificationId,
-          title: _texts['statusSent'],
+          title: sentTitle(reached, total),
           body: still.isEmpty ? _texts['statusReady'] : _texts['statusSendRetrying'],
           notificationDetails: const NotificationDetails(
               android: AndroidNotificationDetails(channelId, 'Oksigenia SOS',
                   icon: 'ic_stat_oksigenia', importance: Importance.high)),
         );
         await _reproducirConfirmacion();
-        service.invoke("onSosSent", {"sent": delivered, "pending": still.length});
+        service.invoke("onSosSent", {
+          "sent": delivered,
+          "reached": reached,
+          "total": total,
+          "pending": stillQueued ? still.length : 0,
+        });
       }
     } catch (e) {
       _logSentinel("SYLVIA SMS: ❌ SOS retry error: $e");
@@ -1267,6 +1287,14 @@ void onStart(ServiceInstance service) async {
           await p.setBool('sos_sent_recently', sentCount > 0);
           final bool retryPending =
               p.getBool(PreferencesService.keySosRetryActive) ?? false;
+          // How it went, for the sent screen: it must not say "sent" when the
+          // SOS reached one contact of three.
+          final int totalContacts = _recipients.length;
+          final int pendingCount = retryPending
+              ? (p.getStringList(PreferencesService.keySosRetryNumbers) ?? const []).length
+              : 0;
+          await p.setInt(PreferencesService.keySosLastSent, sentCount);
+          await p.setInt(PreferencesService.keySosLastTotal, totalContacts);
 
           _lastMovementTime = DateTime.now().add(const Duration(seconds: 60));
 
@@ -1274,7 +1302,7 @@ void onStart(ServiceInstance service) async {
           if (sentCount > 0) {
             flutterLocalNotificationsPlugin.show(
               id: notificationId,
-              title: _texts['statusSent'],
+              title: sentTitle(sentCount, totalContacts),
               body: retryPending ? _texts['statusSendRetrying'] : _texts['statusReady'],
               notificationDetails: const NotificationDetails(
                   android: AndroidNotificationDetails(
@@ -1299,7 +1327,12 @@ void onStart(ServiceInstance service) async {
                       priority: Priority.max)),
             );
           }
-          service.invoke("onSosSent", {"sent": sentCount});
+          service.invoke("onSosSent", {
+            "sent": sentCount,
+            "reached": sentCount,
+            "total": totalContacts,
+            "pending": pendingCount,
+          });
         } catch (e) {
           _logSentinel("SYLVIA SERVICE: ❌ Error en protocolo de envío: $e");
         } finally {

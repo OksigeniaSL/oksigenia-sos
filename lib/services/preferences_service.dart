@@ -54,6 +54,12 @@ class PreferencesService {
   static const String keySosRetryAttempt = 'sos_retry_attempt';
   static const String keySosRetryUntil = 'sos_retry_until_ms';
 
+  // How the last SOS went: contacts reached so far and contacts in total.
+  // Written by whichever isolate sent it (and by Sylvia after each retry), read
+  // by the sent screen, which must not say "sent" when it reached 1 of 3.
+  static const String keySosLastSent = 'sos_last_sent';
+  static const String keySosLastTotal = 'sos_last_total';
+
   Future<void> init() async {
     _prefs = await SharedPreferences.getInstance();
   }

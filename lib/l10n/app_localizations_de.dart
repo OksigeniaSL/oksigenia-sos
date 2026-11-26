@@ -58,6 +58,22 @@ class AppLocalizationsDe extends AppLocalizations {
   String get smsLiveCheckinHeader => '✅ ALLES OK — Oksigenia SOS';
 
   @override
+  String sentPartialTitle(String sent, String total) {
+    return 'Alarm an $sent von $total Kontakten gesendet';
+  }
+
+  @override
+  String get sentBeaconInfo =>
+      'Wenn du dich mehr als 300 m bewegst, wird dein neuer Standort an deine Kontakte gesendet.';
+
+  @override
+  String get sentStopExplain =>
+      'Die Taste unten stoppt die Standort-Updates und die ausstehenden Sendeversuche. Drücke sie erst, wenn du in Sicherheit bist.';
+
+  @override
+  String get btnSafeStop => 'ICH BIN IN SICHERHEIT — STOPPEN';
+
+  @override
   String statusError(Object error) {
     return 'FEHLER: $error';
   }
