@@ -128,7 +128,7 @@ class SOSLogic extends ChangeNotifier with WidgetsBindingObserver {
   int get sentCount => _sentCount;
   int get sentTotal => _sentTotal;
   int get retryPendingCount => _retryPendingCount;
-  /// True when the last SOS has not reached every contact.
+  /// True when the last SOS reached every contact (or its count is unknown).
   bool get sentToEveryone => _sentTotal <= 0 || _sentCount >= _sentTotal;
   bool get smsPermissionOk => _smsPermissionOk;
   bool get notificationPermissionOk => _notificationPermissionOk;
