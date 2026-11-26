@@ -787,6 +787,38 @@ class AppLocalizationsPl extends AppLocalizations {
       'Alarm zostanie anulowany za 2 sekundy. Stuknij dwukrotnie, aby go zachować.';
 
   @override
+  String get a11yMotionOk => 'Czujnik ruchu działa';
+
+  @override
+  String get a11yMotionOff => 'Brak zgody na czujnik ruchu';
+
+  @override
+  String a11yBattery(int level) {
+    return 'Bateria $level%';
+  }
+
+  @override
+  String a11yBatteryRestricted(int level) {
+    return 'Bateria $level%, ograniczona przez Androida';
+  }
+
+  @override
+  String a11yGps(String meters) {
+    return 'Dokładność GPS $meters m';
+  }
+
+  @override
+  String get a11yGpsNone => 'GPS: brak pozycji';
+
+  @override
+  String get a11yAddContact => 'Dodaj kontakt';
+
+  @override
+  String a11yDeleteContact(String number) {
+    return 'Usuń $number';
+  }
+
+  @override
   String get contactCheckTitle => 'Czy numer kierunkowy kraju jest poprawny?';
 
   @override

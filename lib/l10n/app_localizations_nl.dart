@@ -791,6 +791,38 @@ class AppLocalizationsNl extends AppLocalizations {
       'Het alarm wordt over 2 seconden geannuleerd. Dubbeltik om het te behouden.';
 
   @override
+  String get a11yMotionOk => 'Bewegingssensor actief';
+
+  @override
+  String get a11yMotionOff => 'Bewegingssensor niet toegestaan';
+
+  @override
+  String a11yBattery(int level) {
+    return 'Batterij $level%';
+  }
+
+  @override
+  String a11yBatteryRestricted(int level) {
+    return 'Batterij $level%, beperkt door Android';
+  }
+
+  @override
+  String a11yGps(String meters) {
+    return 'GPS-nauwkeurigheid $meters m';
+  }
+
+  @override
+  String get a11yGpsNone => 'GPS: nog geen positie';
+
+  @override
+  String get a11yAddContact => 'Contact toevoegen';
+
+  @override
+  String a11yDeleteContact(String number) {
+    return '$number verwijderen';
+  }
+
+  @override
   String get contactCheckTitle => 'Klopt de landcode?';
 
   @override

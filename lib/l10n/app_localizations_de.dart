@@ -785,6 +785,38 @@ class AppLocalizationsDe extends AppLocalizations {
       'Der Alarm wird in 2 Sekunden abgebrochen. Doppelt tippen, um ihn beizubehalten.';
 
   @override
+  String get a11yMotionOk => 'Bewegungssensor aktiv';
+
+  @override
+  String get a11yMotionOff => 'Bewegungssensor nicht erlaubt';
+
+  @override
+  String a11yBattery(int level) {
+    return 'Akku $level %';
+  }
+
+  @override
+  String a11yBatteryRestricted(int level) {
+    return 'Akku $level %, von Android eingeschränkt';
+  }
+
+  @override
+  String a11yGps(String meters) {
+    return 'GPS-Genauigkeit $meters m';
+  }
+
+  @override
+  String get a11yGpsNone => 'GPS: noch keine Position';
+
+  @override
+  String get a11yAddContact => 'Kontakt hinzufügen';
+
+  @override
+  String a11yDeleteContact(String number) {
+    return '$number löschen';
+  }
+
+  @override
   String get contactCheckTitle => 'Stimmt die Ländervorwahl?';
 
   @override

@@ -300,76 +300,39 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver, Ti
                 mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                 children: [
                   // Fuerza G
-                  GestureDetector(
+                  _statusIndicator(
+                    a11yLabel: _sosLogic.sensorsPermissionOk ? l10n.a11yMotionOk : l10n.a11yMotionOff,
                     onTap: !_sosLogic.sensorsPermissionOk ? () {
                       _showSensorErrorDialog(context, l10n);
                     } : null,
-                    child: Column(
-                      children: [
-                        Icon(gForceIcon, color: gForceColor, size: 48),
-                        const SizedBox(height: 6),
-                        Text(
-                          gForceText,
-                          style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 14, color: Colors.white)
-                        ),
-                      ],
-                    ),
+                    icon: Icon(gForceIcon, color: gForceColor, size: 48),
+                    text: gForceText,
                   ),
 
                   // Batería
-                  GestureDetector(
+                  _statusIndicator(
+                    a11yLabel: _sosLogic.batteryOptimizationOk
+                        ? l10n.a11yBattery(_sosLogic.batteryLevel)
+                        : l10n.a11yBatteryRestricted(_sosLogic.batteryLevel),
                     onTap: !_sosLogic.batteryOptimizationOk ? () {
                        _showBatteryDialog(context, l10n);
                     } : null,
-                    child: Column(
-                      children: [
-                        Icon(battIcon, color: battColor, size: 48),
-                        const SizedBox(height: 6),
-                        Text(
-                          "${_sosLogic.batteryLevel}%", 
-                          style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 14, color: Colors.white)
-                        ),
-                      ],
-                    ),
+                    icon: Icon(battIcon, color: battColor, size: 48),
+                    text: "${_sosLogic.batteryLevel}%",
                   ),
 
                   // GPS
-                  GestureDetector(
-                    onTap: () {
-                      showDialog(
-                        context: context,
-                        builder: (ctx) => AlertDialog(
-                          title: Row(
-                            children: [
-                              const Icon(Icons.info_outline, color: Colors.blue),
-                              const SizedBox(width: 10),
-                              Text(l10n.gpsHelpTitle),
-                            ],
-                          ),
-                          content: Text(l10n.gpsHelpBody),
-                          actions: [
-                            TextButton(
-                              onPressed: () => Navigator.pop(ctx),
-                              child: const Text("OK"),
-                            )
-                          ],
-                        ),
-                      );
-                    },
-                    child: Column(
-                      children: [
-                        Icon(
-                          Icons.gps_fixed, 
-                          color: _sosLogic.gpsAccuracy > 0 ? Colors.green : Colors.grey, 
-                          size: 48
-                        ),
-                        const SizedBox(height: 6),
-                        Text(
-                          _sosLogic.gpsAccuracy > 0 ? "${_sosLogic.gpsAccuracy.toStringAsFixed(0)}m" : "--", 
-                          style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 14, color: Colors.white)
-                        ),
-                      ],
+                  _statusIndicator(
+                    a11yLabel: _sosLogic.gpsAccuracy > 0
+                        ? l10n.a11yGps(_sosLogic.gpsAccuracy.toStringAsFixed(0))
+                        : l10n.a11yGpsNone,
+                    onTap: () => _showGpsHelp(l10n),
+                    icon: Icon(
+                      Icons.gps_fixed, 
+                      color: _sosLogic.gpsAccuracy > 0 ? Colors.green : Colors.grey, 
+                      size: 48
                     ),
+                    text: _sosLogic.gpsAccuracy > 0 ? "${_sosLogic.gpsAccuracy.toStringAsFixed(0)}m" : "--",
                   ),
                 ],
               ),
@@ -1577,6 +1540,55 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver, Ti
             ),
           );
         },
+      ),
+    );
+  }
+
+  // One indicator under the profile card. Screen readers heard only "1.00G",
+  // "80%" or "--"; they now get a sentence, and the tap action when there is
+  // one.
+  Widget _statusIndicator({required String a11yLabel, VoidCallback? onTap, required Widget icon, required String text}) {
+    return Semantics(
+      container: true,
+      button: onTap != null,
+      label: a11yLabel,
+      onTap: onTap,
+      excludeSemantics: true,
+      child: GestureDetector(
+        behavior: HitTestBehavior.opaque,
+        onTap: onTap,
+        child: Column(
+          children: [
+            icon,
+            const SizedBox(height: 6),
+            Text(
+              text,
+              style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 14, color: Colors.white)
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  void _showGpsHelp(AppLocalizations l10n) {
+    showDialog(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: Row(
+          children: [
+            const Icon(Icons.info_outline, color: Colors.blue),
+            const SizedBox(width: 10),
+            Expanded(child: Text(l10n.gpsHelpTitle)),
+          ],
+        ),
+        content: SingleChildScrollView(child: Text(l10n.gpsHelpBody)),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(ctx),
+            child: const Text("OK"),
+          )
+        ],
       ),
     );
   }

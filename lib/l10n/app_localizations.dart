@@ -1532,6 +1532,54 @@ abstract class AppLocalizations {
   /// **'Cancelling the alert in 2 seconds. Double-tap to keep it.'**
   String get a11yAlarmCancelCountdown;
 
+  /// Screen-reader name of the motion (G-force) indicator on Home when the sensor works.
+  ///
+  /// In en, this message translates to:
+  /// **'Motion sensor working'**
+  String get a11yMotionOk;
+
+  /// Screen-reader name of the motion indicator when the sensor permission is missing (tapping it explains).
+  ///
+  /// In en, this message translates to:
+  /// **'Motion sensor not allowed'**
+  String get a11yMotionOff;
+
+  /// Screen-reader name of the battery indicator.
+  ///
+  /// In en, this message translates to:
+  /// **'Battery {level}%'**
+  String a11yBattery(int level);
+
+  /// Battery indicator when Android's battery optimisation can stop the app (tapping it explains).
+  ///
+  /// In en, this message translates to:
+  /// **'Battery {level}%, restricted by Android'**
+  String a11yBatteryRestricted(int level);
+
+  /// Screen-reader name of the GPS indicator with a fix.
+  ///
+  /// In en, this message translates to:
+  /// **'GPS accurate to {meters} m'**
+  String a11yGps(String meters);
+
+  /// Screen-reader name of the GPS indicator showing '--'.
+  ///
+  /// In en, this message translates to:
+  /// **'GPS: no position yet'**
+  String get a11yGpsNone;
+
+  /// Screen-reader name / tooltip of the + button in Settings.
+  ///
+  /// In en, this message translates to:
+  /// **'Add contact'**
+  String get a11yAddContact;
+
+  /// Screen-reader name / tooltip of the bin button next to a contact.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete {number}'**
+  String a11yDeleteContact(String number);
+
   /// No description provided for @contactCheckTitle.
   ///
   /// In en, this message translates to:

@@ -789,6 +789,38 @@ class AppLocalizationsSv extends AppLocalizations {
       'Larmet avbryts om 2 sekunder. Dubbeltryck för att behålla det.';
 
   @override
+  String get a11yMotionOk => 'Rörelsesensor aktiv';
+
+  @override
+  String get a11yMotionOff => 'Rörelsesensor inte tillåten';
+
+  @override
+  String a11yBattery(int level) {
+    return 'Batteri $level %';
+  }
+
+  @override
+  String a11yBatteryRestricted(int level) {
+    return 'Batteri $level %, begränsat av Android';
+  }
+
+  @override
+  String a11yGps(String meters) {
+    return 'GPS-noggrannhet $meters m';
+  }
+
+  @override
+  String get a11yGpsNone => 'GPS: ingen position än';
+
+  @override
+  String get a11yAddContact => 'Lägg till kontakt';
+
+  @override
+  String a11yDeleteContact(String number) {
+    return 'Ta bort $number';
+  }
+
+  @override
   String get contactCheckTitle => 'Stämmer landsnumret?';
 
   @override

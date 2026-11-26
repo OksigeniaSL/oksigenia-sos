@@ -783,6 +783,38 @@ class AppLocalizationsEn extends AppLocalizations {
       'Cancelling the alert in 2 seconds. Double-tap to keep it.';
 
   @override
+  String get a11yMotionOk => 'Motion sensor working';
+
+  @override
+  String get a11yMotionOff => 'Motion sensor not allowed';
+
+  @override
+  String a11yBattery(int level) {
+    return 'Battery $level%';
+  }
+
+  @override
+  String a11yBatteryRestricted(int level) {
+    return 'Battery $level%, restricted by Android';
+  }
+
+  @override
+  String a11yGps(String meters) {
+    return 'GPS accurate to $meters m';
+  }
+
+  @override
+  String get a11yGpsNone => 'GPS: no position yet';
+
+  @override
+  String get a11yAddContact => 'Add contact';
+
+  @override
+  String a11yDeleteContact(String number) {
+    return 'Delete $number';
+  }
+
+  @override
   String get contactCheckTitle => 'Is the country code right?';
 
   @override

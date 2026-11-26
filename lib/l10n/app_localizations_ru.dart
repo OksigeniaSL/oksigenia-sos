@@ -789,6 +789,38 @@ class AppLocalizationsRu extends AppLocalizations {
       'Тревога отменится через 2 секунды. Дважды коснитесь, чтобы оставить её.';
 
   @override
+  String get a11yMotionOk => 'Датчик движения работает';
+
+  @override
+  String get a11yMotionOff => 'Нет доступа к датчику движения';
+
+  @override
+  String a11yBattery(int level) {
+    return 'Батарея $level%';
+  }
+
+  @override
+  String a11yBatteryRestricted(int level) {
+    return 'Батарея $level%, ограничена Android';
+  }
+
+  @override
+  String a11yGps(String meters) {
+    return 'Точность GPS $meters м';
+  }
+
+  @override
+  String get a11yGpsNone => 'GPS: позиция ещё не определена';
+
+  @override
+  String get a11yAddContact => 'Добавить контакт';
+
+  @override
+  String a11yDeleteContact(String number) {
+    return 'Удалить $number';
+  }
+
+  @override
   String get contactCheckTitle => 'Код страны указан верно?';
 
   @override

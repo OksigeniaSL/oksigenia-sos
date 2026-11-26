@@ -785,6 +785,38 @@ class AppLocalizationsPt extends AppLocalizations {
       'O alerta é cancelado dentro de 2 segundos. Toque duas vezes para o manter.';
 
   @override
+  String get a11yMotionOk => 'Sensor de movimento ativo';
+
+  @override
+  String get a11yMotionOff => 'Sensor de movimento sem permissão';
+
+  @override
+  String a11yBattery(int level) {
+    return 'Bateria $level%';
+  }
+
+  @override
+  String a11yBatteryRestricted(int level) {
+    return 'Bateria $level%, restrita pelo Android';
+  }
+
+  @override
+  String a11yGps(String meters) {
+    return 'GPS com precisão de $meters m';
+  }
+
+  @override
+  String get a11yGpsNone => 'GPS: ainda sem posição';
+
+  @override
+  String get a11yAddContact => 'Adicionar contacto';
+
+  @override
+  String a11yDeleteContact(String number) {
+    return 'Apagar $number';
+  }
+
+  @override
   String get contactCheckTitle => 'O indicativo do país está correto?';
 
   @override

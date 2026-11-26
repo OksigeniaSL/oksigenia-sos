@@ -789,6 +789,38 @@ class AppLocalizationsNb extends AppLocalizations {
       'Alarmen avbrytes om 2 sekunder. Dobbelttrykk for å beholde den.';
 
   @override
+  String get a11yMotionOk => 'Bevegelsessensor aktiv';
+
+  @override
+  String get a11yMotionOff => 'Bevegelsessensor ikke tillatt';
+
+  @override
+  String a11yBattery(int level) {
+    return 'Batteri $level %';
+  }
+
+  @override
+  String a11yBatteryRestricted(int level) {
+    return 'Batteri $level %, begrenset av Android';
+  }
+
+  @override
+  String a11yGps(String meters) {
+    return 'GPS-nøyaktighet $meters m';
+  }
+
+  @override
+  String get a11yGpsNone => 'GPS: ingen posisjon ennå';
+
+  @override
+  String get a11yAddContact => 'Legg til kontakt';
+
+  @override
+  String a11yDeleteContact(String number) {
+    return 'Slett $number';
+  }
+
+  @override
   String get contactCheckTitle => 'Er landskoden riktig?';
 
   @override
