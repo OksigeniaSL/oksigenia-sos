@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:convert';
 import 'dart:io';
 import 'dart:ui';
 import 'dart:math';
@@ -15,11 +16,15 @@ import 'package:another_telephony/telephony.dart';
 import 'package:battery_plus/battery_plus.dart';
 import 'package:path_provider/path_provider.dart';
 import '../logic/activity_profile.dart';
+import '../utils/beacon_fix.dart';
 import '../utils/phone_utils.dart';
+import '../utils/sentinel_log.dart';
 import 'package:oksigenia_sms/oksigenia_sms.dart';
 import '../utils/geo_links.dart';
+import '../utils/inactivity_backstop.dart';
 import '../utils/sms_budget.dart';
 import '../utils/sms_splitter.dart';
+import '../utils/sms_text.dart';
 import '../utils/sos_sms.dart';
 import 'preferences_service.dart';
 import 'package:timezone/data/latest_all.dart' as tz;
@@ -34,6 +39,8 @@ const int notificationId = 888;
 const int alarmNotifId = 890;
 const int _liveTrackingAlarmId = 891;
 const int _liveTrackingShutdownAlarmId = 892;
+// Only Sylvia reads and writes it: when the shutdown reminder is due (epoch ms).
+const String _liveTrackingShutdownAtKey = 'live_tracking_shutdown_at_ms';
 
 // 🟢 CAMBIO: AudioPlayer ahora es dinámico, no estático
 AudioPlayer? _audioPlayer;
@@ -43,11 +50,15 @@ final Battery _battery = Battery();
 // File logger for Smart Sentinel events. Writes to external scoped storage so
 // we can pull it without run-as (release APKs block run-as):
 //   adb pull /sdcard/Android/data/com.oksigenia.oksigenia_sos/files/sentinel.log
+// At about 2 MB it rotates to sentinel.log.1 (one older file is kept).
 // On first run after upgrading, migrates any pre-existing internal log.
 File? _sentinelLogFile;
 bool _sentinelLogMigrated = false;
 
-void _logSentinel(String line) {
+void _logSentinel(String rawLine) {
+  // No contact numbers and no exact positions, in the file or in logcat: the
+  // log sits in external storage and users paste it into public issues.
+  final String line = scrubLogLine(rawLine);
   print(line);
   // El timestamp se captura AQUÍ (no dentro del append encolado) para que la
   // hora refleje el evento y no el momento en que la cola llegó a escribirlo.
@@ -94,8 +105,7 @@ Future<void> _sentinelLogAppend(String line) async {
         }
       }
     }
-    await _sentinelLogFile!
-        .writeAsString('$line\n', mode: FileMode.append, flush: true);
+    await appendToRotatingLog(_sentinelLogFile!, line);
   } catch (e) {
     print("SENTINEL LOG err: $e");
   }
@@ -104,22 +114,35 @@ Future<void> _sentinelLogAppend(String line) async {
 // Variables de Configuración
 List<String> _recipients = [];
 String _customMessage = "";
+// English until the UI sends its own with setConfig; Sylvia saves those and
+// restores them in _loadConfigFromDisk, so a start without the UI (boot,
+// watchdog) keeps the user's language. Same wording as app_en.arb, and the SMS
+// ones in plain GSM-7 (no emojis, no dashes) like the translations.
 Map<String, String> _texts = {
   'alertFallDetected': 'IMPACT DETECTED!',
+  'alertInactivityDetected': 'INACTIVITY DETECTED!',
+  'alertInactivityBody': 'No movement detected. Are you okay?',
   'holdToCancel': 'Hold to cancel',
   'alertSendingIn': 'Sending alert in...',
   'statusSent': 'Alert sent successfully.',
   'statusSendFailed': '⚠️ SOS NOT SENT',
   'statusSendFailedBody': 'No SMS could be sent. Check signal and contacts, then retry.',
-  'statusSendRetrying': 'Not sent to every contact yet. Retrying automatically.',
+  'statusSendRetrying': 'Not every contact has it yet (no signal?). Retrying automatically.',
   'statusReady': 'Oksigenia System Ready.',
-  'smsHelpMessage': 'HELP! SOS!',
-  'smsDyingGasp': 'BATTERY CRITICAL. Bye.',
+  'smsHelpMessage': 'HELP! I need assistance.',
+  'smsDyingGasp': 'BATTERY <5%. System shutting down. Loc:',
   'pauseTitle': 'Monitoring paused',
-  'resumesIn': 'Resumes in',
+  'pauseNotifResumesIn': 'Resumes in {time}',
   'resumeNow': 'Resume now',
-  'smsBeaconHeader': '📍 OKSIGENIA SOS — automatic follow-up to my emergency alert (this is NOT a new alarm). My updated location:',
-  'smsBeaconDistance': 'from the point where the SOS was sent.',
+  'smsBeaconHeader': 'OKSIGENIA SOS - follow-up (NOT a new alarm):',
+  'smsBeaconDistance': 'from the SOS point.',
+  'sentPartialTitle': 'Alert sent to {sent} of {total} contacts',
+  'liveTrackingTitle': 'Live Tracking',
+  'liveTrackingCardTitle': 'Live Tracking Active',
+  'liveTrackingShutdownReminder': 'Shutdown reminder',
+  // Routine messages, casual on purpose: these two keep their emojis.
+  'smsLiveTrackingHeader': '📍 LIVE TRACKING — Oksigenia SOS',
+  'smsLiveCheckinHeader': "✅ I'M OK — Oksigenia SOS",
 };
 
 // Smart Beacon: post-SOS position-update SMS protocol.
@@ -134,6 +157,11 @@ const double _beaconDistanceM = 300.0;
 const int _beaconMinIntervalSeconds = 300;
 const int _beaconMaxUpdates = 20;
 const int _beaconWindowSeconds = 14400;
+
+// The alarm causes Sylvia knows. Anything else (a missing or older value)
+// counts as a fall, the previous default.
+String _alarmCause(Object? raw) =>
+    (raw == 'inactivity' || raw == 'manual') ? raw as String : 'fall';
 
 // Variables Globales
 Timer? _zombieTimer;
@@ -229,7 +257,17 @@ void onStart(ServiceInstance service) async {
 
   // AlarmClock anti-Doze
   const int _inactivityAlarmNotifId = 889;
+  // The last movement the backstop is armed from (see _scheduleInactivityAlarmClock).
   DateTime _lastAlarmReschedule = DateTime.fromMillisecondsSinceEpoch(0);
+
+  // Profile in force (its name), to tell a real change of setMonitoring from a
+  // repeat of what Sylvia already has.
+  String activeProfileName = '';
+  // Completed once _loadConfigFromDisk has run. setMonitoring and setConfig
+  // wait for it: the state saved on disk goes first, live changes after. A UI
+  // that starts together with Sylvia used to race it, and whichever came last
+  // won (texts, flags and the inactivity backstop among them).
+  final Completer<void> diskConfigLoaded = Completer<void>();
 
   // Timed pause
   DateTime _pausedUntil = DateTime.fromMillisecondsSinceEpoch(0);
@@ -356,54 +394,96 @@ void onStart(ServiceInstance service) async {
     _shieldTimer = Timer(Duration(seconds: segundos), () => _sensorCooldown = false);
   }
 
-  Future<void> _scheduleInactivityAlarmClock() async {
-    if (!_isMonitoringInactivity) return;
-    try {
-      final scheduledDate = tz.TZDateTime.now(tz.UTC).add(Duration(seconds: _inactivityLimitSeconds));
-      await flutterLocalNotificationsPlugin.cancel(id: _inactivityAlarmNotifId);
-      await flutterLocalNotificationsPlugin.zonedSchedule(
-        id: _inactivityAlarmNotifId,
-        title: "🚨 OKSIGENIA SOS",
-        body: _texts['holdToCancel'] ?? 'Hold to cancel',
-        scheduledDate: scheduledDate,
-        notificationDetails: const NotificationDetails(
-          android: AndroidNotificationDetails(
-            alarmChannelId, 'Oksigenia SOS Alarm',
-            icon: 'ic_stat_oksigenia',
-            importance: Importance.max,
-            priority: Priority.max,
-            fullScreenIntent: true,
-            color: Color(0xFFFF0000),
-            playSound: false,
-            enableVibration: false,
-            category: AndroidNotificationCategory.alarm,
-          ),
-        ),
-        androidScheduleMode: AndroidScheduleMode.inexactAllowWhileIdle,
-      );
-      final prefs = await SharedPreferences.getInstance();
-      await prefs.setInt('inactivity_alarm_scheduled_for', scheduledDate.millisecondsSinceEpoch);
-      _lastAlarmReschedule = DateTime.now();
-      print("SYLVIA: ⏰ AlarmClock programado en ${_inactivityLimitSeconds}s");
-    } catch (e) {
-      // C1: se usa inexactAllowWhileIdle (no alarmClock) — así el plugin NO llama
-      // a canScheduleExactAlarms() y no lanza sin permiso de alarma exacta, que
-      // era lo que dejaba la capa anti-Doze sin programar en Android 12+. El
-      // sistema puede retrasar la alarma unos minutos en Doze; irrelevante para
-      // un umbral de inactividad de 1h. _logSentinel (no print) para que
-      // cualquier fallo futuro quede en el log — este catch mudo ocultó C1.
-      _logSentinel("SYLVIA: ❌ Error al programar alarma de inactividad: $e");
+  // Inactivity backstop: notification 889, fired by AlarmManager if the phone
+  // stays still and Sylvia did not raise the alarm itself (process killed, or
+  // frozen). Rules in lib/utils/inactivity_backstop.dart:
+  //  - It is armed from the last movement + limit + 90 s, so it can never come
+  //    before Sylvia's own alarm, which cancels it. It used to be armed from
+  //    the last re-arm + limit: always ahead of Sylvia, by up to a minute.
+  //  - Arming and cancelling run one after the other, in the order they were
+  //    asked for: a cancel can no longer be overtaken by a re-arm that started
+  //    just before it.
+  //  - Never while paused: a pause cancels it and its end arms it again.
+  // Callers on the alarm path do not wait for it.
+  Future<void> backstopQueue = Future.value();
+
+  Future<void> backstopOp(Future<void> Function() op) {
+    return backstopQueue = backstopQueue.then((_) async {
+      try {
+        // A platform call that never answers must not hold the queue for ever.
+        await op().timeout(const Duration(seconds: 10));
+      } catch (e) {
+        _logSentinel("SYLVIA: ❌ inactivity backstop: $e");
+      }
+    });
+  }
+
+  Future<void> _scheduleInactivityAlarmClock() {
+    if (!_isMonitoringInactivity || _pausedUntil.isAfter(DateTime.now())) {
+      return Future.value();
     }
+    // The movement this arming counts from. The sensor listener re-arms when
+    // it sees one more than 60 s newer. Set before any await: while a first
+    // call was still in flight, every sample started another.
+    _lastAlarmReschedule = _lastMovementTime;
+    final DateTime due = backstopDue(
+        lastMovement: _lastMovementTime,
+        limitSeconds: _inactivityLimitSeconds,
+        now: DateTime.now());
+    // It shows when Sylvia is not there to raise the alarm, so it must not
+    // promise a countdown ("hold to cancel"): it asks, and a tap opens the app.
+    final String title = "🚨 ${_texts['alertInactivityDetected'] ?? 'INACTIVITY DETECTED!'}";
+    final String body = _texts['alertInactivityBody'] ?? 'No movement detected. Are you okay?';
+    return backstopOp(() async {
+      final prefs = await SharedPreferences.getInstance();
+      try {
+        await flutterLocalNotificationsPlugin.cancel(id: _inactivityAlarmNotifId);
+        // inexactAllowWhileIdle (no alarmClock): así el plugin NO llama a
+        // canScheduleExactAlarms() ni necesita permiso de alarma exacta. El
+        // sistema puede retrasarla unos minutos en Doze, nunca adelantarla.
+        await flutterLocalNotificationsPlugin.zonedSchedule(
+          id: _inactivityAlarmNotifId,
+          title: title,
+          body: body,
+          scheduledDate: tz.TZDateTime.from(due, tz.UTC),
+          notificationDetails: const NotificationDetails(
+            android: AndroidNotificationDetails(
+              alarmChannelId, 'Oksigenia SOS Alarm',
+              icon: 'ic_stat_oksigenia',
+              importance: Importance.max,
+              priority: Priority.max,
+              fullScreenIntent: true,
+              color: Color(0xFFFF0000),
+              playSound: false,
+              enableVibration: false,
+              category: AndroidNotificationCategory.alarm,
+            ),
+          ),
+          androidScheduleMode: AndroidScheduleMode.inexactAllowWhileIdle,
+        );
+        await prefs.setInt(PreferencesService.keyInactivityBackstopDue, due.millisecondsSinceEpoch);
+      } catch (e) {
+        // Not armed: the pref must not keep an older due time that a later
+        // start of Sylvia would take for a backstop that fired.
+        await prefs.setInt(PreferencesService.keyInactivityBackstopDue, 0);
+        rethrow;
+      }
+    });
   }
 
-  Future<void> _cancelInactivityAlarmClock() async {
-    try {
+  Future<void> _cancelInactivityAlarmClock() {
+    return backstopOp(() async {
       await flutterLocalNotificationsPlugin.cancel(id: _inactivityAlarmNotifId);
       final prefs = await SharedPreferences.getInstance();
-      await prefs.setInt('inactivity_alarm_scheduled_for', 0);
-    } catch (_) {}
+      await prefs.setInt(PreferencesService.keyInactivityBackstopDue, 0);
+    });
   }
 
+  // Notifications 891 and 892 belong to live tracking, a routine feature: they
+  // go on the service channel (no sound, no vibration, default importance).
+  // They used to name the alarm channel, which is max importance with sound,
+  // and a notification's own importance cannot lower its channel's: every
+  // tracking interval would have rung like an alarm.
   Future<void> _scheduleLiveTrackingAlarm() async {
     try {
       final scheduledDate = tz.TZDateTime.now(tz.UTC).add(Duration(seconds: _liveTrackingIntervalSeconds));
@@ -411,15 +491,16 @@ void onStart(ServiceInstance service) async {
       await flutterLocalNotificationsPlugin.cancel(id: _liveTrackingAlarmId);
       await flutterLocalNotificationsPlugin.zonedSchedule(
         id: _liveTrackingAlarmId,
-        title: "📍 Live Tracking",
-        body: "Sending position update...",
+        title: "📍 ${_texts['liveTrackingCardTitle'] ?? 'Live Tracking Active'}",
+        body: null,
         scheduledDate: scheduledDate,
         notificationDetails: const NotificationDetails(
           android: AndroidNotificationDetails(
-            alarmChannelId, 'Oksigenia SOS Alarm',
+            channelId, 'Oksigenia SOS - Active Monitor',
             icon: 'ic_stat_oksigenia',
             importance: Importance.low,
             priority: Priority.low,
+            onlyAlertOnce: true,
             playSound: false,
             enableVibration: false,
           ),
@@ -440,35 +521,44 @@ void onStart(ServiceInstance service) async {
       await flutterLocalNotificationsPlugin.cancel(id: _liveTrackingShutdownAlarmId);
       final prefs = await SharedPreferences.getInstance();
       await prefs.setInt('live_tracking_next_send', 0);
+      await prefs.setInt(_liveTrackingShutdownAtKey, 0);
     } catch (_) {}
   }
 
-  Future<void> _scheduleShutdownReminder(int afterSeconds) async {
+  // The reminder to switch live tracking off, at [dueMs] (epoch ms). Its time
+  // is kept in prefs so a Sylvia that starts after a reboot arms it again:
+  // AlarmManager forgets its alarms when the phone restarts.
+  Future<void> scheduleShutdownReminderAt(int dueMs) async {
     try {
-      final scheduledDate = tz.TZDateTime.now(tz.UTC).add(Duration(seconds: afterSeconds));
+      final scheduledDate = tz.TZDateTime.fromMillisecondsSinceEpoch(tz.UTC, dueMs);
       await flutterLocalNotificationsPlugin.cancel(id: _liveTrackingShutdownAlarmId);
       await flutterLocalNotificationsPlugin.zonedSchedule(
         id: _liveTrackingShutdownAlarmId,
-        title: "⏰ Oksigenia SOS",
-        body: "Live Tracking shutdown reminder. Open app to continue.",
+        title: "⏰ ${_texts['liveTrackingTitle'] ?? 'Live Tracking'}",
+        body: _texts['liveTrackingShutdownReminder'] ?? 'Shutdown reminder',
         scheduledDate: scheduledDate,
         notificationDetails: const NotificationDetails(
           android: AndroidNotificationDetails(
-            alarmChannelId, 'Oksigenia SOS Alarm',
+            channelId, 'Oksigenia SOS - Active Monitor',
             icon: 'ic_stat_oksigenia',
-            importance: Importance.high,
-            priority: Priority.high,
+            importance: Importance.defaultImportance,
+            priority: Priority.defaultPriority,
             playSound: false,
             enableVibration: false,
           ),
         ),
         androidScheduleMode: AndroidScheduleMode.inexactAllowWhileIdle,
       );
-      print("SYLVIA: ⏰ Shutdown reminder scheduled in ${afterSeconds}s");
+      final prefs = await SharedPreferences.getInstance();
+      await prefs.setInt(_liveTrackingShutdownAtKey, dueMs);
+      print("SYLVIA: ⏰ Shutdown reminder scheduled");
     } catch (e) {
       _logSentinel("SYLVIA: ❌ Shutdown reminder error: $e");
     }
   }
+
+  Future<void> _scheduleShutdownReminder(int afterSeconds) => scheduleShutdownReminderAt(
+      DateTime.now().millisecondsSinceEpoch + afterSeconds * 1000);
 
   // Every SMS goes through sendSosSms (lib/utils/sos_sms.dart): it says how
   // the send really ended. Before, a send without coverage fell back to pieces
@@ -487,6 +577,14 @@ void onStart(ServiceInstance service) async {
           {bool overLimit = false}) async =>
       sosSmsDelivered(await _sendSmsOutcome(to, message, overLimit: overLimit));
 
+  // Title of the "sent" notification: it only says "sent" when every contact
+  // has the SOS; otherwise it says how many do.
+  String sentTitle(int reached, int total) => reached >= total
+      ? (_texts['statusSent'] ?? 'Alert sent successfully.')
+      : (_texts['sentPartialTitle'] ?? 'Alert sent to {sent} of {total} contacts')
+          .replaceAll('{sent}', '$reached')
+          .replaceAll('{total}', '$total');
+
   Future<void> _sendLiveTrackingSMS({bool isCheckin = false}) async {
     if (_recipients.isEmpty) {
       final prefs = await SharedPreferences.getInstance();
@@ -503,9 +601,10 @@ void onStart(ServiceInstance service) async {
     int batteryLevel = 0;
     try { batteryLevel = await _battery.batteryLevel; } catch (_) {}
 
-    String header = isCheckin
-        ? "✅ I'M OK — Oksigenia SOS"
-        : "📍 LIVE TRACKING — Oksigenia SOS";
+    // In the app's language: they were fixed English in all eleven.
+    final String header = isCheckin
+        ? (_texts['smsLiveCheckinHeader'] ?? "✅ I'M OK — Oksigenia SOS")
+        : (_texts['smsLiveTrackingHeader'] ?? "📍 LIVE TRACKING — Oksigenia SOS");
 
     String msgBody = header;
     if (_customMessage.isNotEmpty && !isCheckin) {
@@ -514,16 +613,21 @@ void onStart(ServiceInstance service) async {
 
     try {
       Position? pos;
+      bool posIsStale = false;
       try {
         pos = await Geolocator.getCurrentPosition(
             locationSettings: const LocationSettings(
                 accuracy: LocationAccuracy.high, timeLimit: Duration(seconds: 8)));
       } catch (_) {
         pos = await Geolocator.getLastKnownPosition();
+        posIsStale = pos != null;
       }
       if (pos != null) {
+        // A last-known position says how old it is, as in the SOS: sent as
+        // "live" it could be hours old.
+        final int fixAgeSec = DateTime.now().difference(pos.timestamp).inSeconds;
         msgBody += "\n${geoLinks(pos.latitude, pos.longitude)}";
-        msgBody += "\n\n🔋Bat: $batteryLevel% | 📡Alt: ${pos.altitude.toStringAsFixed(0)}m | 🎯Acc: ${pos.accuracy.toStringAsFixed(0)}m";
+        msgBody += "\n\n🔋Bat: $batteryLevel%$smsFieldSeparator📡Alt: ${pos.altitude.toStringAsFixed(0)}m$smsFieldSeparator🎯${smsFixQuality(pos.accuracy, fixAgeSec, stale: posIsStale)}";
       } else {
         msgBody += "\n(No GPS)\n\n🔋Bat: $batteryLevel%";
       }
@@ -540,18 +644,41 @@ void onStart(ServiceInstance service) async {
     }
   }
 
+  // The plain status notification of an armed Sylvia. When the UI is alive it
+  // repaints it with more detail right after (updateNotification); when it is
+  // not, this is what replaces a pause or an alarm that ended.
+  void showReadyNotification() {
+    try {
+      flutterLocalNotificationsPlugin.show(
+          id: notificationId,
+          title: "Oksigenia SOS",
+          body: _texts['statusReady'],
+          notificationDetails: const NotificationDetails(
+              android: AndroidNotificationDetails(
+                  channelId, 'Oksigenia SOS - Active Monitor',
+                  icon: 'ic_stat_oksigenia',
+                  ongoing: true,
+                  importance: Importance.low,
+                  priority: Priority.low,
+                  onlyAlertOnce: true,
+                  playSound: false,
+                  enableVibration: false)));
+    } catch (_) {}
+  }
+
   void _updatePausedNotification() {
     final remaining = _pausedUntil.difference(DateTime.now());
     final totalMin = remaining.inMinutes;
     final secs = remaining.inSeconds % 60;
     final timeStr = totalMin > 0 ? "${totalMin}m ${secs.toString().padLeft(2, '0')}s" : "${remaining.inSeconds}s";
     final pauseLabel = _texts['pauseTitle'] ?? 'Monitoring paused';
-    final resumesInLabel = _texts['resumesIn'] ?? 'Resumes in';
+    final resumesIn = (_texts['pauseNotifResumesIn'] ?? 'Resumes in {time}')
+        .replaceAll('{time}', timeStr);
     final resumeNowLabel = _texts['resumeNow'] ?? 'Resume now';
     flutterLocalNotificationsPlugin.show(
       id: notificationId,
       title: "⏸ Oksigenia SOS — $pauseLabel",
-      body: "$resumesInLabel $timeStr",
+      body: resumesIn,
       notificationDetails: NotificationDetails(
         android: AndroidNotificationDetails(
           channelId, 'Oksigenia SOS',
@@ -673,7 +800,7 @@ void onStart(ServiceInstance service) async {
       await p.setInt('beacon_last_ts', now);
       await p.setInt('beacon_count', 0);
       await p.setBool('beacon_origin_pending', false);
-      _logSentinel("SYLVIA SERVICE: 📍 Beacon activated at ${originPos.latitude.toStringAsFixed(5)},${originPos.longitude.toStringAsFixed(5)}");
+      _logSentinel("SYLVIA SERVICE: 📍 Beacon activated at ${logPosition(originPos.latitude, originPos.longitude)}");
     } catch (e) {
       print("SYLVIA: Beacon activate error: $e");
     }
@@ -758,16 +885,14 @@ void onStart(ServiceInstance service) async {
       }
       if (sosPos != null) {
         final int fixAgeSec = DateTime.now().difference(sosPos.timestamp).inSeconds;
-        // Un fix de hace minutos presentado como "posición actual" es peligroso
-        // en un rescate: si viene del lastKnown o es viejo, decir de cuándo es.
-        final String ageNote = (posIsStale || fixAgeSec > 90)
-            ? " | ${(fixAgeSec / 60).round()}min"
-            : "";
         // La nota del usuario justo bajo la cabecera (se lee primero); después
-        // el bloque de ubicación (geo: + Google + OSM) y la línea técnica.
+        // el bloque de ubicación (geo: + Google + OSM) y la línea técnica. Un
+        // fix de hace minutos presentado como "posición actual" es peligroso en
+        // un rescate: si viene del lastKnown o es viejo, la línea dice de
+        // cuándo es.
         msgBody += "\n$note";
         msgBody += "\n${geoLinks(sosPos.latitude, sosPos.longitude)}";
-        msgBody += "\nBat: $batteryLevel% | Alt: ${sosPos.altitude.toStringAsFixed(0)}m | Acc: ${sosPos.accuracy.toStringAsFixed(0)}m$ageNote";
+        msgBody += "\n${sosTechLine(batteryPct: batteryLevel, altitudeM: sosPos.altitude, accuracyM: sosPos.accuracy, fixAgeSeconds: fixAgeSec, stale: posIsStale)}";
       } else {
         msgBody += "\n$note";
         msgBody += "\n(GPS Error/Timeout)";
@@ -936,6 +1061,12 @@ void onStart(ServiceInstance service) async {
 
       if (delivered > 0) {
         await p.setBool('sos_sent_recently', true);
+        // The running count of this SOS, for the sent screen and this notice.
+        final int reached = (p.getInt(PreferencesService.keySosLastSent) ?? 0) + delivered;
+        final int total = max(p.getInt(PreferencesService.keySosLastTotal) ?? 0,
+            reached + (stillQueued ? still.length : 0));
+        await p.setInt(PreferencesService.keySosLastSent, reached);
+        await p.setInt(PreferencesService.keySosLastTotal, total);
         if (!(p.getBool('beacon_active') ?? false)) {
           if (pos != null) {
             await _activateBeacon(pos);
@@ -945,19 +1076,53 @@ void onStart(ServiceInstance service) async {
         }
         flutterLocalNotificationsPlugin.show(
           id: notificationId,
-          title: _texts['statusSent'],
+          title: sentTitle(reached, total),
           body: still.isEmpty ? _texts['statusReady'] : _texts['statusSendRetrying'],
           notificationDetails: const NotificationDetails(
               android: AndroidNotificationDetails(channelId, 'Oksigenia SOS',
                   icon: 'ic_stat_oksigenia', importance: Importance.high)),
         );
         await _reproducirConfirmacion();
-        service.invoke("onSosSent", {"sent": delivered, "pending": still.length});
+        service.invoke("onSosSent", {
+          "sent": delivered,
+          "reached": reached,
+          "total": total,
+          "pending": stillQueued ? still.length : 0,
+        });
       }
     } catch (e) {
       _logSentinel("SYLVIA SMS: ❌ SOS retry error: $e");
     } finally {
       sosRetryBusy = false;
+    }
+  }
+
+  // Fresh fixes for the beacon, from a short-lived position stream (one fix
+  // about every 2 s). [onFix] sees each one and returns true when it has what
+  // it needs; the stream is closed then, on an error, or after [window].
+  Future<void> beaconFixes(Duration window, bool Function(Position) onFix) async {
+    final Completer<void> done = Completer<void>();
+    void finish() {
+      if (!done.isCompleted) done.complete();
+    }
+
+    StreamSubscription<Position>? sub;
+    final Timer timer = Timer(window, finish);
+    try {
+      sub = Geolocator.getPositionStream(
+        locationSettings: AndroidSettings(
+            accuracy: LocationAccuracy.high,
+            distanceFilter: 0,
+            intervalDuration: const Duration(seconds: 2)),
+      ).listen((fix) {
+        if (!done.isCompleted && onFix(fix)) finish();
+      }, onError: (_) => finish());
+      await done.future;
+    } catch (_) {
+      // No location service or no permission: this probe finds nothing.
+    } finally {
+      timer.cancel();
+      try { await sub?.cancel(); } catch (_) {}
     }
   }
 
@@ -986,30 +1151,51 @@ void onStart(ServiceInstance service) async {
         return;
       }
 
+      // A new alarm is counting down or sending: its SOS carries a fresh
+      // position and re-arms the beacon, so this round would only compete with
+      // it for the GPS and the SMS limit.
+      if (_isAlarmActive) return;
+
       // M5: origen pendiente (el SOS salió sin GPS). Establecerlo con el primer
       // fix disponible y enviarlo — sin esperar al umbral de 300 m ni al de 5 min.
       if (p.getBool('beacon_origin_pending') ?? false) {
         if (DateTime.now().difference(_beaconLastProbe).inSeconds < 60) return;
         _beaconLastProbe = DateTime.now();
+        // Best: an accurate, recent fix. Failing that, the most accurate recent
+        // one of the window. Last resort, the last known position: the SOS
+        // left with no position at all, so even an old one tells the contacts
+        // more than nothing, as long as the SMS says how old and how accurate.
         Position? fp;
-        try {
-          fp = await Geolocator.getCurrentPosition(
-              locationSettings: const LocationSettings(
-                  accuracy: LocationAccuracy.high, timeLimit: Duration(seconds: 15)));
-        } catch (_) {
-          fp = await Geolocator.getLastKnownPosition();
+        bool fpIsStale = false;
+        await beaconFixes(const Duration(seconds: 25), (fix) {
+          final int age = DateTime.now().difference(fix.timestamp).inSeconds;
+          if (age >= beaconMaxFixAgeSeconds) return false;
+          // An accuracy of 0 is "unknown": the worst there is.
+          double radius(Position x) => x.accuracy > 0 ? x.accuracy : double.infinity;
+          if (fp == null || radius(fix) < radius(fp!)) fp = fix;
+          return beaconFixUsable(accuracyM: fix.accuracy, ageSeconds: age);
+        });
+        if (fp == null) {
+          try { fp = await Geolocator.getLastKnownPosition(); } catch (_) {}
+          fpIsStale = fp != null;
         }
-        if (fp == null) return;
-        await p.setDouble('beacon_origin_lat', fp.latitude);
-        await p.setDouble('beacon_origin_lon', fp.longitude);
-        await p.setDouble('beacon_last_lat', fp.latitude);
-        await p.setDouble('beacon_last_lon', fp.longitude);
+        final Position? origin = fp;
+        if (origin == null) return;
+        // The UI may have stopped the beacon, or an alarm started, meanwhile.
+        await p.reload();
+        if (!(p.getBool('beacon_active') ?? false) || _isAlarmActive) return;
+        await p.setDouble('beacon_origin_lat', origin.latitude);
+        await p.setDouble('beacon_origin_lon', origin.longitude);
+        await p.setDouble('beacon_last_lat', origin.latitude);
+        await p.setDouble('beacon_last_lon', origin.longitude);
         await p.setInt('beacon_last_ts', DateTime.now().millisecondsSinceEpoch);
         await p.setInt('beacon_count', count + 1);
         await p.setBool('beacon_origin_pending', false);
         final header = _texts['smsBeaconHeader'] ??
             'OKSIGENIA SOS - follow-up (NOT a new alarm):';
-        String msg = "$header\n${geoLinks(fp.latitude, fp.longitude)}";
+        final int originAge = DateTime.now().difference(origin.timestamp).inSeconds;
+        String msg = "$header\n${geoLinks(origin.latitude, origin.longitude)}";
+        msg += "\n${smsFixQuality(origin.accuracy, originAge, stale: fpIsStale)}";
         if (_recipients.isEmpty) {
           _recipients = p.getStringList(PreferencesService.keyContacts) ?? [];
           if (_recipients.isEmpty) return;
@@ -1017,7 +1203,8 @@ void onStart(ServiceInstance service) async {
         for (final number in _recipients) {
           await _sendSmsTracked(normalizePhoneE164(number), msg);
         }
-        _logSentinel("SYLVIA SERVICE: 📍 Beacon origin established from first post-SOS fix");
+        _logSentinel("SYLVIA SERVICE: 📍 Beacon origin established from first post-SOS fix "
+            "(acc ${origin.accuracy.toStringAsFixed(0)}m, ${fpIsStale ? 'last known, ' : ''}${originAge}s old)");
         return;
       }
 
@@ -1031,24 +1218,44 @@ void onStart(ServiceInstance service) async {
       if (DateTime.now().difference(_beaconLastProbe).inSeconds < 60) return;
       _beaconLastProbe = DateTime.now();
 
-      Position? pos;
-      try {
-        pos = await Geolocator.getCurrentPosition(
-            locationSettings: const LocationSettings(
-                accuracy: LocationAccuracy.high, timeLimit: Duration(seconds: 5)));
-      } catch (_) {
-        pos = await Geolocator.getLastKnownPosition();
-      }
-      if (pos == null) return;
-
+      // A move is only real when two fixes in a row say so, each accurate to
+      // 100 m and under a minute old (BeaconMoveCheck). Before, one fix of any
+      // accuracy or age decided, and when the GPS timed out the last known
+      // position did: a first network fix hundreds of metres off sent a wrong
+      // "new location", became the reference, and the next good fix "moved"
+      // back, up to twenty times.
       final lastLat = p.getDouble('beacon_last_lat') ?? 0;
       final lastLon = p.getDouble('beacon_last_lon') ?? 0;
-      final delta = Geolocator.distanceBetween(lastLat, lastLon, pos.latitude, pos.longitude);
-      if (delta < _beaconDistanceM) return;
+      final BeaconMoveCheck move = BeaconMoveCheck(
+          refLat: lastLat, refLon: lastLon, thresholdM: _beaconDistanceM);
+      Position? pos;
+      await beaconFixes(const Duration(seconds: 25), (fix) {
+        final BeaconMove verdict = move.add(
+            lat: fix.latitude,
+            lon: fix.longitude,
+            accuracyM: fix.accuracy,
+            time: fix.timestamp,
+            now: DateTime.now());
+        if (verdict == BeaconMove.moved) pos = fix;
+        return verdict != BeaconMove.undecided;
+      });
+      final Position? moved = pos;
+      if (move.result != BeaconMove.moved || moved == null) {
+        if (move.result == BeaconMove.undecided && move.candidateDistanceM > 0) {
+          _logSentinel("SYLVIA SERVICE: 📍 Beacon: a fix ${move.candidateDistanceM.toStringAsFixed(0)}m away, not confirmed by a second one. No update.");
+        }
+        return;
+      }
+      final double delta = move.distanceM;
+
+      // The probe took up to 25 s: the UI may have stopped the beacon, or a new
+      // alarm may have started (its SOS carries the position).
+      await p.reload();
+      if (!(p.getBool('beacon_active') ?? false) || _isAlarmActive) return;
 
       final originLat = p.getDouble('beacon_origin_lat') ?? 0;
       final originLon = p.getDouble('beacon_origin_lon') ?? 0;
-      final totalDist = Geolocator.distanceBetween(originLat, originLon, pos.latitude, pos.longitude);
+      final totalDist = metersBetween(originLat, originLon, moved.latitude, moved.longitude);
 
       // Mensaje autoexplicativo para quien lo recibe: el destinatario no debe
       // confundir un aviso de movimiento con una nueva alarma SOS (feedback
@@ -1057,7 +1264,9 @@ void onStart(ServiceInstance service) async {
           'OKSIGENIA SOS - follow-up (NOT a new alarm):';
       final distSuffix = _texts['smsBeaconDistance'] ?? 'from the SOS point.';
       String msg = "$header\n${totalDist.toStringAsFixed(0)} m $distSuffix";
-      msg += "\n${geoLinks(pos.latitude, pos.longitude)}";
+      msg += "\n${geoLinks(moved.latitude, moved.longitude)}";
+      // How far to trust it. Plain text and "/" as in the SOS: GSM-7 only.
+      msg += "\n${smsFixQuality(moved.accuracy, DateTime.now().difference(moved.timestamp).inSeconds)}";
 
       if (_recipients.isEmpty) {
         _recipients = p.getStringList(PreferencesService.keyContacts) ?? [];
@@ -1067,11 +1276,11 @@ void onStart(ServiceInstance service) async {
         await _sendSmsTracked(normalizePhoneE164(number), msg);
       }
 
-      await p.setDouble('beacon_last_lat', pos.latitude);
-      await p.setDouble('beacon_last_lon', pos.longitude);
-      await p.setInt('beacon_last_ts', now);
+      await p.setDouble('beacon_last_lat', moved.latitude);
+      await p.setDouble('beacon_last_lon', moved.longitude);
+      await p.setInt('beacon_last_ts', DateTime.now().millisecondsSinceEpoch);
       await p.setInt('beacon_count', count + 1);
-      _logSentinel("SYLVIA SERVICE: 📍 Beacon update #${count + 1} sent (delta ${delta.toStringAsFixed(0)}m, total ${totalDist.toStringAsFixed(0)}m)");
+      _logSentinel("SYLVIA SERVICE: 📍 Beacon update #${count + 1} sent (delta ${delta.toStringAsFixed(0)}m, total ${totalDist.toStringAsFixed(0)}m, acc ${moved.accuracy.toStringAsFixed(0)}m)");
     } catch (e) {
       print("SYLVIA: Beacon tick error: $e");
     } finally {
@@ -1088,6 +1297,9 @@ void onStart(ServiceInstance service) async {
 
   // resumeCountdown: segundos restantes al reanudar una alarma que sobrevivió
   // a un respawn del servicio (Android mató el isolate a mitad de cuenta atrás).
+  //
+  // cause: 'fall', 'inactivity' or 'manual' (an SOS the user started from the
+  // UI). It names the alarm in the notification and travels to the UI.
   Future<void> _lanzarAlarma({int? resumeCountdown, String cause = 'fall'}) async {
     // B6: guard de reentrada. Un segundo startAlarm con la cuenta atrás ya en
     // curso la reiniciaba a 30s. Me apoyo en el timer (no en _isAlarmActive, que
@@ -1100,10 +1312,19 @@ void onStart(ServiceInstance service) async {
     _logSentinel("SYLVIA SERVICE: 🚨 EJECUTANDO PROTOCOLO DE ALARMA"
         "${resumeCountdown != null ? ' (reanudada, ${resumeCountdown}s restantes)' : ''}");
     _isAlarmActive = true;
+    // What the notification says about this alarm. It used to say "impact
+    // detected" for an inactivity alarm and for a manual SOS too.
+    final String causeText = switch (cause) {
+      'inactivity' => _texts['alertInactivityDetected'] ?? 'INACTIVITY DETECTED!',
+      'manual' => 'SOS',
+      _ => _texts['alertFallDetected'] ?? 'IMPACT DETECTED!',
+    };
+    final String holdText = _texts['holdToCancel'] ?? 'Hold to cancel';
     // A2: calentar el GPS ya — la cuenta atrás de 30s es la ventana de warmup.
     _startGpsWarmup();
     _writeWidgetState('red');
-    try { await _cancelInactivityAlarmClock(); } catch (_) {}
+    // Not awaited: nothing on the way to the countdown may wait for it.
+    _cancelInactivityAlarmClock();
     // Pause live tracking during SOS — watchdog checks _isAlarmActive
     if (_isLiveTrackingActive) {
       print("SYLVIA: 📍 Live Tracking paused during SOS");
@@ -1116,10 +1337,16 @@ void onStart(ServiceInstance service) async {
     SharedPreferences? prefs;
     try {
       prefs = await SharedPreferences.getInstance();
-      await prefs.setBool('is_alarm_active', true);
+      // Start time and cause first, the flag last: the UI reads all three from
+      // another isolate, and a flag seen with the start time of an older alarm
+      // made it take this one for expired.
       if (resumeCountdown == null) {
         await prefs.setInt('alarm_start_timestamp', DateTime.now().millisecondsSinceEpoch);
+        // With the UI closed nobody else writes it, and a respawn (or the UI,
+        // when it opens) would name the alarm after the previous one.
+        await prefs.setString(PreferencesService.keyAlarmCause, cause);
       }
+      await prefs.setBool('is_alarm_active', true);
     } catch (e) {
       print("SYLVIA: ❌ prefs en alarma: $e");
     }
@@ -1131,8 +1358,8 @@ void onStart(ServiceInstance service) async {
       // on the UI engine, not the background engine.
       await flutterLocalNotificationsPlugin.show(
         id: alarmNotifId,
-        title: "🚨 ${_texts['alertFallDetected']}",
-        body: _texts['holdToCancel'],
+        title: "🚨 $causeText",
+        body: holdText,
         notificationDetails: const NotificationDetails(
           android: AndroidNotificationDetails(
             alarmChannelId, 'Oksigenia SOS Alarm',
@@ -1193,7 +1420,9 @@ void onStart(ServiceInstance service) async {
         flutterLocalNotificationsPlugin.show(
           id: alarmNotifId,
           title: "${_texts['alertSendingIn']} $_zombieCountdown s",
-          body: _texts['holdToCancel'],
+          // The countdown replaces the title one second in: the cause stays
+          // readable here for the rest of the pre-alert.
+          body: cause == 'manual' ? holdText : "$causeText · $holdText",
           notificationDetails: const NotificationDetails(
               android: AndroidNotificationDetails(
                   alarmChannelId, 'Oksigenia SOS Alarm',
@@ -1227,14 +1456,24 @@ void onStart(ServiceInstance service) async {
           await p.setBool('sos_sent_recently', sentCount > 0);
           final bool retryPending =
               p.getBool(PreferencesService.keySosRetryActive) ?? false;
+          // How it went, for the sent screen: it must not say "sent" when the
+          // SOS reached one contact of three.
+          final int totalContacts = _recipients.length;
+          final int pendingCount = retryPending
+              ? (p.getStringList(PreferencesService.keySosRetryNumbers) ?? const []).length
+              : 0;
+          await p.setInt(PreferencesService.keySosLastSent, sentCount);
+          await p.setInt(PreferencesService.keySosLastTotal, totalContacts);
 
           _lastMovementTime = DateTime.now().add(const Duration(seconds: 60));
+          // The alarm cancelled the backstop; monitoring goes on after the SOS.
+          _scheduleInactivityAlarmClock();
 
           await flutterLocalNotificationsPlugin.cancel(id: alarmNotifId);
           if (sentCount > 0) {
             flutterLocalNotificationsPlugin.show(
               id: notificationId,
-              title: _texts['statusSent'],
+              title: sentTitle(sentCount, totalContacts),
               body: retryPending ? _texts['statusSendRetrying'] : _texts['statusReady'],
               notificationDetails: const NotificationDetails(
                   android: AndroidNotificationDetails(
@@ -1259,7 +1498,12 @@ void onStart(ServiceInstance service) async {
                       priority: Priority.max)),
             );
           }
-          service.invoke("onSosSent", {"sent": sentCount});
+          service.invoke("onSosSent", {
+            "sent": sentCount,
+            "reached": sentCount,
+            "total": totalContacts,
+            "pending": pendingCount,
+          });
         } catch (e) {
           _logSentinel("SYLVIA SERVICE: ❌ Error en protocolo de envío: $e");
         } finally {
@@ -1731,7 +1975,7 @@ void onStart(ServiceInstance service) async {
         double delta = (instantG - _lastG).abs();
         if (delta > 0.15 || instantG > 1.15 || instantG < 0.85) {
           _lastMovementTime = DateTime.now(); // always update, even while paused
-          if (!isPaused && DateTime.now().difference(_lastAlarmReschedule).inSeconds > 60) {
+          if (!isPaused && DateTime.now().difference(_lastAlarmReschedule).inSeconds > backstopRescheduleSeconds) {
             _scheduleInactivityAlarmClock();
           }
         }
@@ -1754,6 +1998,9 @@ void onStart(ServiceInstance service) async {
         _lastMovementTime = DateTime.now();
         try { (await SharedPreferences.getInstance()).setInt('paused_until', 0); } catch (_) {} // M1
         if (_isMonitoringInactivity) _scheduleInactivityAlarmClock();
+        // With the UI closed nobody repainted the notification: it stayed on
+        // "paused" with the countdown frozen.
+        showReadyNotification();
         service.invoke("onPauseResumed");
       }
 
@@ -1770,6 +2017,8 @@ void onStart(ServiceInstance service) async {
           _pausedUntil = DateTime.fromMillisecondsSinceEpoch(0);
           _lastMovementTime = DateTime.now();
           if (_isMonitoringInactivity) _scheduleInactivityAlarmClock();
+          _logSentinel("SYLVIA: ▶ Pause ended from the notification (Resume now)");
+          showReadyNotification();
           service.invoke("onPauseResumed");
         }
       } catch (_) {}
@@ -1847,6 +2096,7 @@ void onStart(ServiceInstance service) async {
   void _applyProfileConfig(String profileName) {
     final ActivityProfile profile = activityProfileFromName(profileName);
     final ActivityProfileConfig cfg = activityProfileConfigs[profile]!;
+    activeProfileName = profile.name;
     _impactDetectionEnabled = cfg.impactDetectionEnabled;
     if (cfg.impactDetectionEnabled) {
       _yellowThreshold = cfg.yellowThreshold;
@@ -1865,6 +2115,20 @@ void onStart(ServiceInstance service) async {
       _recipients = prefs.getStringList(PreferencesService.keyContacts) ?? [];
       _customMessage = prefs.getString(PreferencesService.keySosMessage) ?? "";
 
+      // The texts the UI gave Sylvia last time. Without them a Sylvia started
+      // by the boot receiver or the watchdog notified and texted in English
+      // until someone opened the app.
+      try {
+        final String? savedTexts = prefs.getString(PreferencesService.keyServiceTexts);
+        if (savedTexts != null && savedTexts.isNotEmpty) {
+          (jsonDecode(savedTexts) as Map).forEach((key, value) {
+            _texts[key.toString()] = value.toString();
+          });
+        }
+      } catch (e) {
+        _logSentinel("SYLVIA BOOT: saved texts unreadable ($e), using English");
+      }
+
       // Restaurar el perfil de actividad: un respawn a mitad de ruta debe
       // volver con los umbrales del usuario, no con los defaults.
       _applyProfileConfig(prefs.getString(PreferencesService.keyActivityProfile) ?? 'trekking');
@@ -1872,6 +2136,18 @@ void onStart(ServiceInstance service) async {
       bool savedFall = prefs.getBool('fall_detection_enabled') ?? false;
       bool savedInactivity = prefs.getBool('inactivity_monitor_enabled') ?? false;
       _inactivityLimitSeconds = prefs.getInt('inactivity_time') ?? 3600;
+
+      // The inactivity backstop the previous Sylvia left armed, read before
+      // anything here arms a new one. If it came due while no Sylvia was
+      // running, the alarm is raised below.
+      final int backstopDueMs = prefs.getInt(PreferencesService.keyInactivityBackstopDue) ?? 0;
+      // Left over from versions whose UI started its own silent alarm from it.
+      if (prefs.containsKey('inactivity_alarm_scheduled_for')) {
+        await prefs.remove('inactivity_alarm_scheduled_for');
+      }
+      if (!savedInactivity && backstopDueMs != 0) {
+        await prefs.setInt(PreferencesService.keyInactivityBackstopDue, 0);
+      }
 
       // M1: restaurar una pausa en curso que sobreviva a un respawn del servicio.
       final int pausedUntilMs = prefs.getInt('paused_until') ?? 0;
@@ -1887,6 +2163,10 @@ void onStart(ServiceInstance service) async {
         _liveTrackingNextSend = DateTime.fromMillisecondsSinceEpoch(nextMs);
         if (nextMs == 0 || nextMs <= DateTime.now().millisecondsSinceEpoch) {
           await _scheduleLiveTrackingAlarm();
+        }
+        final int shutdownAtMs = prefs.getInt(_liveTrackingShutdownAtKey) ?? 0;
+        if (shutdownAtMs > DateTime.now().millisecondsSinceEpoch + 5000) {
+          await scheduleShutdownReminderAt(shutdownAtMs);
         }
         _startInactivityChecker();
         print("SYLVIA BOOT: 📍 Live Tracking restaurado.");
@@ -1909,21 +2189,31 @@ void onStart(ServiceInstance service) async {
         return;
       }
 
-      flutterLocalNotificationsPlugin.show(
-          id: notificationId,
-          title: 'Oksigenia SOS',
-          body: 'System Ready',
-          notificationDetails: const NotificationDetails(
-              android: AndroidNotificationDetails(
-                  channelId, 'Oksigenia SOS - Active Monitor',
-                  icon: 'ic_stat_oksigenia',
-                  ongoing: true,
-                  importance: Importance.low,
-                  priority: Priority.low,
-                  onlyAlertOnce: true,
-                  playSound: false,
-                  enableVibration: false))
-      );
+      showReadyNotification();
+
+      // The backstop came due with the service down (killed, and brought back
+      // now by the watchdog, by the backstop's own notification opening the
+      // app, or by a reboot): the phone was still when the previous Sylvia was
+      // last alive, and nobody has been watching since. Starting the clock
+      // from zero would give an unconscious user another full limit of
+      // waiting. Instead the clock starts almost run out: the sensors get 45 s
+      // to see movement, and if they see none the normal inactivity alarm
+      // fires, with siren and countdown. The UI used to turn the same kind of
+      // mark into an alarm of its own, in silence. Not during a pause, not on
+      // top of an alarm being resumed, and not for a mark older than 15
+      // minutes (the phone was switched off for hours).
+      final bool backstopMissed = savedInactivity &&
+          !bootAlarm &&
+          !_pausedUntil.isAfter(DateTime.now()) &&
+          backstopCameDue(
+              dueMs: backstopDueMs, nowMs: DateTime.now().millisecondsSinceEpoch);
+      if (backstopMissed) {
+        _lastMovementTime = lastMovementAfterMissedBackstop(
+            now: DateTime.now(), limitSeconds: _inactivityLimitSeconds);
+        _logSentinel("SYLVIA BOOT: ⏰ Inactivity backstop came due "
+            "${(DateTime.now().millisecondsSinceEpoch - backstopDueMs) ~/ 1000}s ago with the service down "
+            "→ alarm in ${backstopGraceSeconds}s unless the phone moves");
+      }
 
       if (savedFall || savedInactivity) {
         _isMonitoringImpact = savedFall;
@@ -1948,18 +2238,19 @@ void onStart(ServiceInstance service) async {
             ? (DateTime.now().millisecondsSinceEpoch - startMs) ~/ 1000
             : 9999;
         _logSentinel("SYLVIA BOOT: 🚨 Alarma activa detectada tras respawn (${elapsed}s transcurridos)");
+        final String savedCause = _alarmCause(prefs.getString(PreferencesService.keyAlarmCause));
         if (elapsed <= 120) {
-          _lanzarAlarma(resumeCountdown: (30 - elapsed).clamp(2, 30));
+          _lanzarAlarma(resumeCountdown: (30 - elapsed).clamp(2, 30), cause: savedCause);
         } else {
           // The countdown was interrupted long ago (phone switched off, battery
           // gone): sending 2 s after power-on would give nobody a chance to
           // cancel a false alarm. Start a full, audible 30 s countdown instead;
           // _lanzarAlarma rewrites alarm_start_timestamp so the UI shows it too.
-          _lanzarAlarma();
+          _lanzarAlarma(cause: savedCause);
         }
       }
     } catch (e) {
-      print("SYLVIA BOOT ERROR: $e");
+      _logSentinel("SYLVIA BOOT ERROR: $e");
     }
   }
 
@@ -1990,8 +2281,10 @@ void onStart(ServiceInstance service) async {
       service.stopSelf();
     });
 
-    service.on('setConfig').listen((event) {
+    service.on('setConfig').listen((event) async {
       if (event == null) return;
+      // After the texts saved on disk, or they would overwrite these newer ones.
+      await diskConfigLoaded.future.timeout(const Duration(seconds: 5), onTimeout: () {});
       print("SYLVIA SERVICE: Recibiendo configuración...");
       
       if (event.containsKey('recipients')) {
@@ -2005,12 +2298,26 @@ void onStart(ServiceInstance service) async {
         rawTexts.forEach((key, value) {
           _texts[key.toString()] = value.toString();
         });
+        // Kept for the next start without the UI (see _loadConfigFromDisk).
+        if (rawTexts.isNotEmpty) {
+          SharedPreferences.getInstance()
+              .then((p) => p.setString(
+                  PreferencesService.keyServiceTexts, jsonEncode(_texts)))
+              .catchError((_) => false);
+        }
       }
     });
 
     service.on('setMonitoring').listen((event) async {
+      // First what Sylvia restored from disk (see diskConfigLoaded).
+      await diskConfigLoaded.future.timeout(const Duration(seconds: 5), onTimeout: () {});
       _logSentinel("SYLVIA SERVICE: 📥 setMonitoring received: active=${event?['active']} profile=${event?['profile']}");
       final prefs = await SharedPreferences.getInstance();
+      // What was in force, to know below whether this message changes anything.
+      final bool wasImpact = _isMonitoringImpact;
+      final bool wasInactivity = _isMonitoringInactivity;
+      final int wasLimit = _inactivityLimitSeconds;
+      final String wasProfile = activeProfileName;
       _isMonitoringImpact = event?['active'] ?? false;
 
       if (event != null && event.containsKey('inactivity_limit')) {
@@ -2040,14 +2347,28 @@ void onStart(ServiceInstance service) async {
 
       print("SYLVIA SERVICE: Monitor - Impact: $_isMonitoringImpact, Inactivity: $_isMonitoringInactivity (Limit: $_inactivityLimitSeconds s)");
 
+      // The UI sends this on every start and every return to the foreground,
+      // almost always repeating what Sylvia already has. Only a real change
+      // restarts the inactivity clock and raises the 4 s shield: before, just
+      // opening the app gave the user a fresh hour and blinded detection for
+      // four seconds each time.
+      final bool changed = wasImpact != _isMonitoringImpact ||
+          wasInactivity != _isMonitoringInactivity ||
+          wasLimit != _inactivityLimitSeconds ||
+          wasProfile != activeProfileName;
+
       if (_isMonitoringImpact || _isMonitoringInactivity) {
-        _activarEscudo(segundos: 4);
-        _lastMovementTime = DateTime.now();
+        if (changed) {
+          _activarEscudo(segundos: 4);
+          _lastMovementTime = DateTime.now();
+        }
         _startSensorListener();
-        if (_isMonitoringInactivity) {
-          _scheduleInactivityAlarmClock();
-        } else {
-          _cancelInactivityAlarmClock();
+        if (changed) {
+          if (_isMonitoringInactivity) {
+            _scheduleInactivityAlarmClock();
+          } else {
+            _cancelInactivityAlarmClock();
+          }
         }
       } else {
         _accSub?.cancel();
@@ -2069,6 +2390,16 @@ void onStart(ServiceInstance service) async {
     service.on('setPaused').listen((event) async {
       final int until = event?['until'] ?? 0;
       _pausedUntil = DateTime.fromMillisecondsSinceEpoch(until);
+      if (until == 0) {
+        // The end of a pause counts as movement, as when it runs out by itself.
+        // Done here, before any await, so the 5 s checker never sees "not
+        // paused" together with the clock of before the pause. The UI sends
+        // setMonitoring right after, but an unchanged setMonitoring no longer
+        // restarts the clock: without this, a phone that lay still through the
+        // pause would alarm the moment it ended.
+        _activarEscudo(segundos: 4);
+        _lastMovementTime = DateTime.now();
+      }
       // M1: persistir la pausa. Sin esto, si Android mata a Sylvia durante la
       // pausa (p. ej. 1h en coche), el respawn rearmaba los sensores a mitad de
       // pausa y un bache disparaba un falso positivo.
@@ -2085,11 +2416,15 @@ void onStart(ServiceInstance service) async {
         _updatePausedNotification();
         print("SYLVIA: ⏸ Monitorización pausada por ${_pausedUntil.difference(DateTime.now()).inMinutes} min");
       } else {
+        _scheduleInactivityAlarmClock();
         print("SYLVIA: ▶ Pausa cancelada desde UI");
       }
     });
 
-    service.on('startAlarm').listen((event) => _lanzarAlarma());
+    // The UI says why it starts the alarm (a manual SOS, or its own inactivity
+    // timer). Without a cause it is an older caller: 'fall', as before.
+    service.on('startAlarm').listen(
+        (event) => _lanzarAlarma(cause: _alarmCause(event?['cause'])));
 
     service.on('stopAlarm').listen((event) async {
       _logSentinel("SYLVIA SERVICE: 🛑 Recibida orden de STOP ALARM");
@@ -2101,8 +2436,9 @@ void onStart(ServiceInstance service) async {
       _activarEscudo(segundos: 4);
       _zombieTimer?.cancel();
       _stopGpsWarmup(); // A2: cerrar el warmup de GPS al cancelar la alarma
-      await _cancelInactivityAlarmClock();
-      
+      // Not awaited: the siren below must not wait for the notification plugin.
+      _cancelInactivityAlarmClock();
+
       _lastMovementTime = DateTime.now().add(const Duration(seconds: 15));
 
       try {
@@ -2184,7 +2520,11 @@ void onStart(ServiceInstance service) async {
     });
   }
   
-  await _loadConfigFromDisk();
+  try {
+    await _loadConfigFromDisk();
+  } finally {
+    if (!diskConfigLoaded.isCompleted) diskConfigLoaded.complete();
+  }
 }
 
 @pragma('vm:entry-point')
@@ -2192,9 +2532,16 @@ Future<bool> onIosBackground(ServiceInstance service) async {
   return true;
 }
 
+// "Resume now" on the pause notification. It runs in an isolate of its own,
+// started by the notifications plugin's ActionBroadcastReceiver (declared in
+// the manifest; without it the button did nothing). It only leaves a mark in
+// prefs: Sylvia's 5 s checker picks it up and ends the pause.
 @pragma('vm:entry-point')
 void _handleNotificationAction(NotificationResponse details) async {
   if (details.actionId == 'resume_monitoring') {
+    // This isolate did not go through main(): make sure the plugins (prefs
+    // among them) are registered in it.
+    DartPluginRegistrant.ensureInitialized();
     final prefs = await SharedPreferences.getInstance();
     await prefs.setInt('pause_resume_requested', DateTime.now().millisecondsSinceEpoch);
   }

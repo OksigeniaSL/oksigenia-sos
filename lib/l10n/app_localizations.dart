@@ -188,6 +188,48 @@ abstract class AppLocalizations {
   /// **'Not every contact has it yet (no signal?). Retrying automatically.'**
   String get statusSendRetrying;
 
+  /// No description provided for @pauseNotifResumesIn.
+  ///
+  /// In en, this message translates to:
+  /// **'Resumes in {time}'**
+  String pauseNotifResumesIn(String time);
+
+  /// No description provided for @smsLiveTrackingHeader.
+  ///
+  /// In en, this message translates to:
+  /// **'📍 LIVE TRACKING — Oksigenia SOS'**
+  String get smsLiveTrackingHeader;
+
+  /// No description provided for @smsLiveCheckinHeader.
+  ///
+  /// In en, this message translates to:
+  /// **'✅ I\'M OK — Oksigenia SOS'**
+  String get smsLiveCheckinHeader;
+
+  /// No description provided for @sentPartialTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Alert sent to {sent} of {total} contacts'**
+  String sentPartialTitle(String sent, String total);
+
+  /// No description provided for @sentBeaconInfo.
+  ///
+  /// In en, this message translates to:
+  /// **'If you move more than 300 m, your new location is sent to your contacts.'**
+  String get sentBeaconInfo;
+
+  /// No description provided for @sentStopExplain.
+  ///
+  /// In en, this message translates to:
+  /// **'The button below stops the location updates and the pending retries. Press it only when you are safe.'**
+  String get sentStopExplain;
+
+  /// No description provided for @btnSafeStop.
+  ///
+  /// In en, this message translates to:
+  /// **'I\'M SAFE — STOP FOLLOW-UPS'**
+  String get btnSafeStop;
+
   /// No description provided for @statusError.
   ///
   /// In en, this message translates to:

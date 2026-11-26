@@ -47,6 +47,33 @@ class AppLocalizationsNb extends AppLocalizations {
       'Ikke alle kontaktene har fått den ennå (ingen dekning?). Prøver igjen automatisk.';
 
   @override
+  String pauseNotifResumesIn(String time) {
+    return 'Fortsetter om $time';
+  }
+
+  @override
+  String get smsLiveTrackingHeader => '📍 LIVE TRACKING — Oksigenia SOS';
+
+  @override
+  String get smsLiveCheckinHeader => '✅ ALT ER BRA — Oksigenia SOS';
+
+  @override
+  String sentPartialTitle(String sent, String total) {
+    return 'Varsel sendt til $sent av $total kontakter';
+  }
+
+  @override
+  String get sentBeaconInfo =>
+      'Hvis du flytter deg mer enn 300 m, sendes den nye posisjonen din til kontaktene dine.';
+
+  @override
+  String get sentStopExplain =>
+      'Knappen nedenfor stopper posisjonsoppdateringene og de ventende nye forsøkene. Trykk først når du er i sikkerhet.';
+
+  @override
+  String get btnSafeStop => 'JEG ER TRYGG — STOPP';
+
+  @override
   String statusError(Object error) {
     return 'FEIL: $error';
   }

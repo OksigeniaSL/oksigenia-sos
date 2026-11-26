@@ -47,6 +47,33 @@ class AppLocalizationsPl extends AppLocalizations {
       'Nie wszystkie kontakty go otrzymały (brak zasięgu?). Ponawiam automatycznie.';
 
   @override
+  String pauseNotifResumesIn(String time) {
+    return 'Wznowienie za $time';
+  }
+
+  @override
+  String get smsLiveTrackingHeader => '📍 LIVE TRACKING — Oksigenia SOS';
+
+  @override
+  String get smsLiveCheckinHeader => '✅ WSZYSTKO OK — Oksigenia SOS';
+
+  @override
+  String sentPartialTitle(String sent, String total) {
+    return 'Alert wysłany do $sent z $total kontaktów';
+  }
+
+  @override
+  String get sentBeaconInfo =>
+      'Jeśli przemieścisz się o ponad 300 m, Twoja nowa lokalizacja zostanie wysłana do kontaktów.';
+
+  @override
+  String get sentStopExplain =>
+      'Przycisk poniżej zatrzymuje wysyłanie lokalizacji i oczekujące ponowne próby. Naciśnij go dopiero, gdy nic Ci już nie grozi.';
+
+  @override
+  String get btnSafeStop => 'NIC MI NIE GROZI — ZATRZYMAJ';
+
+  @override
   String statusError(Object error) {
     return 'BŁĄD: $error';
   }

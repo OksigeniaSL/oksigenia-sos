@@ -47,6 +47,33 @@ class AppLocalizationsPt extends AppLocalizations {
       'Ainda não chegou a todos os contactos (sem rede?). A tentar novamente automaticamente.';
 
   @override
+  String pauseNotifResumesIn(String time) {
+    return 'Retoma em $time';
+  }
+
+  @override
+  String get smsLiveTrackingHeader => '📍 RASTREAMENTO AO VIVO — Oksigenia SOS';
+
+  @override
+  String get smsLiveCheckinHeader => '✅ ESTOU BEM — Oksigenia SOS';
+
+  @override
+  String sentPartialTitle(String sent, String total) {
+    return 'Alerta enviado a $sent de $total contactos';
+  }
+
+  @override
+  String get sentBeaconInfo =>
+      'Se te deslocares mais de 300 m, a tua nova localização é enviada aos teus contactos.';
+
+  @override
+  String get sentStopExplain =>
+      'O botão abaixo para os envios de localização e as novas tentativas pendentes. Prime-o só quando estiveres em segurança.';
+
+  @override
+  String get btnSafeStop => 'ESTOU A SALVO — PARAR AVISOS';
+
+  @override
   String statusError(Object error) {
     return 'ERRO: $error';
   }

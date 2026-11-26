@@ -10,7 +10,11 @@
     <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE_MEDIA_PLAYBACK" />
-    <uses-permission android:name="android.permission.FOREGROUND_SERVICE_LOCATION" />
+    <!-- No FOREGROUND_SERVICE_LOCATION: no service of type location is ever put in the
+         foreground. The monitoring service is health|mediaPlayback, and geolocator's own
+         service (type location in its manifest) is only bound; it would call
+         startForeground only with a foregroundNotificationConfig, which this app never
+         passes. Location with the screen off comes from ACCESS_BACKGROUND_LOCATION. -->
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE_HEALTH" />
     <uses-permission android:name="android.permission.ACTIVITY_RECOGNITION" />
     <uses-permission android:name="android.permission.REQUEST_IGNORE_BATTERY_OPTIMIZATIONS" />
@@ -103,6 +107,24 @@
         <receiver
             android:name="id.flutter.flutter_background_service.BootReceiver"
             tools:node="remove" />
+
+        <!-- flutter_local_notifications. Since its version 16 the plugin declares no
+             receivers of its own; without them a scheduled notification targets a component
+             that does not exist and never shows, and a notification action does nothing.
+             - ScheduledNotificationReceiver: the inactivity backstop (889) and the two
+               live-tracking notifications (891, 892).
+             - ActionBroadcastReceiver: "Resume now" on the pause notification.
+             The plugin's ScheduledNotificationBootReceiver is left out on purpose: after a
+             reboot it re-arms every cached schedule, also those whose time has passed, and
+             Android fires those at once. The backstop would show its alarm-style
+             notification at power-on. Sylvia re-arms its own schedules when
+             OksigeniaBootReceiver starts it. -->
+        <receiver
+            android:name="com.dexterous.flutterlocalnotifications.ScheduledNotificationReceiver"
+            android:exported="false" />
+        <receiver
+            android:name="com.dexterous.flutterlocalnotifications.ActionBroadcastReceiver"
+            android:exported="false" />
             <meta-data android:name="flutterEmbedding" android:value="2" />
 
         <receiver
