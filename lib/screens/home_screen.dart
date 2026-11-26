@@ -1159,11 +1159,15 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver, Ti
       context: context,
       backgroundColor: Colors.grey[900],
       isScrollControlled: true,
+      // Below the status bar, and scrollable: in es, de, pl and ru the last
+      // profile was cut off even at 100 % font size, and at 200 % half the
+      // list could not be reached.
+      useSafeArea: true,
       shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
       ),
       builder: (ctx) => SafeArea(
-        child: Padding(
+        child: SingleChildScrollView(
           padding: const EdgeInsets.symmetric(vertical: 16),
           child: Column(
             mainAxisSize: MainAxisSize.min,
