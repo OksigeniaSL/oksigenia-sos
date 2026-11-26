@@ -317,7 +317,7 @@ class AppLocalizationsDe extends AppLocalizations {
   String get invalidNumberWarning => 'Ungültige oder zu kurze Nummer';
 
   @override
-  String get contactMain => 'Hauptkontakt (Tracking / Akku)';
+  String get contactMain => 'Hauptkontakt — erhält auch das Live-Tracking';
 
   @override
   String get inactivitySubtitle => 'Zeit ohne Bewegung vor dem Notruf.';

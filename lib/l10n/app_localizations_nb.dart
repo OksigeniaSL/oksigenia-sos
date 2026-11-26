@@ -321,7 +321,7 @@ class AppLocalizationsNb extends AppLocalizations {
   String get invalidNumberWarning => 'Ugyldig eller for kort nummer';
 
   @override
-  String get contactMain => 'Hoved (Sporing / Batteri)';
+  String get contactMain => 'Hovedkontakt — får også Live Tracking';
 
   @override
   String get inactivitySubtitle => 'Tid uten bevegelse før hjelp tilkalles.';

@@ -322,7 +322,7 @@ class AppLocalizationsRu extends AppLocalizations {
   String get invalidNumberWarning => 'Номер неверный или слишком короткий';
 
   @override
-  String get contactMain => 'Главный (Трекинг / Батарея)';
+  String get contactMain => 'Главный контакт — также получает Live Tracking';
 
   @override
   String get inactivitySubtitle => 'Время без движения до вызова помощи.';

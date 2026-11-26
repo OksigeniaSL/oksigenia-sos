@@ -99,7 +99,7 @@
     "noContacts": "Geen contacten geconfigureerd.",
     "inactivityTitle": "Inactiviteitstijd",
     "invalidNumberWarning": "Ongeldig of te kort nummer",
-    "contactMain": "Primair (Tracking / Batterij)",
+    "contactMain": "Hoofdcontact — ontvangt ook Live Tracking",
     "inactivitySubtitle": "Tijd zonder beweging voordat hulp wordt ingeroepen.",
     "dialogPermissionTitle": "Hoe toestemmingen in te schakelen",
     "dialogPermissionStep1": "1. Tik hieronder op 'GA NAAR INSTELLINGEN'.",

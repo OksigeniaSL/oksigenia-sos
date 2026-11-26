@@ -98,7 +98,7 @@
     "noContacts": "Ingen kontakter konfigurert.",
     "inactivityTitle": "Inaktivitetstid",
     "invalidNumberWarning": "Ugyldig eller for kort nummer",
-    "contactMain": "Hoved (Sporing / Batteri)",
+    "contactMain": "Hovedkontakt — får også Live Tracking",
     "inactivitySubtitle": "Tid uten bevegelse før hjelp tilkalles.",
     "dialogPermissionTitle": "Slik aktiverer du tillatelser",
     "dialogPermissionStep1": "1. Trykk «GÅ TIL INNSTILLINGER» nedenfor.",

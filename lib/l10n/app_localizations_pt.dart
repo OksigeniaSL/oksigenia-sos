@@ -317,7 +317,8 @@ class AppLocalizationsPt extends AppLocalizations {
   String get invalidNumberWarning => 'Número inválido ou muito curto';
 
   @override
-  String get contactMain => 'Principal (Rastreio / Bateria)';
+  String get contactMain =>
+      'Contacto principal — também recebe o Rastreamento ao Vivo';
 
   @override
   String get inactivitySubtitle => 'Tempo sem movimento antes de pedir ajuda.';

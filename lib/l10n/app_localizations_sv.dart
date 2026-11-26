@@ -322,7 +322,7 @@ class AppLocalizationsSv extends AppLocalizations {
   String get invalidNumberWarning => 'Ogiltigt eller för kort nummer';
 
   @override
-  String get contactMain => 'Primär (Spårning / Batteri)';
+  String get contactMain => 'Huvudkontakt — får även Livespårning';
 
   @override
   String get inactivitySubtitle => 'Tid utan rörelse innan hjälp tillkallas.';

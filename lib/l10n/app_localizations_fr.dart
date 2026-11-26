@@ -319,7 +319,8 @@ class AppLocalizationsFr extends AppLocalizations {
   String get invalidNumberWarning => 'Numéro invalide ou trop court';
 
   @override
-  String get contactMain => 'Principal (Suivi / Batterie)';
+  String get contactMain =>
+      'Contact principal — reçoit aussi le Suivi en Direct';
 
   @override
   String get inactivitySubtitle =>

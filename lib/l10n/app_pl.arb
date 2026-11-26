@@ -98,7 +98,7 @@
     "noContacts": "Brak skonfigurowanych kontaktów.",
     "inactivityTitle": "Czas bezruchu",
     "invalidNumberWarning": "Numer nieprawidłowy lub za krótki",
-    "contactMain": "Główny (Śledzenie / Bateria)",
+    "contactMain": "Główny kontakt — otrzymuje też Live Tracking",
     "inactivitySubtitle": "Czas bez ruchu przed wezwaniem pomocy.",
     "dialogPermissionTitle": "Jak włączyć uprawnienia",
     "dialogPermissionStep1": "1. Naciśnij „PRZEJDŹ DO USTAWIEŃ” poniżej.",

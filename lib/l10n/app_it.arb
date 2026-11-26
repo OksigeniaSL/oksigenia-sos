@@ -71,7 +71,7 @@
     "track30": "⏱️ Ogni 30 min",
     "track60": "⏱️ Ogni ora",
     "track120": "⏱️ Ogni 2 ore",
-    "contactMain": "Primario (Tracking / Batteria)",
+    "contactMain": "Contatto principale — riceve anche il Tracciamento Live",
     "inactivityTimeTitle": "Tempo prima dell'Allerta",
     "inactivityTimeSubtitle": "Quanto tempo senza movimenti prima dell'allarme?",
     "ina30s": "🧪 30 sec (Modalità TEST)",

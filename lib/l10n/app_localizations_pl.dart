@@ -320,7 +320,7 @@ class AppLocalizationsPl extends AppLocalizations {
   String get invalidNumberWarning => 'Numer nieprawidłowy lub za krótki';
 
   @override
-  String get contactMain => 'Główny (Śledzenie / Bateria)';
+  String get contactMain => 'Główny kontakt — otrzymuje też Live Tracking';
 
   @override
   String get inactivitySubtitle => 'Czas bez ruchu przed wezwaniem pomocy.';

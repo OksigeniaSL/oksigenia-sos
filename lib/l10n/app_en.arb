@@ -98,7 +98,7 @@
     "noContacts": "No contacts configured.",
     "inactivityTitle": "Inactivity Time",
     "invalidNumberWarning": "Invalid or too short number",
-    "contactMain": "Primary (Tracking / Battery)",
+    "contactMain": "Main contact — also gets live tracking",
     "inactivitySubtitle": "Time without movement before calling for help.",
     "dialogPermissionTitle": "How to enable permissions",
     "dialogPermissionStep1": "1. Tap 'GO TO SETTINGS' below.",

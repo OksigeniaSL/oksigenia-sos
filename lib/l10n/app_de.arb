@@ -98,7 +98,7 @@
     "noContacts": "Keine Kontakte konfiguriert.",
     "inactivityTitle": "Inaktivitätszeit",
     "invalidNumberWarning": "Ungültige oder zu kurze Nummer",
-    "contactMain": "Hauptkontakt (Tracking / Akku)",
+    "contactMain": "Hauptkontakt — erhält auch das Live-Tracking",
     "inactivitySubtitle": "Zeit ohne Bewegung vor dem Notruf.",
     "dialogPermissionTitle": "Berechtigungen aktivieren",
     "dialogPermissionStep1": "1. Tippen Sie unten auf 'EINSTELLUNGEN'.",

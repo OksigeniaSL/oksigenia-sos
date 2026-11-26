@@ -98,7 +98,7 @@
     "noContacts": "Контакты не настроены.",
     "inactivityTitle": "Время бездействия",
     "invalidNumberWarning": "Номер неверный или слишком короткий",
-    "contactMain": "Главный (Трекинг / Батарея)",
+    "contactMain": "Главный контакт — также получает Live Tracking",
     "inactivitySubtitle": "Время без движения до вызова помощи.",
     "dialogPermissionTitle": "Как включить разрешения",
     "dialogPermissionStep1": "1. Нажми «ПЕРЕЙТИ В НАСТРОЙКИ» ниже.",

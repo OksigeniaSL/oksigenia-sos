@@ -321,7 +321,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get invalidNumberWarning => 'Invalid or too short number';
 
   @override
-  String get contactMain => 'Primary (Tracking / Battery)';
+  String get contactMain => 'Main contact — also gets live tracking';
 
   @override
   String get inactivitySubtitle =>

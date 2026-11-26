@@ -323,7 +323,7 @@ class AppLocalizationsNl extends AppLocalizations {
   String get invalidNumberWarning => 'Ongeldig of te kort nummer';
 
   @override
-  String get contactMain => 'Primair (Tracking / Batterij)';
+  String get contactMain => 'Hoofdcontact — ontvangt ook Live Tracking';
 
   @override
   String get inactivitySubtitle =>

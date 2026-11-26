@@ -713,7 +713,7 @@ abstract class AppLocalizations {
   /// No description provided for @contactMain.
   ///
   /// In en, this message translates to:
-  /// **'Primary (Tracking / Battery)'**
+  /// **'Main contact — also gets live tracking'**
   String get contactMain;
 
   /// No description provided for @inactivitySubtitle.

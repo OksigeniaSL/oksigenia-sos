@@ -326,7 +326,8 @@ class AppLocalizationsIt extends AppLocalizations {
   String get invalidNumberWarning => 'Numero non valido o troppo corto';
 
   @override
-  String get contactMain => 'Primario (Tracking / Batteria)';
+  String get contactMain =>
+      'Contatto principale — riceve anche il Tracciamento Live';
 
   @override
   String get inactivitySubtitle =>

@@ -99,7 +99,7 @@
     "noContacts": "Inga kontakter konfigurerade.",
     "inactivityTitle": "Inaktivitetstid",
     "invalidNumberWarning": "Ogiltigt eller för kort nummer",
-    "contactMain": "Primär (Spårning / Batteri)",
+    "contactMain": "Huvudkontakt — får även Livespårning",
     "inactivitySubtitle": "Tid utan rörelse innan hjälp tillkallas.",
     "dialogPermissionTitle": "Hur man aktiverar behörigheter",
     "dialogPermissionStep1": "1. Tryck på 'GÅ TILL INSTÄLLNINGAR' nedan.",

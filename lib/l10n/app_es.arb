@@ -98,7 +98,7 @@
     "noContacts": "No hay contactos configurados.",
     "inactivityTitle": "Tiempo de Inactividad",
     "invalidNumberWarning": "Número inválido o muy corto",
-    "contactMain": "Principal (Tracking / Batería)",
+    "contactMain": "Contacto principal — también recibe el Seguimiento en Vivo",
     "inactivitySubtitle": "Tiempo sin movimiento antes de pedir ayuda.",
     "dialogPermissionTitle": "Cómo activar el permiso",
     "dialogPermissionStep1": "1. Toca 'IR A AJUSTES' abajo.",
