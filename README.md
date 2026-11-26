@@ -362,7 +362,7 @@ We believe safety tools should be open and auditable.
 Get the latest signed APKs from the **[Releases Section](https://github.com/OksigeniaSL/oksigenia-sos/releases)**.
 
 ### 💻 Build from Source
-Requirements: **Flutter 3.38.7** (exact version — required for Reproducible Builds)
+Requirements: **Flutter 3.47.9** (exact version — required for Reproducible Builds)
 
 ```bash
 git clone https://github.com/OksigeniaSL/oksigenia-sos.git

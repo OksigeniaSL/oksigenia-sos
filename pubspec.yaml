@@ -5,7 +5,7 @@ version: 4.3.3+43300
 
 environment:
   sdk: '>=3.2.0 <4.0.0'
-  flutter: ">=3.38.7"
+  flutter: ">=3.47.9"
 
 dependencies:
   flutter:
