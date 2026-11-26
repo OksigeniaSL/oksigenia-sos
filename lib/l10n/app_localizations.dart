@@ -1580,6 +1580,12 @@ abstract class AppLocalizations {
   /// **'Delete {number}'**
   String a11yDeleteContact(String number);
 
+  /// Tooltip / screen-reader name of the stop icon on Home's live-tracking card.
+  ///
+  /// In en, this message translates to:
+  /// **'Stop live tracking'**
+  String get a11yStopTracking;
+
   /// No description provided for @contactCheckTitle.
   ///
   /// In en, this message translates to:

@@ -243,6 +243,7 @@
     "a11yGpsNone": "GPS: brak pozycji",
     "a11yAddContact": "Dodaj kontakt",
     "a11yDeleteContact": "Usuń {number}",
+    "a11yStopTracking": "Zatrzymaj Live Tracking",
     "contactCheckTitle": "Czy numer kierunkowy kraju jest poprawny?",
     "contactCheckBody": "Twój SOS zostanie wysłany na {number}. Jeśli numer kierunkowy jest błędny, wpisz numer z + i kodem kraju.",
     "contactCheckSave": "Tak, zapisz",

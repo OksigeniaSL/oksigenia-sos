@@ -822,6 +822,9 @@ class AppLocalizationsEs extends AppLocalizations {
   }
 
   @override
+  String get a11yStopTracking => 'Detener el seguimiento en vivo';
+
+  @override
   String get contactCheckTitle => '¿Es correcto el prefijo del país?';
 
   @override

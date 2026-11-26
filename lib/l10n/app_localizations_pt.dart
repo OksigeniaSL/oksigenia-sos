@@ -817,6 +817,9 @@ class AppLocalizationsPt extends AppLocalizations {
   }
 
   @override
+  String get a11yStopTracking => 'Parar o rastreamento ao vivo';
+
+  @override
   String get contactCheckTitle => 'O indicativo do país está correto?';
 
   @override

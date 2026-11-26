@@ -817,6 +817,9 @@ class AppLocalizationsDe extends AppLocalizations {
   }
 
   @override
+  String get a11yStopTracking => 'Live-Tracking beenden';
+
+  @override
   String get contactCheckTitle => 'Stimmt die Ländervorwahl?';
 
   @override

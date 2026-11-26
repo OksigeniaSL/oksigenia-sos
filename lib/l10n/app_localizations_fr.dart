@@ -820,6 +820,9 @@ class AppLocalizationsFr extends AppLocalizations {
   }
 
   @override
+  String get a11yStopTracking => 'Arrêter le suivi en direct';
+
+  @override
   String get contactCheckTitle => 'L\'indicatif du pays est-il correct ?';
 
   @override

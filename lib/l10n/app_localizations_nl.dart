@@ -823,6 +823,9 @@ class AppLocalizationsNl extends AppLocalizations {
   }
 
   @override
+  String get a11yStopTracking => 'Live tracking stoppen';
+
+  @override
   String get contactCheckTitle => 'Klopt de landcode?';
 
   @override

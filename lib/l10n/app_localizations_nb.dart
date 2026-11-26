@@ -821,6 +821,9 @@ class AppLocalizationsNb extends AppLocalizations {
   }
 
   @override
+  String get a11yStopTracking => 'Stopp Live Tracking';
+
+  @override
   String get contactCheckTitle => 'Er landskoden riktig?';
 
   @override

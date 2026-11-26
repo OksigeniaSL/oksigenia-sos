@@ -243,6 +243,7 @@
     "a11yGpsNone": "GPS: nog geen positie",
     "a11yAddContact": "Contact toevoegen",
     "a11yDeleteContact": "{number} verwijderen",
+    "a11yStopTracking": "Live tracking stoppen",
     "contactCheckTitle": "Klopt de landcode?",
     "contactCheckBody": "Je SOS wordt verstuurd naar {number}. Is de landcode fout, typ het nummer dan met + en de landcode.",
     "contactCheckSave": "Ja, opslaan",

@@ -243,6 +243,7 @@
     "a11yGpsNone": "GPS: ingen position än",
     "a11yAddContact": "Lägg till kontakt",
     "a11yDeleteContact": "Ta bort {number}",
+    "a11yStopTracking": "Stoppa livespårning",
     "contactCheckTitle": "Stämmer landsnumret?",
     "contactCheckBody": "Ditt SOS skickas till {number}. Om landsnumret är fel, skriv numret med + och landsnummer.",
     "contactCheckSave": "Ja, spara",

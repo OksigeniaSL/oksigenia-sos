@@ -821,6 +821,9 @@ class AppLocalizationsRu extends AppLocalizations {
   }
 
   @override
+  String get a11yStopTracking => 'Остановить Live Tracking';
+
+  @override
   String get contactCheckTitle => 'Код страны указан верно?';
 
   @override

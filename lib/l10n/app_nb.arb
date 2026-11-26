@@ -243,6 +243,7 @@
     "a11yGpsNone": "GPS: ingen posisjon ennå",
     "a11yAddContact": "Legg til kontakt",
     "a11yDeleteContact": "Slett {number}",
+    "a11yStopTracking": "Stopp Live Tracking",
     "contactCheckTitle": "Er landskoden riktig?",
     "contactCheckBody": "SOS-en din sendes til {number}. Hvis landskoden er feil, skriv nummeret med + og landskode.",
     "contactCheckSave": "Ja, lagre",

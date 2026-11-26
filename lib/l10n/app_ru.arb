@@ -243,6 +243,7 @@
     "a11yGpsNone": "GPS: позиция ещё не определена",
     "a11yAddContact": "Добавить контакт",
     "a11yDeleteContact": "Удалить {number}",
+    "a11yStopTracking": "Остановить Live Tracking",
     "contactCheckTitle": "Код страны указан верно?",
     "contactCheckBody": "Ваш SOS будет отправлен на {number}. Если код страны неверный, введите номер с + и кодом страны.",
     "contactCheckSave": "Да, сохранить",

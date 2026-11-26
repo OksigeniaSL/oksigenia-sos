@@ -815,6 +815,9 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
+  String get a11yStopTracking => 'Stop live tracking';
+
+  @override
   String get contactCheckTitle => 'Is the country code right?';
 
   @override

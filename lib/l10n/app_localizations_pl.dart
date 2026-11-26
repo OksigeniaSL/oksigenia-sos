@@ -819,6 +819,9 @@ class AppLocalizationsPl extends AppLocalizations {
   }
 
   @override
+  String get a11yStopTracking => 'Zatrzymaj Live Tracking';
+
+  @override
   String get contactCheckTitle => 'Czy numer kierunkowy kraju jest poprawny?';
 
   @override

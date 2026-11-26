@@ -821,6 +821,9 @@ class AppLocalizationsSv extends AppLocalizations {
   }
 
   @override
+  String get a11yStopTracking => 'Stoppa livespårning';
+
+  @override
   String get contactCheckTitle => 'Stämmer landsnumret?';
 
   @override

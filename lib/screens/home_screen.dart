@@ -957,6 +957,8 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver, Ti
 
     final Widget banner = Container(
       width: double.infinity,
+      // Several banners are tappable: at least a 48 dp target.
+      constraints: const BoxConstraints(minHeight: 48),
       margin: const EdgeInsets.symmetric(horizontal: 20, vertical: 6),
       padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 11),
       decoration: BoxDecoration(
@@ -1519,39 +1521,50 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver, Ti
                         style: TextStyle(color: accentColor, fontWeight: FontWeight.bold, fontSize: 13),
                       ),
                     ),
-                    GestureDetector(
-                      onTap: () {
+                    // Was a bare 22 dp icon with no name; now a 48 dp button.
+                    IconButton(
+                      tooltip: l10n.a11yStopTracking,
+                      constraints: const BoxConstraints(minWidth: 48, minHeight: 48),
+                      padding: EdgeInsets.zero,
+                      onPressed: () {
                         _liveTrackingHoldController.reset();
                         _sosLogic.disableLiveTracking();
                       },
-                      child: const Icon(Icons.stop_circle, color: Colors.redAccent, size: 22),
+                      icon: const Icon(Icons.stop_circle, color: Colors.redAccent, size: 26),
                     ),
                   ],
                 ),
                 const SizedBox(height: 6),
-                Row(
+                // Wrap: with a large font the button drops below the text
+                // instead of squeezing it.
+                SizedBox(
+                  width: double.infinity,
+                  child: Wrap(
+                  alignment: WrapAlignment.spaceBetween,
+                  crossAxisAlignment: WrapCrossAlignment.center,
+                  spacing: 8,
                   children: [
-                    Expanded(
-                      child: Text(
-                        l10n.liveTrackingNextUpdate(timeStr),
-                        style: const TextStyle(color: Colors.white70, fontSize: 12),
-                      ),
+                    Text(
+                      l10n.liveTrackingNextUpdate(timeStr),
+                      style: const TextStyle(color: Colors.white70, fontSize: 12),
                     ),
-                    GestureDetector(
-                      onTap: () => _sosLogic.sendLiveCheckin(),
-                      child: Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-                        decoration: BoxDecoration(
-                          color: Colors.green[700],
-                          borderRadius: BorderRadius.circular(6),
-                        ),
-                        child: Text(
-                          l10n.btnImOkay,
-                          style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 11),
-                        ),
+                    // Was about 20 dp high with 11 px text; now a 48 dp touch
+                    // target, larger text and a darker green for contrast.
+                    ElevatedButton(
+                      onPressed: () => _sosLogic.sendLiveCheckin(),
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: Colors.green[800],
+                        foregroundColor: Colors.white,
+                        minimumSize: const Size(64, 40),
+                        tapTargetSize: MaterialTapTargetSize.padded,
+                        padding: const EdgeInsets.symmetric(horizontal: 14),
+                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(6)),
+                        textStyle: const TextStyle(fontWeight: FontWeight.bold, fontSize: 14),
                       ),
+                      child: Text(l10n.btnImOkay),
                     ),
                   ],
+                  ),
                 ),
                 if (isHolding) ...[
                   const SizedBox(height: 8),

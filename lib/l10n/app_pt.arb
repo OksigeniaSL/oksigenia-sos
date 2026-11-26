@@ -243,6 +243,7 @@
     "a11yGpsNone": "GPS: ainda sem posição",
     "a11yAddContact": "Adicionar contacto",
     "a11yDeleteContact": "Apagar {number}",
+    "a11yStopTracking": "Parar o rastreamento ao vivo",
     "contactCheckTitle": "O indicativo do país está correto?",
     "contactCheckBody": "O seu SOS será enviado para {number}. Se o indicativo estiver errado, escreva o número com + e o indicativo.",
     "contactCheckSave": "Sim, guardar",

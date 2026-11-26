@@ -243,6 +243,7 @@
     "a11yGpsNone": "GPS: noch keine Position",
     "a11yAddContact": "Kontakt hinzufügen",
     "a11yDeleteContact": "{number} löschen",
+    "a11yStopTracking": "Live-Tracking beenden",
     "contactCheckTitle": "Stimmt die Ländervorwahl?",
     "contactCheckBody": "Dein SOS geht an {number}. Wenn die Ländervorwahl falsch ist, gib die Nummer mit + und Ländervorwahl ein.",
     "contactCheckSave": "Ja, speichern",
