@@ -21,8 +21,26 @@ const Map<String, String> countryPrefixes = {
 // Italia (+39) se excluye a propósito: su 0 de fijos SÍ se conserva en E.164.
 const Set<String> _trunkZeroPrefixes = {
   '+33', '+44', '+353', '+49', '+31', '+32', '+352',
-  '+358', '+41', '+43', '+61', '+64', '+81', '+55', '+54',
+  '+358', '+41', '+43', '+61', '+64', '+81', '+55', '+54', '+46',
 };
+
+// The country code typed without '+' is recognised by its digits and a minimum
+// length. In Italy and Brazil national numbers can start with those same digits
+// (mobiles 390-393, area code 55), so they need the full international length.
+const Map<String, int> _minDigitsWithCountryCode = {'39': 11, '55': 12};
+
+// Settings prefills the country prefix and people keep typing the number as
+// they always do, with the national 0: «+33 06 12…», «+44 (0)7700…». In these
+// countries that 0 is never part of the international number; the operator
+// silently drops «+330612…». Italy keeps its 0 and is not in the list.
+String _dropTrunkZero(String e164) {
+  final prefixes = _trunkZeroPrefixes.toList()
+    ..sort((a, b) => b.length.compareTo(a.length));
+  for (final cc in prefixes) {
+    if (e164.startsWith('${cc}0')) return cc + e164.substring(cc.length + 1);
+  }
+  return e164;
+}
 
 String? detectDefaultPrefix() {
   final cc = (PlatformDispatcher.instance.locale.countryCode ?? '').toUpperCase();
@@ -32,13 +50,15 @@ String? detectDefaultPrefix() {
 String normalizePhoneE164(String raw, {String? defaultPrefix}) {
   String s = raw.trim();
   if (s.isEmpty) return s;
+  // «(0)» marks the national trunk digit: it is never dialled with a prefix.
+  s = s.replaceAll(RegExp(r'\(\s*0\s*\)'), '');
 
   if (s.startsWith('+')) {
-    return '+${s.substring(1).replaceAll(RegExp(r'\D'), '')}';
+    return _dropTrunkZero('+${s.substring(1).replaceAll(RegExp(r'\D'), '')}');
   }
 
   if (s.startsWith('00')) {
-    return '+${s.substring(2).replaceAll(RegExp(r'\D'), '')}';
+    return _dropTrunkZero('+${s.substring(2).replaceAll(RegExp(r'\D'), '')}');
   }
 
   final digits = s.replaceAll(RegExp(r'\D'), '');
@@ -60,7 +80,7 @@ String normalizePhoneE164(String raw, {String? defaultPrefix}) {
   final String ccDigits = prefix.substring(1);
   if (!digits.startsWith('0') &&
       digits.startsWith(ccDigits) &&
-      digits.length >= ccDigits.length + 8) {
+      digits.length >= (_minDigitsWithCountryCode[ccDigits] ?? ccDigits.length + 8)) {
     return '+$digits';
   }
 

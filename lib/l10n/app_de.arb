@@ -10,6 +10,7 @@
     "btnRetry": "Erneut versuchen",
     "statusSendFailed": "⚠️ SOS NICHT GESENDET",
     "statusSendFailedBody": "Es konnte keine SMS gesendet werden. Prüfe Empfang und Kontakte, dann erneut versuchen.",
+    "statusSendRetrying": "Noch nicht alle Kontakte haben es erhalten (kein Netz?). Wird automatisch erneut versucht.",
     "statusError": "FEHLER: {error}",
     "menuWeb": "Offizielle Webseite",
     "menuSupport": "Support",

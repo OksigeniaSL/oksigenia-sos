@@ -43,6 +43,10 @@ class AppLocalizationsEs extends AppLocalizations {
       'No se pudo enviar ningún SMS. Comprueba cobertura y contactos, y reintenta.';
 
   @override
+  String get statusSendRetrying =>
+      'Aún no les ha llegado a todos los contactos (¿sin cobertura?). Se reintenta solo.';
+
+  @override
   String statusError(Object error) {
     return 'ERROR: $error';
   }

@@ -43,6 +43,10 @@ class AppLocalizationsEn extends AppLocalizations {
       'No SMS could be sent. Check signal and contacts, then retry.';
 
   @override
+  String get statusSendRetrying =>
+      'Not every contact has it yet (no signal?). Retrying automatically.';
+
+  @override
   String statusError(Object error) {
     return 'ERROR: $error';
   }

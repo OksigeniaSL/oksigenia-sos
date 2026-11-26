@@ -43,6 +43,10 @@ class AppLocalizationsSv extends AppLocalizations {
       'Inget SMS kunde skickas. Kontrollera täckning och kontakter och försök igen.';
 
   @override
+  String get statusSendRetrying =>
+      'Alla kontakter har inte fått det än (ingen täckning?). Försöker igen automatiskt.';
+
+  @override
   String statusError(Object error) {
     return 'FEL: $error';
   }

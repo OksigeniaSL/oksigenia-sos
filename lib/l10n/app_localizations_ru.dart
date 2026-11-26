@@ -43,6 +43,10 @@ class AppLocalizationsRu extends AppLocalizations {
       'Не удалось отправить ни одного SMS. Проверьте сигнал сети и контакты, затем повторите.';
 
   @override
+  String get statusSendRetrying =>
+      'Ещё не все контакты получили его (нет сети?). Повторная отправка автоматически.';
+
+  @override
   String statusError(Object error) {
     return 'ОШИБКА: $error';
   }

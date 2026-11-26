@@ -10,6 +10,7 @@
     "btnRetry": "Tentar novamente",
     "statusSendFailed": "⚠️ SOS NÃO ENVIADO",
     "statusSendFailedBody": "Não foi possível enviar nenhum SMS. Verifique a cobertura e os contactos e tente novamente.",
+    "statusSendRetrying": "Ainda não chegou a todos os contactos (sem rede?). A tentar novamente automaticamente.",
     "statusError": "ERRO: {error}",
     "menuWeb": "Site Oficial",
     "menuSupport": "Suporte Técnico",

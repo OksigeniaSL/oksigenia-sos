@@ -19,9 +19,10 @@ import 'package:oksigenia_sms/oksigenia_sms.dart';
 import 'activity_profile.dart';
 import '../services/preferences_service.dart';
 import '../utils/phone_utils.dart';
-import '../utils/sms_splitter.dart';
 import '../utils/geo_links.dart';
 import '../utils/sms_budget.dart';
+import '../utils/sms_splitter.dart';
+import '../utils/sos_sms.dart';
 import '../screens/settings_screen.dart';
 import '../screens/alarm_screen.dart';
 import '../screens/sent_screen.dart';
@@ -178,6 +179,7 @@ class SOSLogic extends ChangeNotifier with WidgetsBindingObserver {
           'statusSent': l10n.statusSent,
           'statusSendFailed': l10n.statusSendFailed,
           'statusSendFailedBody': l10n.statusSendFailedBody,
+          'statusSendRetrying': l10n.statusSendRetrying,
           'statusReady': l10n.statusReady,
           'smsHelpMessage': l10n.smsHelpMessage,
           'smsDyingGasp': l10n.smsDyingGasp,
@@ -199,6 +201,7 @@ class SOSLogic extends ChangeNotifier with WidgetsBindingObserver {
           'statusSent': l10n.statusSent,
           'statusSendFailed': l10n.statusSendFailed,
           'statusSendFailedBody': l10n.statusSendFailedBody,
+          'statusSendRetrying': l10n.statusSendRetrying,
           'statusReady': l10n.statusReady,
           'smsHelpMessage': l10n.smsHelpMessage,
           'smsDyingGasp': l10n.smsDyingGasp,
@@ -583,7 +586,10 @@ class SOSLogic extends ChangeNotifier with WidgetsBindingObserver {
     _setStatus(SOSStatus.scanning);
     _awaitingServiceSend = true;
     _serviceSendTimeout?.cancel();
-    _serviceSendTimeout = Timer(const Duration(seconds: 90), () async {
+    // Sylvia can take up to ~15 s for the GPS plus ~20-30 s per contact before it
+    // reports: a fixed 90 s made the UI send a duplicate SOS with 4+ contacts.
+    final int contacts = PreferencesService().getContacts().length;
+    _serviceSendTimeout = Timer(Duration(seconds: 90 + 30 * max(0, contacts - 1)), () async {
       if (_awaitingServiceSend) {
         _awaitingServiceSend = false;
         debugPrint("LOGIC: ❌ Sin confirmación de Sylvia tras 90s. Fallback de la UI.");
@@ -608,7 +614,12 @@ class SOSLogic extends ChangeNotifier with WidgetsBindingObserver {
   void _onServiceSendResult(int sentCount) async {
     // Confirmación de Sylvia. Se acepta también en preAlert: si su zombie
     // ganó la carrera y ya envió, mostrar SentScreen es lo veraz.
-    if (_status != SOSStatus.scanning && _status != SOSStatus.preAlert) return;
+    // Also from the error screen: a queued retry that got through later is the
+    // truth the user must see.
+    if (_status != SOSStatus.scanning && _status != SOSStatus.preAlert &&
+        !(_status == SOSStatus.error && sentCount > 0)) {
+      return;
+    }
     _awaitingServiceSend = false;
     _serviceSendTimeout?.cancel();
     _preAlertTimer?.cancel();
@@ -884,6 +895,14 @@ class SOSLogic extends ChangeNotifier with WidgetsBindingObserver {
            return;
         }
         if (isMonitoringPaused) return;
+        // A pause that just ended counts as movement, as in Sylvia. Without it
+        // this clock, frozen during the pause, could fire a false inactivity
+        // alarm the moment a 1 h pause ends with a 1 h limit.
+        if (_pausedUntil != null) {
+          _pausedUntil = null;
+          _lastMovementTime = DateTime.now();
+          return;
+        }
         if (_status != SOSStatus.ready && _status != SOSStatus.locationFixed) return;
 
         if (DateTime.now().difference(_lastMovementTime).inSeconds > _currentInactivityLimit) {
@@ -972,57 +991,45 @@ class SOSLogic extends ChangeNotifier with WidgetsBindingObserver {
     } catch (_) {}
   }
 
-  // issue #12: enviar troceado con isMultipart:false (sendTextMessage). La vía
-  // multipart lanza getGroupIdLevel1/READ_PHONE_STATE en Android 17/GrapheneOS.
-  // Troceo sin partir enlaces (sms_splitter). Devuelve true si salió al menos la
-  // primera pieza (la crítica: SOS + coordenadas).
+  // Every SMS from the UI goes through sendSosSms (lib/utils/sos_sms.dart),
+  // like Sylvia's: it says honestly whether the radio took it.
+  Future<SosSmsOutcome> _sendSmsOutcomeUi(String to, String message,
+      {bool overLimit = false}) {
+    return sendSosSms(to, message,
+        overLimit: overLimit,
+        telephony: _telephony,
+        log: (m) => _logSmsDiag("UI $m"));
+  }
+
   Future<bool> _sendSmsChunked(String to, String message,
-      {bool overLimit = false}) async {
-    // Fase 2 (#12): primario = plugin propio (1 SMS concatenado, sin permiso
-    // extra, con resultCode); fallback al troceo de la Fase 1 si el plugin falla.
-    // #13: con [overLimit], igual que _sendSmsTracked en Sylvia: lo retenido
-    // por el límite de SMS de Android no cuenta como enviado ni se trocea.
+          {bool overLimit = false}) async =>
+      sosSmsDelivered(await _sendSmsOutcomeUi(to, message, overLimit: overLimit));
+
+  // Contacts the UI's SOS could not reach are handed to Sylvia's retry queue
+  // (same prefs keys), and Sylvia is started if it is not running.
+  Future<void> _queueSosRetryForService(List<String> numbers) async {
     try {
-      final r = await OksigeniaSms.send(
-          to: to,
-          message: message,
-          timeout: Duration(seconds: overLimit ? 8 : 20));
-      if (r.status == OksigeniaSmsStatus.failed) {
-        if (overLimit || r.error == 'limit_exceeded') {
-          _logSmsDiag("UI SMS: límite de SMS de Android (${r.error}) — sin troceo");
-          return false;
-        }
-        _logSmsDiag("UI SMS: plugin falló (${r.error}) → fallback a troceo");
-        return _sendSplitFallbackUi(to, message);
-      }
-      if (r.status == OksigeniaSmsStatus.unknown && overLimit) {
-        _logSmsDiag("UI SMS: retenido por el límite de SMS de Android (esperando confirmación)");
-        return false;
-      }
-      return true; // sent | unknown (entregado; ver EXP5)
+      final p = await SharedPreferences.getInstance();
+      final now = DateTime.now().millisecondsSinceEpoch;
+      await p.setStringList(PreferencesService.keySosRetryNumbers, numbers);
+      await p.setInt(PreferencesService.keySosRetryAttempt, 0);
+      await p.setInt(PreferencesService.keySosRetryNext, now + 60 * 1000);
+      await p.setInt(PreferencesService.keySosRetryUntil, now + 4 * 60 * 60 * 1000);
+      await p.setBool(PreferencesService.keySosRetryActive, true);
+      _logSmsDiag("UI SOS: ${numbers.length} contact(s) queued for automatic retry");
+      final service = FlutterBackgroundService();
+      if (!await service.isRunning()) await service.startService();
     } catch (e) {
-      _logSmsDiag("UI SMS: excepción del plugin ($e) → fallback a troceo");
-      final bool ok = await _sendSplitFallbackUi(to, message);
-      return ok && !overLimit;
+      _logSmsDiag("UI SOS: could not queue the retry: $e");
     }
   }
 
-  Future<bool> _sendSplitFallbackUi(String to, String message) async {
-    final parts = splitSmsSafely(message);
-    int ok = 0;
-    for (final part in parts) {
-      try {
-        await _telephony.sendSms(to: to, message: part, isMultipart: false);
-        ok++;
-      } catch (e) {
-        debugPrint("Error enviando pieza: $e");
-        _logSmsDiag("UI SMS FAIL (pieza ${ok + 1}/${parts.length}): $e");
-      }
-    }
-    if (ok < parts.length) {
-      _logSmsDiag("UI SMS: fallback envió $ok/${parts.length} piezas");
-    }
-    return ok > 0;
+  Future<void> _clearSosRetryQueue() async {
+    try {
+      final p = await SharedPreferences.getInstance();
+      await p.setBool(PreferencesService.keySosRetryActive, false);
+      await p.remove(PreferencesService.keySosRetryNumbers);
+    } catch (_) {}
   }
 
   Future<void> _triggerDyingGasp() async {
@@ -1120,6 +1127,7 @@ class SOSLogic extends ChangeNotifier with WidgetsBindingObserver {
     await prefs.setBool('is_alarm_active', false);
     await prefs.setBool('beacon_active', false);
     await prefs.remove('alarm_start_timestamp');
+    await _clearSosRetryQueue();
     _beaconActive = false;
 
     _uiCooldown = true;
@@ -1175,6 +1183,7 @@ class SOSLogic extends ChangeNotifier with WidgetsBindingObserver {
       final raw = await SharedPreferences.getInstance();
       await raw.setBool('beacon_active', false);
     } catch (_) {}
+    await _clearSosRetryQueue();
     _beaconActive = false;
 
     _isFallDetectionActive = false;
@@ -1226,7 +1235,10 @@ class SOSLogic extends ChangeNotifier with WidgetsBindingObserver {
     _setStatus(SOSStatus.scanning);
     _inactivityTimer?.cancel();
     _gpsSubscription?.cancel();
-    int batteryLevel = await _battery.batteryLevel;
+    // This send goes to every contact: an older pending retry is replaced.
+    await _clearSosRetryQueue();
+    int batteryLevel = 0;
+    try { batteryLevel = await _battery.batteryLevel; } catch (_) {}
 
     // Nota (personalizada o de ayuda), colocada tras el enlace de Maps para que
     // las coordenadas viajen en el primer SMS.
@@ -1270,17 +1282,23 @@ class SOSLogic extends ChangeNotifier with WidgetsBindingObserver {
     OksigeniaSmsRateLimit? smsLimit;
     int partsPerContact = 1; // mínimo una parte (ver Sylvia)
     try { smsLimit = await OksigeniaSms.rateLimit(); } catch (_) {}
-    try { partsPerContact = max(1, await OksigeniaSms.partCount(msgBody)); } catch (_) {}
+    try { partsPerContact = max(1, await OksigeniaSms.partCount(gsmSafe(msgBody))); } catch (_) {}
 
     int successCount = 0;
     int burstParts = 0;
+    final List<String> pending = [];
     for (String number in recipients) {
       burstParts += partsPerContact;
       final bool overLimit = smsLimit != null && !smsLimit.allows(burstParts);
-      if (await _sendSmsChunked(normalizePhoneE164(number), msgBody, overLimit: overLimit)) {
+      final SosSmsOutcome outcome = await _sendSmsOutcomeUi(
+          normalizePhoneE164(number), msgBody, overLimit: overLimit);
+      if (sosSmsDelivered(outcome)) {
         successCount++;
+      } else if (sosSmsRetryable(outcome)) {
+        pending.add(number);
       }
     }
+    if (pending.isNotEmpty) await _queueSosRetryForService(pending);
     if (successCount < recipients.length) {
       _logSmsDiag("UI SOS: sólo $successCount/${recipients.length} contactos recibieron el SOS");
     }

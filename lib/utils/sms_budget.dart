@@ -1,6 +1,7 @@
 import 'package:oksigenia_sms/oksigenia_sms.dart';
 
 import 'geo_links.dart';
+import 'sms_splitter.dart';
 
 /// First line of every SOS SMS. The SOS builders in background_service.dart
 /// and sos_logic.dart use it, and so does [worstCaseSosBody].
@@ -9,9 +10,10 @@ const String sosSmsHeader = 'SOS OKSIGENIA';
 /// The longest SOS body the builders can produce for [note]: worst-case
 /// coordinates, altitude, accuracy and fix age. Lets the app price an SOS in
 /// SMS parts before any GPS fix exists. Keep it in step with the builders.
+/// Passed through [gsmSafe], as every SMS is before it is sent.
 String worstCaseSosBody(String note) =>
-    '$sosSmsHeader\n$note\n${geoLinks(-89.999999, -179.999999)}'
-    '\nBat: 100% | Alt: -9999m | Acc: 9999m | 999min';
+    gsmSafe('$sosSmsHeader\n$note\n${geoLinks(-89.999999, -179.999999)}'
+        '\nBat: 100% | Alt: -9999m | Acc: 9999m | 999min');
 
 /// How one SOS fits Android's per-app SMS rate limit (issue #13).
 ///

@@ -114,18 +114,27 @@ class _AlarmScreenState extends State<AlarmScreen> with TickerProviderStateMixin
       bodyText = l10n.alarmSendingNow;
     }
 
-    return Scaffold(
+    final mq = MediaQuery.of(context);
+    // With a large system font (360×640 at 150-200 %) the cancel control ended
+    // up off screen, and the screen could not scroll: no way to stop a false
+    // alarm. The scale is capped on this one screen, the content scrolls, and
+    // the cancel control stays pinned at the bottom, outside the scroll, so a
+    // shaky hold is never taken for a drag.
+    return MediaQuery(
+      data: mq.copyWith(textScaler: mq.textScaler.clamp(maxScaleFactor: 1.3)),
+      child: Scaffold(
       backgroundColor: bgColor,
       body: PopScope(
         canPop: false,
         child: SafeArea(
-          child: Center(
-            child: SingleChildScrollView(
-              physics: const NeverScrollableScrollPhysics(),
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                mainAxisSize: MainAxisSize.min,
-                children: [
+          child: Column(
+            children: [
+              Expanded(
+                child: Center(
+                  child: SingleChildScrollView(
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
                   const SizedBox(height: 20),
                   Icon(Icons.warning_amber_rounded, size: 60, color: textColor),
                   const SizedBox(height: 15),
@@ -221,6 +230,11 @@ class _AlarmScreenState extends State<AlarmScreen> with TickerProviderStateMixin
                     const SizedBox(height: 30),
                   ],
 
+                      ],
+                    ),
+                  ),
+                ),
+              ),
                   // BOTÓN DE SEGURIDAD
                   GestureDetector(
                     behavior: HitTestBehavior.opaque,
@@ -295,13 +309,11 @@ class _AlarmScreenState extends State<AlarmScreen> with TickerProviderStateMixin
                       ),
                     ),
                   ),
-                  const SizedBox(height: 20),
-                ],
-              ),
-            ),
+              const SizedBox(height: 20),
+            ],
           ),
         ),
       ),
-    );
+    ));
   }
 }

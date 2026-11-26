@@ -366,6 +366,12 @@ class _SettingsScreenState extends State<SettingsScreen> with WidgetsBindingObse
                 int index = entry.key;
                 String phone = entry.value;
                 bool isPrimary = (index == 0);
+                // The number the SOS will really dial: contacts are kept as
+                // typed and normalised at send time, so a wrong guess (country
+                // taken from the phone's language) must be visible here.
+                final String dialled = normalizePhoneE164(phone);
+                final bool showDialled =
+                    dialled != phone.replaceAll(RegExp(r'[\s\-().]'), '');
 
                 return Card(
                   elevation: isPrimary ? 2 : 0,
@@ -382,8 +388,17 @@ class _SettingsScreenState extends State<SettingsScreen> with WidgetsBindingObse
                         fontSize: isPrimary ? 18 : 16,
                       ),
                     ),
-                    subtitle: isPrimary 
-                      ? Text(l10n.contactMain, style: TextStyle(color: Colors.amber[800], fontSize: 12)) 
+                    subtitle: (isPrimary || showDialled)
+                      ? Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            if (isPrimary)
+                              Text(l10n.contactMain, style: TextStyle(color: Colors.amber[800], fontSize: 12)),
+                            if (showDialled)
+                              Text('→ $dialled', style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w600)),
+                          ],
+                        )
                       : null,
                     trailing: IconButton(
                       icon: const Icon(Icons.delete, color: Colors.red),

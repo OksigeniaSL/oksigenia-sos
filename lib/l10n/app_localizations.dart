@@ -182,6 +182,12 @@ abstract class AppLocalizations {
   /// **'No SMS could be sent. Check signal and contacts, then retry.'**
   String get statusSendFailedBody;
 
+  /// No description provided for @statusSendRetrying.
+  ///
+  /// In en, this message translates to:
+  /// **'Not every contact has it yet (no signal?). Retrying automatically.'**
+  String get statusSendRetrying;
+
   /// No description provided for @statusError.
   ///
   /// In en, this message translates to:

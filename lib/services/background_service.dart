@@ -16,10 +16,11 @@ import 'package:battery_plus/battery_plus.dart';
 import 'package:path_provider/path_provider.dart';
 import '../logic/activity_profile.dart';
 import '../utils/phone_utils.dart';
-import '../utils/sms_splitter.dart';
 import 'package:oksigenia_sms/oksigenia_sms.dart';
 import '../utils/geo_links.dart';
 import '../utils/sms_budget.dart';
+import '../utils/sms_splitter.dart';
+import '../utils/sos_sms.dart';
 import 'preferences_service.dart';
 import 'package:timezone/data/latest_all.dart' as tz;
 import 'package:timezone/timezone.dart' as tz;
@@ -110,6 +111,7 @@ Map<String, String> _texts = {
   'statusSent': 'Alert sent successfully.',
   'statusSendFailed': '⚠️ SOS NOT SENT',
   'statusSendFailedBody': 'No SMS could be sent. Check signal and contacts, then retry.',
+  'statusSendRetrying': 'Not sent to every contact yet. Retrying automatically.',
   'statusReady': 'Oksigenia System Ready.',
   'smsHelpMessage': 'HELP! SOS!',
   'smsDyingGasp': 'BATTERY CRITICAL. Bye.',
@@ -468,72 +470,22 @@ void onStart(ServiceInstance service) async {
     }
   }
 
-  // Fallback Fase 1: varios SMS con sendTextMessage (isMultipart:false) por
-  // pieza (sms_splitter, sin partir enlaces). La vía validada en v4.3.0.
-  // Declarada ANTES de _sendSmsTracked: las funciones locales de onStart no se
-  // hoisted.
-  Future<bool> _sendSplitFallback(String to, String message) async {
-    final parts = splitSmsSafely(message);
-    int ok = 0;
-    for (final part in parts) {
-      try {
-        await _telephony.sendSms(to: to, message: part, isMultipart: false);
-        ok++;
-      } catch (e) {
-        _logSentinel("SYLVIA SMS: ❌ fallback pieza ${ok + 1}/${parts.length} a $to: $e");
-      }
-    }
-    if (ok < parts.length) {
-      _logSentinel("SYLVIA SMS: ⚠️ fallback envió $ok/${parts.length} piezas a $to");
-    }
-    return ok > 0;
+  // Every SMS goes through sendSosSms (lib/utils/sos_sms.dart): it says how
+  // the send really ended. Before, a send without coverage fell back to pieces
+  // sent with no acknowledgement and counted as sent: «SOS sent» with nothing
+  // on the air. Sequential on purpose: the plugin's status receiver is per send,
+  // but parallel sends would race for Android's SMS limit.
+  Future<SosSmsOutcome> _sendSmsOutcome(String to, String message,
+      {bool overLimit = false}) {
+    return sendSosSms(to, message,
+        overLimit: overLimit,
+        telephony: _telephony,
+        log: (m) => _logSentinel("SYLVIA $m"));
   }
 
-  // Envía un SMS y ADEMÁS registra en el log si el radio llega a confirmarlo.
-  // Devuelve true si se entregó a SmsManager sin excepción (misma semántica que
-  // antes: "encolado"). OJO — techo conocido del plugin: su BroadcastReceiver
-  // reenvía SMS_SENT sin mirar el resultCode, así que la confirmación significa
-  // "el radio lo procesó" (éxito O error), no "entregado". No bloquea el envío:
-  // el statusListener escribe en el log de forma asíncrona cuando llega la
-  // confirmación. El listener del plugin es un campo compartido, por eso los
-  // envíos SIEMPRE deben ser secuenciales (nunca en paralelo).
   Future<bool> _sendSmsTracked(String to, String message,
-      {bool overLimit = false}) async {
-    // Fase 2 (#12): primario = plugin propio → UN SMS concatenado, sin
-    // READ_PHONE_STATE, con resultCode. Si el plugin FALLA (excepción o código
-    // de error), fallback al troceo de la Fase 1 (varios SMS, ya validado en
-    // v4.3.0). 'unknown' = entregado sin acuse dentro del timeout (ver EXP5) →
-    // se cuenta como enviado, sin re-enviar (evita SMS duplicados).
-    // #13: con [overLimit] el envío pasa del límite de SMS de Android, que lo
-    // retiene tras un diálogo «Permitir / Denegar» sin timeout. Sin acuse NO
-    // cuenta como enviado, y no se trocea: el troceo solo encolaría más SMS
-    // detrás del mismo diálogo. Tampoco tras un «limit_exceeded» (alguien
-    // pulsó Denegar).
-    try {
-      final r = await OksigeniaSms.send(
-          to: to,
-          message: message,
-          timeout: Duration(seconds: overLimit ? 8 : 20));
-      if (r.status == OksigeniaSmsStatus.failed) {
-        if (overLimit || r.error == 'limit_exceeded') {
-          _logSentinel("SYLVIA SMS: ⛔ límite de SMS de Android (${r.error}) a $to — sin troceo");
-          return false;
-        }
-        _logSentinel("SYLVIA SMS: ⚠️ plugin falló (${r.error}) → fallback a troceo");
-        return _sendSplitFallback(to, message);
-      }
-      if (r.status == OksigeniaSmsStatus.unknown && overLimit) {
-        _logSentinel("SYLVIA SMS: ⏸️ retenido por el límite de SMS de Android (esperando confirmación) a $to");
-        return false;
-      }
-      _logSentinel("SYLVIA SMS: 📶 ${r.status.name} (${r.okParts}/${r.parts}) a $to");
-      return true;
-    } catch (e) {
-      _logSentinel("SYLVIA SMS: ❌ excepción del plugin ($e) → fallback a troceo");
-      final bool ok = await _sendSplitFallback(to, message);
-      return ok && !overLimit;
-    }
-  }
+          {bool overLimit = false}) async =>
+      sosSmsDelivered(await _sendSmsOutcome(to, message, overLimit: overLimit));
 
   Future<void> _sendLiveTrackingSMS({bool isCheckin = false}) async {
     if (_recipients.isEmpty) {
@@ -639,10 +591,46 @@ void onStart(ServiceInstance service) async {
       final prefs = await SharedPreferences.getInstance();
       await prefs.reload();
       if (prefs.getBool('beacon_active') ?? false) return true;
+      if (prefs.getBool(PreferencesService.keySosRetryActive) ?? false) return true;
     } catch (_) {
       return true; // si no se pueden leer prefs, pecar de seguir viva
     }
     return false;
+  }
+
+  // SOS retry queue. Contacts the SOS could not reach (no coverage, radio
+  // error) are kept in prefs and retried by _sosRetryTick from the 5 s checker,
+  // with a fresh position each time. In prefs so a respawn or a reboot keeps it
+  // (OksigeniaBootReceiver starts the service for it) and the UI can clear it.
+  // Spaced out: every try, even a failed one, counts against Android's per-app
+  // SMS limit.
+  const List<int> sosRetryDelaysSec = [60, 120, 300, 600];
+  const int sosRetryWindowMs = 4 * 60 * 60 * 1000; // same window as the beacon
+  bool sosRetryBusy = false;
+
+  Future<void> _queueSosRetry(List<String> numbers) async {
+    try {
+      final p = await SharedPreferences.getInstance();
+      final now = DateTime.now().millisecondsSinceEpoch;
+      await p.setStringList(PreferencesService.keySosRetryNumbers, numbers);
+      await p.setInt(PreferencesService.keySosRetryAttempt, 0);
+      await p.setInt(PreferencesService.keySosRetryNext, now + sosRetryDelaysSec.first * 1000);
+      await p.setInt(PreferencesService.keySosRetryUntil, now + sosRetryWindowMs);
+      await p.setBool(PreferencesService.keySosRetryActive, true);
+      _logSentinel("SYLVIA SMS: 🔁 SOS pending for ${numbers.length} contact(s), first retry in ${sosRetryDelaysSec.first}s");
+    } catch (e) {
+      _logSentinel("SYLVIA SMS: ❌ could not queue the SOS retry: $e");
+    }
+  }
+
+  Future<void> _clearSosRetry(String reason) async {
+    try {
+      final p = await SharedPreferences.getInstance();
+      if (!(p.getBool(PreferencesService.keySosRetryActive) ?? false)) return;
+      await p.setBool(PreferencesService.keySosRetryActive, false);
+      await p.remove(PreferencesService.keySosRetryNumbers);
+      _logSentinel("SYLVIA SMS: 🔁 SOS retry queue cleared ($reason)");
+    } catch (_) {}
   }
 
   // Detiene el foreground service (liberando el wakelock permanente del plugin)
@@ -730,21 +718,9 @@ void onStart(ServiceInstance service) async {
     _warmGpsSub = null;
   }
 
-  // Devuelve cuántos SMS salieron de verdad; 0 = el SOS NO se envió y el
-  // llamante debe avisar de fallo en vez de fingir éxito.
-  Future<int> _enviarSMSZombie() async {
-    print("SYLVIA SERVICE: 🧟 TIEMPO AGOTADO. Ejecutando protocolo...");
-
-    if (_recipients.isEmpty) {
-      final prefs = await SharedPreferences.getInstance();
-      await prefs.reload();
-      _recipients = prefs.getStringList(PreferencesService.keyContacts) ?? [];
-      if (_recipients.isEmpty) {
-         _logSentinel("SYLVIA FATAL: No hay contactos configurados.");
-         return 0;
-      }
-    }
-
+  // The SOS text with the best position available now. Shared by the first
+  // send and by every retry, so a retry carries a fresh fix, not the old one.
+  Future<(String, Position?)> _composeSosBody() async {
     // Nota (personalizada o de ayuda): se compone aquí pero se coloca DESPUÉS
     // del enlace de Maps, para que las coordenadas viajen en el primer SMS.
     final String note = _customMessage.isNotEmpty
@@ -804,6 +780,26 @@ void onStart(ServiceInstance service) async {
       msgBody += "\nBat: $batteryLevel% (No Loc)";
     }
 
+    return (msgBody, sosPos);
+  }
+
+  // Devuelve cuántos SMS salieron de verdad; 0 = el SOS NO se envió y el
+  // llamante debe avisar de fallo en vez de fingir éxito.
+  Future<int> _enviarSMSZombie() async {
+    print("SYLVIA SERVICE: 🧟 TIEMPO AGOTADO. Ejecutando protocolo...");
+
+    if (_recipients.isEmpty) {
+      final prefs = await SharedPreferences.getInstance();
+      await prefs.reload();
+      _recipients = prefs.getStringList(PreferencesService.keyContacts) ?? [];
+      if (_recipients.isEmpty) {
+         _logSentinel("SYLVIA FATAL: No hay contactos configurados.");
+         return 0;
+      }
+    }
+
+    final (String msgBody, Position? sosPos) = await _composeSosBody();
+
     // M3: la adquisición de GPS puede tardar hasta 15s; si el usuario canceló la
     // alarma en esa ventana (hold-to-cancel apurando el último segundo), NO
     // enviar. Devolver -1 para que el llamante distinga "cancelado" de "0 SMS".
@@ -821,21 +817,27 @@ void onStart(ServiceInstance service) async {
     OksigeniaSmsRateLimit? smsLimit;
     int partsPerContact = 1;
     try { smsLimit = await OksigeniaSms.rateLimit(); } catch (_) {}
-    try { partsPerContact = max(1, await OksigeniaSms.partCount(msgBody)); } catch (_) {}
+    try { partsPerContact = max(1, await OksigeniaSms.partCount(gsmSafe(msgBody))); } catch (_) {}
     _logSentinel("SYLVIA SMS: $smsLimit · $partsPerContact partes × ${_recipients.length} contactos");
 
+    // A new SOS goes to every contact: an older pending retry is replaced.
+    await _clearSosRetry('new SOS');
     int sentCount = 0;
     int burstParts = 0;
+    final List<String> pending = [];
     for (String number in _recipients) {
       final target = normalizePhoneE164(number);
       burstParts += partsPerContact;
       final bool overLimit = smsLimit != null && !smsLimit.allows(burstParts);
-      // Secuencial a propósito: el statusListener del plugin es un único campo
-      // compartido; enviar en paralelo cruzaría las confirmaciones.
-      if (await _sendSmsTracked(target, msgBody, overLimit: overLimit)) {
+      final SosSmsOutcome outcome =
+          await _sendSmsOutcome(target, msgBody, overLimit: overLimit);
+      if (sosSmsDelivered(outcome)) {
         sentCount++;
+      } else if (sosSmsRetryable(outcome)) {
+        pending.add(number);
       }
     }
+    if (pending.isNotEmpty) await _queueSosRetry(pending);
 
     if (sentCount > 0) {
       if (sosPos != null) {
@@ -851,6 +853,112 @@ void onStart(ServiceInstance service) async {
     _stopGpsWarmup();
     if (sentCount > 0) await _reproducirConfirmacion();
     return sentCount;
+  }
+
+  // Retries the queued SOS (see _queueSosRetry) when its time comes: fresh
+  // position, only the contacts not reached yet, within Android's SMS limit.
+  Future<void> _sosRetryTick() async {
+    if (sosRetryBusy || _isAlarmActive) return;
+    sosRetryBusy = true;
+    try {
+      final p = await SharedPreferences.getInstance();
+      await p.reload();
+      if (!(p.getBool(PreferencesService.keySosRetryActive) ?? false)) return;
+      final List<String> numbers =
+          p.getStringList(PreferencesService.keySosRetryNumbers) ?? [];
+      if (numbers.isEmpty) {
+        await _clearSosRetry('nothing left');
+        return;
+      }
+      if (DateTime.now().millisecondsSinceEpoch >
+          (p.getInt(PreferencesService.keySosRetryUntil) ?? 0)) {
+        _logSentinel("SYLVIA SMS: ⌛ SOS retry window over, ${numbers.length} contact(s) never reached");
+        await _clearSosRetry('window over');
+        flutterLocalNotificationsPlugin.show(
+          id: notificationId,
+          title: _texts['statusSendFailed'],
+          body: _texts['statusSendFailedBody'],
+          notificationDetails: const NotificationDetails(
+              android: AndroidNotificationDetails(channelId, 'Oksigenia SOS',
+                  icon: 'ic_stat_oksigenia',
+                  ongoing: true,
+                  importance: Importance.max,
+                  priority: Priority.max)),
+        );
+        return;
+      }
+      if (DateTime.now().millisecondsSinceEpoch <
+          (p.getInt(PreferencesService.keySosRetryNext) ?? 0)) {
+        return;
+      }
+
+      final int attempt = (p.getInt(PreferencesService.keySosRetryAttempt) ?? 0) + 1;
+      _logSentinel("SYLVIA SMS: 🔁 SOS retry #$attempt to ${numbers.length} contact(s)");
+      final (String body, Position? pos) = await _composeSosBody();
+      // A new alarm started meanwhile: it sends to every contact itself.
+      if (_isAlarmActive) return;
+
+      OksigeniaSmsRateLimit? smsLimit;
+      int parts = 1;
+      try { smsLimit = await OksigeniaSms.rateLimit(); } catch (_) {}
+      try { parts = max(1, await OksigeniaSms.partCount(gsmSafe(body))); } catch (_) {}
+      final List<String> still = [];
+      int delivered = 0;
+      int burst = 0;
+      for (final n in numbers) {
+        burst += parts;
+        // Past the limit the SMS would wait behind a system dialog: keep the
+        // contact for a later round, when the limit window has moved on.
+        if (smsLimit != null && !smsLimit.allows(burst)) {
+          still.add(n);
+          continue;
+        }
+        if (sosSmsDelivered(await _sendSmsOutcome(normalizePhoneE164(n), body))) {
+          delivered++;
+        } else {
+          still.add(n);
+        }
+      }
+
+      // The UI may have cleared the queue meanwhile («Restart system»).
+      await p.reload();
+      final bool stillQueued = p.getBool(PreferencesService.keySosRetryActive) ?? false;
+      if (still.isEmpty || !stillQueued) {
+        await _clearSosRetry(still.isEmpty ? 'every contact reached' : 'cleared during the retry');
+      } else {
+        final int delay = sosRetryDelaysSec[min(attempt, sosRetryDelaysSec.length - 1)];
+        await p.setStringList(PreferencesService.keySosRetryNumbers, still);
+        await p.setInt(PreferencesService.keySosRetryAttempt, attempt);
+        await p.setInt(PreferencesService.keySosRetryNext,
+            DateTime.now().millisecondsSinceEpoch + delay * 1000);
+        _logSentinel("SYLVIA SMS: 🔁 ${still.length} contact(s) still pending, next retry in ${delay}s");
+      }
+
+      if (delivered > 0) {
+        await p.setBool('sos_sent_recently', true);
+        if (!(p.getBool('beacon_active') ?? false)) {
+          if (pos != null) {
+            await _activateBeacon(pos);
+          } else {
+            await _activateBeaconPendingOrigin();
+          }
+        }
+        flutterLocalNotificationsPlugin.show(
+          id: notificationId,
+          title: _texts['statusSent'],
+          body: still.isEmpty ? _texts['statusReady'] : _texts['statusSendRetrying'],
+          notificationDetails: const NotificationDetails(
+              android: AndroidNotificationDetails(channelId, 'Oksigenia SOS',
+                  icon: 'ic_stat_oksigenia', importance: Importance.high)),
+        );
+        await _reproducirConfirmacion();
+        service.invoke("onSosSent", {"sent": delivered, "pending": still.length});
+      }
+    } catch (e) {
+      _logSentinel("SYLVIA SMS: ❌ SOS retry error: $e");
+    } finally {
+      sosRetryBusy = false;
+    }
   }
 
   Future<void> _beaconTick() async {
@@ -1033,6 +1141,9 @@ void onStart(ServiceInstance service) async {
             importance: Importance.max,
             priority: Priority.max,
             fullScreenIntent: true,
+            // Without the alarm category, Do Not Disturb intercepts it and
+            // suppresses the full-screen alarm (AOSP ZenModeFiltering).
+            category: AndroidNotificationCategory.alarm,
             color: Color(0xFFFF0000),
             playSound: false,
             enableVibration: false,
@@ -1090,6 +1201,7 @@ void onStart(ServiceInstance service) async {
                   ongoing: true,
                   importance: Importance.max,
                   priority: Priority.max,
+                  category: AndroidNotificationCategory.alarm,
                   color: Color(0xFFFF0000),
                   playSound: false,
                   enableVibration: false,
@@ -1113,6 +1225,8 @@ void onStart(ServiceInstance service) async {
 
           final p = prefs ?? await SharedPreferences.getInstance();
           await p.setBool('sos_sent_recently', sentCount > 0);
+          final bool retryPending =
+              p.getBool(PreferencesService.keySosRetryActive) ?? false;
 
           _lastMovementTime = DateTime.now().add(const Duration(seconds: 60));
 
@@ -1121,7 +1235,7 @@ void onStart(ServiceInstance service) async {
             flutterLocalNotificationsPlugin.show(
               id: notificationId,
               title: _texts['statusSent'],
-              body: _texts['statusReady'],
+              body: retryPending ? _texts['statusSendRetrying'] : _texts['statusReady'],
               notificationDetails: const NotificationDetails(
                   android: AndroidNotificationDetails(
                       channelId, 'Oksigenia SOS',
@@ -1135,7 +1249,7 @@ void onStart(ServiceInstance service) async {
             flutterLocalNotificationsPlugin.show(
               id: notificationId,
               title: _texts['statusSendFailed'],
-              body: _texts['statusSendFailedBody'],
+              body: retryPending ? _texts['statusSendRetrying'] : _texts['statusSendFailedBody'],
               notificationDetails: const NotificationDetails(
                   android: AndroidNotificationDetails(
                       channelId, 'Oksigenia SOS',
@@ -1408,6 +1522,13 @@ void onStart(ServiceInstance service) async {
     // P8 está sano y no tiene ese problema: si lineal dice 21G y raw dice
     // ~60 m/s², el impacto es artefacto del filtro.
     double recentRawMax = 0;
+    // An impact the raw stream has not confirmed yet. The linear sample is
+    // processed before the raw one of the same instant (seen on a Pixel 7a), so
+    // judging it at once discarded real impacts as "phantoms": in the field
+    // logs both such discards were real, and one (6.30 G) was lost. It waits
+    // up to 300 ms for the raw peak instead.
+    double pendingImpactG = 0;
+    DateTime pendingImpactAt = DateTime.fromMillisecondsSinceEpoch(0);
     DateTime recentRawMaxAt = DateTime.fromMillisecondsSinceEpoch(0);
 
     String freefallInfo() {
@@ -1559,6 +1680,21 @@ void onStart(ServiceInstance service) async {
         // gameInterval); _isRhythmicMovement only uses last 2s of real samples.
         if (_gBuffer.length > 600) _gBuffer.removeAt(0);
 
+        if (pendingImpactG > 0) {
+          final int waitedMs = DateTime.now().difference(pendingImpactAt).inMilliseconds;
+          if (_sentinelYellow || _isAlarmActive) {
+            pendingImpactG = 0;
+          } else if (recentRawMax >= 25.0) {
+            _logSentinel("SYLVIA BACKGROUND: ⚡ Impacto ${pendingImpactG.toStringAsFixed(2)}G corroborado ${waitedMs}ms después (rawPk=${recentRawMax.toStringAsFixed(0)}) → Smart Sentinel ${freefallInfo()}");
+            pendingImpactG = 0;
+            _activarEscudo(segundos: 3);
+            _enterYellowState();
+          } else if (waitedMs > 300) {
+            _logSentinel("SYLVIA BACKGROUND: 👻 Impacto ${pendingImpactG.toStringAsFixed(2)}G DESCARTADO — rawPk=${recentRawMax.toStringAsFixed(0)} < 25 m/s² tras ${waitedMs}ms, fantasma del stream lineal ${freefallInfo()}");
+            pendingImpactG = 0;
+          }
+        }
+
         if (instantG > _yellowThreshold && !_sentinelYellow && !_isAlarmActive) {
           // Corroboración física: el stream lineal fabrica impactos fantasma
           // durante volteos/caída libre — medido 2026-06-10: "17.5G" con
@@ -1569,8 +1705,11 @@ void onStart(ServiceInstance service) async {
           final bool isOrange = _orangeThreshold > 0 && instantG >= _orangeThreshold;
 
           if (!rawCorroborated) {
-            _logSentinel("SYLVIA BACKGROUND: 👻 Impacto ${instantG.toStringAsFixed(2)}G DESCARTADO — rawPk=${recentRawMax.toStringAsFixed(0)} < 25 m/s², fantasma del stream lineal (effX=${effX.toStringAsFixed(1)} effY=${effY.toStringAsFixed(1)} effZ=${effZ.toStringAsFixed(1)}) ${freefallInfo()}");
+            // Not yet: give the raw stream up to 300 ms (see pendingImpactG).
+            if (pendingImpactG == 0) pendingImpactAt = DateTime.now();
+            if (instantG > pendingImpactG) pendingImpactG = instantG;
           } else {
+            pendingImpactG = 0;
             // Decisión de diseño 2026-06-10: NINGÚN impacto dispara la alarma
             // directamente — siempre vigilancia primero. El antiguo
             // orange-direct saltaba el amarillo; ahora un impacto crítico
@@ -1639,6 +1778,9 @@ void onStart(ServiceInstance service) async {
       // return de pausa: es protocolo de rescate, no monitorización — una
       // pausa no debe dejar a los rescatadores sin actualizaciones.
       _beaconTick();
+      // The SOS retry queue, like the beacon, is rescue protocol: a pause does
+      // not hold it back.
+      _sosRetryTick();
 
       // A1: watchdog de streams. Si el monitoreo está activo pero los sensores
       // llevan >8s mudos (stream muerto por error de plataforma/HAL), resuscribir.
@@ -1758,8 +1900,9 @@ void onStart(ServiceInstance service) async {
       // no mantener el wakelock permanente del plugin drenando batería en vacío.
       final bool bootBeacon = prefs.getBool('beacon_active') ?? false;
       final bool bootAlarm = prefs.getBool('is_alarm_active') ?? false;
+      final bool bootRetry = prefs.getBool(PreferencesService.keySosRetryActive) ?? false;
       if (!savedFall && !savedInactivity && !_isLiveTrackingActive &&
-          !bootBeacon && !bootAlarm) {
+          !bootBeacon && !bootAlarm && !bootRetry) {
         _logSentinel("SYLVIA BOOT: 🌙 Nada activo al arrancar → deteniendo (no revivir en vacío)");
         try { await flutterLocalNotificationsPlugin.cancelAll(); } catch (_) {}
         service.stopSelf();
@@ -1805,7 +1948,15 @@ void onStart(ServiceInstance service) async {
             ? (DateTime.now().millisecondsSinceEpoch - startMs) ~/ 1000
             : 9999;
         _logSentinel("SYLVIA BOOT: 🚨 Alarma activa detectada tras respawn (${elapsed}s transcurridos)");
-        _lanzarAlarma(resumeCountdown: (30 - elapsed).clamp(2, 30));
+        if (elapsed <= 120) {
+          _lanzarAlarma(resumeCountdown: (30 - elapsed).clamp(2, 30));
+        } else {
+          // The countdown was interrupted long ago (phone switched off, battery
+          // gone): sending 2 s after power-on would give nobody a chance to
+          // cancel a false alarm. Start a full, audible 30 s countdown instead;
+          // _lanzarAlarma rewrites alarm_start_timestamp so the UI shows it too.
+          _lanzarAlarma();
+        }
       }
     } catch (e) {
       print("SYLVIA BOOT ERROR: $e");
@@ -1822,6 +1973,7 @@ void onStart(ServiceInstance service) async {
 
     service.on('stopService').listen((event) async {
       print("SYLVIA: 💀 Recibida orden de apagado.");
+      await _clearSosRetry('system stopped');
       _accSub?.cancel();
       _rawAccSub?.cancel();
       _inactivityCheckTimer?.cancel();
@@ -1879,6 +2031,12 @@ void onStart(ServiceInstance service) async {
           ? event['profile'] as String
           : (prefs.getString(PreferencesService.keyActivityProfile) ?? 'trekking');
       _applyProfileConfig(profileName);
+      // Fall detection switched off (or a profile without it) in the middle of
+      // a yellow observation: the buffer stops filling, so the observation
+      // could only end in a full alarm with detection off.
+      if (_sentinelYellow && (!_isMonitoringImpact || !_impactDetectionEnabled)) {
+        _returnToGreen();
+      }
 
       print("SYLVIA SERVICE: Monitor - Impact: $_isMonitoringImpact, Inactivity: $_isMonitoringInactivity (Limit: $_inactivityLimitSeconds s)");
 

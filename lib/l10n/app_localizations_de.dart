@@ -43,6 +43,10 @@ class AppLocalizationsDe extends AppLocalizations {
       'Es konnte keine SMS gesendet werden. Prüfe Empfang und Kontakte, dann erneut versuchen.';
 
   @override
+  String get statusSendRetrying =>
+      'Noch nicht alle Kontakte haben es erhalten (kein Netz?). Wird automatisch erneut versucht.';
+
+  @override
   String statusError(Object error) {
     return 'FEHLER: $error';
   }

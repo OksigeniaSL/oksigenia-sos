@@ -43,6 +43,10 @@ class AppLocalizationsNl extends AppLocalizations {
       'Er kon geen sms worden verzonden. Controleer bereik en contacten en probeer opnieuw.';
 
   @override
+  String get statusSendRetrying =>
+      'Nog niet alle contacten hebben het ontvangen (geen bereik?). Wordt automatisch opnieuw geprobeerd.';
+
+  @override
   String statusError(Object error) {
     return 'FOUT: $error';
   }

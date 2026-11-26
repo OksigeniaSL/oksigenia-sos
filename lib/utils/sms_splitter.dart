@@ -16,10 +16,10 @@ const int _gsmLimit = 152; // margen bajo 160
 const int _ucs2Limit = 67; // margen bajo 70
 
 // GSM 03.38: caracteres NO-ASCII que sí caben en GSM 7-bit y por tanto NO
-// fuerzan UCS-2. Incluye ¡ ¿ ñ, umlauts alemanes, acento grave + é del italiano,
+// fuerzan UCS-2. Incluye ¡ ¿ ñ, umlauts alemanes, acento grave en minúscula + é/É,
 // y nórdicos. NO incluye á í ó ú (acento agudo salvo é), guiones largos, emojis,
 // cirílico ni acentos polacos/portugueses raros → esos van a UCS-2 (conservador).
-final Set<int> _gsmExtra = "¡¿ñÑäöüÄÖÜßàèéìòùÀÈÉÌÒÙåÅøØæÆÇ".runes.toSet();
+final Set<int> _gsmExtra = "¡¿ñÑäöüÄÖÜßàèéìòùÉåÅøØæÆÇ".runes.toSet();
 
 // UCS-2 si hay algún carácter no-ASCII que no sea GSM-extra. (ASCII siempre GSM.)
 bool _isUcs2(String s) => s.runes.any((r) => r > 0x7F && !_gsmExtra.contains(r));
@@ -91,4 +91,23 @@ List<String> splitSmsSafely(String message) {
   }
   flush();
   return pieces.isEmpty ? [message] : pieces;
+}
+
+// Capital letters with a grave accent are not in the GSM 03.38 default table
+// (only the lower-case ones are). With one of them the radio switches the whole
+// text to UCS-2 (67 characters per part); parts counted as GSM (152) then fail,
+// and in French the default note «À L'AIDE !» did exactly that.
+const Map<String, String> _nonGsmCapitals = {
+  'À': 'A', 'È': 'E', 'Ì': 'I', 'Ò': 'O', 'Ù': 'U',
+};
+
+/// [text] with the characters that silently break GSM-7 replaced by their base
+/// letter. Apply it to every SMS body before counting parts or sending.
+String gsmSafe(String text) {
+  if (!text.runes.any((r) => r >= 0xC0 && r <= 0xD9)) return text;
+  final b = StringBuffer();
+  for (final ch in text.split('')) {
+    b.write(_nonGsmCapitals[ch] ?? ch);
+  }
+  return b.toString();
 }

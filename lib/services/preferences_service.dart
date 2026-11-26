@@ -32,6 +32,14 @@ class PreferencesService {
   // ACTIVITY PROFILE (v4.0.0)
   static const String keyActivityProfile = 'activity_profile';
 
+  // SOS RETRY QUEUE (shared by both isolates and OksigeniaBootReceiver.kt,
+  // which reads the bool as "flutter.sos_retry_active")
+  static const String keySosRetryActive = 'sos_retry_active';
+  static const String keySosRetryNumbers = 'sos_retry_numbers';
+  static const String keySosRetryNext = 'sos_retry_next_ms';
+  static const String keySosRetryAttempt = 'sos_retry_attempt';
+  static const String keySosRetryUntil = 'sos_retry_until_ms';
+
   Future<void> init() async {
     _prefs = await SharedPreferences.getInstance();
   }
