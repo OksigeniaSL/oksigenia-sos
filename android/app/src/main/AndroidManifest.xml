@@ -50,8 +50,16 @@
                 <action android:name="android.intent.action.BOOT_COMPLETED" />
                 <action android:name="android.intent.action.QUICKBOOT_POWERON" />
                 <action android:name="com.htc.intent.action.QUICKBOOT_POWERON" />
+                <!-- An update (F-Droid, IzzyOnDroid, Obtainium) kills the process; without this,
+                     armed monitoring stayed off until the user opened the app again. -->
+                <action android:name="android.intent.action.MY_PACKAGE_REPLACED" />
             </intent-filter>
         </receiver>
+
+        <!-- Restarts the service if the process was killed while something was armed. -->
+        <receiver
+            android:name=".OksigeniaWatchdog"
+            android:exported="false" />
 
         <activity
             android:name=".MainActivity"
@@ -78,9 +86,23 @@
             android:name="id.flutter.flutter_background_service.BackgroundService"
             android:foregroundServiceType="health|mediaPlayback"
             android:enabled="true"
-            android:exported="true"
+            android:exported="false"
             android:stopWithTask="false"
             tools:replace="android:foregroundServiceType, android:exported, android:stopWithTask" />
+
+        <!-- The plugin exports both receivers without a permission, and both call
+             intent.getAction().equals(...) without a null check: any app could crash the
+             process (and the armed service with it) with one empty broadcast. The watchdog
+             is only fired by our own AlarmManager PendingIntent, so it needs no export; the
+             plugin's boot receiver does nothing with autoStartOnBoot=false (OksigeniaBootReceiver
+             does that job), so it is removed. -->
+        <receiver
+            android:name="id.flutter.flutter_background_service.WatchdogReceiver"
+            android:exported="false"
+            tools:replace="android:exported" />
+        <receiver
+            android:name="id.flutter.flutter_background_service.BootReceiver"
+            tools:node="remove" />
             <meta-data android:name="flutterEmbedding" android:value="2" />
 
         <receiver

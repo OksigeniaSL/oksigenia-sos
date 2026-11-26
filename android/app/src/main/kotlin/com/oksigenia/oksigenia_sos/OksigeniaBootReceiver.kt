@@ -7,8 +7,8 @@ import android.content.Intent
 import androidx.core.content.ContextCompat
 
 /**
- * Revive Sylvia (the background service) after a reboot ONLY when there is
- * something to monitor.
+ * Revive Sylvia (the background service) after a reboot or an app update ONLY
+ * when there is something to monitor.
  *
  * The flutter_background_service plugin's own boot autostart is unconditional:
  * it restarts the service on every boot and immediately acquires a permanent
@@ -23,6 +23,7 @@ class OksigeniaBootReceiver : BroadcastReceiver() {
     override fun onReceive(context: Context, intent: Intent) {
         val action = intent.action ?: return
         if (action != Intent.ACTION_BOOT_COMPLETED &&
+            action != Intent.ACTION_MY_PACKAGE_REPLACED &&
             action != "android.intent.action.QUICKBOOT_POWERON" &&
             action != "com.htc.intent.action.QUICKBOOT_POWERON"
         ) {
@@ -38,8 +39,11 @@ class OksigeniaBootReceiver : BroadcastReceiver() {
         val liveTracking = prefs.getBoolean("flutter.live_tracking_enabled", false)
         val beacon = prefs.getBoolean("flutter.beacon_active", false)
         val alarm = prefs.getBoolean("flutter.is_alarm_active", false)
+        // An SOS that could not reach every contact yet (no coverage) is retried
+        // by the service: it must come back for it too.
+        val sosRetry = prefs.getBoolean("flutter.sos_retry_active", false)
 
-        if (!(fall || inactivity || liveTracking || beacon || alarm)) {
+        if (!(fall || inactivity || liveTracking || beacon || alarm || sosRetry)) {
             // Nothing to watch → do not start the service → no wakelock in vain.
             return
         }
@@ -56,5 +60,7 @@ class OksigeniaBootReceiver : BroadcastReceiver() {
             // If the service can't be started (OEM restriction, etc.) the user
             // still has the SOS once they open the app; nothing worse than today.
         }
+        // And keep it alive afterwards, if the system kills the process later.
+        OksigeniaWatchdog.schedule(context)
     }
 }
