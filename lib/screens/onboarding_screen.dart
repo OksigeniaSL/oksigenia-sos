@@ -441,7 +441,8 @@ class _OnboardingScreenState extends State<OnboardingScreen> with WidgetsBinding
               const SizedBox(height: 8),
               Row(
                 children: [
-                  Image.asset('assets/images/logo_oksigenia.png', width: 36, height: 36,
+                  // White-on-transparent logo: suits the black background.
+                  Image.asset('assets/images/logo_white.png', width: 36, height: 36,
                     errorBuilder: (_, __, ___) => const Icon(Icons.shield, color: Colors.amber, size: 36)),
                   const SizedBox(width: 12),
                   Expanded(
