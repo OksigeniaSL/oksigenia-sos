@@ -78,7 +78,7 @@
     "testModeWarning": "MODO TEST: La alerta saltará en 30s.",
     "toastHoldToSOS": "Mantén pulsado para SOS",
     "donateDialogTitle": "💎 Apoya el Proyecto",
-    "donateDialogBody": "Esta app es Software Libre y Gratuito. Si te da seguridad, invítanos a un café para mantener los servidores.",
+    "donateDialogBody": "Esta app es software libre y gratuito. Si te da seguridad, invítanos a un café.",
     "donateBtn": "Donar con PayPal",
     "donateClose": "CERRAR",
     "alertSendingIn": "Enviando alerta en...",

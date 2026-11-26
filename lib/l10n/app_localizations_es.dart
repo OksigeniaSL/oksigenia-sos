@@ -260,7 +260,7 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get donateDialogBody =>
-      'Esta app es Software Libre y Gratuito. Si te da seguridad, invítanos a un café para mantener los servidores.';
+      'Esta app es software libre y gratuito. Si te da seguridad, invítanos a un café.';
 
   @override
   String get donateBtn => 'Donar con PayPal';
