@@ -11,7 +11,8 @@ that look near-perfect on simulated falls do much worse on real ones: 13 publish
 57 ± 27 % sensitivity on 29 real-world falls (Bagalà et al., *PLOS ONE*, 2012), and detectors overfit to the
 lab dataset they were tuned on (Silva, Casilari & García-Bermúdez, *Measurement*, 2024). We therefore target
 **70–85 % real-world sensitivity**, never the 95 %+ that lab papers claim, and we lean on the user's 30 s
-cancel window rather than on a perfect classifier.
+cancel window rather than on a perfect classifier. The current thresholds do not reach that target: see
+*Measured 2026-11-26* below.
 
 ## The two-stage detector
 
@@ -90,6 +91,39 @@ Notes:
 - **Impact detection off** (paragliding, kayak, horse riding) leaves the user protected by the Inactivity
   Monitor and manual SOS only. Horse cadence (trot ≈ 1.5 Hz, canter 2–3 Hz) interferes with the human-walk
   detector and there is no field data for phone-in-pocket while riding; revisit when such data exists.
+
+## Measured 2026-11-26
+
+The v4.3.3 detector was ported line by line and run on **SisFall** (Sucerquia et al., *Sensors* 2017): 1 798
+lab falls and 2 702 daily activities, sensor at the waist, resampled to 50 Hz, the person lying still after
+each fall. An independent re-run reproduced the figures and added a gravity estimate closer to Android's
+sensor fusion; both are given as a range.
+
+| Yellow threshold | Profiles | Falls that reach the alarm | Only falls while walking or jogging |
+|---|---|---|---|
+| 6 G | Trekking, Mountaineering, Professional | 34–41 % | 60 % |
+| 8 G | Trail / MTB | 13–17 % | 30 % |
+| 10 G | Running | 4–7 % | 15 % |
+
+- Missed falls are missed because the peak never reaches the threshold (median fall peak ≈ 5.1–5.5 G), not
+  because of the rhythm check. At 4 G about 74–79 % would reach the alarm, at the cost of roughly 6× more
+  yellow states and up to 3× more alarms in the field logs.
+- No daily activity raised an alarm while it went on; walking or jogging cancelled a yellow state in a
+  median of 10 s. Fast stairs are the weak case (about 40 % of rhythm checks positive).
+- Field logs (Pixel 8 and Pixel 7a, 190.7 monitored hours): 12 yellow states, 8 alarms, all cancelled by
+  hand in 4–13 s, no SMS sent. Six of the 8 were a knock followed by stillness (phone or backpack set
+  down), three of them on Running at 10 G: the high threshold drops falls without dropping these.
+- A "no movement at all" veto cannot tell a phone on a table from a person lying still; it would suppress
+  most of the falls detected today. Not adopted.
+- With the raw sample one sample late, about 3 % of falls were lost at 6 G (one real field impact too);
+  the 300 ms catch-up window for the raw stream was added afterwards for that reason.
+
+The 70–85 % target is not met at 6 G with these data. In a trouser pocket peaks are probably higher (a
+thigh sensor read a median 1.17× the waist; Özdemir & Barshan, *Sensors* 2014), which puts the central
+estimate at 6 G between 41 % (all SisFall falls) and 72 % (falls while walking or jogging). These are young
+volunteers falling on mats; nobody has yet measured a fall with a phone in a pocket or a backpack. 30–50
+simulated falls with the phone in both places, and a second phone at the waist as reference, would settle
+it.
 
 ## Device-specific findings
 
