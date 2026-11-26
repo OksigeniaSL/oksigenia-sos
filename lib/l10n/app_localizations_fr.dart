@@ -496,7 +496,7 @@ class AppLocalizationsFr extends AppLocalizations {
   String get pauseResumedMsg => 'Surveillance reprise';
 
   @override
-  String get pauseHoldHint => 'Appuyez longuement pour pausar';
+  String get pauseHoldHint => 'Maintenir pour mettre en pause';
 
   @override
   String get pauseSec5 => '5 secondes';

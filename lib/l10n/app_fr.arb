@@ -152,7 +152,7 @@
     "pauseResumesIn": "⏸ En pause · reprend dans {time}",
     "pauseResumeNow": "Reprendre maintenant",
     "pauseResumedMsg": "Surveillance reprise",
-    "pauseHoldHint": "Appuyez longuement pour pausar",
+    "pauseHoldHint": "Maintenir pour mettre en pause",
     "pauseSec5": "5 secondes",
     "liveTrackingTitle": "Suivi en Direct",
     "liveTrackingSubtitle": "Envoie votre position GPS par SMS à intervalles réguliers.",
