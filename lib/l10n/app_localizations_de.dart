@@ -742,6 +742,85 @@ class AppLocalizationsDe extends AppLocalizations {
       'NICHT GESCHÜTZT — dieses Profil erkennt keine Stürze. Schalten Sie den Inaktivitätsmonitor ein.';
 
   @override
+  String get homeFallUnavailable => 'In diesem Profil nicht verfügbar';
+
+  @override
+  String homeAlertPaused(String time) {
+    return 'PAUSIERT bis $time';
+  }
+
+  @override
+  String get a11ySosHint =>
+      '3 Sekunden gedrückt halten, um Ihre Kontakte zu alarmieren';
+
+  @override
+  String get a11ySosLongPress => 'SOS senden';
+
+  @override
+  String get a11ySosCountdown =>
+      'SOS in 3 Sekunden. Zum Abbrechen doppelt tippen.';
+
+  @override
+  String get a11yStopLabel => 'Oksigenia SOS beenden';
+
+  @override
+  String get a11yStopHint =>
+      '2 Sekunden gedrückt halten. Beendet die gesamte Überwachung und schließt die App.';
+
+  @override
+  String get a11yStopLongPress => 'Überwachung beenden und App schließen';
+
+  @override
+  String get a11yStopCountdown =>
+      'Wird in 2 Sekunden beendet. Zum Abbrechen doppelt tippen.';
+
+  @override
+  String get a11yAlarmCancelHint =>
+      '2 Sekunden gedrückt halten, um den Alarm abzubrechen';
+
+  @override
+  String get a11yAlarmCancelLongPress => 'Alarm abbrechen';
+
+  @override
+  String get a11yAlarmCancelCountdown =>
+      'Der Alarm wird in 2 Sekunden abgebrochen. Doppelt tippen, um ihn beizubehalten.';
+
+  @override
+  String get a11yMotionOk => 'Bewegungssensor aktiv';
+
+  @override
+  String get a11yMotionOff => 'Bewegungssensor nicht erlaubt';
+
+  @override
+  String a11yBattery(int level) {
+    return 'Akku $level %';
+  }
+
+  @override
+  String a11yBatteryRestricted(int level) {
+    return 'Akku $level %, von Android eingeschränkt';
+  }
+
+  @override
+  String a11yGps(String meters) {
+    return 'GPS-Genauigkeit $meters m';
+  }
+
+  @override
+  String get a11yGpsNone => 'GPS: noch keine Position';
+
+  @override
+  String get a11yAddContact => 'Kontakt hinzufügen';
+
+  @override
+  String a11yDeleteContact(String number) {
+    return '$number löschen';
+  }
+
+  @override
+  String get a11yStopTracking => 'Live-Tracking beenden';
+
+  @override
   String get contactCheckTitle => 'Stimmt die Ländervorwahl?';
 
   @override

@@ -747,6 +747,84 @@ class AppLocalizationsSv extends AppLocalizations {
       'INTE SKYDDAD — den här profilen upptäcker inte fall. Slå på Inaktivitetsmonitorn.';
 
   @override
+  String get homeFallUnavailable => 'Inte tillgängligt i den här profilen';
+
+  @override
+  String homeAlertPaused(String time) {
+    return 'PAUSAD till $time';
+  }
+
+  @override
+  String get a11ySosHint => 'Håll in i 3 sekunder för att larma dina kontakter';
+
+  @override
+  String get a11ySosLongPress => 'skicka ett SOS';
+
+  @override
+  String get a11ySosCountdown =>
+      'SOS om 3 sekunder. Dubbeltryck för att avbryta.';
+
+  @override
+  String get a11yStopLabel => 'Stäng av Oksigenia SOS';
+
+  @override
+  String get a11yStopHint =>
+      'Håll in i 2 sekunder. Stoppar all övervakning och stänger appen.';
+
+  @override
+  String get a11yStopLongPress => 'stoppa övervakningen och stänga appen';
+
+  @override
+  String get a11yStopCountdown =>
+      'Stängs av om 2 sekunder. Dubbeltryck för att avbryta.';
+
+  @override
+  String get a11yAlarmCancelHint =>
+      'Håll in i 2 sekunder för att avbryta larmet';
+
+  @override
+  String get a11yAlarmCancelLongPress => 'avbryta larmet';
+
+  @override
+  String get a11yAlarmCancelCountdown =>
+      'Larmet avbryts om 2 sekunder. Dubbeltryck för att behålla det.';
+
+  @override
+  String get a11yMotionOk => 'Rörelsesensor aktiv';
+
+  @override
+  String get a11yMotionOff => 'Rörelsesensor inte tillåten';
+
+  @override
+  String a11yBattery(int level) {
+    return 'Batteri $level %';
+  }
+
+  @override
+  String a11yBatteryRestricted(int level) {
+    return 'Batteri $level %, begränsat av Android';
+  }
+
+  @override
+  String a11yGps(String meters) {
+    return 'GPS-noggrannhet $meters m';
+  }
+
+  @override
+  String get a11yGpsNone => 'GPS: ingen position än';
+
+  @override
+  String get a11yAddContact => 'Lägg till kontakt';
+
+  @override
+  String a11yDeleteContact(String number) {
+    return 'Ta bort $number';
+  }
+
+  @override
+  String get a11yStopTracking => 'Stoppa livespårning';
+
+  @override
   String get contactCheckTitle => 'Stämmer landsnumret?';
 
   @override

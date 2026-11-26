@@ -748,6 +748,85 @@ class AppLocalizationsNl extends AppLocalizations {
       'NIET BESCHERMD — dit profiel detecteert geen vallen. Zet de Inactiviteitsmonitor aan.';
 
   @override
+  String get homeFallUnavailable => 'Niet beschikbaar in dit profiel';
+
+  @override
+  String homeAlertPaused(String time) {
+    return 'GEPAUZEERD tot $time';
+  }
+
+  @override
+  String get a11ySosHint =>
+      'Houd 3 seconden ingedrukt om je contacten te waarschuwen';
+
+  @override
+  String get a11ySosLongPress => 'SOS sturen';
+
+  @override
+  String get a11ySosCountdown =>
+      'SOS over 3 seconden. Dubbeltik om te annuleren.';
+
+  @override
+  String get a11yStopLabel => 'Oksigenia SOS stoppen';
+
+  @override
+  String get a11yStopHint =>
+      'Houd 2 seconden ingedrukt. Stopt alle bewaking en sluit de app.';
+
+  @override
+  String get a11yStopLongPress => 'bewaking stoppen en app sluiten';
+
+  @override
+  String get a11yStopCountdown =>
+      'Stopt over 2 seconden. Dubbeltik om te annuleren.';
+
+  @override
+  String get a11yAlarmCancelHint =>
+      'Houd 2 seconden ingedrukt om het alarm te annuleren';
+
+  @override
+  String get a11yAlarmCancelLongPress => 'alarm annuleren';
+
+  @override
+  String get a11yAlarmCancelCountdown =>
+      'Het alarm wordt over 2 seconden geannuleerd. Dubbeltik om het te behouden.';
+
+  @override
+  String get a11yMotionOk => 'Bewegingssensor actief';
+
+  @override
+  String get a11yMotionOff => 'Bewegingssensor niet toegestaan';
+
+  @override
+  String a11yBattery(int level) {
+    return 'Batterij $level%';
+  }
+
+  @override
+  String a11yBatteryRestricted(int level) {
+    return 'Batterij $level%, beperkt door Android';
+  }
+
+  @override
+  String a11yGps(String meters) {
+    return 'GPS-nauwkeurigheid $meters m';
+  }
+
+  @override
+  String get a11yGpsNone => 'GPS: nog geen positie';
+
+  @override
+  String get a11yAddContact => 'Contact toevoegen';
+
+  @override
+  String a11yDeleteContact(String number) {
+    return '$number verwijderen';
+  }
+
+  @override
+  String get a11yStopTracking => 'Live tracking stoppen';
+
+  @override
   String get contactCheckTitle => 'Klopt de landcode?';
 
   @override

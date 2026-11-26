@@ -1460,6 +1460,132 @@ abstract class AppLocalizations {
   /// **'NOT PROTECTED — this profile has no fall detection. Turn on the Inactivity Monitor.'**
   String get homeAlertProfileNoImpact;
 
+  /// Subtitle of the greyed-out Fall Detection switch in profiles without impact detection (paragliding, kayak, horse riding).
+  ///
+  /// In en, this message translates to:
+  /// **'Not available in this profile'**
+  String get homeFallUnavailable;
+
+  /// Home banner while monitoring is paused. time = local clock time when it resumes by itself (e.g. 14:32).
+  ///
+  /// In en, this message translates to:
+  /// **'PAUSED until {time}'**
+  String homeAlertPaused(String time);
+
+  /// Screen-reader hint of the SOS button.
+  ///
+  /// In en, this message translates to:
+  /// **'Hold for 3 seconds to send an alert to your contacts'**
+  String get a11ySosHint;
+
+  /// Screen readers say 'Double-tap and hold to …' followed by this (infinitive, lower case).
+  ///
+  /// In en, this message translates to:
+  /// **'send an SOS'**
+  String get a11ySosLongPress;
+
+  /// Read by screen readers while the SOS countdown started from an accessibility long press runs.
+  ///
+  /// In en, this message translates to:
+  /// **'SOS in 3 seconds. Double-tap to cancel.'**
+  String get a11ySosCountdown;
+
+  /// Screen-reader name of the hold-to-stop control at the bottom of Home.
+  ///
+  /// In en, this message translates to:
+  /// **'Stop Oksigenia SOS'**
+  String get a11yStopLabel;
+
+  /// Screen-reader hint of the hold-to-stop control.
+  ///
+  /// In en, this message translates to:
+  /// **'Hold for 2 seconds. Stops all monitoring and closes the app.'**
+  String get a11yStopHint;
+
+  /// Screen readers say 'Double-tap and hold to …' followed by this (infinitive, lower case).
+  ///
+  /// In en, this message translates to:
+  /// **'stop monitoring and close the app'**
+  String get a11yStopLongPress;
+
+  /// Read by screen readers while the stop countdown started from an accessibility long press runs.
+  ///
+  /// In en, this message translates to:
+  /// **'Closing in 2 seconds. Double-tap to cancel.'**
+  String get a11yStopCountdown;
+
+  /// Screen-reader hint of the alarm screen's hold-to-cancel control.
+  ///
+  /// In en, this message translates to:
+  /// **'Hold for 2 seconds to cancel the alert'**
+  String get a11yAlarmCancelHint;
+
+  /// Screen readers say 'Double-tap and hold to …' followed by this (infinitive, lower case).
+  ///
+  /// In en, this message translates to:
+  /// **'cancel the alert'**
+  String get a11yAlarmCancelLongPress;
+
+  /// Read by screen readers while the cancel countdown started from an accessibility long press runs. A double-tap stops it and the alert goes on.
+  ///
+  /// In en, this message translates to:
+  /// **'Cancelling the alert in 2 seconds. Double-tap to keep it.'**
+  String get a11yAlarmCancelCountdown;
+
+  /// Screen-reader name of the motion (G-force) indicator on Home when the sensor works.
+  ///
+  /// In en, this message translates to:
+  /// **'Motion sensor working'**
+  String get a11yMotionOk;
+
+  /// Screen-reader name of the motion indicator when the sensor permission is missing (tapping it explains).
+  ///
+  /// In en, this message translates to:
+  /// **'Motion sensor not allowed'**
+  String get a11yMotionOff;
+
+  /// Screen-reader name of the battery indicator.
+  ///
+  /// In en, this message translates to:
+  /// **'Battery {level}%'**
+  String a11yBattery(int level);
+
+  /// Battery indicator when Android's battery optimisation can stop the app (tapping it explains).
+  ///
+  /// In en, this message translates to:
+  /// **'Battery {level}%, restricted by Android'**
+  String a11yBatteryRestricted(int level);
+
+  /// Screen-reader name of the GPS indicator with a fix.
+  ///
+  /// In en, this message translates to:
+  /// **'GPS accurate to {meters} m'**
+  String a11yGps(String meters);
+
+  /// Screen-reader name of the GPS indicator showing '--'.
+  ///
+  /// In en, this message translates to:
+  /// **'GPS: no position yet'**
+  String get a11yGpsNone;
+
+  /// Screen-reader name / tooltip of the + button in Settings.
+  ///
+  /// In en, this message translates to:
+  /// **'Add contact'**
+  String get a11yAddContact;
+
+  /// Screen-reader name / tooltip of the bin button next to a contact.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete {number}'**
+  String a11yDeleteContact(String number);
+
+  /// Tooltip / screen-reader name of the stop icon on Home's live-tracking card.
+  ///
+  /// In en, this message translates to:
+  /// **'Stop live tracking'**
+  String get a11yStopTracking;
+
   /// No description provided for @contactCheckTitle.
   ///
   /// In en, this message translates to:

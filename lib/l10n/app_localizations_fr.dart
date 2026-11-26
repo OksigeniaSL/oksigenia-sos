@@ -746,6 +746,85 @@ class AppLocalizationsFr extends AppLocalizations {
       'NON PROTÉGÉ — ce profil ne détecte pas les chutes. Activez le Moniteur d\'Inactivité.';
 
   @override
+  String get homeFallUnavailable => 'Non disponible avec ce profil';
+
+  @override
+  String homeAlertPaused(String time) {
+    return 'EN PAUSE jusqu\'à $time';
+  }
+
+  @override
+  String get a11ySosHint => 'Maintenez 3 secondes pour alerter vos contacts';
+
+  @override
+  String get a11ySosLongPress => 'envoyer un SOS';
+
+  @override
+  String get a11ySosCountdown =>
+      'SOS dans 3 secondes. Touchez deux fois pour annuler.';
+
+  @override
+  String get a11yStopLabel => 'Arrêter Oksigenia SOS';
+
+  @override
+  String get a11yStopHint =>
+      'Maintenez 2 secondes. Arrête toute la surveillance et ferme l\'application.';
+
+  @override
+  String get a11yStopLongPress =>
+      'arrêter la surveillance et fermer l\'application';
+
+  @override
+  String get a11yStopCountdown =>
+      'Arrêt dans 2 secondes. Touchez deux fois pour annuler.';
+
+  @override
+  String get a11yAlarmCancelHint =>
+      'Maintenez 2 secondes pour annuler l\'alerte';
+
+  @override
+  String get a11yAlarmCancelLongPress => 'annuler l\'alerte';
+
+  @override
+  String get a11yAlarmCancelCountdown =>
+      'Annulation de l\'alerte dans 2 secondes. Touchez deux fois pour la maintenir.';
+
+  @override
+  String get a11yMotionOk => 'Capteur de mouvement actif';
+
+  @override
+  String get a11yMotionOff => 'Capteur de mouvement non autorisé';
+
+  @override
+  String a11yBattery(int level) {
+    return 'Batterie $level %';
+  }
+
+  @override
+  String a11yBatteryRestricted(int level) {
+    return 'Batterie $level %, restreinte par Android';
+  }
+
+  @override
+  String a11yGps(String meters) {
+    return 'GPS précis à $meters m';
+  }
+
+  @override
+  String get a11yGpsNone => 'GPS : pas encore de position';
+
+  @override
+  String get a11yAddContact => 'Ajouter le contact';
+
+  @override
+  String a11yDeleteContact(String number) {
+    return 'Supprimer $number';
+  }
+
+  @override
+  String get a11yStopTracking => 'Arrêter le suivi en direct';
+
+  @override
   String get contactCheckTitle => 'L\'indicatif du pays est-il correct ?';
 
   @override

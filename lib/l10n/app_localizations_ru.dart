@@ -746,6 +746,85 @@ class AppLocalizationsRu extends AppLocalizations {
       'НЕТ ЗАЩИТЫ — этот профиль не определяет падения. Включите Монитор бездействия.';
 
   @override
+  String get homeFallUnavailable => 'Недоступно в этом профиле';
+
+  @override
+  String homeAlertPaused(String time) {
+    return 'ПАУЗА до $time';
+  }
+
+  @override
+  String get a11ySosHint =>
+      'Удерживайте 3 секунды, чтобы оповестить ваши контакты';
+
+  @override
+  String get a11ySosLongPress => 'отправить SOS';
+
+  @override
+  String get a11ySosCountdown =>
+      'SOS через 3 секунды. Дважды коснитесь для отмены.';
+
+  @override
+  String get a11yStopLabel => 'Остановить Oksigenia SOS';
+
+  @override
+  String get a11yStopHint =>
+      'Удерживайте 2 секунды. Останавливает весь мониторинг и закрывает приложение.';
+
+  @override
+  String get a11yStopLongPress => 'остановить мониторинг и закрыть приложение';
+
+  @override
+  String get a11yStopCountdown =>
+      'Остановка через 2 секунды. Дважды коснитесь для отмены.';
+
+  @override
+  String get a11yAlarmCancelHint =>
+      'Удерживайте 2 секунды, чтобы отменить тревогу';
+
+  @override
+  String get a11yAlarmCancelLongPress => 'отменить тревогу';
+
+  @override
+  String get a11yAlarmCancelCountdown =>
+      'Тревога отменится через 2 секунды. Дважды коснитесь, чтобы оставить её.';
+
+  @override
+  String get a11yMotionOk => 'Датчик движения работает';
+
+  @override
+  String get a11yMotionOff => 'Нет доступа к датчику движения';
+
+  @override
+  String a11yBattery(int level) {
+    return 'Батарея $level%';
+  }
+
+  @override
+  String a11yBatteryRestricted(int level) {
+    return 'Батарея $level%, ограничена Android';
+  }
+
+  @override
+  String a11yGps(String meters) {
+    return 'Точность GPS $meters м';
+  }
+
+  @override
+  String get a11yGpsNone => 'GPS: позиция ещё не определена';
+
+  @override
+  String get a11yAddContact => 'Добавить контакт';
+
+  @override
+  String a11yDeleteContact(String number) {
+    return 'Удалить $number';
+  }
+
+  @override
+  String get a11yStopTracking => 'Остановить Live Tracking';
+
+  @override
   String get contactCheckTitle => 'Код страны указан верно?';
 
   @override

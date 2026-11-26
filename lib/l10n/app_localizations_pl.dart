@@ -745,6 +745,84 @@ class AppLocalizationsPl extends AppLocalizations {
       'BRAK OCHRONY — ten profil nie wykrywa upadków. Włącz Monitor bezruchu.';
 
   @override
+  String get homeFallUnavailable => 'Niedostępne w tym profilu';
+
+  @override
+  String homeAlertPaused(String time) {
+    return 'WSTRZYMANE do $time';
+  }
+
+  @override
+  String get a11ySosHint =>
+      'Przytrzymaj 3 sekundy, aby powiadomić swoje kontakty';
+
+  @override
+  String get a11ySosLongPress => 'wysłać SOS';
+
+  @override
+  String get a11ySosCountdown =>
+      'SOS za 3 sekundy. Stuknij dwukrotnie, aby anulować.';
+
+  @override
+  String get a11yStopLabel => 'Wyłącz Oksigenia SOS';
+
+  @override
+  String get a11yStopHint =>
+      'Przytrzymaj 2 sekundy. Wyłącza całe monitorowanie i zamyka aplikację.';
+
+  @override
+  String get a11yStopLongPress => 'wyłączyć monitorowanie i zamknąć aplikację';
+
+  @override
+  String get a11yStopCountdown =>
+      'Wyłączenie za 2 sekundy. Stuknij dwukrotnie, aby anulować.';
+
+  @override
+  String get a11yAlarmCancelHint => 'Przytrzymaj 2 sekundy, aby anulować alarm';
+
+  @override
+  String get a11yAlarmCancelLongPress => 'anulować alarm';
+
+  @override
+  String get a11yAlarmCancelCountdown =>
+      'Alarm zostanie anulowany za 2 sekundy. Stuknij dwukrotnie, aby go zachować.';
+
+  @override
+  String get a11yMotionOk => 'Czujnik ruchu działa';
+
+  @override
+  String get a11yMotionOff => 'Brak zgody na czujnik ruchu';
+
+  @override
+  String a11yBattery(int level) {
+    return 'Bateria $level%';
+  }
+
+  @override
+  String a11yBatteryRestricted(int level) {
+    return 'Bateria $level%, ograniczona przez Androida';
+  }
+
+  @override
+  String a11yGps(String meters) {
+    return 'Dokładność GPS $meters m';
+  }
+
+  @override
+  String get a11yGpsNone => 'GPS: brak pozycji';
+
+  @override
+  String get a11yAddContact => 'Dodaj kontakt';
+
+  @override
+  String a11yDeleteContact(String number) {
+    return 'Usuń $number';
+  }
+
+  @override
+  String get a11yStopTracking => 'Zatrzymaj Live Tracking';
+
+  @override
   String get contactCheckTitle => 'Czy numer kierunkowy kraju jest poprawny?';
 
   @override

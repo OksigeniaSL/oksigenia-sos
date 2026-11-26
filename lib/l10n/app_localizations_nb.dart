@@ -746,6 +746,85 @@ class AppLocalizationsNb extends AppLocalizations {
       'IKKE BESKYTTET — denne profilen oppdager ikke fall. Slå på Inaktivitetsmonitoren.';
 
   @override
+  String get homeFallUnavailable => 'Ikke tilgjengelig i denne profilen';
+
+  @override
+  String homeAlertPaused(String time) {
+    return 'PAUSET til $time';
+  }
+
+  @override
+  String get a11ySosHint =>
+      'Hold inne i 3 sekunder for å varsle kontaktene dine';
+
+  @override
+  String get a11ySosLongPress => 'sende en SOS';
+
+  @override
+  String get a11ySosCountdown =>
+      'SOS om 3 sekunder. Dobbelttrykk for å avbryte.';
+
+  @override
+  String get a11yStopLabel => 'Slå av Oksigenia SOS';
+
+  @override
+  String get a11yStopHint =>
+      'Hold inne i 2 sekunder. Stopper all overvåking og lukker appen.';
+
+  @override
+  String get a11yStopLongPress => 'stoppe overvåkingen og lukke appen';
+
+  @override
+  String get a11yStopCountdown =>
+      'Slås av om 2 sekunder. Dobbelttrykk for å avbryte.';
+
+  @override
+  String get a11yAlarmCancelHint =>
+      'Hold inne i 2 sekunder for å avbryte alarmen';
+
+  @override
+  String get a11yAlarmCancelLongPress => 'avbryte alarmen';
+
+  @override
+  String get a11yAlarmCancelCountdown =>
+      'Alarmen avbrytes om 2 sekunder. Dobbelttrykk for å beholde den.';
+
+  @override
+  String get a11yMotionOk => 'Bevegelsessensor aktiv';
+
+  @override
+  String get a11yMotionOff => 'Bevegelsessensor ikke tillatt';
+
+  @override
+  String a11yBattery(int level) {
+    return 'Batteri $level %';
+  }
+
+  @override
+  String a11yBatteryRestricted(int level) {
+    return 'Batteri $level %, begrenset av Android';
+  }
+
+  @override
+  String a11yGps(String meters) {
+    return 'GPS-nøyaktighet $meters m';
+  }
+
+  @override
+  String get a11yGpsNone => 'GPS: ingen posisjon ennå';
+
+  @override
+  String get a11yAddContact => 'Legg til kontakt';
+
+  @override
+  String a11yDeleteContact(String number) {
+    return 'Slett $number';
+  }
+
+  @override
+  String get a11yStopTracking => 'Stopp Live Tracking';
+
+  @override
   String get contactCheckTitle => 'Er landskoden riktig?';
 
   @override

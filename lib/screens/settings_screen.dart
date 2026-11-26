@@ -375,9 +375,15 @@ class _SettingsScreenState extends State<SettingsScreen> with WidgetsBindingObse
                   ),
                 ),
                 const SizedBox(width: 10),
-                ElevatedButton(
-                  onPressed: _addContact,
-                  child: const Icon(Icons.add), 
+                // The icon's semantic label names the button for screen
+                // readers (it had none); the tooltip shows it on a long press.
+                Tooltip(
+                  message: l10n.a11yAddContact,
+                  excludeFromSemantics: true,
+                  child: ElevatedButton(
+                    onPressed: _addContact,
+                    child: Icon(Icons.add, semanticLabel: l10n.a11yAddContact),
+                  ),
                 ),
               ],
             ),
@@ -430,6 +436,7 @@ class _SettingsScreenState extends State<SettingsScreen> with WidgetsBindingObse
                       : null,
                     trailing: IconButton(
                       icon: const Icon(Icons.delete, color: Colors.red),
+                      tooltip: l10n.a11yDeleteContact(phone),
                       onPressed: () => _removeContact(phone),
                     ),
                   ),
@@ -445,6 +452,11 @@ class _SettingsScreenState extends State<SettingsScreen> with WidgetsBindingObse
             TextField(
               controller: _messageController,
               decoration: InputDecoration(
+                // labelText names the field for screen readers once it holds a
+                // message (the hint is only read while it is empty).
+                labelText: l10n.messageTitle,
+                // Keep the example visible while the field is empty.
+                floatingLabelBehavior: FloatingLabelBehavior.always,
                 hintText: l10n.messageHint,
                 border: const OutlineInputBorder(),
               ),

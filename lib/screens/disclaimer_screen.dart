@@ -71,47 +71,69 @@ class _DisclaimerScreenState extends State<DisclaimerScreen> {
         child: Padding(
           padding: const EdgeInsets.all(24.0),
           child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              const Icon(
-                Icons.warning_amber_rounded,
-                size: 80,
-                color: Colors.amber,
-              ),
-              const SizedBox(height: 20),
-              Text(
-                l10n.disclaimerTitle,
-                style: theme.textTheme.headlineSmall?.copyWith(
-                  color: Colors.white,
-                  fontWeight: FontWeight.bold,
-                ),
-                textAlign: TextAlign.center,
-              ),
-              const SizedBox(height: 20),
+              // Icon, title and legal text scroll together, the buttons stay
+              // below. At 200 % the old fixed layout left the text box one
+              // line high. On a normal font the box still fills the space.
               Expanded(
-                child: Container(
-                  padding: const EdgeInsets.all(16),
-                  decoration: BoxDecoration(
-                    color: Colors.grey[900],
-                    borderRadius: BorderRadius.circular(12),
-                    border: Border.all(color: Colors.grey[800]!),
-                  ),
-                  child: SingleChildScrollView(
-                    child: Text(
-                      l10n.disclaimerText,
-                      style: theme.textTheme.bodyMedium?.copyWith(
-                        color: Colors.grey[300],
-                        height: 1.5,
+                child: LayoutBuilder(
+                  builder: (context, viewport) => SingleChildScrollView(
+                    child: ConstrainedBox(
+                      constraints: BoxConstraints(minHeight: viewport.maxHeight),
+                      child: IntrinsicHeight(
+                        child: Column(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            const Icon(
+                              Icons.warning_amber_rounded,
+                              size: 64,
+                              color: Colors.amber,
+                            ),
+                            const SizedBox(height: 20),
+                            Text(
+                              l10n.disclaimerTitle,
+                              style: theme.textTheme.headlineSmall?.copyWith(
+                                color: Colors.white,
+                                fontWeight: FontWeight.bold,
+                              ),
+                              textAlign: TextAlign.center,
+                              // A 24 sp heading at 200 % split Russian words
+                              // in two; 150 % is still large and, as Android
+                              // 14+ does with big text, it grows less.
+                              textScaler: MediaQuery.textScalerOf(context)
+                                  .clamp(maxScaleFactor: 1.5),
+                            ),
+                            const SizedBox(height: 20),
+                            Expanded(
+                              child: Container(
+                                width: double.infinity,
+                                padding: const EdgeInsets.all(16),
+                                decoration: BoxDecoration(
+                                  color: Colors.grey[900],
+                                  borderRadius: BorderRadius.circular(12),
+                                  border: Border.all(color: Colors.grey[800]!),
+                                ),
+                                child: Text(
+                                  l10n.disclaimerText,
+                                  style: theme.textTheme.bodyMedium?.copyWith(
+                                    color: Colors.grey[300],
+                                    height: 1.5,
+                                  ),
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
                       ),
                     ),
                   ),
                 ),
               ),
-              const SizedBox(height: 30),
+              const SizedBox(height: 24),
               
-              SizedBox(
-                width: double.infinity,
-                height: 55,
+              // At least 55 high, taller if a large font wraps the label.
+              ConstrainedBox(
+                constraints: const BoxConstraints(minWidth: double.infinity, minHeight: 55),
                 child: ElevatedButton(
                   onPressed: _canAccept ? _acceptDisclaimer : null,
                   style: ElevatedButton.styleFrom(
@@ -124,6 +146,7 @@ class _DisclaimerScreenState extends State<DisclaimerScreen> {
                     _canAccept 
                       ? l10n.btnAccept 
                       : "${l10n.btnAccept} ($_countdown)",
+                    textAlign: TextAlign.center,
                     style: const TextStyle(
                       fontWeight: FontWeight.bold,
                       fontSize: 16,
@@ -131,7 +154,7 @@ class _DisclaimerScreenState extends State<DisclaimerScreen> {
                   ),
                 ),
               ),
-              const SizedBox(height: 16),
+              const SizedBox(height: 8),
               
               TextButton(
                 onPressed: _exitApp,

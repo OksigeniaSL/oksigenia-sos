@@ -17,7 +17,10 @@ class _AlarmScreenState extends State<AlarmScreen> with TickerProviderStateMixin
   late AnimationController _holdController;
   
   VoidCallback? _statusListener;
-  late SOSLogic _logic; 
+  late SOSLogic _logic;
+  // TalkBack sends one long-press action, never a held finger: without this a
+  // screen-reader user could not cancel a false alarm.
+  bool _a11yHold = false;
 
   @override
   void initState() {
@@ -43,6 +46,7 @@ class _AlarmScreenState extends State<AlarmScreen> with TickerProviderStateMixin
     _holdController.addStatusListener((status) {
       if (status == AnimationStatus.completed) {
         debugPrint("ALARM SCREEN: Botón completado. Cancelando...");
+        _a11yHold = false;
         _triggerSuccessHaptic();
         _logic.cancelSOS();
       }
@@ -192,7 +196,10 @@ class _AlarmScreenState extends State<AlarmScreen> with TickerProviderStateMixin
                     Stack(
                       alignment: Alignment.center,
                       children: [
-                        SizedBox(
+                        // The seconds are read from the number; the ring's
+                        // percentage only confused screen readers.
+                        ExcludeSemantics(
+                         child: SizedBox(
                           width: ring,
                           height: ring,
                           child: AnimatedBuilder(
@@ -206,6 +213,7 @@ class _AlarmScreenState extends State<AlarmScreen> with TickerProviderStateMixin
                               );
                             },
                           ),
+                         ),
                         ),
                         // TEXTO DIRECTO DE LA LÓGICA
                         Text(
@@ -242,10 +250,30 @@ class _AlarmScreenState extends State<AlarmScreen> with TickerProviderStateMixin
                 ),
               ),
                   // BOTÓN DE SEGURIDAD
-                  GestureDetector(
+                  Semantics(
+                    container: true,
+                    button: true,
+                    liveRegion: true,
+                    label: l10n.alertCancel,
+                    value: _a11yHold ? l10n.a11yAlarmCancelCountdown : null,
+                    hint: l10n.a11yAlarmCancelHint,
+                    onLongPressHint: l10n.a11yAlarmCancelLongPress,
+                    onLongPress: () {
+                      setState(() => _a11yHold = true);
+                      _holdController.forward();
+                    },
+                    onTap: _a11yHold
+                        ? () {
+                            setState(() => _a11yHold = false);
+                            _holdController.reverse();
+                          }
+                        : null,
+                    excludeSemantics: true,
+                    child: GestureDetector(
                     behavior: HitTestBehavior.opaque,
                     onPanDown: (_) {
                       debugPrint("ALARM SCREEN: Botón presionado");
+                      if (_a11yHold) setState(() => _a11yHold = false);
                       _holdController.forward();
                     },
                     onPanEnd: (_) {
@@ -314,7 +342,7 @@ class _AlarmScreenState extends State<AlarmScreen> with TickerProviderStateMixin
                         ],
                       ),
                     ),
-                  ),
+                  )),
               const SizedBox(height: 20),
             ],
           ),

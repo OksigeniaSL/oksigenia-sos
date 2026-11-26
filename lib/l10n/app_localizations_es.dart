@@ -748,6 +748,85 @@ class AppLocalizationsEs extends AppLocalizations {
       'SIN PROTECCIÓN — este perfil no detecta caídas. Activa el Monitor de Inactividad.';
 
   @override
+  String get homeFallUnavailable => 'No disponible con este perfil';
+
+  @override
+  String homeAlertPaused(String time) {
+    return 'EN PAUSA hasta las $time';
+  }
+
+  @override
+  String get a11ySosHint =>
+      'Mantén pulsado 3 segundos para avisar a tus contactos';
+
+  @override
+  String get a11ySosLongPress => 'enviar un SOS';
+
+  @override
+  String get a11ySosCountdown =>
+      'SOS en 3 segundos. Toca dos veces para cancelar.';
+
+  @override
+  String get a11yStopLabel => 'Apagar Oksigenia SOS';
+
+  @override
+  String get a11yStopHint =>
+      'Mantén pulsado 2 segundos. Detiene toda la vigilancia y cierra la app.';
+
+  @override
+  String get a11yStopLongPress => 'detener la vigilancia y cerrar la app';
+
+  @override
+  String get a11yStopCountdown =>
+      'Se apaga en 2 segundos. Toca dos veces para cancelar.';
+
+  @override
+  String get a11yAlarmCancelHint =>
+      'Mantén pulsado 2 segundos para cancelar la alerta';
+
+  @override
+  String get a11yAlarmCancelLongPress => 'cancelar la alerta';
+
+  @override
+  String get a11yAlarmCancelCountdown =>
+      'La alerta se cancela en 2 segundos. Toca dos veces para mantenerla.';
+
+  @override
+  String get a11yMotionOk => 'Sensor de movimiento activo';
+
+  @override
+  String get a11yMotionOff => 'Sensor de movimiento sin permiso';
+
+  @override
+  String a11yBattery(int level) {
+    return 'Batería $level %';
+  }
+
+  @override
+  String a11yBatteryRestricted(int level) {
+    return 'Batería $level %, restringida por Android';
+  }
+
+  @override
+  String a11yGps(String meters) {
+    return 'GPS con precisión de $meters m';
+  }
+
+  @override
+  String get a11yGpsNone => 'GPS: aún sin posición';
+
+  @override
+  String get a11yAddContact => 'Añadir contacto';
+
+  @override
+  String a11yDeleteContact(String number) {
+    return 'Borrar $number';
+  }
+
+  @override
+  String get a11yStopTracking => 'Detener el seguimiento en vivo';
+
+  @override
   String get contactCheckTitle => '¿Es correcto el prefijo del país?';
 
   @override

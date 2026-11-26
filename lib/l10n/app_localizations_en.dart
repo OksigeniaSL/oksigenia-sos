@@ -743,6 +743,82 @@ class AppLocalizationsEn extends AppLocalizations {
       'NOT PROTECTED — this profile has no fall detection. Turn on the Inactivity Monitor.';
 
   @override
+  String get homeFallUnavailable => 'Not available in this profile';
+
+  @override
+  String homeAlertPaused(String time) {
+    return 'PAUSED until $time';
+  }
+
+  @override
+  String get a11ySosHint =>
+      'Hold for 3 seconds to send an alert to your contacts';
+
+  @override
+  String get a11ySosLongPress => 'send an SOS';
+
+  @override
+  String get a11ySosCountdown => 'SOS in 3 seconds. Double-tap to cancel.';
+
+  @override
+  String get a11yStopLabel => 'Stop Oksigenia SOS';
+
+  @override
+  String get a11yStopHint =>
+      'Hold for 2 seconds. Stops all monitoring and closes the app.';
+
+  @override
+  String get a11yStopLongPress => 'stop monitoring and close the app';
+
+  @override
+  String get a11yStopCountdown => 'Closing in 2 seconds. Double-tap to cancel.';
+
+  @override
+  String get a11yAlarmCancelHint => 'Hold for 2 seconds to cancel the alert';
+
+  @override
+  String get a11yAlarmCancelLongPress => 'cancel the alert';
+
+  @override
+  String get a11yAlarmCancelCountdown =>
+      'Cancelling the alert in 2 seconds. Double-tap to keep it.';
+
+  @override
+  String get a11yMotionOk => 'Motion sensor working';
+
+  @override
+  String get a11yMotionOff => 'Motion sensor not allowed';
+
+  @override
+  String a11yBattery(int level) {
+    return 'Battery $level%';
+  }
+
+  @override
+  String a11yBatteryRestricted(int level) {
+    return 'Battery $level%, restricted by Android';
+  }
+
+  @override
+  String a11yGps(String meters) {
+    return 'GPS accurate to $meters m';
+  }
+
+  @override
+  String get a11yGpsNone => 'GPS: no position yet';
+
+  @override
+  String get a11yAddContact => 'Add contact';
+
+  @override
+  String a11yDeleteContact(String number) {
+    return 'Delete $number';
+  }
+
+  @override
+  String get a11yStopTracking => 'Stop live tracking';
+
+  @override
   String get contactCheckTitle => 'Is the country code right?';
 
   @override
