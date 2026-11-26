@@ -67,7 +67,7 @@ class AppLocalizationsFr extends AppLocalizations {
   String get menuPrivacy => 'Confidentialité et Légal';
 
   @override
-  String get menuDonate => 'Donar / Donate';
+  String get menuDonate => 'Faire un don';
 
   @override
   String get menuX => '𝕏 (Twitter)';

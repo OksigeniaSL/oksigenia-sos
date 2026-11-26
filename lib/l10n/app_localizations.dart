@@ -227,7 +227,7 @@ abstract class AppLocalizations {
   /// No description provided for @menuDonate.
   ///
   /// In en, this message translates to:
-  /// **'Donar / Donate'**
+  /// **'Donate'**
   String get menuDonate;
 
   /// No description provided for @menuX.

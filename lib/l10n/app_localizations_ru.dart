@@ -67,7 +67,7 @@ class AppLocalizationsRu extends AppLocalizations {
   String get menuPrivacy => 'Конфиденциальность';
 
   @override
-  String get menuDonate => 'Поддержать / Donate';
+  String get menuDonate => 'Поддержать';
 
   @override
   String get menuX => '𝕏 (Twitter)';

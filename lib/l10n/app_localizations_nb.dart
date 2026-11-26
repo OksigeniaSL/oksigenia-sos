@@ -67,7 +67,7 @@ class AppLocalizationsNb extends AppLocalizations {
   String get menuPrivacy => 'Personvern og juridisk';
 
   @override
-  String get menuDonate => 'Støtt / Donate';
+  String get menuDonate => 'Doner';
 
   @override
   String get menuX => '𝕏 (Twitter)';
