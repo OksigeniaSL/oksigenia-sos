@@ -11,6 +11,7 @@
     "statusSendFailed": "⚠️ SOS NIE WYSŁANE",
     "statusSendFailedBody": "Nie udało się wysłać żadnego SMS-a. Sprawdź zasięg i kontakty, a następnie spróbuj ponownie.",
     "statusSendRetrying": "Nie wszystkie kontakty go otrzymały (brak zasięgu?). Ponawiam automatycznie.",
+    "pauseNotifResumesIn": "Wznowienie za {time}",
     "statusError": "BŁĄD: {error}",
     "menuWeb": "Oficjalna strona",
     "menuSupport": "Wsparcie techniczne",

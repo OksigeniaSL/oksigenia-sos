@@ -47,6 +47,11 @@ class AppLocalizationsDe extends AppLocalizations {
       'Noch nicht alle Kontakte haben es erhalten (kein Netz?). Wird automatisch erneut versucht.';
 
   @override
+  String pauseNotifResumesIn(String time) {
+    return 'Geht in $time weiter';
+  }
+
+  @override
   String statusError(Object error) {
     return 'FEHLER: $error';
   }

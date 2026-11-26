@@ -11,6 +11,7 @@
     "statusSendFailed": "⚠️ SOS NIET VERZONDEN",
     "statusSendFailedBody": "Er kon geen sms worden verzonden. Controleer bereik en contacten en probeer opnieuw.",
     "statusSendRetrying": "Nog niet alle contacten hebben het ontvangen (geen bereik?). Wordt automatisch opnieuw geprobeerd.",
+    "pauseNotifResumesIn": "Hervat over {time}",
     "statusError": "FOUT: {error}",
     "menuWeb": "Officiële Website",
     "menuSupport": "Technische Ondersteuning",

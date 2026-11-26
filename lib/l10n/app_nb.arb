@@ -11,6 +11,7 @@
     "statusSendFailed": "⚠️ SOS IKKE SENDT",
     "statusSendFailedBody": "Ingen SMS kunne sendes. Sjekk dekning og kontakter, og prøv igjen.",
     "statusSendRetrying": "Ikke alle kontaktene har fått den ennå (ingen dekning?). Prøver igjen automatisk.",
+    "pauseNotifResumesIn": "Fortsetter om {time}",
     "statusError": "FEIL: {error}",
     "menuWeb": "Offisielt nettsted",
     "menuSupport": "Teknisk støtte",

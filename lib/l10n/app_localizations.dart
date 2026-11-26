@@ -188,6 +188,12 @@ abstract class AppLocalizations {
   /// **'Not every contact has it yet (no signal?). Retrying automatically.'**
   String get statusSendRetrying;
 
+  /// No description provided for @pauseNotifResumesIn.
+  ///
+  /// In en, this message translates to:
+  /// **'Resumes in {time}'**
+  String pauseNotifResumesIn(String time);
+
   /// No description provided for @statusError.
   ///
   /// In en, this message translates to:

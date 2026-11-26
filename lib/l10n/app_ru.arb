@@ -11,6 +11,7 @@
     "statusSendFailed": "⚠️ SOS НЕ ОТПРАВЛЕН",
     "statusSendFailedBody": "Не удалось отправить ни одного SMS. Проверьте сигнал сети и контакты, затем повторите.",
     "statusSendRetrying": "Ещё не все контакты получили его (нет сети?). Повторная отправка автоматически.",
+    "pauseNotifResumesIn": "Возобновится через {time}",
     "statusError": "ОШИБКА: {error}",
     "menuWeb": "Официальный сайт",
     "menuSupport": "Техподдержка",

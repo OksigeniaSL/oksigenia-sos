@@ -47,6 +47,11 @@ class AppLocalizationsNb extends AppLocalizations {
       'Ikke alle kontaktene har fått den ennå (ingen dekning?). Prøver igjen automatisk.';
 
   @override
+  String pauseNotifResumesIn(String time) {
+    return 'Fortsetter om $time';
+  }
+
+  @override
   String statusError(Object error) {
     return 'FEIL: $error';
   }

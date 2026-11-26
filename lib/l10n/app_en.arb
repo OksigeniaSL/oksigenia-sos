@@ -11,6 +11,8 @@
     "statusSendFailed": "⚠️ SOS NOT SENT",
     "statusSendFailedBody": "No SMS could be sent. Check signal and contacts, then retry.",
     "statusSendRetrying": "Not every contact has it yet (no signal?). Retrying automatically.",
+    "pauseNotifResumesIn": "Resumes in {time}",
+    "@pauseNotifResumesIn": {"placeholders": {"time": {"type": "String"}}},
     "statusError": "ERROR: {error}",
     "menuWeb": "Official Website",
     "menuSupport": "Tech Support",

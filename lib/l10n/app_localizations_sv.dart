@@ -47,6 +47,11 @@ class AppLocalizationsSv extends AppLocalizations {
       'Alla kontakter har inte fått det än (ingen täckning?). Försöker igen automatiskt.';
 
   @override
+  String pauseNotifResumesIn(String time) {
+    return 'Återupptas om $time';
+  }
+
+  @override
   String statusError(Object error) {
     return 'FEL: $error';
   }

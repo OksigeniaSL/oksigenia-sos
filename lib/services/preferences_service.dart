@@ -36,6 +36,16 @@ class PreferencesService {
   // by whoever starts it, read by both isolates after a respawn.
   static const String keyAlarmCause = 'alarm_cause';
 
+  // The texts Sylvia shows and sends (notifications, SMS), as JSON, in the
+  // language the UI last gave it. Sylvia saves them on setConfig and reads them
+  // back when it starts alone (boot, watchdog): without them it spoke English.
+  static const String keyServiceTexts = 'service_texts';
+
+  // Language the UI was last shown in. Unlike 'language_code' (only set when
+  // the user picks a language by hand, and then it rules the whole app), this
+  // one just remembers: it is what code without a widget falls back to.
+  static const String keyLastUiLanguage = 'last_ui_language';
+
   // SOS RETRY QUEUE (shared by both isolates and OksigeniaBootReceiver.kt,
   // which reads the bool as "flutter.sos_retry_active")
   static const String keySosRetryActive = 'sos_retry_active';

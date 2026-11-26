@@ -47,6 +47,11 @@ class AppLocalizationsNl extends AppLocalizations {
       'Nog niet alle contacten hebben het ontvangen (geen bereik?). Wordt automatisch opnieuw geprobeerd.';
 
   @override
+  String pauseNotifResumesIn(String time) {
+    return 'Hervat over $time';
+  }
+
+  @override
   String statusError(Object error) {
     return 'FOUT: $error';
   }

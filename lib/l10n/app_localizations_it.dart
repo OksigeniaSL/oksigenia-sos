@@ -47,6 +47,11 @@ class AppLocalizationsIt extends AppLocalizations {
       'Non è ancora arrivato a tutti i contatti (niente rete?). Nuovo tentativo automatico.';
 
   @override
+  String pauseNotifResumesIn(String time) {
+    return 'Riprende tra $time';
+  }
+
+  @override
   String statusError(Object error) {
     return 'ERRORE: $error';
   }

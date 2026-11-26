@@ -172,59 +172,70 @@ class SOSLogic extends ChangeNotifier with WidgetsBindingObserver {
     return contacts.isNotEmpty ? contacts.first : null;
   }
 
+  /// The texts Sylvia shows and sends, in the language of [l10n].
+  Map<String, String> _serviceTexts(AppLocalizations l10n) => {
+        'alertFallDetected': l10n.alertFallDetected,
+        'alertInactivityDetected': l10n.alertInactivityDetected,
+        'holdToCancel': l10n.holdToCancel,
+        'alertSendingIn': l10n.alertSendingIn,
+        'statusSent': l10n.statusSent,
+        'statusSendFailed': l10n.statusSendFailed,
+        'statusSendFailedBody': l10n.statusSendFailedBody,
+        'statusSendRetrying': l10n.statusSendRetrying,
+        'statusReady': l10n.statusReady,
+        'smsHelpMessage': l10n.smsHelpMessage,
+        'smsDyingGasp': l10n.smsDyingGasp,
+        'pauseTitle': l10n.pauseTitle,
+        // Sylvia fills in {time} on every refresh of the pause notification.
+        'pauseNotifResumesIn': l10n.pauseNotifResumesIn('{time}'),
+        'resumeNow': l10n.pauseResumeNow,
+        'smsBeaconHeader': l10n.smsBeaconHeader,
+        'smsBeaconDistance': l10n.smsBeaconDistance,
+      };
+
+  /// The app's texts for code that has no widget at hand (notifications, SMS).
+  ///
+  /// With a context it is the language on screen, and that language is
+  /// remembered. Without one (the UI not built yet, or gone) it is the language
+  /// the user chose by hand, else the last one the UI was shown in, else
+  /// English. Before, that last case was always English for anyone who never
+  /// picked a language in the menu: 'language_code' is only written there, and
+  /// it is not written here either, or the app would stay in that language.
+  Future<AppLocalizations> _l10nNow() async {
+    final BuildContext? ctx = oksigeniaNavigatorKey.currentContext;
+    if (ctx != null) {
+      final AppLocalizations? onScreen = AppLocalizations.of(ctx);
+      if (onScreen != null) {
+        try {
+          final sharedPrefs = await SharedPreferences.getInstance();
+          final String lang = onScreen.localeName.split('_').first;
+          if (sharedPrefs.getString(PreferencesService.keyLastUiLanguage) != lang) {
+            await sharedPrefs.setString(PreferencesService.keyLastUiLanguage, lang);
+          }
+        } catch (_) {}
+        return onScreen;
+      }
+    }
+    String langCode = 'en';
+    try {
+      final sharedPrefs = await SharedPreferences.getInstance();
+      langCode = sharedPrefs.getString('language_code') ??
+          sharedPrefs.getString(PreferencesService.keyLastUiLanguage) ??
+          'en';
+    } catch (_) {}
+    try {
+      return await AppLocalizations.delegate.load(Locale(langCode));
+    } catch (_) {
+      return AppLocalizations.delegate.load(const Locale('en'));
+    }
+  }
+
   Future<void> _syncConfigWithService() async {
     final service = FlutterBackgroundService();
     if (!(await service.isRunning())) return;
 
     final prefs = PreferencesService();
-    
-    Map<String, String> texts = {};
-    
-    if (oksigeniaNavigatorKey.currentContext != null) {
-      final l10n = AppLocalizations.of(oksigeniaNavigatorKey.currentContext!);
-      if (l10n != null) {
-        texts = {
-          'alertFallDetected': l10n.alertFallDetected,
-          'alertInactivityDetected': l10n.alertInactivityDetected,
-          'holdToCancel': l10n.holdToCancel,
-          'alertSendingIn': l10n.alertSendingIn,
-          'statusSent': l10n.statusSent,
-          'statusSendFailed': l10n.statusSendFailed,
-          'statusSendFailedBody': l10n.statusSendFailedBody,
-          'statusSendRetrying': l10n.statusSendRetrying,
-          'statusReady': l10n.statusReady,
-          'smsHelpMessage': l10n.smsHelpMessage,
-          'smsDyingGasp': l10n.smsDyingGasp,
-          'pauseTitle': l10n.pauseTitle,
-          'resumeNow': l10n.pauseResumeNow,
-          'smsBeaconHeader': l10n.smsBeaconHeader,
-          'smsBeaconDistance': l10n.smsBeaconDistance,
-        };
-      }
-    } else {
-      final sharedPrefs = await SharedPreferences.getInstance();
-      String langCode = sharedPrefs.getString('language_code') ?? 'en';
-      try {
-        final l10n = await AppLocalizations.delegate.load(Locale(langCode));
-        texts = {
-          'alertFallDetected': l10n.alertFallDetected,
-          'alertInactivityDetected': l10n.alertInactivityDetected,
-          'holdToCancel': l10n.holdToCancel,
-          'alertSendingIn': l10n.alertSendingIn,
-          'statusSent': l10n.statusSent,
-          'statusSendFailed': l10n.statusSendFailed,
-          'statusSendFailedBody': l10n.statusSendFailedBody,
-          'statusSendRetrying': l10n.statusSendRetrying,
-          'statusReady': l10n.statusReady,
-          'smsHelpMessage': l10n.smsHelpMessage,
-          'smsDyingGasp': l10n.smsDyingGasp,
-          'pauseTitle': l10n.pauseTitle,
-          'resumeNow': l10n.pauseResumeNow,
-          'smsBeaconHeader': l10n.smsBeaconHeader,
-          'smsBeaconDistance': l10n.smsBeaconDistance,
-        };
-      } catch (_) {}
-    }
+    final Map<String, String> texts = _serviceTexts(await _l10nNow());
 
     service.invoke("setConfig", {
       "recipients": prefs.getContacts(),
@@ -1063,9 +1074,7 @@ class SOSLogic extends ChangeNotifier with WidgetsBindingObserver {
     final List<String> recipients = prefs.getContacts();
     if (recipients.isEmpty) return;
 
-    final sharedPrefs = await SharedPreferences.getInstance();
-    String langCode = sharedPrefs.getString('language_code') ?? 'en';
-    final t = await AppLocalizations.delegate.load(Locale(langCode));
+    final t = await _l10nNow();
 
     String msg = t.smsDyingGasp;
     if (msg.isEmpty) msg = "BATT <5%. Bye. Loc:";
@@ -1234,9 +1243,7 @@ class SOSLogic extends ChangeNotifier with WidgetsBindingObserver {
   // Nota del SOS cuando el usuario no ha escrito la suya: el mensaje de ayuda en
   // el idioma de la app.
   Future<String> _defaultSosNote() async {
-    final sharedPrefs = await SharedPreferences.getInstance();
-    final String langCode = sharedPrefs.getString('language_code') ?? 'en';
-    final t = await AppLocalizations.delegate.load(Locale(langCode));
+    final t = await _l10nNow();
     return t.smsHelpMessage.isEmpty ? "HELP!" : t.smsHelpMessage;
   }
 
@@ -1503,9 +1510,7 @@ class SOSLogic extends ChangeNotifier with WidgetsBindingObserver {
       final service = FlutterBackgroundService();
       if (await service.isRunning()) {
         bool isActive = _isFallDetectionActive || _isInactivityMonitorActive;
-        final prefs = await SharedPreferences.getInstance(); 
-        String lang = prefs.getString('language_code') ?? 'en';
-        final t = await AppLocalizations.delegate.load(Locale(lang));
+        final t = await _l10nNow();
 
         String title = "";
         String content = "";
@@ -1524,7 +1529,7 @@ class SOSLogic extends ChangeNotifier with WidgetsBindingObserver {
           final mins = pauseRemainingSeconds ~/ 60;
           final secs = (pauseRemainingSeconds % 60).toString().padLeft(2, '0');
           title = "⏸ ${t.pauseTitle}";
-          content = "${t.pauseResumeNow} — ${mins}m${secs}s";
+          content = t.pauseNotifResumesIn("${mins}m ${secs}s");
         } else if (!isActive) {
           statusIcon = "paused";
           title = t.statusMonitorStopped;

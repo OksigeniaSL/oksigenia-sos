@@ -11,6 +11,7 @@
     "statusSendFailed": "⚠️ SOS NON ENVOYÉ",
     "statusSendFailedBody": "Aucun SMS n'a pu être envoyé. Vérifiez la couverture et les contacts, puis réessayez.",
     "statusSendRetrying": "Tous les contacts ne l'ont pas encore reçu (pas de réseau ?). Nouvel essai automatique.",
+    "pauseNotifResumesIn": "Reprise dans {time}",
     "statusError": "ERREUR : {error}",
     "menuWeb": "Site Officiel",
     "menuSupport": "Support Technique",

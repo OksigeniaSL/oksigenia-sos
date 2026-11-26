@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:convert';
 import 'dart:io';
 import 'dart:ui';
 import 'dart:math';
@@ -109,6 +110,10 @@ Future<void> _sentinelLogAppend(String line) async {
 // Variables de Configuración
 List<String> _recipients = [];
 String _customMessage = "";
+// English until the UI sends its own with setConfig; Sylvia saves those and
+// restores them in _loadConfigFromDisk, so a start without the UI (boot,
+// watchdog) keeps the user's language. Same wording as app_en.arb, and the SMS
+// ones in plain GSM-7 (no emojis, no dashes) like the translations.
 Map<String, String> _texts = {
   'alertFallDetected': 'IMPACT DETECTED!',
   'alertInactivityDetected': 'INACTIVITY DETECTED!',
@@ -117,15 +122,15 @@ Map<String, String> _texts = {
   'statusSent': 'Alert sent successfully.',
   'statusSendFailed': '⚠️ SOS NOT SENT',
   'statusSendFailedBody': 'No SMS could be sent. Check signal and contacts, then retry.',
-  'statusSendRetrying': 'Not sent to every contact yet. Retrying automatically.',
+  'statusSendRetrying': 'Not every contact has it yet (no signal?). Retrying automatically.',
   'statusReady': 'Oksigenia System Ready.',
-  'smsHelpMessage': 'HELP! SOS!',
-  'smsDyingGasp': 'BATTERY CRITICAL. Bye.',
+  'smsHelpMessage': 'HELP! I need assistance.',
+  'smsDyingGasp': 'BATTERY <5%. System shutting down. Loc:',
   'pauseTitle': 'Monitoring paused',
-  'resumesIn': 'Resumes in',
+  'pauseNotifResumesIn': 'Resumes in {time}',
   'resumeNow': 'Resume now',
-  'smsBeaconHeader': '📍 OKSIGENIA SOS — automatic follow-up to my emergency alert (this is NOT a new alarm). My updated location:',
-  'smsBeaconDistance': 'from the point where the SOS was sent.',
+  'smsBeaconHeader': 'OKSIGENIA SOS - follow-up (NOT a new alarm):',
+  'smsBeaconDistance': 'from the SOS point.',
 };
 
 // Smart Beacon: post-SOS position-update SMS protocol.
@@ -557,12 +562,13 @@ void onStart(ServiceInstance service) async {
     final secs = remaining.inSeconds % 60;
     final timeStr = totalMin > 0 ? "${totalMin}m ${secs.toString().padLeft(2, '0')}s" : "${remaining.inSeconds}s";
     final pauseLabel = _texts['pauseTitle'] ?? 'Monitoring paused';
-    final resumesInLabel = _texts['resumesIn'] ?? 'Resumes in';
+    final resumesIn = (_texts['pauseNotifResumesIn'] ?? 'Resumes in {time}')
+        .replaceAll('{time}', timeStr);
     final resumeNowLabel = _texts['resumeNow'] ?? 'Resume now';
     flutterLocalNotificationsPlugin.show(
       id: notificationId,
       title: "⏸ Oksigenia SOS — $pauseLabel",
-      body: "$resumesInLabel $timeStr",
+      body: resumesIn,
       notificationDetails: NotificationDetails(
         android: AndroidNotificationDetails(
           channelId, 'Oksigenia SOS',
@@ -1890,6 +1896,20 @@ void onStart(ServiceInstance service) async {
       _recipients = prefs.getStringList(PreferencesService.keyContacts) ?? [];
       _customMessage = prefs.getString(PreferencesService.keySosMessage) ?? "";
 
+      // The texts the UI gave Sylvia last time. Without them a Sylvia started
+      // by the boot receiver or the watchdog notified and texted in English
+      // until someone opened the app.
+      try {
+        final String? savedTexts = prefs.getString(PreferencesService.keyServiceTexts);
+        if (savedTexts != null && savedTexts.isNotEmpty) {
+          (jsonDecode(savedTexts) as Map).forEach((key, value) {
+            _texts[key.toString()] = value.toString();
+          });
+        }
+      } catch (e) {
+        _logSentinel("SYLVIA BOOT: saved texts unreadable ($e), using English");
+      }
+
       // Restaurar el perfil de actividad: un respawn a mitad de ruta debe
       // volver con los umbrales del usuario, no con los defaults.
       _applyProfileConfig(prefs.getString(PreferencesService.keyActivityProfile) ?? 'trekking');
@@ -2031,6 +2051,13 @@ void onStart(ServiceInstance service) async {
         rawTexts.forEach((key, value) {
           _texts[key.toString()] = value.toString();
         });
+        // Kept for the next start without the UI (see _loadConfigFromDisk).
+        if (rawTexts.isNotEmpty) {
+          SharedPreferences.getInstance()
+              .then((p) => p.setString(
+                  PreferencesService.keyServiceTexts, jsonEncode(_texts)))
+              .catchError((_) => false);
+        }
       }
     });
 

@@ -47,6 +47,11 @@ class AppLocalizationsPl extends AppLocalizations {
       'Nie wszystkie kontakty go otrzymały (brak zasięgu?). Ponawiam automatycznie.';
 
   @override
+  String pauseNotifResumesIn(String time) {
+    return 'Wznowienie za $time';
+  }
+
+  @override
   String statusError(Object error) {
     return 'BŁĄD: $error';
   }

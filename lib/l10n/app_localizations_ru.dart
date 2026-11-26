@@ -47,6 +47,11 @@ class AppLocalizationsRu extends AppLocalizations {
       'Ещё не все контакты получили его (нет сети?). Повторная отправка автоматически.';
 
   @override
+  String pauseNotifResumesIn(String time) {
+    return 'Возобновится через $time';
+  }
+
+  @override
   String statusError(Object error) {
     return 'ОШИБКА: $error';
   }
