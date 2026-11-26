@@ -774,6 +774,17 @@ class AppLocalizationsPt extends AppLocalizations {
       'Para dentro de 2 segundos. Toque duas vezes para cancelar.';
 
   @override
+  String get a11yAlarmCancelHint =>
+      'Mantenha premido 2 segundos para cancelar o alerta';
+
+  @override
+  String get a11yAlarmCancelLongPress => 'cancelar o alerta';
+
+  @override
+  String get a11yAlarmCancelCountdown =>
+      'O alerta é cancelado dentro de 2 segundos. Toque duas vezes para o manter.';
+
+  @override
   String get contactCheckTitle => 'O indicativo do país está correto?';
 
   @override

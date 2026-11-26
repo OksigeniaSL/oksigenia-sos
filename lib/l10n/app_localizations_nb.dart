@@ -778,6 +778,17 @@ class AppLocalizationsNb extends AppLocalizations {
       'Slås av om 2 sekunder. Dobbelttrykk for å avbryte.';
 
   @override
+  String get a11yAlarmCancelHint =>
+      'Hold inne i 2 sekunder for å avbryte alarmen';
+
+  @override
+  String get a11yAlarmCancelLongPress => 'avbryte alarmen';
+
+  @override
+  String get a11yAlarmCancelCountdown =>
+      'Alarmen avbrytes om 2 sekunder. Dobbelttrykk for å beholde den.';
+
+  @override
   String get contactCheckTitle => 'Er landskoden riktig?';
 
   @override

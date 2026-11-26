@@ -1514,6 +1514,24 @@ abstract class AppLocalizations {
   /// **'Closing in 2 seconds. Double-tap to cancel.'**
   String get a11yStopCountdown;
 
+  /// Screen-reader hint of the alarm screen's hold-to-cancel control.
+  ///
+  /// In en, this message translates to:
+  /// **'Hold for 2 seconds to cancel the alert'**
+  String get a11yAlarmCancelHint;
+
+  /// Screen readers say 'Double-tap and hold to …' followed by this (infinitive, lower case).
+  ///
+  /// In en, this message translates to:
+  /// **'cancel the alert'**
+  String get a11yAlarmCancelLongPress;
+
+  /// Read by screen readers while the cancel countdown started from an accessibility long press runs. A double-tap stops it and the alert goes on.
+  ///
+  /// In en, this message translates to:
+  /// **'Cancelling the alert in 2 seconds. Double-tap to keep it.'**
+  String get a11yAlarmCancelCountdown;
+
   /// No description provided for @contactCheckTitle.
   ///
   /// In en, this message translates to:

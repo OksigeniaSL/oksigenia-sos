@@ -780,6 +780,17 @@ class AppLocalizationsNl extends AppLocalizations {
       'Stopt over 2 seconden. Dubbeltik om te annuleren.';
 
   @override
+  String get a11yAlarmCancelHint =>
+      'Houd 2 seconden ingedrukt om het alarm te annuleren';
+
+  @override
+  String get a11yAlarmCancelLongPress => 'alarm annuleren';
+
+  @override
+  String get a11yAlarmCancelCountdown =>
+      'Het alarm wordt over 2 seconden geannuleerd. Dubbeltik om het te behouden.';
+
+  @override
   String get contactCheckTitle => 'Klopt de landcode?';
 
   @override

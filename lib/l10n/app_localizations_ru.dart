@@ -778,6 +778,17 @@ class AppLocalizationsRu extends AppLocalizations {
       'Остановка через 2 секунды. Дважды коснитесь для отмены.';
 
   @override
+  String get a11yAlarmCancelHint =>
+      'Удерживайте 2 секунды, чтобы отменить тревогу';
+
+  @override
+  String get a11yAlarmCancelLongPress => 'отменить тревогу';
+
+  @override
+  String get a11yAlarmCancelCountdown =>
+      'Тревога отменится через 2 секунды. Дважды коснитесь, чтобы оставить её.';
+
+  @override
   String get contactCheckTitle => 'Код страны указан верно?';
 
   @override

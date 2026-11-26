@@ -777,6 +777,16 @@ class AppLocalizationsPl extends AppLocalizations {
       'Wyłączenie za 2 sekundy. Stuknij dwukrotnie, aby anulować.';
 
   @override
+  String get a11yAlarmCancelHint => 'Przytrzymaj 2 sekundy, aby anulować alarm';
+
+  @override
+  String get a11yAlarmCancelLongPress => 'anulować alarm';
+
+  @override
+  String get a11yAlarmCancelCountdown =>
+      'Alarm zostanie anulowany za 2 sekundy. Stuknij dwukrotnie, aby go zachować.';
+
+  @override
   String get contactCheckTitle => 'Czy numer kierunkowy kraju jest poprawny?';
 
   @override

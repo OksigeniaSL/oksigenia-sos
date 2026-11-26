@@ -774,6 +774,17 @@ class AppLocalizationsDe extends AppLocalizations {
       'Wird in 2 Sekunden beendet. Zum Abbrechen doppelt tippen.';
 
   @override
+  String get a11yAlarmCancelHint =>
+      '2 Sekunden gedrückt halten, um den Alarm abzubrechen';
+
+  @override
+  String get a11yAlarmCancelLongPress => 'Alarm abbrechen';
+
+  @override
+  String get a11yAlarmCancelCountdown =>
+      'Der Alarm wird in 2 Sekunden abgebrochen. Doppelt tippen, um ihn beizubehalten.';
+
+  @override
   String get contactCheckTitle => 'Stimmt die Ländervorwahl?';
 
   @override

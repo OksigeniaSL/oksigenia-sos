@@ -773,6 +773,16 @@ class AppLocalizationsEn extends AppLocalizations {
   String get a11yStopCountdown => 'Closing in 2 seconds. Double-tap to cancel.';
 
   @override
+  String get a11yAlarmCancelHint => 'Hold for 2 seconds to cancel the alert';
+
+  @override
+  String get a11yAlarmCancelLongPress => 'cancel the alert';
+
+  @override
+  String get a11yAlarmCancelCountdown =>
+      'Cancelling the alert in 2 seconds. Double-tap to keep it.';
+
+  @override
   String get contactCheckTitle => 'Is the country code right?';
 
   @override

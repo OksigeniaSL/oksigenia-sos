@@ -778,6 +778,17 @@ class AppLocalizationsSv extends AppLocalizations {
       'Stängs av om 2 sekunder. Dubbeltryck för att avbryta.';
 
   @override
+  String get a11yAlarmCancelHint =>
+      'Håll in i 2 sekunder för att avbryta larmet';
+
+  @override
+  String get a11yAlarmCancelLongPress => 'avbryta larmet';
+
+  @override
+  String get a11yAlarmCancelCountdown =>
+      'Larmet avbryts om 2 sekunder. Dubbeltryck för att behålla det.';
+
+  @override
   String get contactCheckTitle => 'Stämmer landsnumret?';
 
   @override
