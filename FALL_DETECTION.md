@@ -13,18 +13,21 @@ that lab papers claim, and we lean on the user's 30 s cancel window rather than 
 
 ## The two-stage detector
 
-The sentinel never sends an SOS straight from an impact. It runs two independent paths:
+The sentinel never sends an SOS straight from an impact, and no impact skips observation:
 
 1. **Yellow observation.** An impact above the profile's `yellowThreshold` (user-acceleration, gravity
    removed; resting ≈ 1.0 G) opens an observation window of `observationSeconds`. If the person resumes
    rhythmic movement (walking) within the window, the sentinel returns to green. If the window elapses with
    no rhythm, it fires the alarm. An impact is only trusted when corroborated by the raw accelerometer
-   stream — the linear-acceleration stream alone fabricates phantom impacts during tumbles and free-fall.
-2. **Orange-direct.** An impact above `orangeThreshold` is treated as catastrophic and fires the alarm
-   immediately, skipping the observation window. The 30 s pre-alert on the alarm screen is still the user's
-   last chance to cancel. Set `orangeThreshold` to 0 to disable this path.
+   stream (≥ 25 m/s², with up to 300 ms for the raw stream to catch up) — the linear-acceleration stream
+   alone fabricates phantom impacts during tumbles and free-fall.
+2. **Pre-alert.** Firing the alarm only arms a 30 s pre-alert; the SOS SMS is sent only if the user does
+   not cancel.
 
-Firing the alarm only arms a 30 s pre-alert; the SOS SMS is sent only if the user does not cancel.
+**`orangeThreshold` no longer changes what happens.** Until commit eb9b651 (2026-06-10) an impact above it
+fired the alarm at once ("orange-direct"). That path was removed after the linear stream reported a 17.5 G
+"impact" while the phone was still in the air. An impact above `orangeThreshold` now enters the same
+observation window as any other; only its log line differs ("Impacto crítico" instead of "Impacto").
 
 ## The rhythm detector (`_isRhythmicMovement`)
 
@@ -61,7 +64,7 @@ of 1.30 (1.50 for running/trail) cancels real walking while still rejecting pure
 Automatic activity classification is not viable without a continuous heart-rate signal, which a phone does
 not have — so the profile is a manual selector, which is the honest answer. Values as shipped:
 
-| Profile | Yellow | Orange | Settling | Observation | CV cap | Impact | GPS interval | GPS dist. |
+| Profile | Yellow | Orange (log only) | Settling | Observation | CV cap | Impact | GPS interval | GPS dist. |
 |---|---|---|---|---|---|---|---|---|
 | Trekking / Hiking | 6 G | 10 G | 5 s | 60 s | 1.30 | on | 30 s | 30 m |
 | Road running | 10 G | 14 G | 5 s | 60 s | 1.50 | on | 5 s | 10 m |
@@ -77,10 +80,11 @@ Notes:
 - **Running** was calibrated from P8 logs: a 9.75 G foot-strike impact produced 0 crossings over 27 yellow
   checks (→ false alarm) at the trekking baseline. The fix was a higher yellow threshold (so gait peaks do
   not enter yellow) plus the adaptive moving-mean cadence detector described above.
-- **Orange-direct** was calibrated on the Pixel 8: 12 G required an implausibly hard blow; 10 G is reached
-  cleanly by a firm knock against a chair arm without injury. Trail/MTB and running sit higher because the
-  base vibration of the activity is higher. Known trade-off: a phone dropped onto concrete can exceed 10 G
-  and trip the alarm screen; the user cancels with the 2 s hold within 30 s. Accepted.
+- **Orange** values come from the old orange-direct path, calibrated on the Pixel 8 (12 G required an
+  implausibly hard blow; 10 G is reached by a firm knock against a chair arm). Since eb9b651 they only label
+  the log line. A phone dropped onto concrete no longer trips the alarm screen at once: it enters
+  observation like any other impact, and only if it then lies still for the whole window does the alarm
+  fire; the user cancels with the 2 s hold within 30 s.
 - **Impact detection off** (paragliding, kayak, horse riding) leaves the user protected by the Inactivity
   Monitor and manual SOS only. Horse cadence (trot ≈ 1.5 Hz, canter 2–3 Hz) interferes with the human-walk
   detector and there is no field data for phone-in-pocket while riding; revisit when such data exists.
