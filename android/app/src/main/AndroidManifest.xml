@@ -10,7 +10,11 @@
     <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE_MEDIA_PLAYBACK" />
-    <uses-permission android:name="android.permission.FOREGROUND_SERVICE_LOCATION" />
+    <!-- No FOREGROUND_SERVICE_LOCATION: no service of type location is ever put in the
+         foreground. The monitoring service is health|mediaPlayback, and geolocator's own
+         service (type location in its manifest) is only bound; it would call
+         startForeground only with a foregroundNotificationConfig, which this app never
+         passes. Location with the screen off comes from ACCESS_BACKGROUND_LOCATION. -->
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE_HEALTH" />
     <uses-permission android:name="android.permission.ACTIVITY_RECOGNITION" />
     <uses-permission android:name="android.permission.REQUEST_IGNORE_BATTERY_OPTIMIZATIONS" />
