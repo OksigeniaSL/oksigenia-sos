@@ -206,7 +206,7 @@
     "profileProfessionalDesc": "Erweitertes 120-Sekunden-Beobachtungsfenster für fortgeschrittene Einsätze, bei denen die Erholungszeit nach einem Sturz die Standard-Timeouts überschreiten kann.",
     "homeSummaryWithImpact": "Impact {imp}G · Beob {obs}s · GPS {gps}",
     "homeSummaryNoImpact": "Impact AUS · GPS {gps}",
-    "homeAlertNotArmed": "NICHT BEREIT — Schalter unten antippen zum Aktivieren",
+    "homeAlertNotArmed": "NICHT AKTIV — Schalter unten antippen zum Aktivieren",
     "homeAlertSensorPermDenied": "Sensor-Berechtigung verweigert",
     "homeConfirmTitleImpact": "Aufprallerkennung",
     "homeConfirmTitleObservation": "Beobachtung",

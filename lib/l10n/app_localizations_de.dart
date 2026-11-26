@@ -681,7 +681,7 @@ class AppLocalizationsDe extends AppLocalizations {
 
   @override
   String get homeAlertNotArmed =>
-      'NICHT BEREIT — Schalter unten antippen zum Aktivieren';
+      'NICHT AKTIV — Schalter unten antippen zum Aktivieren';
 
   @override
   String get homeAlertSensorPermDenied => 'Sensor-Berechtigung verweigert';
