@@ -745,6 +745,9 @@ class AppLocalizationsNb extends AppLocalizations {
       'IKKE BESKYTTET — denne profilen oppdager ikke fall. Slå på Inaktivitetsmonitoren.';
 
   @override
+  String get homeFallUnavailable => 'Ikke tilgjengelig i denne profilen';
+
+  @override
   String get contactCheckTitle => 'Er landskoden riktig?';
 
   @override

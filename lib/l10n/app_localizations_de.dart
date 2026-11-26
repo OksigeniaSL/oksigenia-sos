@@ -741,6 +741,9 @@ class AppLocalizationsDe extends AppLocalizations {
       'NICHT GESCHÜTZT — dieses Profil erkennt keine Stürze. Schalte den Inaktivitätsmonitor ein.';
 
   @override
+  String get homeFallUnavailable => 'In diesem Profil nicht verfügbar';
+
+  @override
   String get contactCheckTitle => 'Stimmt die Ländervorwahl?';
 
   @override

@@ -745,6 +745,9 @@ class AppLocalizationsRu extends AppLocalizations {
       'НЕТ ЗАЩИТЫ — этот профиль не определяет падения. Включите Монитор бездействия.';
 
   @override
+  String get homeFallUnavailable => 'Недоступно в этом профиле';
+
+  @override
   String get contactCheckTitle => 'Код страны указан верно?';
 
   @override

@@ -191,6 +191,9 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver, Ti
     }
 
     final l10n = AppLocalizations.of(context)!;
+    final bool impactAvailable = activityProfileConfigs[
+            PreferencesService().getActivityProfile()]!
+        .impactDetectionEnabled;
 
     // --- VISUAL FUERZA G ---
     Color gForceColor = Colors.grey; 
@@ -389,7 +392,9 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver, Ti
                   AnimatedBuilder(
                     animation: _pulseController,
                     builder: (context, child) {
-                      final bool monitoring = _sosLogic.isFallDetectionActive || _sosLogic.isInactivityMonitorActive;
+                      // Green only when something automatic really watches:
+                      // the fall switch alone in paragliding is not enough.
+                      final bool monitoring = _sosLogic.protectionEffective;
                       final Color glowColor = monitoring ? _sosLogic.sentinelColor : Colors.red;
                       final double glowSpread = monitoring && _sosLogic.sentinelState != SentinelState.green
                           ? 5 + (_pulseController.value * 8)
@@ -481,10 +486,13 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver, Ti
             const SizedBox(height: 12),
 
             // INTERRUPTORES
+            // In profiles without impact detection the fall switch is shown
+            // off and greyed out, but the saved choice is left alone, so it
+            // comes back when the user returns to trekking.
             _buildQuickToggle(
-              context, 
-              l10n.autoModeLabel, 
-              _sosLogic.isFallDetectionActive, 
+              context,
+              l10n.autoModeLabel,
+              impactAvailable && _sosLogic.isFallDetectionActive,
               (v) {
                 if (v && !_sosLogic.smsPermissionOk) {
                    _showSmsRequiredError(context, l10n);
@@ -496,7 +504,8 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver, Ti
                    _hasShownWarning = true;
                 }
               },
-              Icons.health_and_safety 
+              Icons.health_and_safety,
+              unavailable: impactAvailable ? null : l10n.homeFallUnavailable,
             ),
             _buildQuickToggle(
               context,
@@ -606,8 +615,26 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver, Ti
     );
   }
 
-  Widget _buildQuickToggle(BuildContext context, String label, bool value, Function(bool) onChanged, IconData icon, {String? subtitle}) {
+  Widget _buildQuickToggle(BuildContext context, String label, bool value, Function(bool) onChanged, IconData icon, {String? subtitle, String? unavailable}) {
     final l10n = AppLocalizations.of(context)!;
+
+    if (unavailable != null) {
+      // Disabled, not switched off: nothing is written to the preferences.
+      return Container(
+        margin: const EdgeInsets.symmetric(horizontal: 30, vertical: 5),
+        child: SwitchListTile(
+          title: Text(label, style: const TextStyle(fontWeight: FontWeight.w500, color: Colors.grey)),
+          subtitle: Text(
+            unavailable,
+            style: const TextStyle(color: Colors.white70, fontSize: 13, fontWeight: FontWeight.bold),
+          ),
+          secondary: Icon(icon, color: Colors.grey.shade700),
+          value: false,
+          onChanged: null,
+        ),
+      );
+    }
+
     final isPaused = value && _sosLogic.isMonitoringPaused;
 
     String? effectiveSubtitle = subtitle;

@@ -746,6 +746,9 @@ class AppLocalizationsEs extends AppLocalizations {
       'SIN PROTECCIÓN — este perfil no detecta caídas. Activa el Monitor de Inactividad.';
 
   @override
+  String get homeFallUnavailable => 'No disponible con este perfil';
+
+  @override
   String get contactCheckTitle => '¿Es correcto el prefijo del país?';
 
   @override

@@ -223,6 +223,7 @@
     "smsLimitBody": "Denne telefonen ber om bekreftelse når en app sender mer enn {limit} SMS på kort tid. SOS-en din trenger {needed} ({parts} per kontakt): hvis ingen bekrefter, blir en del ikke sendt.\n\nØk grensen til minst {needed} (i LineageOS: Trust → «SMS message limit») og start telefonen på nytt for sikkerhets skyld: på noen telefoner trer endringen først i kraft etter omstart. Eller bruk færre kontakter eller en kortere tilpasset melding.",
     "smsLimitBodyAlways": "Denne telefonen ber om bekreftelse før en app sender en SMS («Always confirm»): hvis ingen bekrefter, blir SOS-en din ikke sendt.\n\nVelg en grense på minst {needed} (i LineageOS: Trust → «SMS message limit») og start telefonen på nytt for sikkerhets skyld: på noen telefoner trer endringen først i kraft etter omstart.",
     "homeAlertProfileNoImpact": "IKKE BESKYTTET — denne profilen oppdager ikke fall. Slå på Inaktivitetsmonitoren.",
+    "homeFallUnavailable": "Ikke tilgjengelig i denne profilen",
     "contactCheckTitle": "Er landskoden riktig?",
     "contactCheckBody": "SOS-en din sendes til {number}. Hvis landskoden er feil, skriv nummeret med + og landskode.",
     "contactCheckSave": "Ja, lagre",

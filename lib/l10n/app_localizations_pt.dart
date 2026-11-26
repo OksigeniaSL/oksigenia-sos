@@ -741,6 +741,9 @@ class AppLocalizationsPt extends AppLocalizations {
       'SEM PROTEÇÃO — este perfil não deteta quedas. Ative o Monitor de Inatividade.';
 
   @override
+  String get homeFallUnavailable => 'Indisponível neste perfil';
+
+  @override
   String get contactCheckTitle => 'O indicativo do país está correto?';
 
   @override

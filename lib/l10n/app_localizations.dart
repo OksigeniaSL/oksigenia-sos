@@ -1460,6 +1460,12 @@ abstract class AppLocalizations {
   /// **'NOT PROTECTED — this profile has no fall detection. Turn on the Inactivity Monitor.'**
   String get homeAlertProfileNoImpact;
 
+  /// Subtitle of the greyed-out Fall Detection switch in profiles without impact detection (paragliding, kayak, horse riding).
+  ///
+  /// In en, this message translates to:
+  /// **'Not available in this profile'**
+  String get homeFallUnavailable;
+
   /// No description provided for @contactCheckTitle.
   ///
   /// In en, this message translates to:

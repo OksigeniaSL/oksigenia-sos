@@ -223,6 +223,7 @@
     "smsLimitBody": "Este móvil pide confirmación cuando una app envía más de {limit} SMS en poco tiempo. Tu SOS necesita {needed} ({parts} por contacto): si nadie lo confirma, parte no se enviará.\n\nSube el límite al menos a {needed} (en LineageOS: Trust → Límite de mensajes SMS) y reinicia el móvil para asegurarte: en algunos móviles el cambio solo se aplica tras reiniciar. O usa menos contactos o un mensaje personalizado más corto.",
     "smsLimitBodyAlways": "Este móvil pide confirmación antes de que cualquier app envíe un SMS («Confirmar siempre»): si nadie lo confirma, tu SOS no se enviará.\n\nElige un límite de al menos {needed} (en LineageOS: Trust → Límite de mensajes SMS) y reinicia el móvil para asegurarte: en algunos móviles el cambio solo se aplica tras reiniciar.",
     "homeAlertProfileNoImpact": "SIN PROTECCIÓN — este perfil no detecta caídas. Activa el Monitor de Inactividad.",
+    "homeFallUnavailable": "No disponible con este perfil",
     "contactCheckTitle": "¿Es correcto el prefijo del país?",
     "contactCheckBody": "Tu SOS se enviará al {number}. Si el prefijo del país no es ese, escribe el número con + y su prefijo.",
     "contactCheckSave": "Sí, guardar",

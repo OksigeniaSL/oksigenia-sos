@@ -223,6 +223,7 @@
     "smsLimitBody": "Ce téléphone demande une confirmation dès qu'une app envoie plus de {limit} SMS en peu de temps. Votre SOS nécessite {needed} SMS ({parts} par contact) : si personne ne confirme, une partie ne sera pas envoyée.\n\nRelevez la limite à au moins {needed} (sous LineageOS : Trust → Limiter l'émission de SMS) puis redémarrez le téléphone par précaution : sur certains téléphones, le changement ne s'applique qu'après un redémarrage. Ou utilisez moins de contacts ou un message personnalisé plus court.",
     "smsLimitBodyAlways": "Ce téléphone demande une confirmation avant tout envoi de SMS par une app (« Toujours confirmer ») : si personne ne confirme, votre SOS ne sera pas envoyé.\n\nChoisissez une limite d'au moins {needed} (sous LineageOS : Trust → Limiter l'émission de SMS) puis redémarrez le téléphone par précaution : sur certains téléphones, le changement ne s'applique qu'après un redémarrage.",
     "homeAlertProfileNoImpact": "NON PROTÉGÉ — ce profil ne détecte pas les chutes. Activez le Moniteur d'Inactivité.",
+    "homeFallUnavailable": "Non disponible avec ce profil",
     "contactCheckTitle": "L'indicatif du pays est-il correct ?",
     "contactCheckBody": "Votre SOS sera envoyé au {number}. Si l'indicatif n'est pas le bon, écrivez le numéro avec + et son indicatif.",
     "contactCheckSave": "Oui, enregistrer",

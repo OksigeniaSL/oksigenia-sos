@@ -746,6 +746,9 @@ class AppLocalizationsSv extends AppLocalizations {
       'INTE SKYDDAD — den här profilen upptäcker inte fall. Slå på Inaktivitetsmonitorn.';
 
   @override
+  String get homeFallUnavailable => 'Inte tillgängligt i den här profilen';
+
+  @override
   String get contactCheckTitle => 'Stämmer landsnumret?';
 
   @override

@@ -744,6 +744,9 @@ class AppLocalizationsPl extends AppLocalizations {
       'BRAK OCHRONY — ten profil nie wykrywa upadków. Włącz Monitor bezruchu.';
 
   @override
+  String get homeFallUnavailable => 'Niedostępne w tym profilu';
+
+  @override
   String get contactCheckTitle => 'Czy numer kierunkowy kraju jest poprawny?';
 
   @override

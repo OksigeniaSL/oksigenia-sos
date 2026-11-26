@@ -751,6 +751,9 @@ class AppLocalizationsIt extends AppLocalizations {
       'NON PROTETTO — questo profilo non rileva le cadute. Attiva il Monitor Inattività.';
 
   @override
+  String get homeFallUnavailable => 'Non disponibile con questo profilo';
+
+  @override
   String get contactCheckTitle => 'Il prefisso del paese è corretto?';
 
   @override

@@ -742,6 +742,9 @@ class AppLocalizationsEn extends AppLocalizations {
       'NOT PROTECTED — this profile has no fall detection. Turn on the Inactivity Monitor.';
 
   @override
+  String get homeFallUnavailable => 'Not available in this profile';
+
+  @override
   String get contactCheckTitle => 'Is the country code right?';
 
   @override

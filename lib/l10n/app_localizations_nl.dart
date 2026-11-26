@@ -747,6 +747,9 @@ class AppLocalizationsNl extends AppLocalizations {
       'NIET BESCHERMD — dit profiel detecteert geen vallen. Zet de Inactiviteitsmonitor aan.';
 
   @override
+  String get homeFallUnavailable => 'Niet beschikbaar in dit profiel';
+
+  @override
   String get contactCheckTitle => 'Klopt de landcode?';
 
   @override

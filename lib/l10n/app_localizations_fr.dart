@@ -744,6 +744,9 @@ class AppLocalizationsFr extends AppLocalizations {
       'NON PROTÉGÉ — ce profil ne détecte pas les chutes. Activez le Moniteur d\'Inactivité.';
 
   @override
+  String get homeFallUnavailable => 'Non disponible avec ce profil';
+
+  @override
   String get contactCheckTitle => 'L\'indicatif du pays est-il correct ?';
 
   @override
