@@ -459,7 +459,7 @@ class AppLocalizationsFr extends AppLocalizations {
   String get onboardingNext => 'CONTINUER';
 
   @override
-  String get onboardingFinish => 'PRÊT — DÉMARRER LA SURVEILLANCE';
+  String get onboardingFinish => 'PRÊT — OUVRIR L\'APPLICATION';
 
   @override
   String get onboardingMandatory => 'Requis pour activer la surveillance';

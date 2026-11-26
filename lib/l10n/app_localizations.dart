@@ -971,7 +971,7 @@ abstract class AppLocalizations {
   /// No description provided for @onboardingFinish.
   ///
   /// In en, this message translates to:
-  /// **'ALL SET — START MONITORING'**
+  /// **'ALL SET — OPEN THE APP'**
   String get onboardingFinish;
 
   /// No description provided for @onboardingMandatory.

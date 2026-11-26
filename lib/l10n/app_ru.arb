@@ -141,7 +141,7 @@
     "onboardingGrant": "РАЗРЕШИТЬ",
     "onboardingGranted": "РАЗРЕШЕНО ✓",
     "onboardingNext": "ДАЛЕЕ",
-    "onboardingFinish": "ГОТОВО — ЗАПУСТИТЬ МОНИТОРИНГ",
+    "onboardingFinish": "ГОТОВО — ОТКРЫТЬ ПРИЛОЖЕНИЕ",
     "onboardingMandatory": "Требуется для активации мониторинга",
     "onboardingSkip": "Пропустить",
     "fullScreenIntentTitle": "Тревога на экране блокировки",

@@ -141,7 +141,7 @@
     "onboardingGrant": "GRANT",
     "onboardingGranted": "GRANTED ✓",
     "onboardingNext": "CONTINUE",
-    "onboardingFinish": "ALL SET — START MONITORING",
+    "onboardingFinish": "ALL SET — OPEN THE APP",
     "onboardingMandatory": "Required to activate monitoring",
     "onboardingSkip": "Skip",
     "fullScreenIntentTitle": "Lock Screen Alarm",

@@ -141,7 +141,7 @@
     "onboardingGrant": "ACCORDER",
     "onboardingGranted": "ACCORDÉ ✓",
     "onboardingNext": "CONTINUER",
-    "onboardingFinish": "PRÊT — DÉMARRER LA SURVEILLANCE",
+    "onboardingFinish": "PRÊT — OUVRIR L'APPLICATION",
     "onboardingMandatory": "Requis pour activer la surveillance",
     "onboardingSkip": "Ignorer",
     "fullScreenIntentTitle": "Alarme sur écran verrouillé",

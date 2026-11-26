@@ -455,7 +455,7 @@ class AppLocalizationsDe extends AppLocalizations {
   String get onboardingNext => 'WEITER';
 
   @override
-  String get onboardingFinish => 'BEREIT — ÜBERWACHUNG STARTEN';
+  String get onboardingFinish => 'BEREIT — APP ÖFFNEN';
 
   @override
   String get onboardingMandatory => 'Erforderlich zur Aktivierung';

@@ -459,7 +459,7 @@ class AppLocalizationsRu extends AppLocalizations {
   String get onboardingNext => 'ДАЛЕЕ';
 
   @override
-  String get onboardingFinish => 'ГОТОВО — ЗАПУСТИТЬ МОНИТОРИНГ';
+  String get onboardingFinish => 'ГОТОВО — ОТКРЫТЬ ПРИЛОЖЕНИЕ';
 
   @override
   String get onboardingMandatory => 'Требуется для активации мониторинга';

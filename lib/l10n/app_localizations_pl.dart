@@ -458,7 +458,7 @@ class AppLocalizationsPl extends AppLocalizations {
   String get onboardingNext => 'DALEJ';
 
   @override
-  String get onboardingFinish => 'GOTOWE — URUCHOM MONITORING';
+  String get onboardingFinish => 'GOTOWE — OTWÓRZ APLIKACJĘ';
 
   @override
   String get onboardingMandatory => 'Wymagane do aktywacji monitoringu';

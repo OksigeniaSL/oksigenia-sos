@@ -459,7 +459,7 @@ class AppLocalizationsNb extends AppLocalizations {
   String get onboardingNext => 'FORTSETT';
 
   @override
-  String get onboardingFinish => 'KLART — START OVERVÅKING';
+  String get onboardingFinish => 'KLART — ÅPNE APPEN';
 
   @override
   String get onboardingMandatory => 'Kreves for å aktivere overvåking';

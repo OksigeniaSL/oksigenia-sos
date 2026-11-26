@@ -141,7 +141,7 @@
     "onboardingGrant": "CONCEDER",
     "onboardingGranted": "CONCEDIDO ✓",
     "onboardingNext": "CONTINUAR",
-    "onboardingFinish": "LISTO — INICIAR MONITORIZACIÓN",
+    "onboardingFinish": "LISTO — ABRIR LA APP",
     "onboardingMandatory": "Necesario para activar la monitorización",
     "onboardingSkip": "Omitir",
     "fullScreenIntentTitle": "Alarma en Pantalla Bloqueada",

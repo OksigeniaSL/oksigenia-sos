@@ -141,7 +141,7 @@
     "onboardingGrant": "VERLENEN",
     "onboardingGranted": "VERLEEND ✓",
     "onboardingNext": "DOORGAAN",
-    "onboardingFinish": "KLAAR — MONITORING STARTEN",
+    "onboardingFinish": "KLAAR — APP OPENEN",
     "onboardingMandatory": "Vereist om monitoring te activeren",
     "onboardingSkip": "Overslaan",
     "fullScreenIntentTitle": "Alarm op vergrendeld scherm",

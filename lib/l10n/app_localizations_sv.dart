@@ -460,7 +460,7 @@ class AppLocalizationsSv extends AppLocalizations {
   String get onboardingNext => 'FORTSÄTT';
 
   @override
-  String get onboardingFinish => 'KLART — STARTA ÖVERVAKNING';
+  String get onboardingFinish => 'KLART — ÖPPNA APPEN';
 
   @override
   String get onboardingMandatory => 'Krävs för att aktivera övervakning';

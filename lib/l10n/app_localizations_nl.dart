@@ -461,7 +461,7 @@ class AppLocalizationsNl extends AppLocalizations {
   String get onboardingNext => 'DOORGAAN';
 
   @override
-  String get onboardingFinish => 'KLAAR — MONITORING STARTEN';
+  String get onboardingFinish => 'KLAAR — APP OPENEN';
 
   @override
   String get onboardingMandatory => 'Vereist om monitoring te activeren';
