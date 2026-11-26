@@ -24,7 +24,7 @@ class AppLocalizationsPl extends AppLocalizations {
   String get statusLocationFixed => 'POZYCJA USTALONA';
 
   @override
-  String get statusSent => 'Alert wysłany pomyślnie.';
+  String get statusSent => 'Alarm wysłany pomyślnie.';
 
   @override
   String get alarmSendingNow => 'Wysyłanie alarmu…';
@@ -203,7 +203,7 @@ class AppLocalizationsPl extends AppLocalizations {
   String get contactsAddHint => 'Dodaj numer';
 
   @override
-  String get contactsEmpty => '⚠️ Brak kontaktów. Alert nie zostanie wysłany.';
+  String get contactsEmpty => '⚠️ Brak kontaktów. Alarm nie zostanie wysłany.';
 
   @override
   String get messageTitle => 'Wiadomość niestandardowa';
