@@ -2532,9 +2532,16 @@ Future<bool> onIosBackground(ServiceInstance service) async {
   return true;
 }
 
+// "Resume now" on the pause notification. It runs in an isolate of its own,
+// started by the notifications plugin's ActionBroadcastReceiver (declared in
+// the manifest; without it the button did nothing). It only leaves a mark in
+// prefs: Sylvia's 5 s checker picks it up and ends the pause.
 @pragma('vm:entry-point')
 void _handleNotificationAction(NotificationResponse details) async {
   if (details.actionId == 'resume_monitoring') {
+    // This isolate did not go through main(): make sure the plugins (prefs
+    // among them) are registered in it.
+    DartPluginRegistrant.ensureInitialized();
     final prefs = await SharedPreferences.getInstance();
     await prefs.setInt('pause_resume_requested', DateTime.now().millisecondsSinceEpoch);
   }
