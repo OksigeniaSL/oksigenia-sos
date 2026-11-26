@@ -67,7 +67,7 @@ class AppLocalizationsFr extends AppLocalizations {
   String get menuPrivacy => 'Confidentialité et Légal';
 
   @override
-  String get menuDonate => 'Donar / Donate';
+  String get menuDonate => 'Faire un don';
 
   @override
   String get menuX => '𝕏 (Twitter)';
@@ -273,7 +273,7 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get warningKeepAlive =>
-      '⚠️ IMPORTANT : Ne fermez pas l\'application (Gestionnaire de tâches) en la faisant glisser. Laissez-la en arrière-plan pour qu\'elle puisse redémarrer automatiquement.';
+      'Laissez l\'application ouverte en arrière-plan. Si vous la balayez hors des applications récentes, la protection peut s\'arrêter.';
 
   @override
   String get aboutTitle => 'À propos';
@@ -319,7 +319,8 @@ class AppLocalizationsFr extends AppLocalizations {
   String get invalidNumberWarning => 'Numéro invalide ou trop court';
 
   @override
-  String get contactMain => 'Principal (Suivi / Batterie)';
+  String get contactMain =>
+      'Contact principal — reçoit aussi le Suivi en Direct';
 
   @override
   String get inactivitySubtitle =>
@@ -439,7 +440,7 @@ class AppLocalizationsFr extends AppLocalizations {
   String get permLocMissing => 'Permission localisation manquante';
 
   @override
-  String get slideStopSystem => 'GLISSER POUR ARRÊTER';
+  String get slideStopSystem => 'MAINTENIR POUR TOUT ARRÊTER';
 
   @override
   String get onboardingTitle => 'Configurer votre système de sécurité';
@@ -458,7 +459,7 @@ class AppLocalizationsFr extends AppLocalizations {
   String get onboardingNext => 'CONTINUER';
 
   @override
-  String get onboardingFinish => 'PRÊT — DÉMARRER LA SURVEILLANCE';
+  String get onboardingFinish => 'PRÊT — OUVRIR L\'APPLICATION';
 
   @override
   String get onboardingMandatory => 'Requis pour activer la surveillance';
@@ -477,7 +478,8 @@ class AppLocalizationsFr extends AppLocalizations {
   String get btnEnableFullScreenIntent => 'ACTIVER';
 
   @override
-  String get pauseMonitoringSheet => 'Mettre en pause pour...';
+  String get pauseMonitoringSheet =>
+      'Mettre toute la surveillance en pause pendant… (reprend toute seule)';
 
   @override
   String get pauseTitle => 'Surveillance en pause';
@@ -494,7 +496,7 @@ class AppLocalizationsFr extends AppLocalizations {
   String get pauseResumedMsg => 'Surveillance reprise';
 
   @override
-  String get pauseHoldHint => 'Appuyez longuement pour pausar';
+  String get pauseHoldHint => 'Maintenir pour mettre en pause';
 
   @override
   String get pauseSec5 => '5 secondes';
@@ -707,7 +709,7 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get homeProfileNoFallWarning =>
-      'Ce profil NE détecte PAS les chutes. Le SOS doit être déclenché manuellement.';
+      'Ce profil NE détecte PAS les chutes. Activez le Moniteur d\'Inactivité ; le bouton SOS fonctionne toujours.';
 
   @override
   String get homeActionApply => 'Appliquer';
@@ -756,4 +758,42 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get contactCheckEdit => 'Corriger';
+
+  @override
+  String get onboardingPermLocation => 'GPS / Position';
+
+  @override
+  String get onboardingPermNotifications => 'Notifications';
+
+  @override
+  String get onboardingPermActivity => 'Activité physique';
+
+  @override
+  String get onboardingPermSensors => 'Capteurs de mouvement';
+
+  @override
+  String get onboardingSettingsLocation => 'Position';
+
+  @override
+  String get onboardingSettingsSensors => 'Capteurs';
+
+  @override
+  String onboardingSettingsPath(String permission) {
+    return 'Paramètres → Applications → Oksigenia SOS → Autorisations → $permission';
+  }
+
+  @override
+  String get onboardingSmsStep1Done =>
+      'Étape 1 terminée : Android a affiché son avertissement de sécurité.';
+
+  @override
+  String get onboardingSmsStep2 =>
+      '2. Ouvrez les Paramètres (bouton ci-dessous).';
+
+  @override
+  String get onboardingSmsStep3 =>
+      '3. Appuyez sur ⋮ (en haut à droite) → « Autoriser les paramètres restreints » → code PIN.';
+
+  @override
+  String get onboardingSmsStep4 => '4. Autorisations → SMS → Autoriser.';
 }

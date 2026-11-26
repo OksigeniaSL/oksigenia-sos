@@ -10,4 +10,12 @@
     <string name="widget_mode_inactivity_fmt">Bezruch %1$s</string>
     <string name="widget_mode_tracking">Tracking</string>
     <string name="widget_modes_none">Brak aktywnych trybów</string>
+    <string name="widget_profile_trekking">Trekking</string>
+    <string name="widget_profile_running">Bieganie</string>
+    <string name="widget_profile_trail_mtb">Trail/MTB</string>
+    <string name="widget_profile_mountaineering">Alpinizm</string>
+    <string name="widget_profile_paragliding">Paralotniarstwo</string>
+    <string name="widget_profile_kayak">Kajak</string>
+    <string name="widget_profile_equitation">Jeździectwo</string>
+    <string name="widget_profile_professional">Profesjonalny</string>
 </resources>

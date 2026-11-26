@@ -277,7 +277,7 @@ class AppLocalizationsNl extends AppLocalizations {
 
   @override
   String get warningKeepAlive =>
-      '⚠️ BELANGRIJK: Sluit de app niet door te vegen. Laat het op de achtergrond zodat het automatisch kan herstarten.';
+      'Laat de app op de achtergrond open. Als je de app uit de recente apps wegveegt, kan de bescherming stoppen.';
 
   @override
   String get aboutTitle => 'Over';
@@ -323,7 +323,7 @@ class AppLocalizationsNl extends AppLocalizations {
   String get invalidNumberWarning => 'Ongeldig of te kort nummer';
 
   @override
-  String get contactMain => 'Primair (Tracking / Batterij)';
+  String get contactMain => 'Hoofdcontact — ontvangt ook Live Tracking';
 
   @override
   String get inactivitySubtitle =>
@@ -442,7 +442,7 @@ class AppLocalizationsNl extends AppLocalizations {
   String get permLocMissing => 'Locatietoestemming ontbreekt';
 
   @override
-  String get slideStopSystem => 'VEEG OM TE STOPPEN';
+  String get slideStopSystem => 'HOUD INGEDRUKT: ALLES STOPPEN';
 
   @override
   String get onboardingTitle => 'Configureer uw veiligheidssysteem';
@@ -461,7 +461,7 @@ class AppLocalizationsNl extends AppLocalizations {
   String get onboardingNext => 'DOORGAAN';
 
   @override
-  String get onboardingFinish => 'KLAAR — MONITORING STARTEN';
+  String get onboardingFinish => 'KLAAR — APP OPENEN';
 
   @override
   String get onboardingMandatory => 'Vereist om monitoring te activeren';
@@ -480,7 +480,8 @@ class AppLocalizationsNl extends AppLocalizations {
   String get btnEnableFullScreenIntent => 'INSCHAKELEN';
 
   @override
-  String get pauseMonitoringSheet => 'Bewaking pauzeren voor...';
+  String get pauseMonitoringSheet =>
+      'Alle bewaking pauzeren voor… (hervat vanzelf)';
 
   @override
   String get pauseTitle => 'Bewaking gepauzeerd';
@@ -710,7 +711,7 @@ class AppLocalizationsNl extends AppLocalizations {
 
   @override
   String get homeProfileNoFallWarning =>
-      'Dit profiel detecteert GEEN vallen. SOS moet handmatig worden geactiveerd.';
+      'Dit profiel detecteert GEEN vallen. Zet de Inactiviteitsmonitor aan; de SOS-knop werkt altijd.';
 
   @override
   String get homeActionApply => 'Toepassen';
@@ -759,4 +760,41 @@ class AppLocalizationsNl extends AppLocalizations {
 
   @override
   String get contactCheckEdit => 'Corrigeren';
+
+  @override
+  String get onboardingPermLocation => 'GPS / Locatie';
+
+  @override
+  String get onboardingPermNotifications => 'Meldingen';
+
+  @override
+  String get onboardingPermActivity => 'Fysieke activiteit';
+
+  @override
+  String get onboardingPermSensors => 'Bewegingssensoren';
+
+  @override
+  String get onboardingSettingsLocation => 'Locatie';
+
+  @override
+  String get onboardingSettingsSensors => 'Sensoren';
+
+  @override
+  String onboardingSettingsPath(String permission) {
+    return 'Instellingen → Apps → Oksigenia SOS → Rechten → $permission';
+  }
+
+  @override
+  String get onboardingSmsStep1Done =>
+      'Stap 1 klaar: Android heeft zijn beveiligingsmelding getoond.';
+
+  @override
+  String get onboardingSmsStep2 => '2. Open Instellingen (knop hieronder).';
+
+  @override
+  String get onboardingSmsStep3 =>
+      '3. Tik op ⋮ (rechtsboven) → \'Beperkte instellingen toestaan\' → pincode.';
+
+  @override
+  String get onboardingSmsStep4 => '4. Rechten → SMS → Toestaan.';
 }

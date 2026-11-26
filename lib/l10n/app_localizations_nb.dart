@@ -67,7 +67,7 @@ class AppLocalizationsNb extends AppLocalizations {
   String get menuPrivacy => 'Personvern og juridisk';
 
   @override
-  String get menuDonate => 'Støtt / Donate';
+  String get menuDonate => 'Doner';
 
   @override
   String get menuX => '𝕏 (Twitter)';
@@ -275,7 +275,7 @@ class AppLocalizationsNb extends AppLocalizations {
 
   @override
   String get warningKeepAlive =>
-      '⚠️ VIKTIG: Ikke sveip-lukk appen (Oppgavebehandling). La den ligge i bakgrunnen så den kan starte automatisk.';
+      'La appen være åpen i bakgrunnen. Hvis du sveiper den bort fra nylige apper, kan beskyttelsen stoppe.';
 
   @override
   String get aboutTitle => 'Om';
@@ -321,7 +321,7 @@ class AppLocalizationsNb extends AppLocalizations {
   String get invalidNumberWarning => 'Ugyldig eller for kort nummer';
 
   @override
-  String get contactMain => 'Hoved (Sporing / Batteri)';
+  String get contactMain => 'Hovedkontakt — får også Live Tracking';
 
   @override
   String get inactivitySubtitle => 'Tid uten bevegelse før hjelp tilkalles.';
@@ -440,7 +440,7 @@ class AppLocalizationsNb extends AppLocalizations {
   String get permLocMissing => 'Mangler posisjonstillatelse';
 
   @override
-  String get slideStopSystem => 'DRA FOR Å STOPPE SYSTEM';
+  String get slideStopSystem => 'HOLD FOR Å STOPPE ALT';
 
   @override
   String get onboardingTitle => 'Konfigurer sikkerhetssystemet';
@@ -459,7 +459,7 @@ class AppLocalizationsNb extends AppLocalizations {
   String get onboardingNext => 'FORTSETT';
 
   @override
-  String get onboardingFinish => 'KLART — START OVERVÅKING';
+  String get onboardingFinish => 'KLART — ÅPNE APPEN';
 
   @override
   String get onboardingMandatory => 'Kreves for å aktivere overvåking';
@@ -478,7 +478,8 @@ class AppLocalizationsNb extends AppLocalizations {
   String get btnEnableFullScreenIntent => 'AKTIVER';
 
   @override
-  String get pauseMonitoringSheet => 'Sett overvåking på pause i...';
+  String get pauseMonitoringSheet =>
+      'Sett all overvåking på pause i… (fortsetter av seg selv)';
 
   @override
   String get pauseTitle => 'Overvåking på pause';
@@ -604,7 +605,7 @@ class AppLocalizationsNb extends AppLocalizations {
   String get sentinelYellow => 'Støt oppdaget · analyserer...';
 
   @override
-  String get sentinelOrange => 'Alarm rett rundt hjørnet!';
+  String get sentinelOrange => 'Alarm om få sekunder!';
 
   @override
   String get sentinelRed => 'ALARM AKTIV';
@@ -708,7 +709,7 @@ class AppLocalizationsNb extends AppLocalizations {
 
   @override
   String get homeProfileNoFallWarning =>
-      'Denne profilen oppdager IKKE fall. SOS må utløses manuelt.';
+      'Denne profilen oppdager IKKE fall. Slå på Inaktivitetsmonitoren; SOS-knappen fungerer alltid.';
 
   @override
   String get homeActionApply => 'Bruk';
@@ -757,4 +758,41 @@ class AppLocalizationsNb extends AppLocalizations {
 
   @override
   String get contactCheckEdit => 'Rett';
+
+  @override
+  String get onboardingPermLocation => 'GPS / Posisjon';
+
+  @override
+  String get onboardingPermNotifications => 'Varsler';
+
+  @override
+  String get onboardingPermActivity => 'Fysisk aktivitet';
+
+  @override
+  String get onboardingPermSensors => 'Bevegelsessensorer';
+
+  @override
+  String get onboardingSettingsLocation => 'Posisjon';
+
+  @override
+  String get onboardingSettingsSensors => 'Sensorer';
+
+  @override
+  String onboardingSettingsPath(String permission) {
+    return 'Innstillinger → Apper → Oksigenia SOS → Tillatelser → $permission';
+  }
+
+  @override
+  String get onboardingSmsStep1Done =>
+      'Trinn 1 ferdig: Android har vist sikkerhetsvarselet sitt.';
+
+  @override
+  String get onboardingSmsStep2 => '2. Åpne Innstillinger (knappen nedenfor).';
+
+  @override
+  String get onboardingSmsStep3 =>
+      '3. Trykk på ⋮ (øverst til høyre) → «Tillat begrensede innstillinger» → PIN-kode.';
+
+  @override
+  String get onboardingSmsStep4 => '4. Tillatelser → SMS → Tillat.';
 }

@@ -67,7 +67,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get menuPrivacy => 'Privacy & Legal';
 
   @override
-  String get menuDonate => 'Donar / Donate';
+  String get menuDonate => 'Donate';
 
   @override
   String get menuX => '𝕏 (Twitter)';
@@ -275,7 +275,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get warningKeepAlive =>
-      '⚠️ IMPORTANT: Do not swipe-close the app (Task Manager). Leave it in background so it can auto-restart.';
+      'Keep the app open in the background. If you swipe it away from recent apps, protection may stop.';
 
   @override
   String get aboutTitle => 'About';
@@ -321,7 +321,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get invalidNumberWarning => 'Invalid or too short number';
 
   @override
-  String get contactMain => 'Primary (Tracking / Battery)';
+  String get contactMain => 'Main contact — also gets live tracking';
 
   @override
   String get inactivitySubtitle =>
@@ -439,7 +439,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get permLocMissing => 'Missing Location Permission';
 
   @override
-  String get slideStopSystem => 'SLIDE TO STOP SYSTEM';
+  String get slideStopSystem => 'HOLD TO STOP ALL MONITORING';
 
   @override
   String get onboardingTitle => 'Configure your safety system';
@@ -458,7 +458,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get onboardingNext => 'CONTINUE';
 
   @override
-  String get onboardingFinish => 'ALL SET — START MONITORING';
+  String get onboardingFinish => 'ALL SET — OPEN THE APP';
 
   @override
   String get onboardingMandatory => 'Required to activate monitoring';
@@ -477,7 +477,8 @@ class AppLocalizationsEn extends AppLocalizations {
   String get btnEnableFullScreenIntent => 'ENABLE';
 
   @override
-  String get pauseMonitoringSheet => 'Pause monitoring for...';
+  String get pauseMonitoringSheet =>
+      'Pause all monitoring for… (resumes by itself)';
 
   @override
   String get pauseTitle => 'Monitoring paused';
@@ -706,7 +707,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get homeProfileNoFallWarning =>
-      'This profile does NOT detect falls. SOS must be triggered manually.';
+      'This profile does NOT detect falls. Turn on the Inactivity Monitor; the SOS button always works.';
 
   @override
   String get homeActionApply => 'Apply';
@@ -754,4 +755,41 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get contactCheckEdit => 'Correct it';
+
+  @override
+  String get onboardingPermLocation => 'GPS / Location';
+
+  @override
+  String get onboardingPermNotifications => 'Notifications';
+
+  @override
+  String get onboardingPermActivity => 'Physical activity';
+
+  @override
+  String get onboardingPermSensors => 'Motion sensors';
+
+  @override
+  String get onboardingSettingsLocation => 'Location';
+
+  @override
+  String get onboardingSettingsSensors => 'Sensors';
+
+  @override
+  String onboardingSettingsPath(String permission) {
+    return 'Settings → Apps → Oksigenia SOS → Permissions → $permission';
+  }
+
+  @override
+  String get onboardingSmsStep1Done =>
+      'Step 1 done: Android has shown its security notice.';
+
+  @override
+  String get onboardingSmsStep2 => '2. Open Settings (button below).';
+
+  @override
+  String get onboardingSmsStep3 =>
+      '3. Tap ⋮ (top right) → \"Allow restricted settings\" → PIN.';
+
+  @override
+  String get onboardingSmsStep4 => '4. Permissions → SMS → Allow.';
 }

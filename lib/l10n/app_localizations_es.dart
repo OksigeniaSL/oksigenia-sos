@@ -260,7 +260,7 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get donateDialogBody =>
-      'Esta app es Software Libre y Gratuito. Si te da seguridad, invítanos a un café para mantener los servidores.';
+      'Esta app es software libre y gratuito. Si te da seguridad, invítanos a un café.';
 
   @override
   String get donateBtn => 'Donar con PayPal';
@@ -276,7 +276,7 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get warningKeepAlive =>
-      '⚠️ IMPORTANTE: No cierres la app deslizando (Multitarea). Déjala en 2º plano para que reinicie sola si apagas el móvil.';
+      'Deja la app abierta en segundo plano. Si la quitas de las apps recientes deslizándola, la protección puede detenerse.';
 
   @override
   String get aboutTitle => 'Acerca de';
@@ -322,7 +322,8 @@ class AppLocalizationsEs extends AppLocalizations {
   String get invalidNumberWarning => 'Número inválido o muy corto';
 
   @override
-  String get contactMain => 'Principal (Tracking / Batería)';
+  String get contactMain =>
+      'Contacto principal — también recibe el Seguimiento en Vivo';
 
   @override
   String get inactivitySubtitle =>
@@ -441,7 +442,7 @@ class AppLocalizationsEs extends AppLocalizations {
   String get permLocMissing => 'Falta Permiso de Ubicación';
 
   @override
-  String get slideStopSystem => 'DESLIZA PARA APAGAR';
+  String get slideStopSystem => 'MANTÉN PARA APAGAR TODO';
 
   @override
   String get onboardingTitle => 'Configura tu sistema de seguridad';
@@ -460,7 +461,7 @@ class AppLocalizationsEs extends AppLocalizations {
   String get onboardingNext => 'CONTINUAR';
 
   @override
-  String get onboardingFinish => 'LISTO — INICIAR MONITORIZACIÓN';
+  String get onboardingFinish => 'LISTO — ABRIR LA APP';
 
   @override
   String get onboardingMandatory => 'Necesario para activar la monitorización';
@@ -479,7 +480,8 @@ class AppLocalizationsEs extends AppLocalizations {
   String get btnEnableFullScreenIntent => 'ACTIVAR';
 
   @override
-  String get pauseMonitoringSheet => 'Pausar monitorización durante...';
+  String get pauseMonitoringSheet =>
+      'Pausar toda la monitorización durante… (se reanuda sola)';
 
   @override
   String get pauseTitle => 'Monitorización pausada';
@@ -709,7 +711,7 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get homeProfileNoFallWarning =>
-      'Este perfil NO detecta caídas. El SOS debe activarse manualmente.';
+      'Este perfil NO detecta caídas. Activa el Monitor de Inactividad; el botón SOS funciona siempre.';
 
   @override
   String get homeActionApply => 'Aplicar';
@@ -758,4 +760,41 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get contactCheckEdit => 'Corregir';
+
+  @override
+  String get onboardingPermLocation => 'GPS / Ubicación';
+
+  @override
+  String get onboardingPermNotifications => 'Notificaciones';
+
+  @override
+  String get onboardingPermActivity => 'Actividad física';
+
+  @override
+  String get onboardingPermSensors => 'Sensores de movimiento';
+
+  @override
+  String get onboardingSettingsLocation => 'Ubicación';
+
+  @override
+  String get onboardingSettingsSensors => 'Sensores';
+
+  @override
+  String onboardingSettingsPath(String permission) {
+    return 'Ajustes → Apps → Oksigenia SOS → Permisos → $permission';
+  }
+
+  @override
+  String get onboardingSmsStep1Done =>
+      'Paso 1 hecho: Android ya ha mostrado su aviso de seguridad.';
+
+  @override
+  String get onboardingSmsStep2 => '2. Abre Ajustes (botón de abajo).';
+
+  @override
+  String get onboardingSmsStep3 =>
+      '3. Toca ⋮ (arriba a la derecha) → «Permitir ajustes restringidos» → PIN.';
+
+  @override
+  String get onboardingSmsStep4 => '4. Permisos → SMS → Permitir.';
 }

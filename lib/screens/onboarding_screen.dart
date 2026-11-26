@@ -142,7 +142,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> with WidgetsBinding
         title: Text(permissionName,
             style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 16)),
         content: Text(
-          'Settings → Apps → Oksigenia SOS → Permissions → $permissionName',
+          l10n.onboardingSettingsPath(permissionName),
           style: const TextStyle(color: Colors.white70, fontSize: 14),
         ),
         actions: [
@@ -186,16 +186,16 @@ class _OnboardingScreenState extends State<OnboardingScreen> with WidgetsBinding
             Text(l10n.restrictedSettingsBody,
                 style: const TextStyle(color: Colors.white70, fontSize: 14)),
             const SizedBox(height: 12),
-            Text('✅ Step 1 done — Android security notice was shown.',
+            Text(l10n.onboardingSmsStep1Done,
                 style: TextStyle(color: Colors.green[300], fontSize: 13)),
             const SizedBox(height: 10),
-            Text('2. Open Settings (button below)',
+            Text(l10n.onboardingSmsStep2,
                 style: const TextStyle(color: Colors.white70, fontSize: 14)),
             const SizedBox(height: 6),
-            Text('3. Tap ⋮ (top right) → "Allow restricted settings" → PIN',
+            Text(l10n.onboardingSmsStep3,
                 style: const TextStyle(color: Colors.amber, fontWeight: FontWeight.w600, fontSize: 14)),
             const SizedBox(height: 6),
-            Text('4. Permissions → SMS → enable',
+            Text(l10n.onboardingSmsStep4,
                 style: const TextStyle(color: Colors.white70, fontSize: 14)),
           ],
         ),
@@ -223,7 +223,8 @@ class _OnboardingScreenState extends State<OnboardingScreen> with WidgetsBinding
     if (await Permission.location.isGranted) { await _refresh(); return; }
     final statuses = await [Permission.location, Permission.locationWhenInUse].request();
     if (statuses.values.every((s) => s.isGranted)) { await _refresh(); return; }
-    await _openSettingsWithDialog('Location');
+    if (!mounted) return;
+    await _openSettingsWithDialog(AppLocalizations.of(context)!.onboardingSettingsLocation);
   }
 
   Future<void> _grantBackgroundLocation() async {
@@ -265,26 +266,28 @@ class _OnboardingScreenState extends State<OnboardingScreen> with WidgetsBinding
     if (proceed != true) return;
     final status = await Permission.locationAlways.request();
     if (status.isGranted) { await _refresh(); return; }
-    await _openSettingsWithDialog('Location → ${AppLocalizations.of(context)!.btnEnableBgLocation}');
+    await _openSettingsWithDialog('${l10n.onboardingSettingsLocation} → ${l10n.btnEnableBgLocation}');
   }
 
   Future<void> _grantNotification() async {
     if (await Permission.notification.isGranted) { await _refresh(); return; }
     final status = await Permission.notification.request();
     if (status.isGranted) { await _refresh(); return; }
-    await _openSettingsWithDialog('Notifications');
+    if (!mounted) return;
+    await _openSettingsWithDialog(AppLocalizations.of(context)!.onboardingPermNotifications);
   }
 
   Future<void> _grantActivity() async {
     if (await Permission.activityRecognition.isGranted) { await _refresh(); return; }
     final status = await Permission.activityRecognition.request();
     if (status.isGranted) { await _refresh(); return; }
-    await _openSettingsWithDialog('Physical activity');
+    if (!mounted) return;
+    await _openSettingsWithDialog(AppLocalizations.of(context)!.onboardingPermActivity);
   }
 
   Future<void> _grantSensors() async {
     if (_sensorsDone) return;
-    await _openSettingsWithDialog('Sensors');
+    await _openSettingsWithDialog(AppLocalizations.of(context)!.onboardingSettingsSensors);
     _checkSensorsAsync();
   }
 
@@ -352,13 +355,13 @@ class _OnboardingScreenState extends State<OnboardingScreen> with WidgetsBinding
     final l10n = AppLocalizations.of(context)!;
     final items = [
       (Icons.message_outlined, 'SMS', l10n.whyPermsSms),
-      (Icons.location_on_outlined, 'GPS', l10n.whyPermsLocation),
+      (Icons.location_on_outlined, l10n.onboardingPermLocation, l10n.whyPermsLocation),
       (Icons.my_location_outlined, l10n.permBgLocationTitle, l10n.whyPermsBgLocation),
-      (Icons.notifications_outlined, 'Notifications', l10n.whyPermsNotifications),
-      (Icons.directions_run, 'Physical Activity', l10n.whyPermsActivity),
-      (Icons.sensors, 'Motion Sensors', l10n.whyPermsSensors),
-      (Icons.battery_charging_full, 'Battery', l10n.whyPermsBattery),
-      (Icons.lock_open_outlined, 'Full Screen', l10n.whyPermsFullScreen),
+      (Icons.notifications_outlined, l10n.onboardingPermNotifications, l10n.whyPermsNotifications),
+      (Icons.directions_run, l10n.onboardingPermActivity, l10n.whyPermsActivity),
+      (Icons.sensors, l10n.onboardingPermSensors, l10n.whyPermsSensors),
+      (Icons.battery_charging_full, l10n.batteryDialogTitle, l10n.whyPermsBattery),
+      (Icons.lock_open_outlined, l10n.fullScreenIntentTitle, l10n.whyPermsFullScreen),
     ];
     showModalBottomSheet(
       context: context,
@@ -438,7 +441,8 @@ class _OnboardingScreenState extends State<OnboardingScreen> with WidgetsBinding
               const SizedBox(height: 8),
               Row(
                 children: [
-                  Image.asset('assets/images/logo_oksigenia.png', width: 36, height: 36,
+                  // White-on-transparent logo: suits the black background.
+                  Image.asset('assets/images/logo_white.png', width: 36, height: 36,
                     errorBuilder: (_, __, ___) => const Icon(Icons.shield, color: Colors.amber, size: 36)),
                   const SizedBox(width: 12),
                   Expanded(
@@ -480,7 +484,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> with WidgetsBinding
                           ),
                           _PermRow(
                             icon: Icons.location_on_outlined,
-                            title: "GPS / Location",
+                            title: l10n.onboardingPermLocation,
                             mandatory: true,
                             granted: _locDone,
                             l10n: l10n,
@@ -496,7 +500,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> with WidgetsBinding
                           ),
                           _PermRow(
                             icon: Icons.notifications_outlined,
-                            title: "Notifications",
+                            title: l10n.onboardingPermNotifications,
                             mandatory: true,
                             granted: _notifDone,
                             l10n: l10n,
@@ -504,7 +508,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> with WidgetsBinding
                           ),
                           _PermRow(
                             icon: Icons.directions_run,
-                            title: "Physical Activity",
+                            title: l10n.onboardingPermActivity,
                             mandatory: true,
                             granted: _activityDone,
                             l10n: l10n,
@@ -512,7 +516,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> with WidgetsBinding
                           ),
                           _PermRow(
                             icon: Icons.sensors,
-                            title: "Motion Sensors",
+                            title: l10n.onboardingPermSensors,
                             mandatory: true,
                             granted: _sensorsDone,
                             l10n: l10n,

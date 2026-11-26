@@ -276,7 +276,7 @@ class AppLocalizationsSv extends AppLocalizations {
 
   @override
   String get warningKeepAlive =>
-      '⚠️ VIKTIGT: Stäng inte appen genom att svepa bort den. Lämna den i bakgrunden så den kan starta om automatiskt.';
+      'Låt appen vara öppen i bakgrunden. Om du sveper bort den från senaste appar kan skyddet sluta fungera.';
 
   @override
   String get aboutTitle => 'Om';
@@ -322,7 +322,7 @@ class AppLocalizationsSv extends AppLocalizations {
   String get invalidNumberWarning => 'Ogiltigt eller för kort nummer';
 
   @override
-  String get contactMain => 'Primär (Spårning / Batteri)';
+  String get contactMain => 'Huvudkontakt — får även Livespårning';
 
   @override
   String get inactivitySubtitle => 'Tid utan rörelse innan hjälp tillkallas.';
@@ -441,7 +441,7 @@ class AppLocalizationsSv extends AppLocalizations {
   String get permLocMissing => 'Platsbehörighet saknas';
 
   @override
-  String get slideStopSystem => 'DRA FÖR ATT STOPPA';
+  String get slideStopSystem => 'HÅLL FÖR ATT STOPPA ALLT';
 
   @override
   String get onboardingTitle => 'Konfigurera ditt säkerhetssystem';
@@ -460,7 +460,7 @@ class AppLocalizationsSv extends AppLocalizations {
   String get onboardingNext => 'FORTSÄTT';
 
   @override
-  String get onboardingFinish => 'KLART — STARTA ÖVERVAKNING';
+  String get onboardingFinish => 'KLART — ÖPPNA APPEN';
 
   @override
   String get onboardingMandatory => 'Krävs för att aktivera övervakning';
@@ -479,7 +479,8 @@ class AppLocalizationsSv extends AppLocalizations {
   String get btnEnableFullScreenIntent => 'AKTIVERA';
 
   @override
-  String get pauseMonitoringSheet => 'Pausa övervakning i...';
+  String get pauseMonitoringSheet =>
+      'Pausa all övervakning i… (återupptas av sig själv)';
 
   @override
   String get pauseTitle => 'Övervakning pausad';
@@ -709,7 +710,7 @@ class AppLocalizationsSv extends AppLocalizations {
 
   @override
   String get homeProfileNoFallWarning =>
-      'Denna profil upptäcker INTE fall. SOS måste utlösas manuellt.';
+      'Denna profil upptäcker INTE fall. Slå på Inaktivitetsmonitorn; SOS-knappen fungerar alltid.';
 
   @override
   String get homeActionApply => 'Tillämpa';
@@ -758,4 +759,41 @@ class AppLocalizationsSv extends AppLocalizations {
 
   @override
   String get contactCheckEdit => 'Rätta';
+
+  @override
+  String get onboardingPermLocation => 'GPS / Plats';
+
+  @override
+  String get onboardingPermNotifications => 'Aviseringar';
+
+  @override
+  String get onboardingPermActivity => 'Fysisk aktivitet';
+
+  @override
+  String get onboardingPermSensors => 'Rörelsesensorer';
+
+  @override
+  String get onboardingSettingsLocation => 'Plats';
+
+  @override
+  String get onboardingSettingsSensors => 'Sensorer';
+
+  @override
+  String onboardingSettingsPath(String permission) {
+    return 'Inställningar → Appar → Oksigenia SOS → Behörigheter → $permission';
+  }
+
+  @override
+  String get onboardingSmsStep1Done =>
+      'Steg 1 klart: Android har visat sitt säkerhetsmeddelande.';
+
+  @override
+  String get onboardingSmsStep2 => '2. Öppna Inställningar (knappen nedan).';
+
+  @override
+  String get onboardingSmsStep3 =>
+      '3. Tryck på ⋮ (uppe till höger) → \'Tillåt begränsade inställningar\' → pinkod.';
+
+  @override
+  String get onboardingSmsStep4 => '4. Behörigheter → SMS → Tillåt.';
 }

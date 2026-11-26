@@ -6,25 +6,31 @@ empirically on real devices (Pixel 7a and Pixel 8 running GrapheneOS) or derived
 literature. **Do not change a parameter without re-running the three-test protocol below and updating this
 file.**
 
-The goal is honesty about what an offline, smartphone-only fall detector can and cannot do. Lab-trained
-algorithms lose 30–50 % of their sensitivity on real-world falls (Palmerini & Klenk, *Measurement*, 2024;
-Bagalà et al., *PLOS ONE*, 2012). We therefore target **70–85 % real-world sensitivity**, never the 95 %+
-that lab papers claim, and we lean on the user's 30 s cancel window rather than on a perfect classifier.
+The goal is honesty about what an offline, smartphone-only fall detector can and cannot do. Algorithms
+that look near-perfect on simulated falls do much worse on real ones: 13 published algorithms averaged
+57 ± 27 % sensitivity on 29 real-world falls (Bagalà et al., *PLOS ONE*, 2012), and detectors overfit to the
+lab dataset they were tuned on (Silva, Casilari & García-Bermúdez, *Measurement*, 2024). We therefore target
+**70–85 % real-world sensitivity**, never the 95 %+ that lab papers claim, and we lean on the user's 30 s
+cancel window rather than on a perfect classifier. The current thresholds do not reach that target: see
+*Measured 2026-11-26* below.
 
 ## The two-stage detector
 
-The sentinel never sends an SOS straight from an impact. It runs two independent paths:
+The sentinel never sends an SOS straight from an impact, and no impact skips observation:
 
 1. **Yellow observation.** An impact above the profile's `yellowThreshold` (user-acceleration, gravity
    removed; resting ≈ 1.0 G) opens an observation window of `observationSeconds`. If the person resumes
    rhythmic movement (walking) within the window, the sentinel returns to green. If the window elapses with
    no rhythm, it fires the alarm. An impact is only trusted when corroborated by the raw accelerometer
-   stream — the linear-acceleration stream alone fabricates phantom impacts during tumbles and free-fall.
-2. **Orange-direct.** An impact above `orangeThreshold` is treated as catastrophic and fires the alarm
-   immediately, skipping the observation window. The 30 s pre-alert on the alarm screen is still the user's
-   last chance to cancel. Set `orangeThreshold` to 0 to disable this path.
+   stream (≥ 25 m/s², with up to 300 ms for the raw stream to catch up) — the linear-acceleration stream
+   alone fabricates phantom impacts during tumbles and free-fall.
+2. **Pre-alert.** Firing the alarm only arms a 30 s pre-alert; the SOS SMS is sent only if the user does
+   not cancel.
 
-Firing the alarm only arms a 30 s pre-alert; the SOS SMS is sent only if the user does not cancel.
+**`orangeThreshold` no longer changes what happens.** Until commit eb9b651 (2026-06-10) an impact above it
+fired the alarm at once ("orange-direct"). That path was removed after the linear stream reported a 17.5 G
+"impact" while the phone was still in the air. An impact above `orangeThreshold` now enters the same
+observation window as any other; only its log line differs ("Impacto crítico" instead of "Impacto").
 
 ## The rhythm detector (`_isRhythmicMovement`)
 
@@ -61,7 +67,7 @@ of 1.30 (1.50 for running/trail) cancels real walking while still rejecting pure
 Automatic activity classification is not viable without a continuous heart-rate signal, which a phone does
 not have — so the profile is a manual selector, which is the honest answer. Values as shipped:
 
-| Profile | Yellow | Orange | Settling | Observation | CV cap | Impact | GPS interval | GPS dist. |
+| Profile | Yellow | Orange (log only) | Settling | Observation | CV cap | Impact | GPS interval | GPS dist. |
 |---|---|---|---|---|---|---|---|---|
 | Trekking / Hiking | 6 G | 10 G | 5 s | 60 s | 1.30 | on | 30 s | 30 m |
 | Road running | 10 G | 14 G | 5 s | 60 s | 1.50 | on | 5 s | 10 m |
@@ -77,13 +83,47 @@ Notes:
 - **Running** was calibrated from P8 logs: a 9.75 G foot-strike impact produced 0 crossings over 27 yellow
   checks (→ false alarm) at the trekking baseline. The fix was a higher yellow threshold (so gait peaks do
   not enter yellow) plus the adaptive moving-mean cadence detector described above.
-- **Orange-direct** was calibrated on the Pixel 8: 12 G required an implausibly hard blow; 10 G is reached
-  cleanly by a firm knock against a chair arm without injury. Trail/MTB and running sit higher because the
-  base vibration of the activity is higher. Known trade-off: a phone dropped onto concrete can exceed 10 G
-  and trip the alarm screen; the user cancels with the 2 s hold within 30 s. Accepted.
+- **Orange** values come from the old orange-direct path, calibrated on the Pixel 8 (12 G required an
+  implausibly hard blow; 10 G is reached by a firm knock against a chair arm). Since eb9b651 they only label
+  the log line. A phone dropped onto concrete no longer trips the alarm screen at once: it enters
+  observation like any other impact, and only if it then lies still for the whole window does the alarm
+  fire; the user cancels with the 2 s hold within 30 s.
 - **Impact detection off** (paragliding, kayak, horse riding) leaves the user protected by the Inactivity
   Monitor and manual SOS only. Horse cadence (trot ≈ 1.5 Hz, canter 2–3 Hz) interferes with the human-walk
   detector and there is no field data for phone-in-pocket while riding; revisit when such data exists.
+
+## Measured 2026-11-26
+
+The v4.3.3 detector was ported line by line and run on **SisFall** (Sucerquia et al., *Sensors* 2017): 1 798
+lab falls and 2 702 daily activities, sensor at the waist, resampled to 50 Hz, the person lying still after
+each fall. An independent re-run reproduced the figures and added a gravity estimate closer to Android's
+sensor fusion; both are given as a range.
+
+| Yellow threshold | Profiles | Falls that reach the alarm | Only falls while walking or jogging |
+|---|---|---|---|
+| 6 G | Trekking, Mountaineering, Professional | 34–41 % | 60 % |
+| 8 G | Trail / MTB | 13–17 % | 30 % |
+| 10 G | Running | 4–7 % | 15 % |
+
+- Missed falls are missed because the peak never reaches the threshold (median fall peak ≈ 5.1–5.5 G), not
+  because of the rhythm check. At 4 G about 74–79 % would reach the alarm, at the cost of roughly 6× more
+  yellow states and up to 3× more alarms in the field logs.
+- No daily activity raised an alarm while it went on; walking or jogging cancelled a yellow state in a
+  median of 10 s. Fast stairs are the weak case (about 40 % of rhythm checks positive).
+- Field logs (Pixel 8 and Pixel 7a, 190.7 monitored hours): 12 yellow states, 8 alarms, all cancelled by
+  hand in 4–13 s, no SMS sent. Six of the 8 were a knock followed by stillness (phone or backpack set
+  down), three of them on Running at 10 G: the high threshold drops falls without dropping these.
+- A "no movement at all" veto cannot tell a phone on a table from a person lying still; it would suppress
+  most of the falls detected today. Not adopted.
+- With the raw sample one sample late, about 3 % of falls were lost at 6 G (one real field impact too);
+  the 300 ms catch-up window for the raw stream was added afterwards for that reason.
+
+The 70–85 % target is not met at 6 G with these data. In a trouser pocket peaks are probably higher (a
+thigh sensor read a median 1.17× the waist; Özdemir & Barshan, *Sensors* 2014), which puts the central
+estimate at 6 G between 41 % (all SisFall falls) and 72 % (falls while walking or jogging). These are young
+volunteers falling on mats; nobody has yet measured a fall with a phone in a pocket or a backpack. 30–50
+simulated falls with the phone in both places, and a second phone at the waist as reference, would settle
+it.
 
 ## Device-specific findings
 
@@ -126,9 +166,12 @@ later. Constants (`lib/services/background_service.dart`):
 
 ## Literature
 
-- Palmerini & Klenk et al., cross-dataset evaluation, *Measurement* (2024).
+- Silva, Casilari & García-Bermúdez, cross-dataset evaluation of fall detectors, *Measurement* 235:114992
+  (2024).
+- Palmerini, Klenk, Becker & Chiari, fall detection on 143 real-world falls (FARSEEING), *Sensors*
+  20(22):6479 (2020).
 - Bagalà et al., "Evaluation of accelerometer-based fall detection algorithms on real-world falls", *PLOS
-  ONE* (2012).
+  ONE* 7(5):e37062 (2012).
 - Musci et al., online fall detection with recurrent networks, *Sensors* 21/13/4335 (2021) — canonical
   pre-impact / impact / post-impact segmentation with 3.5–3.75 s windows.
 - Casilari et al., review of smartphone-based fall detection, PMC10255727 (2023).
@@ -137,7 +180,8 @@ later. Constants (`lib/services/background_service.dart`):
 ## Three-test validation protocol
 
 Any parameter change must pass all three before merging, with the sentinel log pulled from the device
-(`adb run-as … cat app_flutter/sentinel.log`):
+(`adb pull /sdcard/Android/data/com.oksigenia.oksigenia_sos/files/sentinel.log`; release builds block
+`run-as`):
 
 1. Impact + walking, phone in hand.
 2. Impact + walking, phone in pocket.

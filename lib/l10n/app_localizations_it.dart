@@ -67,7 +67,7 @@ class AppLocalizationsIt extends AppLocalizations {
   String get menuPrivacy => 'Privacy e Note Legali';
 
   @override
-  String get menuDonate => 'Dona / Donate';
+  String get menuDonate => 'Dona';
 
   @override
   String get menuX => '𝕏 (Twitter)';
@@ -280,7 +280,7 @@ class AppLocalizationsIt extends AppLocalizations {
 
   @override
   String get warningKeepAlive =>
-      '⚠️ IMPORTANTE: Non chiudere l\'app trascinandola via (Task Manager). Lasciala in background affinché possa riavviarsi.';
+      'Lascia l\'app aperta in background. Se la chiudi scorrendola via dalle app recenti, la protezione potrebbe fermarsi.';
 
   @override
   String get aboutTitle => 'Informazioni';
@@ -326,7 +326,8 @@ class AppLocalizationsIt extends AppLocalizations {
   String get invalidNumberWarning => 'Numero non valido o troppo corto';
 
   @override
-  String get contactMain => 'Primario (Tracking / Batteria)';
+  String get contactMain =>
+      'Contatto principale — riceve anche il Tracciamento Live';
 
   @override
   String get inactivitySubtitle =>
@@ -341,7 +342,7 @@ class AppLocalizationsIt extends AppLocalizations {
 
   @override
   String get dialogPermissionStep2 =>
-      '2. Nella nuova schermata, tocca i 3 puntini (⠇) in alto a derecha.';
+      '2. Nella nuova schermata, tocca i 3 puntini (⠇) in alto a destra.';
 
   @override
   String get dialogPermissionStep3 =>
@@ -446,7 +447,7 @@ class AppLocalizationsIt extends AppLocalizations {
   String get permLocMissing => 'Permesso posizione mancante';
 
   @override
-  String get slideStopSystem => 'SCORRI PER SPEGNERE';
+  String get slideStopSystem => 'TIENI PREMUTO: SPEGNI TUTTO';
 
   @override
   String get onboardingTitle => 'Configura il tuo sistema di sicurezza';
@@ -465,7 +466,7 @@ class AppLocalizationsIt extends AppLocalizations {
   String get onboardingNext => 'CONTINUA';
 
   @override
-  String get onboardingFinish => 'PRONTO — AVVIA MONITORAGGIO';
+  String get onboardingFinish => 'PRONTO — APRI L\'APP';
 
   @override
   String get onboardingMandatory => 'Necessario per attivare il monitoraggio';
@@ -484,7 +485,8 @@ class AppLocalizationsIt extends AppLocalizations {
   String get btnEnableFullScreenIntent => 'ATTIVA';
 
   @override
-  String get pauseMonitoringSheet => 'Metti in pausa per...';
+  String get pauseMonitoringSheet =>
+      'Metti in pausa tutto il monitoraggio per… (riprende da solo)';
 
   @override
   String get pauseTitle => 'Monitoraggio in pausa';
@@ -714,7 +716,7 @@ class AppLocalizationsIt extends AppLocalizations {
 
   @override
   String get homeProfileNoFallWarning =>
-      'Questo profilo NON rileva cadute. Il SOS deve essere attivato manualmente.';
+      'Questo profilo NON rileva cadute. Attiva il Monitor Inattività; il pulsante SOS funziona sempre.';
 
   @override
   String get homeActionApply => 'Applica';
@@ -763,4 +765,41 @@ class AppLocalizationsIt extends AppLocalizations {
 
   @override
   String get contactCheckEdit => 'Correggi';
+
+  @override
+  String get onboardingPermLocation => 'GPS / Posizione';
+
+  @override
+  String get onboardingPermNotifications => 'Notifiche';
+
+  @override
+  String get onboardingPermActivity => 'Attività fisica';
+
+  @override
+  String get onboardingPermSensors => 'Sensori di movimento';
+
+  @override
+  String get onboardingSettingsLocation => 'Posizione';
+
+  @override
+  String get onboardingSettingsSensors => 'Sensori';
+
+  @override
+  String onboardingSettingsPath(String permission) {
+    return 'Impostazioni → App → Oksigenia SOS → Autorizzazioni → $permission';
+  }
+
+  @override
+  String get onboardingSmsStep1Done =>
+      'Passo 1 fatto: Android ha mostrato il suo avviso di sicurezza.';
+
+  @override
+  String get onboardingSmsStep2 => '2. Apri Impostazioni (pulsante qui sotto).';
+
+  @override
+  String get onboardingSmsStep3 =>
+      '3. Tocca ⋮ (in alto a destra) → «Consenti impostazioni limitate» → PIN.';
+
+  @override
+  String get onboardingSmsStep4 => '4. Autorizzazioni → SMS → Consenti.';
 }

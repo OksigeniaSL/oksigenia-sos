@@ -82,8 +82,8 @@ class StatusWidget : AppWidgetProvider() {
             prefs.getInt(KEY_INACTIVITY_LIMIT, 3600)
         }
 
-        // Profile name: capitalize first letter, replace camel keys
-        val profileLabel = humanProfile(profileName)
+        // Profile name, localized through res/values*/strings.xml
+        val profileLabel = humanProfile(context, profileName)
         views.setTextViewText(R.id.status_profile, profileLabel)
 
         // Sentinel state text + dot color
@@ -139,15 +139,20 @@ class StatusWidget : AppWidgetProvider() {
         manager.updateAppWidget(id, views)
     }
 
-    private fun humanProfile(raw: String): String = when (raw) {
-        "trekking" -> "🥾 Trekking"
-        "trailMtb" -> "🚵 Trail/MTB"
-        "mountaineering" -> "🧗 Alpinismo"
-        "paragliding" -> "🪂 Parapente"
-        "kayak" -> "🛶 Kayak"
-        "equitation" -> "🐴 Equitación"
-        "professional" -> "👷 Profesional"
-        else -> raw.replaceFirstChar { it.uppercase() }
+    // Keys are the ActivityProfile enum names stored by Dart (activity_profile.dart).
+    private fun humanProfile(context: Context, raw: String): String {
+        val (icon, nameRes) = when (raw) {
+            "trekking" -> "🥾" to R.string.widget_profile_trekking
+            "running" -> "🏃" to R.string.widget_profile_running
+            "trailMtb" -> "🚵" to R.string.widget_profile_trail_mtb
+            "mountaineering" -> "🧗" to R.string.widget_profile_mountaineering
+            "paragliding" -> "🪂" to R.string.widget_profile_paragliding
+            "kayak" -> "🛶" to R.string.widget_profile_kayak
+            "equitation" -> "🐴" to R.string.widget_profile_equitation
+            "professional" -> "👷" to R.string.widget_profile_professional
+            else -> return raw.replaceFirstChar { it.uppercase() }
+        }
+        return "$icon ${context.getString(nameRes)}"
     }
 
     private fun formatDuration(seconds: Int): String {

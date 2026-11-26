@@ -212,7 +212,7 @@ The fall-detection algorithm has been rewritten from scratch using field telemet
 * **Runtime Hz measurement** — Pixel 7a delivers 58.8 Hz, Pixel 8 delivers 49.8 Hz (not the 50 Hz the old code assumed). Frequency now self-calibrates per device.
 * **CV cap raised to 1.30** (was 0.85) — the wearable literature's "CV ≈ 0.4" is wrong for a phone in a pocket. Median measured CV in real walking is 1.1.
 * **Crossing threshold raised to 1.12 m/s²** (was 1.06) — sits above hand-carried noise.
-* **File logger** at `app_flutter/sentinel.log` for post-incident analysis.
+* **File logger** `sentinel.log` for post-incident analysis (now in the app's external files folder: `/sdcard/Android/data/com.oksigenia.oksigenia_sos/files/sentinel.log`).
 
 ### 🏃 Activity Profiles
 Six presets tune Smart Sentinel sensitivity to match the sport. Pick from the home screen chip or Settings.

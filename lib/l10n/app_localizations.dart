@@ -227,7 +227,7 @@ abstract class AppLocalizations {
   /// No description provided for @menuDonate.
   ///
   /// In en, this message translates to:
-  /// **'Donar / Donate'**
+  /// **'Donate'**
   String get menuDonate;
 
   /// No description provided for @menuX.
@@ -623,7 +623,7 @@ abstract class AppLocalizations {
   /// No description provided for @warningKeepAlive.
   ///
   /// In en, this message translates to:
-  /// **'⚠️ IMPORTANT: Do not swipe-close the app (Task Manager). Leave it in background so it can auto-restart.'**
+  /// **'Keep the app open in the background. If you swipe it away from recent apps, protection may stop.'**
   String get warningKeepAlive;
 
   /// No description provided for @aboutTitle.
@@ -713,7 +713,7 @@ abstract class AppLocalizations {
   /// No description provided for @contactMain.
   ///
   /// In en, this message translates to:
-  /// **'Primary (Tracking / Battery)'**
+  /// **'Main contact — also gets live tracking'**
   String get contactMain;
 
   /// No description provided for @inactivitySubtitle.
@@ -935,7 +935,7 @@ abstract class AppLocalizations {
   /// No description provided for @slideStopSystem.
   ///
   /// In en, this message translates to:
-  /// **'SLIDE TO STOP SYSTEM'**
+  /// **'HOLD TO STOP ALL MONITORING'**
   String get slideStopSystem;
 
   /// No description provided for @onboardingTitle.
@@ -971,7 +971,7 @@ abstract class AppLocalizations {
   /// No description provided for @onboardingFinish.
   ///
   /// In en, this message translates to:
-  /// **'ALL SET — START MONITORING'**
+  /// **'ALL SET — OPEN THE APP'**
   String get onboardingFinish;
 
   /// No description provided for @onboardingMandatory.
@@ -1007,7 +1007,7 @@ abstract class AppLocalizations {
   /// No description provided for @pauseMonitoringSheet.
   ///
   /// In en, this message translates to:
-  /// **'Pause monitoring for...'**
+  /// **'Pause all monitoring for… (resumes by itself)'**
   String get pauseMonitoringSheet;
 
   /// No description provided for @pauseTitle.
@@ -1403,7 +1403,7 @@ abstract class AppLocalizations {
   /// No description provided for @homeProfileNoFallWarning.
   ///
   /// In en, this message translates to:
-  /// **'This profile does NOT detect falls. SOS must be triggered manually.'**
+  /// **'This profile does NOT detect falls. Turn on the Inactivity Monitor; the SOS button always works.'**
   String get homeProfileNoFallWarning;
 
   /// No description provided for @homeActionApply.
@@ -1483,6 +1483,72 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Correct it'**
   String get contactCheckEdit;
+
+  /// No description provided for @onboardingPermLocation.
+  ///
+  /// In en, this message translates to:
+  /// **'GPS / Location'**
+  String get onboardingPermLocation;
+
+  /// No description provided for @onboardingPermNotifications.
+  ///
+  /// In en, this message translates to:
+  /// **'Notifications'**
+  String get onboardingPermNotifications;
+
+  /// No description provided for @onboardingPermActivity.
+  ///
+  /// In en, this message translates to:
+  /// **'Physical activity'**
+  String get onboardingPermActivity;
+
+  /// No description provided for @onboardingPermSensors.
+  ///
+  /// In en, this message translates to:
+  /// **'Motion sensors'**
+  String get onboardingPermSensors;
+
+  /// No description provided for @onboardingSettingsLocation.
+  ///
+  /// In en, this message translates to:
+  /// **'Location'**
+  String get onboardingSettingsLocation;
+
+  /// No description provided for @onboardingSettingsSensors.
+  ///
+  /// In en, this message translates to:
+  /// **'Sensors'**
+  String get onboardingSettingsSensors;
+
+  /// No description provided for @onboardingSettingsPath.
+  ///
+  /// In en, this message translates to:
+  /// **'Settings → Apps → Oksigenia SOS → Permissions → {permission}'**
+  String onboardingSettingsPath(String permission);
+
+  /// No description provided for @onboardingSmsStep1Done.
+  ///
+  /// In en, this message translates to:
+  /// **'Step 1 done: Android has shown its security notice.'**
+  String get onboardingSmsStep1Done;
+
+  /// No description provided for @onboardingSmsStep2.
+  ///
+  /// In en, this message translates to:
+  /// **'2. Open Settings (button below).'**
+  String get onboardingSmsStep2;
+
+  /// No description provided for @onboardingSmsStep3.
+  ///
+  /// In en, this message translates to:
+  /// **'3. Tap ⋮ (top right) → \"Allow restricted settings\" → PIN.'**
+  String get onboardingSmsStep3;
+
+  /// No description provided for @onboardingSmsStep4.
+  ///
+  /// In en, this message translates to:
+  /// **'4. Permissions → SMS → Allow.'**
+  String get onboardingSmsStep4;
 }
 
 class _AppLocalizationsDelegate

@@ -40,7 +40,7 @@ class AppLocalizationsDe extends AppLocalizations {
 
   @override
   String get statusSendFailedBody =>
-      'Es konnte keine SMS gesendet werden. Prüfe Empfang und Kontakte, dann erneut versuchen.';
+      'Es konnte keine SMS gesendet werden. Prüfen Sie Empfang und Kontakte und versuchen Sie es dann erneut.';
 
   @override
   String get statusSendRetrying =>
@@ -67,7 +67,7 @@ class AppLocalizationsDe extends AppLocalizations {
   String get menuPrivacy => 'Datenschutz';
 
   @override
-  String get menuDonate => 'Donar / Donate';
+  String get menuDonate => 'Spenden';
 
   @override
   String get menuX => '𝕏 (Twitter)';
@@ -271,7 +271,7 @@ class AppLocalizationsDe extends AppLocalizations {
 
   @override
   String get warningKeepAlive =>
-      '⚠️ WICHTIG: Schließen Sie die App (Task-Manager) nicht durch Wischen. Lassen Sie sie im Hintergrund, damit sie automatisch neu gestartet werden kann.';
+      'Lassen Sie die App im Hintergrund geöffnet. Wenn Sie sie aus den zuletzt verwendeten Apps wegwischen, kann der Schutz aufhören.';
 
   @override
   String get aboutTitle => 'Über';
@@ -317,7 +317,7 @@ class AppLocalizationsDe extends AppLocalizations {
   String get invalidNumberWarning => 'Ungültige oder zu kurze Nummer';
 
   @override
-  String get contactMain => 'Hauptkontakt (Tracking / Akku)';
+  String get contactMain => 'Hauptkontakt — erhält auch das Live-Tracking';
 
   @override
   String get inactivitySubtitle => 'Zeit ohne Bewegung vor dem Notruf.';
@@ -423,11 +423,11 @@ class AppLocalizationsDe extends AppLocalizations {
 
   @override
   String get bgLocationDialogBody =>
-      'Wenn der Alarm auslöst, steckt das Handy meist mit ausgeschaltetem Bildschirm in der Tasche. Damit das SOS in diesem Moment mit deiner genauen Position rausgeht, verlangt Android die Standortstufe „Immer zulassen“.\n\nDein Standort verlässt das Telefon nie: kein Internet, keine Cloud, keine Tracker — er reist nur in der SOS-SMS an deine eigenen Kontakte.\n\nWähle auf dem nächsten Bildschirm „Immer zulassen“.';
+      'Wenn der Alarm auslöst, steckt das Handy meist mit ausgeschaltetem Bildschirm in der Tasche. Damit das SOS in diesem Moment mit Ihrer genauen Position rausgeht, verlangt Android die Standortstufe „Immer zulassen“.\n\nIhr Standort verlässt das Telefon nie: kein Internet, keine Cloud, keine Tracker — er reist nur in der SOS-SMS an Ihre eigenen Kontakte.\n\nWählen Sie auf dem nächsten Bildschirm „Immer zulassen“.';
 
   @override
   String get whyPermsBgLocation =>
-      'Ermittelt deine GPS-Position bei ausgeschaltetem Bildschirm oder App im Hintergrund — genau dann, wenn ein SOS auslöst. Der Standort wird ausschließlich in der SOS-SMS an deine Kontakte gesendet und verlässt das Telefon sonst nie.';
+      'Ermittelt Ihre GPS-Position bei ausgeschaltetem Bildschirm oder App im Hintergrund — genau dann, wenn ein SOS auslöst. Der Standort wird ausschließlich in der SOS-SMS an Ihre Kontakte gesendet und verlässt das Telefon sonst nie.';
 
   @override
   String get btnEnableBgLocation => 'Immer zulassen';
@@ -436,7 +436,7 @@ class AppLocalizationsDe extends AppLocalizations {
   String get permLocMissing => 'Standortberechtigung fehlt';
 
   @override
-  String get slideStopSystem => 'WISCHEN ZUM STOPPEN';
+  String get slideStopSystem => 'HALTEN, UM ALLES ZU STOPPEN';
 
   @override
   String get onboardingTitle => 'Sicherheitssystem einrichten';
@@ -455,7 +455,7 @@ class AppLocalizationsDe extends AppLocalizations {
   String get onboardingNext => 'WEITER';
 
   @override
-  String get onboardingFinish => 'BEREIT — ÜBERWACHUNG STARTEN';
+  String get onboardingFinish => 'BEREIT — APP ÖFFNEN';
 
   @override
   String get onboardingMandatory => 'Erforderlich zur Aktivierung';
@@ -474,7 +474,8 @@ class AppLocalizationsDe extends AppLocalizations {
   String get btnEnableFullScreenIntent => 'AKTIVIEREN';
 
   @override
-  String get pauseMonitoringSheet => 'Überwachung pausieren für...';
+  String get pauseMonitoringSheet =>
+      'Gesamte Überwachung pausieren für… (läuft danach von selbst weiter)';
 
   @override
   String get pauseTitle => 'Überwachung pausiert';
@@ -610,7 +611,7 @@ class AppLocalizationsDe extends AppLocalizations {
 
   @override
   String get activityProfileSubtitle =>
-      'Passt die Smart-Sentinel-Erkennung an deinen Sport an. Wähle das ähnlichste — falsches Profil verursacht Fehlalarme oder verpasst echte Stürze.';
+      'Passt die Smart-Sentinel-Erkennung an Ihren Sport an. Wählen Sie das ähnlichste — falsches Profil verursacht Fehlalarme oder verpasst echte Stürze.';
 
   @override
   String get profileTrekking => 'Wandern / Trekking';
@@ -652,7 +653,7 @@ class AppLocalizationsDe extends AppLocalizations {
 
   @override
   String get profileKayakDesc =>
-      'Automatische Sturzerkennung ist DEAKTIVIERT — Wasser dämpft Aufprälle und Schwimmbewegung ist nicht aussagekräftig. Nutze den Inaktivitätsmonitor und manuellen SOS.';
+      'Automatische Sturzerkennung ist DEAKTIVIERT — Wasser dämpft Aufprälle und Schwimmbewegung ist nicht aussagekräftig. Nutzen Sie den Inaktivitätsmonitor und den manuellen SOS.';
 
   @override
   String get profileEquitation => 'Reiten';
@@ -680,7 +681,7 @@ class AppLocalizationsDe extends AppLocalizations {
 
   @override
   String get homeAlertNotArmed =>
-      'NICHT BEREIT — Schalter unten antippen zum Aktivieren';
+      'NICHT AKTIV — Schalter unten antippen zum Aktivieren';
 
   @override
   String get homeAlertSensorPermDenied => 'Sensor-Berechtigung verweigert';
@@ -704,7 +705,7 @@ class AppLocalizationsDe extends AppLocalizations {
 
   @override
   String get homeProfileNoFallWarning =>
-      'Dieses Profil erkennt KEINE Stürze. SOS muss manuell ausgelöst werden.';
+      'Dieses Profil erkennt KEINE Stürze. Schalten Sie den Inaktivitätsmonitor ein; die SOS-Taste funktioniert immer.';
 
   @override
   String get homeActionApply => 'Anwenden';
@@ -714,7 +715,7 @@ class AppLocalizationsDe extends AppLocalizations {
 
   @override
   String get homeBeaconBanner =>
-      'Standort-Updates an deinen Kontakt nach dem SOS — zum Stoppen tippen';
+      'Standort-Updates an Ihren Kontakt nach dem SOS — zum Stoppen tippen';
 
   @override
   String get beaconStopped => 'Bewegungsmeldungen gestoppt';
@@ -738,14 +739,14 @@ class AppLocalizationsDe extends AppLocalizations {
 
   @override
   String get homeAlertProfileNoImpact =>
-      'NICHT GESCHÜTZT — dieses Profil erkennt keine Stürze. Schalte den Inaktivitätsmonitor ein.';
+      'NICHT GESCHÜTZT — dieses Profil erkennt keine Stürze. Schalten Sie den Inaktivitätsmonitor ein.';
 
   @override
   String get contactCheckTitle => 'Stimmt die Ländervorwahl?';
 
   @override
   String contactCheckBody(String number) {
-    return 'Dein SOS geht an $number. Wenn die Ländervorwahl falsch ist, gib die Nummer mit + und Ländervorwahl ein.';
+    return 'Ihr SOS geht an $number. Wenn die Ländervorwahl falsch ist, geben Sie die Nummer mit + und Ländervorwahl ein.';
   }
 
   @override
@@ -753,4 +754,42 @@ class AppLocalizationsDe extends AppLocalizations {
 
   @override
   String get contactCheckEdit => 'Korrigieren';
+
+  @override
+  String get onboardingPermLocation => 'GPS / Standort';
+
+  @override
+  String get onboardingPermNotifications => 'Benachrichtigungen';
+
+  @override
+  String get onboardingPermActivity => 'Körperliche Aktivität';
+
+  @override
+  String get onboardingPermSensors => 'Bewegungssensoren';
+
+  @override
+  String get onboardingSettingsLocation => 'Standort';
+
+  @override
+  String get onboardingSettingsSensors => 'Sensoren';
+
+  @override
+  String onboardingSettingsPath(String permission) {
+    return 'Einstellungen → Apps → Oksigenia SOS → Berechtigungen → $permission';
+  }
+
+  @override
+  String get onboardingSmsStep1Done =>
+      'Schritt 1 erledigt: Android hat seinen Sicherheitshinweis angezeigt.';
+
+  @override
+  String get onboardingSmsStep2 =>
+      '2. Öffnen Sie die Einstellungen (Schaltfläche unten).';
+
+  @override
+  String get onboardingSmsStep3 =>
+      '3. Tippen Sie auf ⋮ (oben rechts) → „Eingeschränkte Einstellungen zulassen“ → PIN.';
+
+  @override
+  String get onboardingSmsStep4 => '4. Berechtigungen → SMS → Zulassen.';
 }

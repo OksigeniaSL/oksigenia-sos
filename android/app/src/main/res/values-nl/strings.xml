@@ -10,4 +10,12 @@
     <string name="widget_mode_inactivity_fmt">Inactiviteit %1$s</string>
     <string name="widget_mode_tracking">Tracking</string>
     <string name="widget_modes_none">Geen modi actief</string>
+    <string name="widget_profile_trekking">Trekken</string>
+    <string name="widget_profile_running">Hardlopen</string>
+    <string name="widget_profile_trail_mtb">Trail/MTB</string>
+    <string name="widget_profile_mountaineering">Bergbeklimmen</string>
+    <string name="widget_profile_paragliding">Paragliden</string>
+    <string name="widget_profile_kayak">Kajak</string>
+    <string name="widget_profile_equitation">Paardrijden</string>
+    <string name="widget_profile_professional">Professioneel</string>
 </resources>

@@ -10,4 +10,12 @@
     <string name="widget_mode_inactivity_fmt">Бездействие %1$s</string>
     <string name="widget_mode_tracking">Tracking</string>
     <string name="widget_modes_none">Нет активных режимов</string>
+    <string name="widget_profile_trekking">Треккинг</string>
+    <string name="widget_profile_running">Бег</string>
+    <string name="widget_profile_trail_mtb">Трейл/MTB</string>
+    <string name="widget_profile_mountaineering">Альпинизм</string>
+    <string name="widget_profile_paragliding">Парапланеризм</string>
+    <string name="widget_profile_kayak">Каяк</string>
+    <string name="widget_profile_equitation">Конный спорт</string>
+    <string name="widget_profile_professional">Профессиональный</string>
 </resources>

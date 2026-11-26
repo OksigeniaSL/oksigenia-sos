@@ -24,7 +24,7 @@ class AppLocalizationsPl extends AppLocalizations {
   String get statusLocationFixed => 'POZYCJA USTALONA';
 
   @override
-  String get statusSent => 'Alert wysłany pomyślnie.';
+  String get statusSent => 'Alarm wysłany pomyślnie.';
 
   @override
   String get alarmSendingNow => 'Wysyłanie alarmu…';
@@ -67,7 +67,7 @@ class AppLocalizationsPl extends AppLocalizations {
   String get menuPrivacy => 'Prywatność i prawo';
 
   @override
-  String get menuDonate => 'Wesprzyj / Donate';
+  String get menuDonate => 'Wesprzyj';
 
   @override
   String get menuX => '𝕏 (Twitter)';
@@ -203,7 +203,7 @@ class AppLocalizationsPl extends AppLocalizations {
   String get contactsAddHint => 'Dodaj numer';
 
   @override
-  String get contactsEmpty => '⚠️ Brak kontaktów. Alert nie zostanie wysłany.';
+  String get contactsEmpty => '⚠️ Brak kontaktów. Alarm nie zostanie wysłany.';
 
   @override
   String get messageTitle => 'Wiadomość niestandardowa';
@@ -274,7 +274,7 @@ class AppLocalizationsPl extends AppLocalizations {
 
   @override
   String get warningKeepAlive =>
-      '⚠️ WAŻNE: Nie zamykaj aplikacji przesuwając (Menedżer zadań). Zostaw w tle, aby mogła się sama uruchomić.';
+      'Zostaw aplikację otwartą w tle. Jeśli usuniesz ją z ostatnich aplikacji przesunięciem, ochrona może przestać działać.';
 
   @override
   String get aboutTitle => 'O aplikacji';
@@ -320,7 +320,7 @@ class AppLocalizationsPl extends AppLocalizations {
   String get invalidNumberWarning => 'Numer nieprawidłowy lub za krótki';
 
   @override
-  String get contactMain => 'Główny (Śledzenie / Bateria)';
+  String get contactMain => 'Główny kontakt — otrzymuje też Live Tracking';
 
   @override
   String get inactivitySubtitle => 'Czas bez ruchu przed wezwaniem pomocy.';
@@ -439,7 +439,7 @@ class AppLocalizationsPl extends AppLocalizations {
   String get permLocMissing => 'Brak uprawnienia lokalizacji';
 
   @override
-  String get slideStopSystem => 'PRZESUŃ, ABY ZATRZYMAĆ';
+  String get slideStopSystem => 'PRZYTRZYMAJ: WYŁĄCZ WSZYSTKO';
 
   @override
   String get onboardingTitle => 'Skonfiguruj system bezpieczeństwa';
@@ -458,7 +458,7 @@ class AppLocalizationsPl extends AppLocalizations {
   String get onboardingNext => 'DALEJ';
 
   @override
-  String get onboardingFinish => 'GOTOWE — URUCHOM MONITORING';
+  String get onboardingFinish => 'GOTOWE — OTWÓRZ APLIKACJĘ';
 
   @override
   String get onboardingMandatory => 'Wymagane do aktywacji monitoringu';
@@ -477,7 +477,8 @@ class AppLocalizationsPl extends AppLocalizations {
   String get btnEnableFullScreenIntent => 'WŁĄCZ';
 
   @override
-  String get pauseMonitoringSheet => 'Wstrzymaj monitoring na...';
+  String get pauseMonitoringSheet =>
+      'Wstrzymaj cały monitoring na… (wznowi się sam)';
 
   @override
   String get pauseTitle => 'Monitoring wstrzymany';
@@ -707,7 +708,7 @@ class AppLocalizationsPl extends AppLocalizations {
 
   @override
   String get homeProfileNoFallWarning =>
-      'Ten profil NIE wykrywa upadków. SOS musi być uruchomiony ręcznie.';
+      'Ten profil NIE wykrywa upadków. Włącz Monitor bezruchu; przycisk SOS działa zawsze.';
 
   @override
   String get homeActionApply => 'Zastosuj';
@@ -756,4 +757,41 @@ class AppLocalizationsPl extends AppLocalizations {
 
   @override
   String get contactCheckEdit => 'Popraw';
+
+  @override
+  String get onboardingPermLocation => 'GPS / Lokalizacja';
+
+  @override
+  String get onboardingPermNotifications => 'Powiadomienia';
+
+  @override
+  String get onboardingPermActivity => 'Aktywność fizyczna';
+
+  @override
+  String get onboardingPermSensors => 'Czujniki ruchu';
+
+  @override
+  String get onboardingSettingsLocation => 'Lokalizacja';
+
+  @override
+  String get onboardingSettingsSensors => 'Czujniki';
+
+  @override
+  String onboardingSettingsPath(String permission) {
+    return 'Ustawienia → Aplikacje → Oksigenia SOS → Uprawnienia → $permission';
+  }
+
+  @override
+  String get onboardingSmsStep1Done =>
+      'Krok 1 gotowy: Android wyświetlił ostrzeżenie bezpieczeństwa.';
+
+  @override
+  String get onboardingSmsStep2 => '2. Otwórz Ustawienia (przycisk poniżej).';
+
+  @override
+  String get onboardingSmsStep3 =>
+      '3. Dotknij ⋮ (w prawym górnym rogu) → „Zezwól na ograniczone ustawienia” → PIN.';
+
+  @override
+  String get onboardingSmsStep4 => '4. Uprawnienia → SMS → Zezwalaj.';
 }
