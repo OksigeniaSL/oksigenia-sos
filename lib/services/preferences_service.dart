@@ -32,6 +32,10 @@ class PreferencesService {
   // ACTIVITY PROFILE (v4.0.0)
   static const String keyActivityProfile = 'activity_profile';
 
+  // Why the alarm in course started: 'fall', 'inactivity' or 'manual'. Written
+  // by whoever starts it, read by both isolates after a respawn.
+  static const String keyAlarmCause = 'alarm_cause';
+
   // SOS RETRY QUEUE (shared by both isolates and OksigeniaBootReceiver.kt,
   // which reads the bool as "flutter.sos_retry_active")
   static const String keySosRetryActive = 'sos_retry_active';

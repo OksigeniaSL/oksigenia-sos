@@ -185,6 +185,7 @@ class SOSLogic extends ChangeNotifier with WidgetsBindingObserver {
       if (l10n != null) {
         texts = {
           'alertFallDetected': l10n.alertFallDetected,
+          'alertInactivityDetected': l10n.alertInactivityDetected,
           'holdToCancel': l10n.holdToCancel,
           'alertSendingIn': l10n.alertSendingIn,
           'statusSent': l10n.statusSent,
@@ -207,6 +208,7 @@ class SOSLogic extends ChangeNotifier with WidgetsBindingObserver {
         final l10n = await AppLocalizations.delegate.load(Locale(langCode));
         texts = {
           'alertFallDetected': l10n.alertFallDetected,
+          'alertInactivityDetected': l10n.alertInactivityDetected,
           'holdToCancel': l10n.holdToCancel,
           'alertSendingIn': l10n.alertSendingIn,
           'statusSent': l10n.statusSent,
@@ -298,8 +300,11 @@ class SOSLogic extends ChangeNotifier with WidgetsBindingObserver {
       // M7: respetar la causa que envía Sylvia. Antes era SIEMPRE fall, así que
       // una alarma de inactividad se mostraba como "IMPACT DETECTED".
       final String c = (event?["cause"] ?? 'fall').toString();
-      final AlertCause cause =
-          c == 'inactivity' ? AlertCause.inactivity : AlertCause.fall;
+      final AlertCause cause = switch (c) {
+        'inactivity' => AlertCause.inactivity,
+        'manual' => AlertCause.manual,
+        _ => AlertCause.fall,
+      };
       _triggerPreAlert(cause, startedByService: true);
     }));
 
@@ -528,7 +533,7 @@ class SOSLogic extends ChangeNotifier with WidgetsBindingObserver {
        // Restaurar la causa real (persistida en _triggerPreAlert). El default
        // es fall, no manual: una alarma zombie sin causa conocida es casi
        // seguro del servicio, y con fall el emisor es Sylvia (sin doble SMS).
-       final String causeName = rawPrefs.getString('alarm_cause') ?? '';
+       final String causeName = rawPrefs.getString(PreferencesService.keyAlarmCause) ?? '';
        _lastTrigger = AlertCause.values
            .where((c) => c.name == causeName)
            .firstOrNull ?? AlertCause.fall;
@@ -938,7 +943,7 @@ class SOSLogic extends ChangeNotifier with WidgetsBindingObserver {
     // La causa sí se persiste: sin ella, una restauración zombie volvía a
     // 'manual' y la UI enviaba su propio SMS además del de Sylvia.
     final prefs = await SharedPreferences.getInstance();
-    await prefs.setString('alarm_cause', cause.name);
+    await prefs.setString(PreferencesService.keyAlarmCause, cause.name);
 
     debugPrint("SYLVIA: 🚨 ALARMA ACTIVADA");
     _lastTrigger = cause;
@@ -952,7 +957,9 @@ class SOSLogic extends ChangeNotifier with WidgetsBindingObserver {
     if (!startedByService) {
       try {
          final service = FlutterBackgroundService();
-         service.invoke("startAlarm");
+         // With the cause, so Sylvia's notification does not call a manual
+         // SOS or an inactivity alarm "impact detected".
+         service.invoke("startAlarm", {"cause": cause.name});
          Vibration.vibrate(pattern: [500, 1000, 500, 1000], repeat: 1);
       } catch (e) { debugPrint("Error servicio: $e"); }
     }
@@ -1507,7 +1514,11 @@ class SOSLogic extends ChangeNotifier with WidgetsBindingObserver {
         if (_status == SOSStatus.preAlert) {
           statusIcon = "alarm";
           title = "🚨 SOS";
-          content = t.alertFallDetected;
+          content = switch (_lastTrigger) {
+            AlertCause.fall => t.alertFallDetected,
+            AlertCause.inactivity => t.alertInactivityDetected,
+            _ => t.holdToCancel,
+          };
         } else if (isActive && isMonitoringPaused) {
           statusIcon = "paused";
           final mins = pauseRemainingSeconds ~/ 60;

@@ -111,6 +111,7 @@ List<String> _recipients = [];
 String _customMessage = "";
 Map<String, String> _texts = {
   'alertFallDetected': 'IMPACT DETECTED!',
+  'alertInactivityDetected': 'INACTIVITY DETECTED!',
   'holdToCancel': 'Hold to cancel',
   'alertSendingIn': 'Sending alert in...',
   'statusSent': 'Alert sent successfully.',
@@ -139,6 +140,11 @@ const double _beaconDistanceM = 300.0;
 const int _beaconMinIntervalSeconds = 300;
 const int _beaconMaxUpdates = 20;
 const int _beaconWindowSeconds = 14400;
+
+// The alarm causes Sylvia knows. Anything else (a missing or older value)
+// counts as a fall, the previous default.
+String _alarmCause(Object? raw) =>
+    (raw == 'inactivity' || raw == 'manual') ? raw as String : 'fall';
 
 // Variables Globales
 Timer? _zombieTimer;
@@ -1091,6 +1097,9 @@ void onStart(ServiceInstance service) async {
 
   // resumeCountdown: segundos restantes al reanudar una alarma que sobrevivió
   // a un respawn del servicio (Android mató el isolate a mitad de cuenta atrás).
+  //
+  // cause: 'fall', 'inactivity' or 'manual' (an SOS the user started from the
+  // UI). It names the alarm in the notification and travels to the UI.
   Future<void> _lanzarAlarma({int? resumeCountdown, String cause = 'fall'}) async {
     // B6: guard de reentrada. Un segundo startAlarm con la cuenta atrás ya en
     // curso la reiniciaba a 30s. Me apoyo en el timer (no en _isAlarmActive, que
@@ -1103,6 +1112,14 @@ void onStart(ServiceInstance service) async {
     _logSentinel("SYLVIA SERVICE: 🚨 EJECUTANDO PROTOCOLO DE ALARMA"
         "${resumeCountdown != null ? ' (reanudada, ${resumeCountdown}s restantes)' : ''}");
     _isAlarmActive = true;
+    // What the notification says about this alarm. It used to say "impact
+    // detected" for an inactivity alarm and for a manual SOS too.
+    final String causeText = switch (cause) {
+      'inactivity' => _texts['alertInactivityDetected'] ?? 'INACTIVITY DETECTED!',
+      'manual' => 'SOS',
+      _ => _texts['alertFallDetected'] ?? 'IMPACT DETECTED!',
+    };
+    final String holdText = _texts['holdToCancel'] ?? 'Hold to cancel';
     // A2: calentar el GPS ya — la cuenta atrás de 30s es la ventana de warmup.
     _startGpsWarmup();
     _writeWidgetState('red');
@@ -1122,6 +1139,9 @@ void onStart(ServiceInstance service) async {
       await prefs.setBool('is_alarm_active', true);
       if (resumeCountdown == null) {
         await prefs.setInt('alarm_start_timestamp', DateTime.now().millisecondsSinceEpoch);
+        // With the UI closed nobody else writes it, and a respawn (or the UI,
+        // when it opens) would name the alarm after the previous one.
+        await prefs.setString(PreferencesService.keyAlarmCause, cause);
       }
     } catch (e) {
       print("SYLVIA: ❌ prefs en alarma: $e");
@@ -1134,8 +1154,8 @@ void onStart(ServiceInstance service) async {
       // on the UI engine, not the background engine.
       await flutterLocalNotificationsPlugin.show(
         id: alarmNotifId,
-        title: "🚨 ${_texts['alertFallDetected']}",
-        body: _texts['holdToCancel'],
+        title: "🚨 $causeText",
+        body: holdText,
         notificationDetails: const NotificationDetails(
           android: AndroidNotificationDetails(
             alarmChannelId, 'Oksigenia SOS Alarm',
@@ -1196,7 +1216,9 @@ void onStart(ServiceInstance service) async {
         flutterLocalNotificationsPlugin.show(
           id: alarmNotifId,
           title: "${_texts['alertSendingIn']} $_zombieCountdown s",
-          body: _texts['holdToCancel'],
+          // The countdown replaces the title one second in: the cause stays
+          // readable here for the rest of the pre-alert.
+          body: cause == 'manual' ? holdText : "$causeText · $holdText",
           notificationDetails: const NotificationDetails(
               android: AndroidNotificationDetails(
                   alarmChannelId, 'Oksigenia SOS Alarm',
@@ -1951,14 +1973,15 @@ void onStart(ServiceInstance service) async {
             ? (DateTime.now().millisecondsSinceEpoch - startMs) ~/ 1000
             : 9999;
         _logSentinel("SYLVIA BOOT: 🚨 Alarma activa detectada tras respawn (${elapsed}s transcurridos)");
+        final String savedCause = _alarmCause(prefs.getString(PreferencesService.keyAlarmCause));
         if (elapsed <= 120) {
-          _lanzarAlarma(resumeCountdown: (30 - elapsed).clamp(2, 30));
+          _lanzarAlarma(resumeCountdown: (30 - elapsed).clamp(2, 30), cause: savedCause);
         } else {
           // The countdown was interrupted long ago (phone switched off, battery
           // gone): sending 2 s after power-on would give nobody a chance to
           // cancel a false alarm. Start a full, audible 30 s countdown instead;
           // _lanzarAlarma rewrites alarm_start_timestamp so the UI shows it too.
-          _lanzarAlarma();
+          _lanzarAlarma(cause: savedCause);
         }
       }
     } catch (e) {
@@ -2092,7 +2115,10 @@ void onStart(ServiceInstance service) async {
       }
     });
 
-    service.on('startAlarm').listen((event) => _lanzarAlarma());
+    // The UI says why it starts the alarm (a manual SOS, or its own inactivity
+    // timer). Without a cause it is an older caller: 'fall', as before.
+    service.on('startAlarm').listen(
+        (event) => _lanzarAlarma(cause: _alarmCause(event?['cause'])));
 
     service.on('stopAlarm').listen((event) async {
       _logSentinel("SYLVIA SERVICE: 🛑 Recibida orden de STOP ALARM");
