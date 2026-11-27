@@ -492,6 +492,47 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver, Ti
               ),
             ],
 
+            // Right under the SOS button, where the eyes are after pressing
+            // it: at the bottom of the list it sat under the gesture bar.
+            if (_sosLogic.status == SOSStatus.error) ...[
+               const SizedBox(height: 12),
+               Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 30),
+                child: Column(
+                  children: [
+                    Text(
+                      _sosLogic.errorMessage == "NO_CONTACT"
+                          ? l10n.errorNoContact
+                          : _sosLogic.errorMessage == "SMS_FAILED"
+                              ? l10n.statusSendFailed
+                              : _sosLogic.errorMessage,
+                      textAlign: TextAlign.center,
+                      style: const TextStyle(color: Colors.redAccent, fontWeight: FontWeight.bold, fontSize: 16)
+                    ),
+                    // No signal: the SOS is queued and Sylvia keeps trying.
+                    // Without this line the user read "NOT SENT" and nothing
+                    // else, while the SMS left by itself a minute later.
+                    if (_sosLogic.errorMessage == "SMS_FAILED" && _sosLogic.retryPendingCount > 0) ...[
+                      const SizedBox(height: 6),
+                      Text(
+                        l10n.statusSendRetrying,
+                        textAlign: TextAlign.center,
+                        style: const TextStyle(color: Colors.amberAccent, fontWeight: FontWeight.bold, fontSize: 15),
+                      ),
+                    ],
+                    const SizedBox(height: 10),
+                    if (_sosLogic.errorMessage == "NO_CONTACT" || _sosLogic.errorMessage.contains("Configura")) 
+                      ElevatedButton.icon(
+                        icon: const Icon(Icons.settings),
+                        label: Text(l10n.menuSettings.toUpperCase()),
+                        style: ElevatedButton.styleFrom(backgroundColor: Colors.redAccent, foregroundColor: Colors.white),
+                        onPressed: () => _sosLogic.openSettings(context),
+                      )
+                  ],
+                ),
+              )
+            ],
+
             const SizedBox(height: 12),
 
             // INTERRUPTORES
@@ -624,35 +665,6 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver, Ti
               ),
             ),
 
-            const SizedBox(height: 20),
-
-            if (_sosLogic.status == SOSStatus.error) ...[
-               const SizedBox(height: 20),
-               Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 30),
-                child: Column(
-                  children: [
-                    Text(
-                      _sosLogic.errorMessage == "NO_CONTACT"
-                          ? l10n.errorNoContact
-                          : _sosLogic.errorMessage == "SMS_FAILED"
-                              ? l10n.statusSendFailed
-                              : _sosLogic.errorMessage,
-                      textAlign: TextAlign.center,
-                      style: const TextStyle(color: Colors.redAccent, fontWeight: FontWeight.bold, fontSize: 16)
-                    ),
-                    const SizedBox(height: 10),
-                    if (_sosLogic.errorMessage == "NO_CONTACT" || _sosLogic.errorMessage.contains("Configura")) 
-                      ElevatedButton.icon(
-                        icon: const Icon(Icons.settings),
-                        label: Text(l10n.menuSettings.toUpperCase()),
-                        style: ElevatedButton.styleFrom(backgroundColor: Colors.redAccent, foregroundColor: Colors.white),
-                        onPressed: () => _sosLogic.openSettings(context),
-                      )
-                  ],
-                ),
-              )
-            ]
           ],
         ),
       ),

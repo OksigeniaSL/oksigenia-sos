@@ -1521,6 +1521,11 @@ class SOSLogic extends ChangeNotifier with WidgetsBindingObserver {
       // gone: its setting was removed but the pref survived in old installs,
       // so after an SOS it texted the first contact forever, in English.
     } else {
+      // Nobody has it yet. With no signal the contacts are queued and Sylvia
+      // retries: Home says so (and the counts are right if a retry succeeds).
+      _sentCount = 0;
+      _sentTotal = recipients.length;
+      _retryPendingCount = pending.length;
       _setStatus(SOSStatus.error, "SMS_FAILED");
     }
   }
