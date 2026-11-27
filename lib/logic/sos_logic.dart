@@ -1287,6 +1287,7 @@ class SOSLogic extends ChangeNotifier with WidgetsBindingObserver {
     await prefs.setBool('sos_sent_recently', false);
     await prefs.setBool('is_alarm_active', false);
     await prefs.setBool('beacon_active', false);
+    await PreferencesService.clearBeaconPosition(prefs);
     await prefs.remove('alarm_start_timestamp');
     await _clearSosRetryQueue();
     _beaconActive = false;
@@ -1322,6 +1323,7 @@ class SOSLogic extends ChangeNotifier with WidgetsBindingObserver {
   Future<void> stopBeacon() async {
     final prefs = await SharedPreferences.getInstance();
     await prefs.setBool('beacon_active', false);
+    await PreferencesService.clearBeaconPosition(prefs);
     _beaconActive = false;
     notifyListeners();
   }
@@ -1343,6 +1345,7 @@ class SOSLogic extends ChangeNotifier with WidgetsBindingObserver {
     try {
       final raw = await SharedPreferences.getInstance();
       await raw.setBool('beacon_active', false);
+      await PreferencesService.clearBeaconPosition(raw);
     } catch (_) {}
     await _clearSosRetryQueue();
     _beaconActive = false;

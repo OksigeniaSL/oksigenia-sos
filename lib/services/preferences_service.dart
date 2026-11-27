@@ -46,6 +46,22 @@ class PreferencesService {
   // one just remembers: it is what code without a widget falls back to.
   static const String keyLastUiLanguage = 'last_ui_language';
 
+  // Where the Smart Beacon started and last reported. Removed as soon as the
+  // beacon ends (expiry, "I'm safe", stop, reset), so the phone doesn't keep
+  // the last known position around once it no longer serves anybody.
+  static const List<String> beaconPositionKeys = [
+    'beacon_origin_lat',
+    'beacon_origin_lon',
+    'beacon_last_lat',
+    'beacon_last_lon',
+  ];
+
+  static Future<void> clearBeaconPosition(SharedPreferences p) async {
+    for (final k in beaconPositionKeys) {
+      await p.remove(k);
+    }
+  }
+
   // SOS RETRY QUEUE (shared by both isolates and OksigeniaBootReceiver.kt,
   // which reads the bool as "flutter.sos_retry_active")
   static const String keySosRetryActive = 'sos_retry_active';

@@ -41,6 +41,8 @@
         android:label="Oksigenia SOS"
         android:name="${applicationName}"
         android:icon="@mipmap/launcher_icon"
+        android:allowBackup="false"
+        android:dataExtractionRules="@xml/data_extraction_rules"
         android:enableOnBackInvokedCallback="true">
 
         <!-- Boot autostart condicional: arranca Sylvia tras un reinicio SÓLO si

@@ -1137,7 +1137,13 @@ void onStart(ServiceInstance service) async {
       // beacon_active lo apaga la UI ("Reiniciar sistema") desde otro isolate;
       // sin reload este isolate seguiría viendo la copia cacheada.
       await p.reload();
-      if (!(p.getBool('beacon_active') ?? false)) return;
+      if (!(p.getBool('beacon_active') ?? false)) {
+        // Stopped from the UI: drop the position it left behind.
+        if (p.containsKey('beacon_last_lat') || p.containsKey('beacon_origin_lat')) {
+          await PreferencesService.clearBeaconPosition(p);
+        }
+        return;
+      }
 
       final now = DateTime.now().millisecondsSinceEpoch;
       final originTs = p.getInt('beacon_origin_ts') ?? 0;
@@ -1145,6 +1151,7 @@ void onStart(ServiceInstance service) async {
 
       if (now - originTs > _beaconWindowSeconds * 1000 || count >= _beaconMaxUpdates) {
         await p.setBool('beacon_active', false);
+        await PreferencesService.clearBeaconPosition(p);
         _logSentinel("SYLVIA SERVICE: 📍 Beacon stopped (window/count reached)");
         // El beacon era lo único que mantenía viva a Sylvia → soltar el wakelock.
         await _stopIfIdle('beacon window ended');
