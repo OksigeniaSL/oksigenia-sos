@@ -50,6 +50,21 @@ The interface is designed for high-stress situations. High contrast, large touch
 
 ---
 
+## 🛰️ What's New in v4.3.4: the SOS really leaves, and protection comes back by itself
+
+A full review of the app, with every critical and high finding fixed and checked:
+
+- **SMS outcome is honest.** Without coverage the SOS was reported as sent and never retried. Each part of the SMS now waits for the radio's answer; with no service the SOS goes into a retry queue (1, 2, 5 and 10 minutes, then every 10, for up to 4 hours) that survives a restart, and the sent screen says how many contacts were reached.
+- **Monitoring comes back.** Any app could stop the service, and after an update or a kill by the system it stayed off. The receivers are no longer exported, the app relaunches after an update, and a watchdog (inexact alarm, no extra permission) restarts it every few minutes while something is armed.
+- **SMS and numbers.** Capitals with a grave accent (French "À L'AIDE") forced a broken encoding; they are now transliterated, and GSM extension characters count as two septets (plugin `oksigenia_sms` 0.2.1). A national 0 typed after the country prefix (`+44 (0)7700…`) is dropped.
+- **Honest screens.** Profiles without impact detection (paragliding, kayak, horse riding) grey out the fall switch instead of claiming to watch for falls; the alarm and its notification name the real cause; a banner shows a pause and when it ends. TalkBack can send and cancel an SOS, nothing overflows at 200 % font, and a shaky hold no longer cuts the SOS short.
+- **Privacy.** System backup is off: nothing is copied to the cloud or to a new phone, so contacts have to be added again after changing phones. `sentinel.log` rotates at 2 MB, masks phone numbers and keeps positions to 3 decimals, and the Smart Beacon forgets its last position when it ends. `FOREGROUND_SERVICE_LOCATION` is gone: no location-type service is ever in the foreground.
+- **Build.** Flutter 3.47.9, unit tests for the SOS helpers, and a release workflow with actions pinned by SHA that builds without secrets and signs in a separate job.
+
+Same signing key, updates cleanly.
+
+---
+
 ## ⏱️ What's New in v4.3.3: protection no longer stops after 6 hours
 
 Since Android 15, the system gives `dataSync` foreground services 6 hours in every 24 and crashes the app if they don't stop. The monitoring service declared `dataSync|mediaPlayback`, and combining types doesn't avoid the limit: after 6 hours without opening the app, Android could close Oksigenia SOS with no warning, whatever the profile. The service is now `health|mediaPlayback`: the type meant for exercise apps, with no time limit. `FOREGROUND_SERVICE_HEALTH` replaces `FOREGROUND_SERVICE_DATA_SYNC`; it is a normal permission and gives no access to any health data. Validated on device (Pixel 7a / GrapheneOS / Android 17) with the system limit shortened to 60 seconds: v4.3.2 was closed 71 seconds after going to the background, and v4.3.3 was still monitoring at 180 seconds, when the test ended. Starting by itself after a reboot and the alarm sounding with the screen locked were checked on the same phone. Same signing key, updates cleanly.

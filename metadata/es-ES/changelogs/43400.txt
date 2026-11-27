@@ -1,0 +1,9 @@
+v4.3.4 — El SOS sale de verdad, y la protección vuelve sola
+
+- Corregido: sin cobertura, el SOS se daba por enviado y no se reintentaba. Ahora lo reintenta hasta 4 horas, y la pantalla dice a cuántos contactos ha llegado.
+- Corregido: si Android u otra app cerraban la vigilancia, o tras una actualización, se quedaba apagada. Ahora vuelve sola.
+- Corregido: en francés el SOS llegaba roto, y algunos números escritos con el 0 nacional tras el prefijo se marcaban mal.
+- Parapente, kayak e hípica ya no dicen que vigilan caídas. La alarma dice su causa real.
+- Mantener SOS ya no se corta con un temblor de la mano. Mejor con TalkBack y letra grande, y una franja mientras está en pausa.
+- Privacidad: sin copia de seguridad del sistema (los contactos no pasan a un móvil nuevo; hay que volver a meterlos), el log oculta números y posiciones exactas, y un permiso menos.
+- Misma firma; actualiza sin problemas sobre cualquier instalación previa.

@@ -1,0 +1,9 @@
+v4.3.4 — The SOS really leaves, and protection comes back by itself
+
+- Fixed: with no coverage, the SOS was shown as sent and never retried. It now retries for up to 4 hours, and the screen says how many contacts it reached.
+- Fixed: if Android or another app closed the monitoring, or after an update, it stayed off. It now comes back by itself.
+- Fixed: in French the SOS arrived broken, and some numbers written with the national 0 after the prefix were dialled wrong.
+- Paragliding, kayak and horse riding no longer claim to watch for falls. The alarm names its real cause.
+- Holding SOS is no longer cut short by a shaky hand. Better with TalkBack and large fonts, and a banner while paused.
+- Privacy: no system backup (contacts aren't copied to a new phone; add them again), the log hides numbers and exact positions, and one permission fewer.
+- Same signing key; updates cleanly over any previous install.
