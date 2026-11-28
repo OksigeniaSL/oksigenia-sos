@@ -100,10 +100,18 @@ jobs:
         trap 'rm -f "$ks"' EXIT
         printf '%s' "$KEYSTORE_BASE64" | tr -d '\n\r ' | base64 --decode > "$ks"
         mkdir -p signed
+        # --alignment-preserved: by default apksigner realigns the entries it
+        # copies, so the signed APK no longer contains the unsigned build byte
+        # for byte. F-Droid and IzzyOnDroid verify reproducible builds by copying
+        # this signature onto their own unsigned build (apksigcopier); with a
+        # realigned APK that copy fails for every ABI (found on v4.3.4-rc.1).
+        # No v1 (JAR) signature: minSdk is 24, v1 is never checked there, and
+        # v4.3.3 (signed by Gradle) had none.
         for f in unsigned/app-*-release.apk; do
           out="signed/$(basename "$f")"
           "$bt/apksigner" sign --ks "$ks" --ks-key-alias "$KEY_ALIAS" \
             --ks-pass env:KEY_PASSWORD --key-pass env:ALIAS_PASSWORD \
+            --alignment-preserved true --v1-signing-enabled false \
             --v4-signing-enabled false --out "$out" "$f"
           "$bt/apksigner" verify --print-certs "$out" | grep -m1 'SHA-256 digest'
         done
