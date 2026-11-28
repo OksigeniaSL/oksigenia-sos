@@ -182,6 +182,54 @@ abstract class AppLocalizations {
   /// **'No SMS could be sent. Check signal and contacts, then retry.'**
   String get statusSendFailedBody;
 
+  /// No description provided for @statusSendRetrying.
+  ///
+  /// In en, this message translates to:
+  /// **'Not every contact has it yet (no signal?). Retrying automatically.'**
+  String get statusSendRetrying;
+
+  /// No description provided for @pauseNotifResumesIn.
+  ///
+  /// In en, this message translates to:
+  /// **'Resumes in {time}'**
+  String pauseNotifResumesIn(String time);
+
+  /// No description provided for @smsLiveTrackingHeader.
+  ///
+  /// In en, this message translates to:
+  /// **'📍 LIVE TRACKING — Oksigenia SOS'**
+  String get smsLiveTrackingHeader;
+
+  /// No description provided for @smsLiveCheckinHeader.
+  ///
+  /// In en, this message translates to:
+  /// **'✅ I\'M OK — Oksigenia SOS'**
+  String get smsLiveCheckinHeader;
+
+  /// No description provided for @sentPartialTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Alert sent to {sent} of {total} contacts'**
+  String sentPartialTitle(String sent, String total);
+
+  /// No description provided for @sentBeaconInfo.
+  ///
+  /// In en, this message translates to:
+  /// **'If you move more than 300 m, your new location is sent to your contacts.'**
+  String get sentBeaconInfo;
+
+  /// No description provided for @sentStopExplain.
+  ///
+  /// In en, this message translates to:
+  /// **'The button below stops the location updates and the pending retries. Press it only when you are safe.'**
+  String get sentStopExplain;
+
+  /// No description provided for @btnSafeStop.
+  ///
+  /// In en, this message translates to:
+  /// **'I\'M SAFE — STOP FOLLOW-UPS'**
+  String get btnSafeStop;
+
   /// No description provided for @statusError.
   ///
   /// In en, this message translates to:
@@ -221,7 +269,7 @@ abstract class AppLocalizations {
   /// No description provided for @menuDonate.
   ///
   /// In en, this message translates to:
-  /// **'Donar / Donate'**
+  /// **'Donate'**
   String get menuDonate;
 
   /// No description provided for @menuX.
@@ -617,7 +665,7 @@ abstract class AppLocalizations {
   /// No description provided for @warningKeepAlive.
   ///
   /// In en, this message translates to:
-  /// **'⚠️ IMPORTANT: Do not swipe-close the app (Task Manager). Leave it in background so it can auto-restart.'**
+  /// **'Keep the app open in the background. If you swipe it away from recent apps, protection may stop.'**
   String get warningKeepAlive;
 
   /// No description provided for @aboutTitle.
@@ -707,7 +755,7 @@ abstract class AppLocalizations {
   /// No description provided for @contactMain.
   ///
   /// In en, this message translates to:
-  /// **'Primary (Tracking / Battery)'**
+  /// **'Main contact — also gets live tracking'**
   String get contactMain;
 
   /// No description provided for @inactivitySubtitle.
@@ -929,7 +977,7 @@ abstract class AppLocalizations {
   /// No description provided for @slideStopSystem.
   ///
   /// In en, this message translates to:
-  /// **'SLIDE TO STOP SYSTEM'**
+  /// **'HOLD TO STOP ALL MONITORING'**
   String get slideStopSystem;
 
   /// No description provided for @onboardingTitle.
@@ -965,7 +1013,7 @@ abstract class AppLocalizations {
   /// No description provided for @onboardingFinish.
   ///
   /// In en, this message translates to:
-  /// **'ALL SET — START MONITORING'**
+  /// **'ALL SET — OPEN THE APP'**
   String get onboardingFinish;
 
   /// No description provided for @onboardingMandatory.
@@ -1001,7 +1049,7 @@ abstract class AppLocalizations {
   /// No description provided for @pauseMonitoringSheet.
   ///
   /// In en, this message translates to:
-  /// **'Pause monitoring for...'**
+  /// **'Pause all monitoring for… (resumes by itself)'**
   String get pauseMonitoringSheet;
 
   /// No description provided for @pauseTitle.
@@ -1397,7 +1445,7 @@ abstract class AppLocalizations {
   /// No description provided for @homeProfileNoFallWarning.
   ///
   /// In en, this message translates to:
-  /// **'This profile does NOT detect falls. SOS must be triggered manually.'**
+  /// **'This profile does NOT detect falls. Turn on the Inactivity Monitor; the SOS button always works.'**
   String get homeProfileNoFallWarning;
 
   /// No description provided for @homeActionApply.
@@ -1447,6 +1495,228 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'This phone asks for confirmation before any app sends an SMS (\"Always confirm\"): if nobody confirms, your SOS will not be sent.\n\nChoose a limit of at least {needed} (on LineageOS: Trust → SMS message limit) and restart the phone to be sure: on some phones the change only takes effect after a restart.'**
   String smsLimitBodyAlways(int needed);
+
+  /// No description provided for @homeAlertProfileNoImpact.
+  ///
+  /// In en, this message translates to:
+  /// **'NOT PROTECTED — this profile has no fall detection. Turn on the Inactivity Monitor.'**
+  String get homeAlertProfileNoImpact;
+
+  /// Subtitle of the greyed-out Fall Detection switch in profiles without impact detection (paragliding, kayak, horse riding).
+  ///
+  /// In en, this message translates to:
+  /// **'Not available in this profile'**
+  String get homeFallUnavailable;
+
+  /// Home banner while monitoring is paused. time = local clock time when it resumes by itself (e.g. 14:32).
+  ///
+  /// In en, this message translates to:
+  /// **'PAUSED until {time}'**
+  String homeAlertPaused(String time);
+
+  /// Screen-reader hint of the SOS button.
+  ///
+  /// In en, this message translates to:
+  /// **'Hold for 3 seconds to send an alert to your contacts'**
+  String get a11ySosHint;
+
+  /// Screen readers say 'Double-tap and hold to …' followed by this (infinitive, lower case).
+  ///
+  /// In en, this message translates to:
+  /// **'send an SOS'**
+  String get a11ySosLongPress;
+
+  /// Read by screen readers while the SOS countdown started from an accessibility long press runs.
+  ///
+  /// In en, this message translates to:
+  /// **'SOS in 3 seconds. Double-tap to cancel.'**
+  String get a11ySosCountdown;
+
+  /// Screen-reader name of the hold-to-stop control at the bottom of Home.
+  ///
+  /// In en, this message translates to:
+  /// **'Stop Oksigenia SOS'**
+  String get a11yStopLabel;
+
+  /// Screen-reader hint of the hold-to-stop control.
+  ///
+  /// In en, this message translates to:
+  /// **'Hold for 2 seconds. Stops all monitoring and closes the app.'**
+  String get a11yStopHint;
+
+  /// Screen readers say 'Double-tap and hold to …' followed by this (infinitive, lower case).
+  ///
+  /// In en, this message translates to:
+  /// **'stop monitoring and close the app'**
+  String get a11yStopLongPress;
+
+  /// Read by screen readers while the stop countdown started from an accessibility long press runs.
+  ///
+  /// In en, this message translates to:
+  /// **'Closing in 2 seconds. Double-tap to cancel.'**
+  String get a11yStopCountdown;
+
+  /// Screen-reader hint of the alarm screen's hold-to-cancel control.
+  ///
+  /// In en, this message translates to:
+  /// **'Hold for 2 seconds to cancel the alert'**
+  String get a11yAlarmCancelHint;
+
+  /// Screen readers say 'Double-tap and hold to …' followed by this (infinitive, lower case).
+  ///
+  /// In en, this message translates to:
+  /// **'cancel the alert'**
+  String get a11yAlarmCancelLongPress;
+
+  /// Read by screen readers while the cancel countdown started from an accessibility long press runs. A double-tap stops it and the alert goes on.
+  ///
+  /// In en, this message translates to:
+  /// **'Cancelling the alert in 2 seconds. Double-tap to keep it.'**
+  String get a11yAlarmCancelCountdown;
+
+  /// Screen-reader name of the motion (G-force) indicator on Home when the sensor works.
+  ///
+  /// In en, this message translates to:
+  /// **'Motion sensor working'**
+  String get a11yMotionOk;
+
+  /// Screen-reader name of the motion indicator when the sensor permission is missing (tapping it explains).
+  ///
+  /// In en, this message translates to:
+  /// **'Motion sensor not allowed'**
+  String get a11yMotionOff;
+
+  /// Screen-reader name of the battery indicator.
+  ///
+  /// In en, this message translates to:
+  /// **'Battery {level}%'**
+  String a11yBattery(int level);
+
+  /// Battery indicator when Android's battery optimisation can stop the app (tapping it explains).
+  ///
+  /// In en, this message translates to:
+  /// **'Battery {level}%, restricted by Android'**
+  String a11yBatteryRestricted(int level);
+
+  /// Screen-reader name of the GPS indicator with a fix.
+  ///
+  /// In en, this message translates to:
+  /// **'GPS accurate to {meters} m'**
+  String a11yGps(String meters);
+
+  /// Screen-reader name of the GPS indicator showing '--'.
+  ///
+  /// In en, this message translates to:
+  /// **'GPS: no position yet'**
+  String get a11yGpsNone;
+
+  /// Screen-reader name / tooltip of the + button in Settings.
+  ///
+  /// In en, this message translates to:
+  /// **'Add contact'**
+  String get a11yAddContact;
+
+  /// Screen-reader name / tooltip of the bin button next to a contact.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete {number}'**
+  String a11yDeleteContact(String number);
+
+  /// Tooltip / screen-reader name of the stop icon on Home's live-tracking card.
+  ///
+  /// In en, this message translates to:
+  /// **'Stop live tracking'**
+  String get a11yStopTracking;
+
+  /// No description provided for @contactCheckTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Is the country code right?'**
+  String get contactCheckTitle;
+
+  /// No description provided for @contactCheckBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Your SOS will be texted to {number}. If the country code is wrong, write the number with + and its country code.'**
+  String contactCheckBody(String number);
+
+  /// No description provided for @contactCheckSave.
+  ///
+  /// In en, this message translates to:
+  /// **'Yes, save'**
+  String get contactCheckSave;
+
+  /// No description provided for @contactCheckEdit.
+  ///
+  /// In en, this message translates to:
+  /// **'Correct it'**
+  String get contactCheckEdit;
+
+  /// No description provided for @onboardingPermLocation.
+  ///
+  /// In en, this message translates to:
+  /// **'GPS / Location'**
+  String get onboardingPermLocation;
+
+  /// No description provided for @onboardingPermNotifications.
+  ///
+  /// In en, this message translates to:
+  /// **'Notifications'**
+  String get onboardingPermNotifications;
+
+  /// No description provided for @onboardingPermActivity.
+  ///
+  /// In en, this message translates to:
+  /// **'Physical activity'**
+  String get onboardingPermActivity;
+
+  /// No description provided for @onboardingPermSensors.
+  ///
+  /// In en, this message translates to:
+  /// **'Motion sensors'**
+  String get onboardingPermSensors;
+
+  /// No description provided for @onboardingSettingsLocation.
+  ///
+  /// In en, this message translates to:
+  /// **'Location'**
+  String get onboardingSettingsLocation;
+
+  /// No description provided for @onboardingSettingsSensors.
+  ///
+  /// In en, this message translates to:
+  /// **'Sensors'**
+  String get onboardingSettingsSensors;
+
+  /// No description provided for @onboardingSettingsPath.
+  ///
+  /// In en, this message translates to:
+  /// **'Settings → Apps → Oksigenia SOS → Permissions → {permission}'**
+  String onboardingSettingsPath(String permission);
+
+  /// No description provided for @onboardingSmsStep1Done.
+  ///
+  /// In en, this message translates to:
+  /// **'Step 1 done: Android has shown its security notice.'**
+  String get onboardingSmsStep1Done;
+
+  /// No description provided for @onboardingSmsStep2.
+  ///
+  /// In en, this message translates to:
+  /// **'2. Open Settings (button below).'**
+  String get onboardingSmsStep2;
+
+  /// No description provided for @onboardingSmsStep3.
+  ///
+  /// In en, this message translates to:
+  /// **'3. Tap ⋮ (top right) → \"Allow restricted settings\" → PIN.'**
+  String get onboardingSmsStep3;
+
+  /// No description provided for @onboardingSmsStep4.
+  ///
+  /// In en, this message translates to:
+  /// **'4. Permissions → SMS → Allow.'**
+  String get onboardingSmsStep4;
 }
 
 class _AppLocalizationsDelegate

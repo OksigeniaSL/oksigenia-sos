@@ -4,10 +4,18 @@
     <string name="widget_status_off">Monitor av</string>
     <string name="widget_status_active">Monitor aktiv</string>
     <string name="widget_status_yellow">Sentinel — observasjon</string>
-    <string name="widget_status_orange">Alarm rett rundt hjørnet</string>
+    <string name="widget_status_orange">Alarm om få sekunder</string>
     <string name="widget_status_alarm">ALARM AKTIV</string>
     <string name="widget_mode_fall">Fall</string>
     <string name="widget_mode_inactivity_fmt">Inaktivitet %1$s</string>
     <string name="widget_mode_tracking">Tracking</string>
     <string name="widget_modes_none">Ingen aktive moduser</string>
+    <string name="widget_profile_trekking">Fjelltur</string>
+    <string name="widget_profile_running">Løping</string>
+    <string name="widget_profile_trail_mtb">Stiløping/MTB</string>
+    <string name="widget_profile_mountaineering">Tindebestigning</string>
+    <string name="widget_profile_paragliding">Paragliding</string>
+    <string name="widget_profile_kayak">Kajakk</string>
+    <string name="widget_profile_equitation">Ridning</string>
+    <string name="widget_profile_professional">Profesjonell</string>
 </resources>

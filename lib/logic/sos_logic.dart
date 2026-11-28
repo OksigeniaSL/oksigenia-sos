@@ -19,9 +19,12 @@ import 'package:oksigenia_sms/oksigenia_sms.dart';
 import 'activity_profile.dart';
 import '../services/preferences_service.dart';
 import '../utils/phone_utils.dart';
-import '../utils/sms_splitter.dart';
+import '../utils/sentinel_log.dart';
 import '../utils/geo_links.dart';
 import '../utils/sms_budget.dart';
+import '../utils/sms_splitter.dart';
+import '../utils/sms_text.dart';
+import '../utils/sos_sms.dart';
 import '../screens/settings_screen.dart';
 import '../screens/alarm_screen.dart';
 import '../screens/sent_screen.dart';
@@ -63,6 +66,13 @@ class SOSLogic extends ChangeNotifier with WidgetsBindingObserver {
 
   double _visualGForce = 1.0;
   DateTime _lastMovementTime = DateTime.now();
+  // The accelerometer listener used to call notifyListeners() on every sample
+  // (50-200 a second), also with the app in the background: the UI isolate
+  // never rested (about 22 % of a core measured with monitoring armed). Only
+  // the G gauge needs those notifications, so they go out at most 10 times a
+  // second and not at all while the app is not on screen.
+  bool _appResumed = true;
+  DateTime _lastGaugeNotify = DateTime.fromMillisecondsSinceEpoch(0);
   
   DateTime _lastSensorPacket = DateTime.now();
   bool _isWarmingUp = false;
@@ -93,6 +103,11 @@ class SOSLogic extends ChangeNotifier with WidgetsBindingObserver {
   // Smart Beacon activo tras un SOS: la UI lo refleja para ofrecer un botón
   // visible de parada (antes era imposible apagarlo desde la app).
   bool _beaconActive = false;
+  // How the last SOS went, for the sent screen: contacts reached, contacts in
+  // total, and how many wait in Sylvia's retry queue.
+  int _sentCount = 0;
+  int _sentTotal = 0;
+  int _retryPendingCount = 0;
 
   bool _smsPermissionOk = true;
   bool _notificationPermissionOk = true;
@@ -110,6 +125,11 @@ class SOSLogic extends ChangeNotifier with WidgetsBindingObserver {
   bool get fullScreenIntentOk => _fullScreenIntentOk;
   bool get bgLocationOk => _bgLocationOk;
   bool get beaconActive => _beaconActive;
+  int get sentCount => _sentCount;
+  int get sentTotal => _sentTotal;
+  int get retryPendingCount => _retryPendingCount;
+  /// True when the last SOS reached every contact (or its count is unknown).
+  bool get sentToEveryone => _sentTotal <= 0 || _sentCount >= _sentTotal;
   bool get smsPermissionOk => _smsPermissionOk;
   bool get notificationPermissionOk => _notificationPermissionOk;
   int get inactivityElapsedSeconds => isMonitoringPaused
@@ -155,9 +175,84 @@ class SOSLogic extends ChangeNotifier with WidgetsBindingObserver {
     }
   }
   
+  /// Fall detection that really runs: the switch alone is not enough in the
+  /// profiles without impact detection (paragliding, kayak, horse riding).
+  bool get fallDetectionEffective =>
+      _isFallDetectionActive &&
+      activityProfileConfigs[PreferencesService().getActivityProfile()]!.impactDetectionEnabled;
+
+  /// Something automatic is watching: what "protected" may honestly mean.
+  bool get protectionEffective => fallDetectionEffective || _isInactivityMonitorActive;
+
   String? get emergencyContact {
     final contacts = PreferencesService().getContacts();
     return contacts.isNotEmpty ? contacts.first : null;
+  }
+
+  /// The texts Sylvia shows and sends, in the language of [l10n].
+  Map<String, String> _serviceTexts(AppLocalizations l10n) => {
+        'alertFallDetected': l10n.alertFallDetected,
+        'alertInactivityDetected': l10n.alertInactivityDetected,
+        'alertInactivityBody': l10n.alertInactivityBody,
+        'holdToCancel': l10n.holdToCancel,
+        'alertSendingIn': l10n.alertSendingIn,
+        'statusSent': l10n.statusSent,
+        'statusSendFailed': l10n.statusSendFailed,
+        'statusSendFailedBody': l10n.statusSendFailedBody,
+        'statusSendRetrying': l10n.statusSendRetrying,
+        'statusReady': l10n.statusReady,
+        'smsHelpMessage': l10n.smsHelpMessage,
+        'smsDyingGasp': l10n.smsDyingGasp,
+        'pauseTitle': l10n.pauseTitle,
+        // Sylvia fills in {time} on every refresh of the pause notification.
+        'pauseNotifResumesIn': l10n.pauseNotifResumesIn('{time}'),
+        'resumeNow': l10n.pauseResumeNow,
+        'smsBeaconHeader': l10n.smsBeaconHeader,
+        'smsBeaconDistance': l10n.smsBeaconDistance,
+        // Sylvia fills in the two numbers.
+        'sentPartialTitle': l10n.sentPartialTitle('{sent}', '{total}'),
+        'liveTrackingTitle': l10n.liveTrackingTitle,
+        'liveTrackingCardTitle': l10n.liveTrackingCardTitle,
+        'liveTrackingShutdownReminder': l10n.liveTrackingShutdownReminder,
+        'smsLiveTrackingHeader': l10n.smsLiveTrackingHeader,
+        'smsLiveCheckinHeader': l10n.smsLiveCheckinHeader,
+      };
+
+  /// The app's texts for code that has no widget at hand (notifications, SMS).
+  ///
+  /// With a context it is the language on screen, and that language is
+  /// remembered. Without one (the UI not built yet, or gone) it is the language
+  /// the user chose by hand, else the last one the UI was shown in, else
+  /// English. Before, that last case was always English for anyone who never
+  /// picked a language in the menu: 'language_code' is only written there, and
+  /// it is not written here either, or the app would stay in that language.
+  Future<AppLocalizations> _l10nNow() async {
+    final BuildContext? ctx = oksigeniaNavigatorKey.currentContext;
+    if (ctx != null) {
+      final AppLocalizations? onScreen = AppLocalizations.of(ctx);
+      if (onScreen != null) {
+        try {
+          final sharedPrefs = await SharedPreferences.getInstance();
+          final String lang = onScreen.localeName.split('_').first;
+          if (sharedPrefs.getString(PreferencesService.keyLastUiLanguage) != lang) {
+            await sharedPrefs.setString(PreferencesService.keyLastUiLanguage, lang);
+          }
+        } catch (_) {}
+        return onScreen;
+      }
+    }
+    String langCode = 'en';
+    try {
+      final sharedPrefs = await SharedPreferences.getInstance();
+      langCode = sharedPrefs.getString('language_code') ??
+          sharedPrefs.getString(PreferencesService.keyLastUiLanguage) ??
+          'en';
+    } catch (_) {}
+    try {
+      return await AppLocalizations.delegate.load(Locale(langCode));
+    } catch (_) {
+      return AppLocalizations.delegate.load(const Locale('en'));
+    }
   }
 
   Future<void> _syncConfigWithService() async {
@@ -165,50 +260,7 @@ class SOSLogic extends ChangeNotifier with WidgetsBindingObserver {
     if (!(await service.isRunning())) return;
 
     final prefs = PreferencesService();
-    
-    Map<String, String> texts = {};
-    
-    if (oksigeniaNavigatorKey.currentContext != null) {
-      final l10n = AppLocalizations.of(oksigeniaNavigatorKey.currentContext!);
-      if (l10n != null) {
-        texts = {
-          'alertFallDetected': l10n.alertFallDetected,
-          'holdToCancel': l10n.holdToCancel,
-          'alertSendingIn': l10n.alertSendingIn,
-          'statusSent': l10n.statusSent,
-          'statusSendFailed': l10n.statusSendFailed,
-          'statusSendFailedBody': l10n.statusSendFailedBody,
-          'statusReady': l10n.statusReady,
-          'smsHelpMessage': l10n.smsHelpMessage,
-          'smsDyingGasp': l10n.smsDyingGasp,
-          'pauseTitle': l10n.pauseTitle,
-          'resumeNow': l10n.pauseResumeNow,
-          'smsBeaconHeader': l10n.smsBeaconHeader,
-          'smsBeaconDistance': l10n.smsBeaconDistance,
-        };
-      }
-    } else {
-      final sharedPrefs = await SharedPreferences.getInstance();
-      String langCode = sharedPrefs.getString('language_code') ?? 'en';
-      try {
-        final l10n = await AppLocalizations.delegate.load(Locale(langCode));
-        texts = {
-          'alertFallDetected': l10n.alertFallDetected,
-          'holdToCancel': l10n.holdToCancel,
-          'alertSendingIn': l10n.alertSendingIn,
-          'statusSent': l10n.statusSent,
-          'statusSendFailed': l10n.statusSendFailed,
-          'statusSendFailedBody': l10n.statusSendFailedBody,
-          'statusReady': l10n.statusReady,
-          'smsHelpMessage': l10n.smsHelpMessage,
-          'smsDyingGasp': l10n.smsDyingGasp,
-          'pauseTitle': l10n.pauseTitle,
-          'resumeNow': l10n.pauseResumeNow,
-          'smsBeaconHeader': l10n.smsBeaconHeader,
-          'smsBeaconDistance': l10n.smsBeaconDistance,
-        };
-      } catch (_) {}
-    }
+    final Map<String, String> texts = _serviceTexts(await _l10nNow());
 
     service.invoke("setConfig", {
       "recipients": prefs.getContacts(),
@@ -224,6 +276,9 @@ class SOSLogic extends ChangeNotifier with WidgetsBindingObserver {
 
     WidgetsBinding.instance.removeObserver(this);
     WidgetsBinding.instance.addObserver(this);
+    // Unknown (null) before the first frame: taken as on screen.
+    _appResumed = (WidgetsBinding.instance.lifecycleState ?? AppLifecycleState.resumed) ==
+        AppLifecycleState.resumed;
     
     // 🟢 FIX: Limpieza de buffer. Forzamos 1.0G visualmente al inicio.
     _visualGForce = 1.0;
@@ -284,13 +339,16 @@ class SOSLogic extends ChangeNotifier with WidgetsBindingObserver {
       // M7: respetar la causa que envía Sylvia. Antes era SIEMPRE fall, así que
       // una alarma de inactividad se mostraba como "IMPACT DETECTED".
       final String c = (event?["cause"] ?? 'fall').toString();
-      final AlertCause cause =
-          c == 'inactivity' ? AlertCause.inactivity : AlertCause.fall;
+      final AlertCause cause = switch (c) {
+        'inactivity' => AlertCause.inactivity,
+        'manual' => AlertCause.manual,
+        _ => AlertCause.fall,
+      };
       _triggerPreAlert(cause, startedByService: true);
     }));
 
     _serviceSubscriptions.add(service.on("onSosSent").listen((event) {
-      _onServiceSendResult(((event?["sent"]) ?? 0) as int);
+      _onServiceSendResult(((event?["sent"]) ?? 0) as int, event);
     }));
 
     _startGForceMonitoring();
@@ -350,6 +408,7 @@ class SOSLogic extends ChangeNotifier with WidgetsBindingObserver {
         final raw = await SharedPreferences.getInstance();
         await raw.reload();
         _beaconActive = raw.getBool('beacon_active') ?? false;
+        _adoptServiceAlarm(raw);
       } catch (_) {}
 
       bool isSystemArmed = _isFallDetectionActive || _isInactivityMonitorActive;
@@ -377,6 +436,32 @@ class SOSLogic extends ChangeNotifier with WidgetsBindingObserver {
 
       notifyListeners();
     } catch(e) { debugPrint("Health Check Error: $e"); }
+  }
+
+  // Sylvia can start an alarm while this UI is not listening yet: at start-up,
+  // when the inactivity backstop came due with the service down, or when it
+  // resumes a countdown after a respawn. Its onAlarmTriggered is then lost and
+  // the siren sounded with no screen to cancel it from. The 5 s health check
+  // picks the alarm up from what Sylvia leaves in prefs. The alarm, its siren
+  // and its countdown stay Sylvia's: this only shows them. [p] must be freshly
+  // reloaded.
+  void _adoptServiceAlarm(SharedPreferences p) {
+    if (_status != SOSStatus.ready && _status != SOSStatus.locationFixed) return;
+    // Just cancelled: Sylvia may not have cleared its flag yet.
+    if (DateTime.now().difference(_lastCancellationTime).inSeconds < 10) return;
+    if (!(p.getBool('is_alarm_active') ?? false)) return;
+    final int startMs = p.getInt('alarm_start_timestamp') ?? 0;
+    if (startMs <= 0) return;
+    final int remaining =
+        30 - (DateTime.now().millisecondsSinceEpoch - startMs) ~/ 1000;
+    // Over: Sylvia is sending or has sent, there is nothing left to cancel.
+    if (remaining <= 0 || remaining > 30) return;
+    final String causeName = p.getString(PreferencesService.keyAlarmCause) ?? '';
+    final AlertCause cause = AlertCause.values
+        .where((c) => c.name == causeName)
+        .firstOrNull ?? AlertCause.fall;
+    debugPrint("LOGIC: 🚨 Alarma de Sylvia en curso sin pantalla ($causeName, ${remaining}s). Mostrándola.");
+    _triggerPreAlert(cause, startedByService: true, countdown: remaining);
   }
 
   Future<void> requestBatteryOptimizationIgnore() async {
@@ -410,6 +495,7 @@ class SOSLogic extends ChangeNotifier with WidgetsBindingObserver {
 
   @override
   void didChangeAppLifecycleState(AppLifecycleState state) {
+    _appResumed = state == AppLifecycleState.resumed;
     if (state == AppLifecycleState.resumed) {
       if (_status == SOSStatus.preAlert || _status == SOSStatus.sent) return;
       
@@ -483,6 +569,9 @@ class SOSLogic extends ChangeNotifier with WidgetsBindingObserver {
     }
 
     final rawPrefs = await SharedPreferences.getInstance();
+    // What follows is written by Sylvia, in another isolate: without a reload
+    // this one only sees its own cached copy.
+    try { await rawPrefs.reload(); } catch (_) {}
 
     // M1 (lado UI): restaurar una pausa en curso tras un respawn. Sylvia ya la
     // restaura por su lado (paused_until en prefs), pero la UI tenía su
@@ -493,17 +582,14 @@ class SOSLogic extends ChangeNotifier with WidgetsBindingObserver {
       _pausedUntil = DateTime.fromMillisecondsSinceEpoch(pausedUntilMs);
     }
 
-    // Check if inactivity AlarmClock fired during Doze (screen was off, Timer was frozen)
-    final int scheduledFor = rawPrefs.getInt('inactivity_alarm_scheduled_for') ?? 0;
-    final bool inactivityWasEnabled = rawPrefs.getBool('inactivity_monitor_enabled') ?? false;
-    if (scheduledFor > 0 &&
-        scheduledFor <= DateTime.now().millisecondsSinceEpoch &&
-        inactivityWasEnabled) {
-      debugPrint("LOGIC: ⏰ AlarmClock de inactividad disparado durante Doze. Activando zombie.");
-      await rawPrefs.setBool('is_alarm_active', true);
-      await rawPrefs.setInt('alarm_start_timestamp', scheduledFor);
-      await rawPrefs.setInt('inactivity_alarm_scheduled_for', 0);
-    }
+    // The UI no longer turns a passed inactivity backstop into an alarm of its
+    // own. It did, by writing is_alarm_active itself and running a countdown
+    // with no siren and no vibration, and after 90 s it sent the SOS: a silent
+    // pre-alarm. A backstop that came due is now Sylvia's business when it
+    // starts (_loadConfigFromDisk): it watches the sensors for 45 s and, if
+    // the phone stays still, raises the normal alarm. The siren and the
+    // countdown are Sylvia's; this UI only shows them, here below, on
+    // onAlarmTriggered or from _adoptServiceAlarm.
 
     bool isZombieAlarming = rawPrefs.getBool('is_alarm_active') ?? false;
 
@@ -514,7 +600,7 @@ class SOSLogic extends ChangeNotifier with WidgetsBindingObserver {
        // Restaurar la causa real (persistida en _triggerPreAlert). El default
        // es fall, no manual: una alarma zombie sin causa conocida es casi
        // seguro del servicio, y con fall el emisor es Sylvia (sin doble SMS).
-       final String causeName = rawPrefs.getString('alarm_cause') ?? '';
+       final String causeName = rawPrefs.getString(PreferencesService.keyAlarmCause) ?? '';
        _lastTrigger = AlertCause.values
            .where((c) => c.name == causeName)
            .firstOrNull ?? AlertCause.fall;
@@ -528,15 +614,8 @@ class SOSLogic extends ChangeNotifier with WidgetsBindingObserver {
           _status = SOSStatus.preAlert;
           _countdownSeconds = remaining; 
           
-          Future.delayed(const Duration(milliseconds: 500), () {
-              if (oksigeniaNavigatorKey.currentState != null) {
-                oksigeniaNavigatorKey.currentState!.popUntil((route) => route.isFirst);
-                oksigeniaNavigatorKey.currentState!.push(
-                  MaterialPageRoute(builder: (context) => const AlarmScreen())
-                );
-              }
-          });
-          
+          Future.delayed(const Duration(milliseconds: 500), _showAlarmScreen);
+
           _preAlertTimer?.cancel();
           _preAlertTimer = Timer.periodic(const Duration(seconds: 1), (timer) {
             _countdownSeconds--;
@@ -583,7 +662,10 @@ class SOSLogic extends ChangeNotifier with WidgetsBindingObserver {
     _setStatus(SOSStatus.scanning);
     _awaitingServiceSend = true;
     _serviceSendTimeout?.cancel();
-    _serviceSendTimeout = Timer(const Duration(seconds: 90), () async {
+    // Sylvia can take up to ~15 s for the GPS plus ~20-30 s per contact before it
+    // reports: a fixed 90 s made the UI send a duplicate SOS with 4+ contacts.
+    final int contacts = PreferencesService().getContacts().length;
+    _serviceSendTimeout = Timer(Duration(seconds: 90 + 30 * max(0, contacts - 1)), () async {
       if (_awaitingServiceSend) {
         _awaitingServiceSend = false;
         debugPrint("LOGIC: ❌ Sin confirmación de Sylvia tras 90s. Fallback de la UI.");
@@ -605,10 +687,15 @@ class SOSLogic extends ChangeNotifier with WidgetsBindingObserver {
     });
   }
 
-  void _onServiceSendResult(int sentCount) async {
+  void _onServiceSendResult(int sentCount, [Map<String, dynamic>? details]) async {
     // Confirmación de Sylvia. Se acepta también en preAlert: si su zombie
     // ganó la carrera y ya envió, mostrar SentScreen es lo veraz.
-    if (_status != SOSStatus.scanning && _status != SOSStatus.preAlert) return;
+    // Also from the error screen: a queued retry that got through later is the
+    // truth the user must see.
+    if (_status != SOSStatus.scanning && _status != SOSStatus.preAlert &&
+        !(_status == SOSStatus.error && sentCount > 0)) {
+      return;
+    }
     _awaitingServiceSend = false;
     _serviceSendTimeout?.cancel();
     _preAlertTimer?.cancel();
@@ -618,6 +705,14 @@ class SOSLogic extends ChangeNotifier with WidgetsBindingObserver {
       return;
     }
 
+    // What the sent screen will say: Sylvia tells how many contacts have it.
+    final int? reached = (details?["reached"] ?? details?["sent"]) as int?;
+    final int? total = details?["total"] as int?;
+    if (reached != null && total != null) {
+      _sentCount = reached;
+      _sentTotal = total;
+      _retryPendingCount = (details?["pending"] as int?) ?? 0;
+    }
     _setStatus(SOSStatus.sent);
     final sharedPrefs = await SharedPreferences.getInstance();
     await sharedPrefs.setBool('sos_sent_recently', true);
@@ -642,6 +737,32 @@ class SOSLogic extends ChangeNotifier with WidgetsBindingObserver {
           MaterialPageRoute(builder: (context) => const SentScreen())
        );
     }
+  }
+
+  /// Reads how the last SOS went from what both isolates leave in prefs:
+  /// contacts reached, contacts in total, the retry queue and the beacon. The
+  /// sent screen calls it when it opens, which also covers a UI that was not
+  /// running when Sylvia sent.
+  Future<void> refreshSentSummary() async {
+    try {
+      final p = await SharedPreferences.getInstance();
+      await p.reload();
+      final int total = p.getInt(PreferencesService.keySosLastTotal) ?? 0;
+      final int sent = p.getInt(PreferencesService.keySosLastSent) ?? 0;
+      final bool queued = p.getBool(PreferencesService.keySosRetryActive) ?? false;
+      final int pending = queued
+          ? (p.getStringList(PreferencesService.keySosRetryNumbers) ?? const []).length
+          : 0;
+      final bool beacon = p.getBool('beacon_active') ?? false;
+      if (total != _sentTotal || sent != _sentCount ||
+          pending != _retryPendingCount || beacon != _beaconActive) {
+        _sentTotal = total;
+        _sentCount = sent;
+        _retryPendingCount = pending;
+        _beaconActive = beacon;
+        notifyListeners();
+      }
+    } catch (_) {}
   }
 
   Future<void> refreshConfig() async {
@@ -673,6 +794,17 @@ class SOSLogic extends ChangeNotifier with WidgetsBindingObserver {
              if (_status == SOSStatus.locationFixed) _setStatus(SOSStatus.ready);
           });
     } catch (e) { debugPrint("Passive GPS Error: $e"); }
+  }
+
+  // Repaint request for the G gauge: at most 10 a second, none in the
+  // background. The stream itself and the inactivity clock it feeds keep
+  // running as before; every state change still notifies on its own.
+  void _notifyGauge() {
+    if (!_appResumed) return;
+    final DateTime now = DateTime.now();
+    if (now.difference(_lastGaugeNotify).inMilliseconds < 100) return;
+    _lastGaugeNotify = now;
+    notifyListeners();
   }
 
   void _startGForceMonitoring() {
@@ -719,7 +851,7 @@ class SOSLogic extends ChangeNotifier with WidgetsBindingObserver {
               DateTime.now().difference(streamStart).inMilliseconds < 4000;
           if (_isWarmingUp || sensorWarmup) {
             _visualGForce = 1.0;
-            notifyListeners();
+            _notifyGauge();
             return;
           }
 
@@ -729,7 +861,7 @@ class SOSLogic extends ChangeNotifier with WidgetsBindingObserver {
             _visualGForce = (_visualGForce * 0.90) + (instantG * 0.10);
           }
 
-          notifyListeners();
+          _notifyGauge();
 
           if (_uiCooldown) return;
           if (_status == SOSStatus.sent) return;
@@ -884,6 +1016,14 @@ class SOSLogic extends ChangeNotifier with WidgetsBindingObserver {
            return;
         }
         if (isMonitoringPaused) return;
+        // A pause that just ended counts as movement, as in Sylvia. Without it
+        // this clock, frozen during the pause, could fire a false inactivity
+        // alarm the moment a 1 h pause ends with a 1 h limit.
+        if (_pausedUntil != null) {
+          _pausedUntil = null;
+          _lastMovementTime = DateTime.now();
+          return;
+        }
         if (_status != SOSStatus.ready && _status != SOSStatus.locationFixed) return;
 
         if (DateTime.now().difference(_lastMovementTime).inSeconds > _currentInactivityLimit) {
@@ -893,6 +1033,13 @@ class SOSLogic extends ChangeNotifier with WidgetsBindingObserver {
       });
     } else {
       _inactivityTimer?.cancel();
+      // Sylvia clears its backstop when it gets the message. If it is not
+      // running, nobody would, and the next Sylvia to start with inactivity
+      // back on could take the old mark for a backstop that fired.
+      try {
+        (await SharedPreferences.getInstance())
+            .setInt(PreferencesService.keyInactivityBackstopDue, 0);
+      } catch (_) {}
       if (_status == SOSStatus.preAlert && _lastTrigger == AlertCause.inactivity) {
         cancelAlert(); 
       }
@@ -900,20 +1047,27 @@ class SOSLogic extends ChangeNotifier with WidgetsBindingObserver {
     notifyListeners();
   }
 
-  void _triggerPreAlert(AlertCause cause, {bool startedByService = false}) async {
+  // countdown: seconds left, when the alarm is already counting down in Sylvia
+  // and the UI joins it late (_adoptServiceAlarm).
+  void _triggerPreAlert(AlertCause cause,
+      {bool startedByService = false, int countdown = 30}) async {
     if (_status == SOSStatus.preAlert || _status == SOSStatus.sent) return;
+
+    // State first, before any await: two triggers at once (Sylvia's event and
+    // the UI's own timer, or the alarm picked up from prefs) both passed the
+    // check above, and the second restarted the countdown under another cause.
+    debugPrint("SYLVIA: 🚨 ALARMA ACTIVADA");
+    _lastTrigger = cause;
+    _status = SOSStatus.preAlert;
+    _countdownSeconds = countdown;
 
     // alarm_start_timestamp es de Sylvia (lo escribe _lanzarAlarma) y de él
     // dependen las dos recuperaciones tras kill de proceso — no se borra aquí.
     // La causa sí se persiste: sin ella, una restauración zombie volvía a
     // 'manual' y la UI enviaba su propio SMS además del de Sylvia.
     final prefs = await SharedPreferences.getInstance();
-    await prefs.setString('alarm_cause', cause.name);
+    await prefs.setString(PreferencesService.keyAlarmCause, cause.name);
 
-    debugPrint("SYLVIA: 🚨 ALARMA ACTIVADA");
-    _lastTrigger = cause;
-    _status = SOSStatus.preAlert;
-    _countdownSeconds = 30;
     _updateSylviaStatus();
     notifyListeners();
 
@@ -922,7 +1076,9 @@ class SOSLogic extends ChangeNotifier with WidgetsBindingObserver {
     if (!startedByService) {
       try {
          final service = FlutterBackgroundService();
-         service.invoke("startAlarm");
+         // With the cause, so Sylvia's notification does not call a manual
+         // SOS or an inactivity alarm "impact detected".
+         service.invoke("startAlarm", {"cause": cause.name});
          Vibration.vibrate(pattern: [500, 1000, 500, 1000], repeat: 1);
       } catch (e) { debugPrint("Error servicio: $e"); }
     }
@@ -948,11 +1104,26 @@ class SOSLogic extends ChangeNotifier with WidgetsBindingObserver {
     try { await platform.invokeMethod('bringToFront'); } catch(_) {}
 
     await Future.delayed(const Duration(milliseconds: 500));
-    if (oksigeniaNavigatorKey.currentState != null) {
-      await oksigeniaNavigatorKey.currentState!.pushAndRemoveUntil(
-        MaterialPageRoute(builder: (_) => const AlarmScreen()),
-        (route) => route.isFirst,
-      );
+    await _showAlarmScreen();
+  }
+
+  // Puts the alarm screen on top as soon as there is a navigator to push it
+  // on. When the alarm itself opens the app (cold start) the first frame can
+  // come later than the single 500 ms wait there used to be; the push was then
+  // skipped for good and the siren sounded with no screen to cancel it from.
+  // Gives up after about 10 s, or as soon as the alarm is no longer pending.
+  Future<void> _showAlarmScreen() async {
+    for (int attempt = 0; attempt < 50; attempt++) {
+      if (_status != SOSStatus.preAlert) return;
+      final NavigatorState? navigator = oksigeniaNavigatorKey.currentState;
+      if (navigator != null) {
+        navigator.pushAndRemoveUntil(
+          MaterialPageRoute(builder: (_) => const AlarmScreen()),
+          (route) => route.isFirst,
+        );
+        return;
+      }
+      await Future.delayed(const Duration(milliseconds: 200));
     }
   }
 
@@ -960,69 +1131,58 @@ class SOSLogic extends ChangeNotifier with WidgetsBindingObserver {
   // real de un fallo de SMS quedaba en logcat, invisible en el sentinel.log que
   // revisa el usuario (bug #12: "no vi nada en el log"). Escribe el motivo en el
   // MISMO archivo que Sylvia (mismo path externo), SIN PII: nunca el número del
-  // contacto (el usuario puede pegar el log en público). Diagnóstico esporádico
-  // → append simple con flush.
+  // contacto (el usuario puede pegar el log en público); scrubLogLine lo
+  // garantiza aunque el texto de una excepción lo traiga. Diagnóstico
+  // esporádico → append con flush, con la misma rotación que Sylvia.
   Future<void> _logSmsDiag(String line) async {
     try {
       Directory? dir = await getExternalStorageDirectory();
       dir ??= await getApplicationDocumentsDirectory();
       final ts = DateTime.now().toIso8601String();
-      await File('${dir.path}/sentinel.log')
-          .writeAsString('$ts $line\n', mode: FileMode.append, flush: true);
+      await appendToRotatingLog(
+          File('${dir.path}/sentinel.log'), '$ts ${scrubLogLine(line)}');
     } catch (_) {}
   }
 
-  // issue #12: enviar troceado con isMultipart:false (sendTextMessage). La vía
-  // multipart lanza getGroupIdLevel1/READ_PHONE_STATE en Android 17/GrapheneOS.
-  // Troceo sin partir enlaces (sms_splitter). Devuelve true si salió al menos la
-  // primera pieza (la crítica: SOS + coordenadas).
+  // Every SMS from the UI goes through sendSosSms (lib/utils/sos_sms.dart),
+  // like Sylvia's: it says honestly whether the radio took it.
+  Future<SosSmsOutcome> _sendSmsOutcomeUi(String to, String message,
+      {bool overLimit = false}) {
+    return sendSosSms(to, message,
+        overLimit: overLimit,
+        telephony: _telephony,
+        log: (m) => _logSmsDiag("UI $m"));
+  }
+
   Future<bool> _sendSmsChunked(String to, String message,
-      {bool overLimit = false}) async {
-    // Fase 2 (#12): primario = plugin propio (1 SMS concatenado, sin permiso
-    // extra, con resultCode); fallback al troceo de la Fase 1 si el plugin falla.
-    // #13: con [overLimit], igual que _sendSmsTracked en Sylvia: lo retenido
-    // por el límite de SMS de Android no cuenta como enviado ni se trocea.
+          {bool overLimit = false}) async =>
+      sosSmsDelivered(await _sendSmsOutcomeUi(to, message, overLimit: overLimit));
+
+  // Contacts the UI's SOS could not reach are handed to Sylvia's retry queue
+  // (same prefs keys), and Sylvia is started if it is not running.
+  Future<void> _queueSosRetryForService(List<String> numbers) async {
     try {
-      final r = await OksigeniaSms.send(
-          to: to,
-          message: message,
-          timeout: Duration(seconds: overLimit ? 8 : 20));
-      if (r.status == OksigeniaSmsStatus.failed) {
-        if (overLimit || r.error == 'limit_exceeded') {
-          _logSmsDiag("UI SMS: límite de SMS de Android (${r.error}) — sin troceo");
-          return false;
-        }
-        _logSmsDiag("UI SMS: plugin falló (${r.error}) → fallback a troceo");
-        return _sendSplitFallbackUi(to, message);
-      }
-      if (r.status == OksigeniaSmsStatus.unknown && overLimit) {
-        _logSmsDiag("UI SMS: retenido por el límite de SMS de Android (esperando confirmación)");
-        return false;
-      }
-      return true; // sent | unknown (entregado; ver EXP5)
+      final p = await SharedPreferences.getInstance();
+      final now = DateTime.now().millisecondsSinceEpoch;
+      await p.setStringList(PreferencesService.keySosRetryNumbers, numbers);
+      await p.setInt(PreferencesService.keySosRetryAttempt, 0);
+      await p.setInt(PreferencesService.keySosRetryNext, now + 60 * 1000);
+      await p.setInt(PreferencesService.keySosRetryUntil, now + 4 * 60 * 60 * 1000);
+      await p.setBool(PreferencesService.keySosRetryActive, true);
+      _logSmsDiag("UI SOS: ${numbers.length} contact(s) queued for automatic retry");
+      final service = FlutterBackgroundService();
+      if (!await service.isRunning()) await service.startService();
     } catch (e) {
-      _logSmsDiag("UI SMS: excepción del plugin ($e) → fallback a troceo");
-      final bool ok = await _sendSplitFallbackUi(to, message);
-      return ok && !overLimit;
+      _logSmsDiag("UI SOS: could not queue the retry: $e");
     }
   }
 
-  Future<bool> _sendSplitFallbackUi(String to, String message) async {
-    final parts = splitSmsSafely(message);
-    int ok = 0;
-    for (final part in parts) {
-      try {
-        await _telephony.sendSms(to: to, message: part, isMultipart: false);
-        ok++;
-      } catch (e) {
-        debugPrint("Error enviando pieza: $e");
-        _logSmsDiag("UI SMS FAIL (pieza ${ok + 1}/${parts.length}): $e");
-      }
-    }
-    if (ok < parts.length) {
-      _logSmsDiag("UI SMS: fallback envió $ok/${parts.length} piezas");
-    }
-    return ok > 0;
+  Future<void> _clearSosRetryQueue() async {
+    try {
+      final p = await SharedPreferences.getInstance();
+      await p.setBool(PreferencesService.keySosRetryActive, false);
+      await p.remove(PreferencesService.keySosRetryNumbers);
+    } catch (_) {}
   }
 
   Future<void> _triggerDyingGasp() async {
@@ -1037,18 +1197,26 @@ class SOSLogic extends ChangeNotifier with WidgetsBindingObserver {
     final List<String> recipients = prefs.getContacts();
     if (recipients.isEmpty) return;
 
-    final sharedPrefs = await SharedPreferences.getInstance();
-    String langCode = sharedPrefs.getString('language_code') ?? 'en';
-    final t = await AppLocalizations.delegate.load(Locale(langCode));
+    final t = await _l10nNow();
 
     String msg = t.smsDyingGasp;
     if (msg.isEmpty) msg = "BATT <5%. Bye. Loc:";
 
     try {
-      Position pos = await Geolocator.getCurrentPosition(timeLimit: const Duration(seconds: 5))
-        .catchError((_) async => await Geolocator.getLastKnownPosition() ?? Position(longitude: 0, latitude: 0, timestamp: DateTime.now(), accuracy: 0, altitude: 0, heading: 0, speed: 0, speedAccuracy: 0, altitudeAccuracy: 0, headingAccuracy: 0));
-
-      msg += "\n${geoLinks(pos.latitude, pos.longitude)}";
+      Position? pos;
+      try {
+        pos = await Geolocator.getCurrentPosition(timeLimit: const Duration(seconds: 5));
+      } catch (_) {
+        pos = await Geolocator.getLastKnownPosition();
+      }
+      // Without any fix this used to send links to 0,0 (Gulf of Guinea).
+      if (pos != null) {
+        final int fixAgeSec = DateTime.now().difference(pos.timestamp).inSeconds;
+        msg += "\n${geoLinks(pos.latitude, pos.longitude)}";
+        if (fixAgeSec > 90) msg += "\n${(fixAgeSec / 60).round()}min";
+      } else {
+        msg += "\n(No Loc)";
+      }
 
       int sent = 0;
       for (String number in recipients) {
@@ -1119,7 +1287,9 @@ class SOSLogic extends ChangeNotifier with WidgetsBindingObserver {
     await prefs.setBool('sos_sent_recently', false);
     await prefs.setBool('is_alarm_active', false);
     await prefs.setBool('beacon_active', false);
+    await PreferencesService.clearBeaconPosition(prefs);
     await prefs.remove('alarm_start_timestamp');
+    await _clearSosRetryQueue();
     _beaconActive = false;
 
     _uiCooldown = true;
@@ -1153,6 +1323,7 @@ class SOSLogic extends ChangeNotifier with WidgetsBindingObserver {
   Future<void> stopBeacon() async {
     final prefs = await SharedPreferences.getInstance();
     await prefs.setBool('beacon_active', false);
+    await PreferencesService.clearBeaconPosition(prefs);
     _beaconActive = false;
     notifyListeners();
   }
@@ -1174,7 +1345,9 @@ class SOSLogic extends ChangeNotifier with WidgetsBindingObserver {
     try {
       final raw = await SharedPreferences.getInstance();
       await raw.setBool('beacon_active', false);
+      await PreferencesService.clearBeaconPosition(raw);
     } catch (_) {}
+    await _clearSosRetryQueue();
     _beaconActive = false;
 
     _isFallDetectionActive = false;
@@ -1196,9 +1369,7 @@ class SOSLogic extends ChangeNotifier with WidgetsBindingObserver {
   // Nota del SOS cuando el usuario no ha escrito la suya: el mensaje de ayuda en
   // el idioma de la app.
   Future<String> _defaultSosNote() async {
-    final sharedPrefs = await SharedPreferences.getInstance();
-    final String langCode = sharedPrefs.getString('language_code') ?? 'en';
-    final t = await AppLocalizations.delegate.load(Locale(langCode));
+    final t = await _l10nNow();
     return t.smsHelpMessage.isEmpty ? "HELP!" : t.smsHelpMessage;
   }
 
@@ -1226,7 +1397,10 @@ class SOSLogic extends ChangeNotifier with WidgetsBindingObserver {
     _setStatus(SOSStatus.scanning);
     _inactivityTimer?.cancel();
     _gpsSubscription?.cancel();
-    int batteryLevel = await _battery.batteryLevel;
+    // This send goes to every contact: an older pending retry is replaced.
+    await _clearSosRetryQueue();
+    int batteryLevel = 0;
+    try { batteryLevel = await _battery.batteryLevel; } catch (_) {}
 
     // Nota (personalizada o de ayuda), colocada tras el enlace de Maps para que
     // las coordenadas viajen en el primer SMS.
@@ -1239,21 +1413,25 @@ class SOSLogic extends ChangeNotifier with WidgetsBindingObserver {
     Position? sosPos;
     try {
       try {
+        // 15 s like Sylvia: 5 s from cold almost always ended in lastKnown.
         final LocationSettings locationSettings = AndroidSettings(
             accuracy: LocationAccuracy.high,
             forceLocationManager: true,
-            timeLimit: const Duration(seconds: 5));
+            timeLimit: const Duration(seconds: 15));
         sosPos = await Geolocator.getCurrentPosition(locationSettings: locationSettings);
       } catch (_) {
         sosPos = await Geolocator.getLastKnownPosition();
       }
       if (sosPos != null) {
         _setStatus(SOSStatus.locationFixed);
+        // An old fix presented as the current position misleads a rescue:
+        // say how old it is, as Sylvia does.
+        final int fixAgeSec = DateTime.now().difference(sosPos.timestamp).inSeconds;
         // La nota del usuario justo bajo la cabecera (se lee primero); después
         // el bloque de ubicación (geo: + Google + OSM) y la línea técnica.
         msgBody += "\n$note";
         msgBody += "\n${geoLinks(sosPos.latitude, sosPos.longitude)}";
-        msgBody += "\nBat: $batteryLevel% | Alt: ${sosPos.altitude.toStringAsFixed(0)}m | Acc: ${sosPos.accuracy.toStringAsFixed(0)}m";
+        msgBody += "\n${sosTechLine(batteryPct: batteryLevel, altitudeM: sosPos.altitude, accuracyM: sosPos.accuracy, fixAgeSeconds: fixAgeSec)}";
       } else {
         msgBody += "\n$note";
         msgBody += "\n(GPS Error/Timeout)";
@@ -1270,17 +1448,23 @@ class SOSLogic extends ChangeNotifier with WidgetsBindingObserver {
     OksigeniaSmsRateLimit? smsLimit;
     int partsPerContact = 1; // mínimo una parte (ver Sylvia)
     try { smsLimit = await OksigeniaSms.rateLimit(); } catch (_) {}
-    try { partsPerContact = max(1, await OksigeniaSms.partCount(msgBody)); } catch (_) {}
+    try { partsPerContact = max(1, await OksigeniaSms.partCount(gsmSafe(msgBody))); } catch (_) {}
 
     int successCount = 0;
     int burstParts = 0;
+    final List<String> pending = [];
     for (String number in recipients) {
       burstParts += partsPerContact;
       final bool overLimit = smsLimit != null && !smsLimit.allows(burstParts);
-      if (await _sendSmsChunked(normalizePhoneE164(number), msgBody, overLimit: overLimit)) {
+      final SosSmsOutcome outcome = await _sendSmsOutcomeUi(
+          normalizePhoneE164(number), msgBody, overLimit: overLimit);
+      if (sosSmsDelivered(outcome)) {
         successCount++;
+      } else if (sosSmsRetryable(outcome)) {
+        pending.add(number);
       }
     }
+    if (pending.isNotEmpty) await _queueSosRetryForService(pending);
     if (successCount < recipients.length) {
       _logSmsDiag("UI SOS: sólo $successCount/${recipients.length} contactos recibieron el SOS");
     }
@@ -1292,11 +1476,18 @@ class SOSLogic extends ChangeNotifier with WidgetsBindingObserver {
         Vibration.cancel();
       } catch (e) {}
 
+      // How it went, for the sent screen (set before the status changes, so
+      // its first frame is already the honest one).
+      _sentCount = successCount;
+      _sentTotal = recipients.length;
+      _retryPendingCount = pending.length;
       _setStatus(SOSStatus.sent);
 
       final sharedPrefs = await SharedPreferences.getInstance();
       await sharedPrefs.setBool('sos_sent_recently', true);
       await sharedPrefs.setBool('is_alarm_active', false);
+      await sharedPrefs.setInt(PreferencesService.keySosLastSent, successCount);
+      await sharedPrefs.setInt(PreferencesService.keySosLastTotal, recipients.length);
 
       // Smart Beacon: arm post-SOS position-update protocol. Sylvia (service)
       // polls these flags in _beaconTick from the inactivity checker loop.
@@ -1326,26 +1517,19 @@ class SOSLogic extends ChangeNotifier with WidgetsBindingObserver {
         await _audioPlayer!.play(AssetSource('sounds/send.mp3'));
       } catch(e) {}
 
-      int interval = prefs.getUpdateInterval();
-      if (interval > 0) _startPeriodicUpdates(interval, recipients);
+      // The old periodic "still moving" SMS (update_interval, v3.6-v3.8) is
+      // gone: its setting was removed but the pref survived in old installs,
+      // so after an SOS it texted the first contact forever, in English.
     } else {
+      // Nobody has it yet. With no signal the contacts are queued and Sylvia
+      // retries: Home says so (and the counts are right if a retry succeeds).
+      _sentCount = 0;
+      _sentTotal = recipients.length;
+      _retryPendingCount = pending.length;
       _setStatus(SOSStatus.error, "SMS_FAILED");
     }
   }
 
-  void _startPeriodicUpdates(int minutes, List<String> recipients) {
-    if (recipients.isEmpty) return;
-    String target = normalizePhoneE164(recipients.first);
-    _periodicUpdateTimer?.cancel();
-    _periodicUpdateTimer = Timer.periodic(Duration(minutes: minutes), (timer) async {
-      try {
-        Position pos = await Geolocator.getCurrentPosition(timeLimit: const Duration(seconds: 20));
-        String updateMsg = "SEGUIMIENTO Oksigenia: sigo en ruta / still moving.";
-        updateMsg += "\n${geoLinks(pos.latitude, pos.longitude)}";
-        await _sendSmsChunked(target, updateMsg);
-      } catch (e) {}
-    });
-  }
 
   void _setStatus(SOSStatus s, [String? e]) { 
       _status = s; 
@@ -1464,9 +1648,7 @@ class SOSLogic extends ChangeNotifier with WidgetsBindingObserver {
       final service = FlutterBackgroundService();
       if (await service.isRunning()) {
         bool isActive = _isFallDetectionActive || _isInactivityMonitorActive;
-        final prefs = await SharedPreferences.getInstance(); 
-        String lang = prefs.getString('language_code') ?? 'en';
-        final t = await AppLocalizations.delegate.load(Locale(lang));
+        final t = await _l10nNow();
 
         String title = "";
         String content = "";
@@ -1475,22 +1657,32 @@ class SOSLogic extends ChangeNotifier with WidgetsBindingObserver {
         if (_status == SOSStatus.preAlert) {
           statusIcon = "alarm";
           title = "🚨 SOS";
-          content = t.alertFallDetected;
+          content = switch (_lastTrigger) {
+            AlertCause.fall => t.alertFallDetected,
+            AlertCause.inactivity => t.alertInactivityDetected,
+            _ => t.holdToCancel,
+          };
         } else if (isActive && isMonitoringPaused) {
           statusIcon = "paused";
           final mins = pauseRemainingSeconds ~/ 60;
           final secs = (pauseRemainingSeconds % 60).toString().padLeft(2, '0');
           title = "⏸ ${t.pauseTitle}";
-          content = "${t.pauseResumeNow} — ${mins}m${secs}s";
+          content = t.pauseNotifResumesIn("${mins}m ${secs}s");
         } else if (!isActive) {
           statusIcon = "paused";
           title = t.statusMonitorStopped;
           content = "---";
+        } else if (!protectionEffective) {
+          // Fall detection on in a profile without it, inactivity off: the
+          // notification must not say "ready" while nothing is watching.
+          statusIcon = "paused";
+          title = t.homeAlertProfileNoImpact;
+          content = "---";
         } else {
-          title = t.statusReady; 
+          title = t.statusReady;
           List<String> activeModes = [];
-          if (_isFallDetectionActive) activeModes.add(t.autoModeLabel); 
-          if (_isInactivityMonitorActive) activeModes.add(t.inactivityModeLabel); 
+          if (fallDetectionEffective) activeModes.add(t.autoModeLabel);
+          if (_isInactivityMonitorActive) activeModes.add(t.inactivityModeLabel);
           content = activeModes.join(" + ");
         }
 

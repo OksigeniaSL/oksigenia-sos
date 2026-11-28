@@ -44,9 +44,17 @@ class MainDrawer extends StatelessWidget {
                   style: TextStyle(color: Colors.white, fontSize: 24, fontWeight: FontWeight.bold)
                 ),
                 const SizedBox(height: 5),
-                Text(
-                  l10n.motto, 
-                  style: const TextStyle(color: Colors.white70, fontSize: 13)
+                // Screen readers said "Respira greater than Inspira…": read
+                // the words, not the code-like symbols.
+                Semantics(
+                  label: l10n.motto
+                      .replaceAll(RegExp(r'\s*>\s*'), ', ')
+                      .replaceAll(';', ''),
+                  excludeSemantics: true,
+                  child: Text(
+                    l10n.motto,
+                    style: const TextStyle(color: Colors.white70, fontSize: 13)
+                  ),
                 ),
               ],
             ),

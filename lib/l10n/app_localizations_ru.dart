@@ -43,6 +43,37 @@ class AppLocalizationsRu extends AppLocalizations {
       'Не удалось отправить ни одного SMS. Проверьте сигнал сети и контакты, затем повторите.';
 
   @override
+  String get statusSendRetrying =>
+      'Ещё не все контакты получили его (нет сети?). Повторная отправка автоматически.';
+
+  @override
+  String pauseNotifResumesIn(String time) {
+    return 'Возобновится через $time';
+  }
+
+  @override
+  String get smsLiveTrackingHeader => '📍 LIVE TRACKING — Oksigenia SOS';
+
+  @override
+  String get smsLiveCheckinHeader => '✅ Я В ПОРЯДКЕ — Oksigenia SOS';
+
+  @override
+  String sentPartialTitle(String sent, String total) {
+    return 'Тревога отправлена $sent из $total контактов';
+  }
+
+  @override
+  String get sentBeaconInfo =>
+      'Если вы переместитесь более чем на 300 м, новое местоположение будет отправлено вашим контактам.';
+
+  @override
+  String get sentStopExplain =>
+      'Кнопка ниже останавливает отправку местоположения и ожидающие повторные попытки. Нажимайте её, только когда будете в безопасности.';
+
+  @override
+  String get btnSafeStop => 'Я В БЕЗОПАСНОСТИ — ОСТАНОВИТЬ';
+
+  @override
   String statusError(Object error) {
     return 'ОШИБКА: $error';
   }
@@ -63,7 +94,7 @@ class AppLocalizationsRu extends AppLocalizations {
   String get menuPrivacy => 'Конфиденциальность';
 
   @override
-  String get menuDonate => 'Поддержать / Donate';
+  String get menuDonate => 'Поддержать';
 
   @override
   String get menuX => '𝕏 (Twitter)';
@@ -95,7 +126,7 @@ class AppLocalizationsRu extends AppLocalizations {
   String get settingsSavedMsg => 'Контакт сохранён';
 
   @override
-  String get errorNoContact => '⚠️ Сначала добавь контакт!';
+  String get errorNoContact => '⚠️ Сначала добавьте контакт!';
 
   @override
   String get autoModeLabel => 'Детектор падений';
@@ -161,10 +192,10 @@ class AppLocalizationsRu extends AppLocalizations {
 
   @override
   String get dialogStoreBody =>
-      'Подпишись на PRO, чтобы открыть несколько контактов и трекинг в реальном времени.';
+      'Подпишитесь на PRO, чтобы открыть несколько контактов и трекинг в реальном времени.';
 
   @override
-  String get btnDonate => 'Купи мне кофе ☕';
+  String get btnDonate => 'Купите мне кофе ☕';
 
   @override
   String get btnSubscribe => 'Подписаться';
@@ -249,14 +280,14 @@ class AppLocalizationsRu extends AppLocalizations {
   String get testModeWarning => 'ТЕСТ-РЕЖИМ: тревога сработает через 30 с.';
 
   @override
-  String get toastHoldToSOS => 'Удерживай кнопку SOS';
+  String get toastHoldToSOS => 'Удерживайте кнопку SOS';
 
   @override
-  String get donateDialogTitle => '💎 Поддержи проект';
+  String get donateDialogTitle => '💎 Поддержите проект';
 
   @override
   String get donateDialogBody =>
-      'Это бесплатное и open-source ПО. Если оно держит тебя в безопасности, угости нас кофе.';
+      'Это бесплатное и open-source ПО. Если оно помогает вам оставаться в безопасности, угостите нас кофе.';
 
   @override
   String get donateBtn => 'Поддержать через PayPal';
@@ -272,7 +303,7 @@ class AppLocalizationsRu extends AppLocalizations {
 
   @override
   String get warningKeepAlive =>
-      '⚠️ ВАЖНО: не закрывай приложение свайпом (диспетчер задач). Оставь в фоне, чтобы оно могло само перезапуститься.';
+      'Оставьте приложение открытым в фоне. Если вы смахнёте его из недавних приложений, защита может прекратиться.';
 
   @override
   String get aboutTitle => 'О приложении';
@@ -318,7 +349,7 @@ class AppLocalizationsRu extends AppLocalizations {
   String get invalidNumberWarning => 'Номер неверный или слишком короткий';
 
   @override
-  String get contactMain => 'Главный (Трекинг / Батарея)';
+  String get contactMain => 'Главный контакт — также получает Live Tracking';
 
   @override
   String get inactivitySubtitle => 'Время без движения до вызова помощи.';
@@ -327,18 +358,18 @@ class AppLocalizationsRu extends AppLocalizations {
   String get dialogPermissionTitle => 'Как включить разрешения';
 
   @override
-  String get dialogPermissionStep1 => '1. Нажми «ПЕРЕЙТИ В НАСТРОЙКИ» ниже.';
+  String get dialogPermissionStep1 => '1. Нажмите «ПЕРЕЙТИ В НАСТРОЙКИ» ниже.';
 
   @override
   String get dialogPermissionStep2 =>
-      '2. На новом экране нажми 3 точки (⠇) сверху справа.';
+      '2. На новом экране нажмите 3 точки (⠇) сверху справа.';
 
   @override
   String get dialogPermissionStep3 =>
-      '3. Выбери «Разрешить ограниченные настройки» (если видно).';
+      '3. Выберите «Разрешить ограниченные настройки» (если видно).';
 
   @override
-  String get dialogPermissionStep4 => '4. Вернись в это приложение.';
+  String get dialogPermissionStep4 => '4. Вернитесь в это приложение.';
 
   @override
   String get btnGoToSettings => 'ПЕРЕЙТИ В НАСТРОЙКИ';
@@ -387,7 +418,7 @@ class AppLocalizationsRu extends AppLocalizations {
       'Точность зависит от физического чипа телефона и прямой видимости неба.\n\nВнутри помещений, в гаражах или туннелях сигнал спутника блокируется, и местоположение может быть приблизительным или отсутствовать.\n\nOksigenia всегда попытается определить наилучшую возможную позицию.';
 
   @override
-  String get holdToCancel => 'Удерживай для отмены';
+  String get holdToCancel => 'Удерживайте для отмены';
 
   @override
   String get statusMonitorStopped => 'Монитор остановлен.';
@@ -416,7 +447,7 @@ class AppLocalizationsRu extends AppLocalizations {
 
   @override
   String get batteryDialogBody =>
-      'Система ограничивает батарею этого приложения. Чтобы SOS работал в фоне, выбери «Без ограничений» или «Не оптимизировать».';
+      'Система ограничивает батарею этого приложения. Чтобы SOS работал в фоне, выберите «Без ограничений» или «Не оптимизировать».';
 
   @override
   String get permBgLocationTitle => 'GPS в фоновом режиме';
@@ -436,14 +467,14 @@ class AppLocalizationsRu extends AppLocalizations {
   String get permLocMissing => 'Нет разрешения геолокации';
 
   @override
-  String get slideStopSystem => 'ПЕРЕТАЩИ, ЧТОБЫ ОСТАНОВИТЬ';
+  String get slideStopSystem => 'УДЕРЖИВАЙТЕ: ВЫКЛЮЧИТЬ ВСЁ';
 
   @override
-  String get onboardingTitle => 'Настрой систему безопасности';
+  String get onboardingTitle => 'Настройте систему безопасности';
 
   @override
   String get onboardingSubtitle =>
-      'Эти разрешения нужны, чтобы Oksigenia SOS защищала тебя в поле.';
+      'Эти разрешения нужны, чтобы Oksigenia SOS защищала вас в поле.';
 
   @override
   String get onboardingGrant => 'РАЗРЕШИТЬ';
@@ -455,7 +486,7 @@ class AppLocalizationsRu extends AppLocalizations {
   String get onboardingNext => 'ДАЛЕЕ';
 
   @override
-  String get onboardingFinish => 'ГОТОВО — ЗАПУСТИТЬ МОНИТОРИНГ';
+  String get onboardingFinish => 'ГОТОВО — ОТКРЫТЬ ПРИЛОЖЕНИЕ';
 
   @override
   String get onboardingMandatory => 'Требуется для активации мониторинга';
@@ -474,7 +505,8 @@ class AppLocalizationsRu extends AppLocalizations {
   String get btnEnableFullScreenIntent => 'ВКЛЮЧИТЬ';
 
   @override
-  String get pauseMonitoringSheet => 'Приостановить мониторинг на...';
+  String get pauseMonitoringSheet =>
+      'Приостановить весь мониторинг на… (возобновится сам)';
 
   @override
   String get pauseTitle => 'Мониторинг приостановлен';
@@ -491,7 +523,7 @@ class AppLocalizationsRu extends AppLocalizations {
   String get pauseResumedMsg => 'Мониторинг возобновлён';
 
   @override
-  String get pauseHoldHint => 'Удерживай для паузы';
+  String get pauseHoldHint => 'Удерживайте для паузы';
 
   @override
   String get pauseSec5 => '5 секунд';
@@ -529,7 +561,7 @@ class AppLocalizationsRu extends AppLocalizations {
 
   @override
   String get liveTrackingLegalBody =>
-      'Live Tracking отправляет одну SMS за интервал главному контакту. Применяются тарифы оператора. Все расходы на SMS несёшь ты.';
+      'Live Tracking отправляет одну SMS за интервал главному контакту. Применяются тарифы оператора. Все расходы на SMS несёте вы.';
 
   @override
   String get liveTrackingActivate => 'АКТИВИРОВАТЬ ТРЕКИНГ';
@@ -560,7 +592,7 @@ class AppLocalizationsRu extends AppLocalizations {
   }
 
   @override
-  String get selectLanguage => 'Выбери язык';
+  String get selectLanguage => 'Выберите язык';
 
   @override
   String get whyPermsTitle => 'Зачем эти разрешения?';
@@ -571,7 +603,7 @@ class AppLocalizationsRu extends AppLocalizations {
 
   @override
   String get whyPermsLocation =>
-      'Включает GPS-координаты в тревогу, чтобы спасатели знали, где ты.';
+      'Включает GPS-координаты в тревогу, чтобы спасатели знали, где вы.';
 
   @override
   String get whyPermsNotifications =>
@@ -591,7 +623,7 @@ class AppLocalizationsRu extends AppLocalizations {
 
   @override
   String get whyPermsFullScreen =>
-      'Показывает тревогу поверх экрана блокировки, чтобы ты мог реагировать без разблокировки.';
+      'Показывает тревогу поверх экрана блокировки, чтобы вы могли реагировать без разблокировки.';
 
   @override
   String get sentinelGreen => 'Система активна';
@@ -610,7 +642,7 @@ class AppLocalizationsRu extends AppLocalizations {
 
   @override
   String get activityProfileSubtitle =>
-      'Настраивает Smart Sentinel под твой спорт. Выбери ближайший — неправильный профиль вызовет ложные тревоги или пропустит реальные падения.';
+      'Настраивает Smart Sentinel под ваш вид спорта. Выберите ближайший — неправильный профиль вызовет ложные тревоги или пропустит реальные падения.';
 
   @override
   String get profileTrekking => 'Треккинг / Походы';
@@ -652,7 +684,7 @@ class AppLocalizationsRu extends AppLocalizations {
 
   @override
   String get profileKayakDesc =>
-      'Автоматический детектор падений ОТКЛЮЧЁН — вода поглощает удары, а движение на плаву неинформативно. Используй монитор бездействия и ручной SOS.';
+      'Автоматический детектор падений ОТКЛЮЧЁН — вода поглощает удары, а движение на плаву неинформативно. Используйте монитор бездействия и ручной SOS.';
 
   @override
   String get profileEquitation => 'Конный спорт';
@@ -704,7 +736,7 @@ class AppLocalizationsRu extends AppLocalizations {
 
   @override
   String get homeProfileNoFallWarning =>
-      'Этот профиль НЕ обнаруживает падения. SOS должен быть активирован вручную.';
+      'Этот профиль НЕ обнаруживает падения. Включите Монитор бездействия; кнопка SOS работает всегда.';
 
   @override
   String get homeActionApply => 'Применить';
@@ -721,18 +753,152 @@ class AppLocalizationsRu extends AppLocalizations {
 
   @override
   String get smsLimitBanner =>
-      'Слишком низкий лимит SMS: твой SOS может не уйти';
+      'Слишком низкий лимит SMS: ваш SOS может не уйти';
 
   @override
   String get smsLimitTitle => 'Лимит SMS в Android слишком низкий';
 
   @override
   String smsLimitBody(int limit, int needed, int parts) {
-    return 'Этот телефон просит подтверждение, когда приложение отправляет больше $limit SMS за короткое время. Твоему SOS нужно $needed ($parts на контакт): если никто не подтвердит, часть не будет отправлена.\n\nПодними лимит хотя бы до $needed (в LineageOS: Trust → Ограничение SMS-сообщений) и на всякий случай перезагрузи телефон: на некоторых телефонах изменение вступает в силу только после перезагрузки. Или используй меньше контактов или более короткое своё сообщение.';
+    return 'Этот телефон просит подтверждение, когда приложение отправляет больше $limit SMS за короткое время. Вашему SOS нужно $needed ($parts на контакт): если никто не подтвердит, часть не будет отправлена.\n\nПоднимите лимит хотя бы до $needed (в LineageOS: Trust → Ограничение SMS-сообщений) и на всякий случай перезагрузите телефон: на некоторых телефонах изменение вступает в силу только после перезагрузки. Или используйте меньше контактов или более короткое своё сообщение.';
   }
 
   @override
   String smsLimitBodyAlways(int needed) {
-    return 'Этот телефон просит подтверждение перед любой отправкой SMS приложением («Подтверждать всегда»): если никто не подтвердит, твой SOS не будет отправлен.\n\nВыбери лимит не меньше $needed (в LineageOS: Trust → Ограничение SMS-сообщений) и на всякий случай перезагрузи телефон: на некоторых телефонах изменение вступает в силу только после перезагрузки.';
+    return 'Этот телефон просит подтверждение перед любой отправкой SMS приложением («Подтверждать всегда»): если никто не подтвердит, ваш SOS не будет отправлен.\n\nВыберите лимит не меньше $needed (в LineageOS: Trust → Ограничение SMS-сообщений) и на всякий случай перезагрузите телефон: на некоторых телефонах изменение вступает в силу только после перезагрузки.';
   }
+
+  @override
+  String get homeAlertProfileNoImpact =>
+      'НЕТ ЗАЩИТЫ — этот профиль не определяет падения. Включите Монитор бездействия.';
+
+  @override
+  String get homeFallUnavailable => 'Недоступно в этом профиле';
+
+  @override
+  String homeAlertPaused(String time) {
+    return 'ПАУЗА до $time';
+  }
+
+  @override
+  String get a11ySosHint =>
+      'Удерживайте 3 секунды, чтобы оповестить ваши контакты';
+
+  @override
+  String get a11ySosLongPress => 'отправить SOS';
+
+  @override
+  String get a11ySosCountdown =>
+      'SOS через 3 секунды. Дважды коснитесь для отмены.';
+
+  @override
+  String get a11yStopLabel => 'Остановить Oksigenia SOS';
+
+  @override
+  String get a11yStopHint =>
+      'Удерживайте 2 секунды. Останавливает весь мониторинг и закрывает приложение.';
+
+  @override
+  String get a11yStopLongPress => 'остановить мониторинг и закрыть приложение';
+
+  @override
+  String get a11yStopCountdown =>
+      'Остановка через 2 секунды. Дважды коснитесь для отмены.';
+
+  @override
+  String get a11yAlarmCancelHint =>
+      'Удерживайте 2 секунды, чтобы отменить тревогу';
+
+  @override
+  String get a11yAlarmCancelLongPress => 'отменить тревогу';
+
+  @override
+  String get a11yAlarmCancelCountdown =>
+      'Тревога отменится через 2 секунды. Дважды коснитесь, чтобы оставить её.';
+
+  @override
+  String get a11yMotionOk => 'Датчик движения работает';
+
+  @override
+  String get a11yMotionOff => 'Нет доступа к датчику движения';
+
+  @override
+  String a11yBattery(int level) {
+    return 'Батарея $level%';
+  }
+
+  @override
+  String a11yBatteryRestricted(int level) {
+    return 'Батарея $level%, ограничена Android';
+  }
+
+  @override
+  String a11yGps(String meters) {
+    return 'Точность GPS $meters м';
+  }
+
+  @override
+  String get a11yGpsNone => 'GPS: позиция ещё не определена';
+
+  @override
+  String get a11yAddContact => 'Добавить контакт';
+
+  @override
+  String a11yDeleteContact(String number) {
+    return 'Удалить $number';
+  }
+
+  @override
+  String get a11yStopTracking => 'Остановить Live Tracking';
+
+  @override
+  String get contactCheckTitle => 'Код страны указан верно?';
+
+  @override
+  String contactCheckBody(String number) {
+    return 'Ваш SOS будет отправлен на $number. Если код страны неверный, введите номер с + и кодом страны.';
+  }
+
+  @override
+  String get contactCheckSave => 'Да, сохранить';
+
+  @override
+  String get contactCheckEdit => 'Исправить';
+
+  @override
+  String get onboardingPermLocation => 'GPS / Местоположение';
+
+  @override
+  String get onboardingPermNotifications => 'Уведомления';
+
+  @override
+  String get onboardingPermActivity => 'Физическая активность';
+
+  @override
+  String get onboardingPermSensors => 'Датчики движения';
+
+  @override
+  String get onboardingSettingsLocation => 'Местоположение';
+
+  @override
+  String get onboardingSettingsSensors => 'Датчики';
+
+  @override
+  String onboardingSettingsPath(String permission) {
+    return 'Настройки → Приложения → Oksigenia SOS → Разрешения → $permission';
+  }
+
+  @override
+  String get onboardingSmsStep1Done =>
+      'Шаг 1 выполнен: Android показал предупреждение безопасности.';
+
+  @override
+  String get onboardingSmsStep2 => '2. Откройте Настройки (кнопка ниже).';
+
+  @override
+  String get onboardingSmsStep3 =>
+      '3. Нажмите ⋮ (вверху справа) → «Разрешить ограниченные настройки» → PIN-код.';
+
+  @override
+  String get onboardingSmsStep4 => '4. Разрешения → SMS → Разрешить.';
 }

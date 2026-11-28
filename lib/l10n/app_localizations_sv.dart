@@ -43,6 +43,37 @@ class AppLocalizationsSv extends AppLocalizations {
       'Inget SMS kunde skickas. Kontrollera täckning och kontakter och försök igen.';
 
   @override
+  String get statusSendRetrying =>
+      'Alla kontakter har inte fått det än (ingen täckning?). Försöker igen automatiskt.';
+
+  @override
+  String pauseNotifResumesIn(String time) {
+    return 'Återupptas om $time';
+  }
+
+  @override
+  String get smsLiveTrackingHeader => '📍 LIVESPÅRNING — Oksigenia SOS';
+
+  @override
+  String get smsLiveCheckinHeader => '✅ ALLT ÄR BRA — Oksigenia SOS';
+
+  @override
+  String sentPartialTitle(String sent, String total) {
+    return 'Varning skickad till $sent av $total kontakter';
+  }
+
+  @override
+  String get sentBeaconInfo =>
+      'Om du förflyttar dig mer än 300 m skickas din nya position till dina kontakter.';
+
+  @override
+  String get sentStopExplain =>
+      'Knappen nedan stoppar platsuppdateringarna och de väntande nya försöken. Tryck först när du är i säkerhet.';
+
+  @override
+  String get btnSafeStop => 'JAG ÄR I SÄKERHET — STOPPA';
+
+  @override
   String statusError(Object error) {
     return 'FEL: $error';
   }
@@ -272,7 +303,7 @@ class AppLocalizationsSv extends AppLocalizations {
 
   @override
   String get warningKeepAlive =>
-      '⚠️ VIKTIGT: Stäng inte appen genom att svepa bort den. Lämna den i bakgrunden så den kan starta om automatiskt.';
+      'Låt appen vara öppen i bakgrunden. Om du sveper bort den från senaste appar kan skyddet sluta fungera.';
 
   @override
   String get aboutTitle => 'Om';
@@ -318,7 +349,7 @@ class AppLocalizationsSv extends AppLocalizations {
   String get invalidNumberWarning => 'Ogiltigt eller för kort nummer';
 
   @override
-  String get contactMain => 'Primär (Spårning / Batteri)';
+  String get contactMain => 'Huvudkontakt — får även Livespårning';
 
   @override
   String get inactivitySubtitle => 'Tid utan rörelse innan hjälp tillkallas.';
@@ -437,7 +468,7 @@ class AppLocalizationsSv extends AppLocalizations {
   String get permLocMissing => 'Platsbehörighet saknas';
 
   @override
-  String get slideStopSystem => 'DRA FÖR ATT STOPPA';
+  String get slideStopSystem => 'HÅLL FÖR ATT STOPPA ALLT';
 
   @override
   String get onboardingTitle => 'Konfigurera ditt säkerhetssystem';
@@ -456,7 +487,7 @@ class AppLocalizationsSv extends AppLocalizations {
   String get onboardingNext => 'FORTSÄTT';
 
   @override
-  String get onboardingFinish => 'KLART — STARTA ÖVERVAKNING';
+  String get onboardingFinish => 'KLART — ÖPPNA APPEN';
 
   @override
   String get onboardingMandatory => 'Krävs för att aktivera övervakning';
@@ -475,7 +506,8 @@ class AppLocalizationsSv extends AppLocalizations {
   String get btnEnableFullScreenIntent => 'AKTIVERA';
 
   @override
-  String get pauseMonitoringSheet => 'Pausa övervakning i...';
+  String get pauseMonitoringSheet =>
+      'Pausa all övervakning i… (återupptas av sig själv)';
 
   @override
   String get pauseTitle => 'Övervakning pausad';
@@ -705,7 +737,7 @@ class AppLocalizationsSv extends AppLocalizations {
 
   @override
   String get homeProfileNoFallWarning =>
-      'Denna profil upptäcker INTE fall. SOS måste utlösas manuellt.';
+      'Denna profil upptäcker INTE fall. Slå på Inaktivitetsmonitorn; SOS-knappen fungerar alltid.';
 
   @override
   String get homeActionApply => 'Tillämpa';
@@ -736,4 +768,137 @@ class AppLocalizationsSv extends AppLocalizations {
   String smsLimitBodyAlways(int needed) {
     return 'Den här telefonen begär bekräftelse innan en app skickar något SMS (\'Bekräfta alltid\'): om ingen bekräftar skickas inte ditt SOS.\n\nVälj en gräns på minst $needed (i LineageOS: Trust → Gräns för SMS-meddelande) och starta om telefonen för säkerhets skull: på vissa telefoner gäller ändringen först efter en omstart.';
   }
+
+  @override
+  String get homeAlertProfileNoImpact =>
+      'INTE SKYDDAD — den här profilen upptäcker inte fall. Slå på Inaktivitetsmonitorn.';
+
+  @override
+  String get homeFallUnavailable => 'Inte tillgängligt i den här profilen';
+
+  @override
+  String homeAlertPaused(String time) {
+    return 'PAUSAD till $time';
+  }
+
+  @override
+  String get a11ySosHint => 'Håll in i 3 sekunder för att larma dina kontakter';
+
+  @override
+  String get a11ySosLongPress => 'skicka ett SOS';
+
+  @override
+  String get a11ySosCountdown =>
+      'SOS om 3 sekunder. Dubbeltryck för att avbryta.';
+
+  @override
+  String get a11yStopLabel => 'Stäng av Oksigenia SOS';
+
+  @override
+  String get a11yStopHint =>
+      'Håll in i 2 sekunder. Stoppar all övervakning och stänger appen.';
+
+  @override
+  String get a11yStopLongPress => 'stoppa övervakningen och stänga appen';
+
+  @override
+  String get a11yStopCountdown =>
+      'Stängs av om 2 sekunder. Dubbeltryck för att avbryta.';
+
+  @override
+  String get a11yAlarmCancelHint =>
+      'Håll in i 2 sekunder för att avbryta larmet';
+
+  @override
+  String get a11yAlarmCancelLongPress => 'avbryta larmet';
+
+  @override
+  String get a11yAlarmCancelCountdown =>
+      'Larmet avbryts om 2 sekunder. Dubbeltryck för att behålla det.';
+
+  @override
+  String get a11yMotionOk => 'Rörelsesensor aktiv';
+
+  @override
+  String get a11yMotionOff => 'Rörelsesensor inte tillåten';
+
+  @override
+  String a11yBattery(int level) {
+    return 'Batteri $level %';
+  }
+
+  @override
+  String a11yBatteryRestricted(int level) {
+    return 'Batteri $level %, begränsat av Android';
+  }
+
+  @override
+  String a11yGps(String meters) {
+    return 'GPS-noggrannhet $meters m';
+  }
+
+  @override
+  String get a11yGpsNone => 'GPS: ingen position än';
+
+  @override
+  String get a11yAddContact => 'Lägg till kontakt';
+
+  @override
+  String a11yDeleteContact(String number) {
+    return 'Ta bort $number';
+  }
+
+  @override
+  String get a11yStopTracking => 'Stoppa livespårning';
+
+  @override
+  String get contactCheckTitle => 'Stämmer landsnumret?';
+
+  @override
+  String contactCheckBody(String number) {
+    return 'Ditt SOS skickas till $number. Om landsnumret är fel, skriv numret med + och landsnummer.';
+  }
+
+  @override
+  String get contactCheckSave => 'Ja, spara';
+
+  @override
+  String get contactCheckEdit => 'Rätta';
+
+  @override
+  String get onboardingPermLocation => 'GPS / Plats';
+
+  @override
+  String get onboardingPermNotifications => 'Aviseringar';
+
+  @override
+  String get onboardingPermActivity => 'Fysisk aktivitet';
+
+  @override
+  String get onboardingPermSensors => 'Rörelsesensorer';
+
+  @override
+  String get onboardingSettingsLocation => 'Plats';
+
+  @override
+  String get onboardingSettingsSensors => 'Sensorer';
+
+  @override
+  String onboardingSettingsPath(String permission) {
+    return 'Inställningar → Appar → Oksigenia SOS → Behörigheter → $permission';
+  }
+
+  @override
+  String get onboardingSmsStep1Done =>
+      'Steg 1 klart: Android har visat sitt säkerhetsmeddelande.';
+
+  @override
+  String get onboardingSmsStep2 => '2. Öppna Inställningar (knappen nedan).';
+
+  @override
+  String get onboardingSmsStep3 =>
+      '3. Tryck på ⋮ (uppe till höger) → \'Tillåt begränsade inställningar\' → pinkod.';
+
+  @override
+  String get onboardingSmsStep4 => '4. Behörigheter → SMS → Tillåt.';
 }

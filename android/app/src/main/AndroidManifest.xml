@@ -10,7 +10,11 @@
     <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE_MEDIA_PLAYBACK" />
-    <uses-permission android:name="android.permission.FOREGROUND_SERVICE_LOCATION" />
+    <!-- No FOREGROUND_SERVICE_LOCATION: no service of type location is ever put in the
+         foreground. The monitoring service is health|mediaPlayback, and geolocator's own
+         service (type location in its manifest) is only bound; it would call
+         startForeground only with a foregroundNotificationConfig, which this app never
+         passes. Location with the screen off comes from ACCESS_BACKGROUND_LOCATION. -->
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE_HEALTH" />
     <uses-permission android:name="android.permission.ACTIVITY_RECOGNITION" />
     <uses-permission android:name="android.permission.REQUEST_IGNORE_BATTERY_OPTIMIZATIONS" />
@@ -37,6 +41,8 @@
         android:label="Oksigenia SOS"
         android:name="${applicationName}"
         android:icon="@mipmap/launcher_icon"
+        android:allowBackup="false"
+        android:dataExtractionRules="@xml/data_extraction_rules"
         android:enableOnBackInvokedCallback="true">
 
         <!-- Boot autostart condicional: arranca Sylvia tras un reinicio SÓLO si
@@ -50,8 +56,16 @@
                 <action android:name="android.intent.action.BOOT_COMPLETED" />
                 <action android:name="android.intent.action.QUICKBOOT_POWERON" />
                 <action android:name="com.htc.intent.action.QUICKBOOT_POWERON" />
+                <!-- An update (F-Droid, IzzyOnDroid, Obtainium) kills the process; without this,
+                     armed monitoring stayed off until the user opened the app again. -->
+                <action android:name="android.intent.action.MY_PACKAGE_REPLACED" />
             </intent-filter>
         </receiver>
+
+        <!-- Restarts the service if the process was killed while something was armed. -->
+        <receiver
+            android:name=".OksigeniaWatchdog"
+            android:exported="false" />
 
         <activity
             android:name=".MainActivity"
@@ -78,9 +92,41 @@
             android:name="id.flutter.flutter_background_service.BackgroundService"
             android:foregroundServiceType="health|mediaPlayback"
             android:enabled="true"
-            android:exported="true"
+            android:exported="false"
             android:stopWithTask="false"
             tools:replace="android:foregroundServiceType, android:exported, android:stopWithTask" />
+
+        <!-- The plugin exports both receivers without a permission, and both call
+             intent.getAction().equals(...) without a null check: any app could crash the
+             process (and the armed service with it) with one empty broadcast. The watchdog
+             is only fired by our own AlarmManager PendingIntent, so it needs no export; the
+             plugin's boot receiver does nothing with autoStartOnBoot=false (OksigeniaBootReceiver
+             does that job), so it is removed. -->
+        <receiver
+            android:name="id.flutter.flutter_background_service.WatchdogReceiver"
+            android:exported="false"
+            tools:replace="android:exported" />
+        <receiver
+            android:name="id.flutter.flutter_background_service.BootReceiver"
+            tools:node="remove" />
+
+        <!-- flutter_local_notifications. Since its version 16 the plugin declares no
+             receivers of its own; without them a scheduled notification targets a component
+             that does not exist and never shows, and a notification action does nothing.
+             - ScheduledNotificationReceiver: the inactivity backstop (889) and the two
+               live-tracking notifications (891, 892).
+             - ActionBroadcastReceiver: "Resume now" on the pause notification.
+             The plugin's ScheduledNotificationBootReceiver is left out on purpose: after a
+             reboot it re-arms every cached schedule, also those whose time has passed, and
+             Android fires those at once. The backstop would show its alarm-style
+             notification at power-on. Sylvia re-arms its own schedules when
+             OksigeniaBootReceiver starts it. -->
+        <receiver
+            android:name="com.dexterous.flutterlocalnotifications.ScheduledNotificationReceiver"
+            android:exported="false" />
+        <receiver
+            android:name="com.dexterous.flutterlocalnotifications.ActionBroadcastReceiver"
+            android:exported="false" />
             <meta-data android:name="flutterEmbedding" android:value="2" />
 
         <receiver

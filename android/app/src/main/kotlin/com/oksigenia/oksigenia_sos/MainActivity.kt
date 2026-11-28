@@ -31,6 +31,18 @@ class MainActivity: FlutterActivity() {
         }
     }
 
+    // Arm the watchdog whenever the app comes and goes: monitoring is switched
+    // on inside the app, and the chain stops by itself when nothing is armed.
+    override fun onResume() {
+        super.onResume()
+        OksigeniaWatchdog.schedule(this)
+    }
+
+    override fun onPause() {
+        super.onPause()
+        OksigeniaWatchdog.schedule(this)
+    }
+
     override fun configureFlutterEngine(@NonNull flutterEngine: FlutterEngine) {
         super.configureFlutterEngine(flutterEngine)
         

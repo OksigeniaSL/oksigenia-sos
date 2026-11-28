@@ -43,6 +43,37 @@ class AppLocalizationsNl extends AppLocalizations {
       'Er kon geen sms worden verzonden. Controleer bereik en contacten en probeer opnieuw.';
 
   @override
+  String get statusSendRetrying =>
+      'Nog niet alle contacten hebben het ontvangen (geen bereik?). Wordt automatisch opnieuw geprobeerd.';
+
+  @override
+  String pauseNotifResumesIn(String time) {
+    return 'Hervat over $time';
+  }
+
+  @override
+  String get smsLiveTrackingHeader => '📍 LIVE TRACKING — Oksigenia SOS';
+
+  @override
+  String get smsLiveCheckinHeader => '✅ ALLES GOED — Oksigenia SOS';
+
+  @override
+  String sentPartialTitle(String sent, String total) {
+    return 'Alarm verzonden naar $sent van $total contacten';
+  }
+
+  @override
+  String get sentBeaconInfo =>
+      'Als je meer dan 300 m beweegt, wordt je nieuwe locatie naar je contacten gestuurd.';
+
+  @override
+  String get sentStopExplain =>
+      'De knop hieronder stopt de locatie-updates en de openstaande nieuwe pogingen. Druk er pas op als je veilig bent.';
+
+  @override
+  String get btnSafeStop => 'IK BEN VEILIG — STOPPEN';
+
+  @override
   String statusError(Object error) {
     return 'FOUT: $error';
   }
@@ -273,7 +304,7 @@ class AppLocalizationsNl extends AppLocalizations {
 
   @override
   String get warningKeepAlive =>
-      '⚠️ BELANGRIJK: Sluit de app niet door te vegen. Laat het op de achtergrond zodat het automatisch kan herstarten.';
+      'Laat de app op de achtergrond open. Als je de app uit de recente apps wegveegt, kan de bescherming stoppen.';
 
   @override
   String get aboutTitle => 'Over';
@@ -319,7 +350,7 @@ class AppLocalizationsNl extends AppLocalizations {
   String get invalidNumberWarning => 'Ongeldig of te kort nummer';
 
   @override
-  String get contactMain => 'Primair (Tracking / Batterij)';
+  String get contactMain => 'Hoofdcontact — ontvangt ook Live Tracking';
 
   @override
   String get inactivitySubtitle =>
@@ -438,7 +469,7 @@ class AppLocalizationsNl extends AppLocalizations {
   String get permLocMissing => 'Locatietoestemming ontbreekt';
 
   @override
-  String get slideStopSystem => 'VEEG OM TE STOPPEN';
+  String get slideStopSystem => 'HOUD INGEDRUKT: ALLES STOPPEN';
 
   @override
   String get onboardingTitle => 'Configureer uw veiligheidssysteem';
@@ -457,7 +488,7 @@ class AppLocalizationsNl extends AppLocalizations {
   String get onboardingNext => 'DOORGAAN';
 
   @override
-  String get onboardingFinish => 'KLAAR — MONITORING STARTEN';
+  String get onboardingFinish => 'KLAAR — APP OPENEN';
 
   @override
   String get onboardingMandatory => 'Vereist om monitoring te activeren';
@@ -476,7 +507,8 @@ class AppLocalizationsNl extends AppLocalizations {
   String get btnEnableFullScreenIntent => 'INSCHAKELEN';
 
   @override
-  String get pauseMonitoringSheet => 'Bewaking pauzeren voor...';
+  String get pauseMonitoringSheet =>
+      'Alle bewaking pauzeren voor… (hervat vanzelf)';
 
   @override
   String get pauseTitle => 'Bewaking gepauzeerd';
@@ -706,7 +738,7 @@ class AppLocalizationsNl extends AppLocalizations {
 
   @override
   String get homeProfileNoFallWarning =>
-      'Dit profiel detecteert GEEN vallen. SOS moet handmatig worden geactiveerd.';
+      'Dit profiel detecteert GEEN vallen. Zet de Inactiviteitsmonitor aan; de SOS-knop werkt altijd.';
 
   @override
   String get homeActionApply => 'Toepassen';
@@ -737,4 +769,138 @@ class AppLocalizationsNl extends AppLocalizations {
   String smsLimitBodyAlways(int needed) {
     return 'Deze telefoon vraagt om bevestiging voordat een app een sms verstuurt (\'Altijd bevestigen\'): als niemand bevestigt, wordt je SOS niet verzonden.\n\nKies een limiet van minstens $needed (in LineageOS: Trust → Limiet sms-berichten) en herstart de telefoon voor de zekerheid: op sommige telefoons werkt de wijziging pas na een herstart.';
   }
+
+  @override
+  String get homeAlertProfileNoImpact =>
+      'NIET BESCHERMD — dit profiel detecteert geen vallen. Zet de Inactiviteitsmonitor aan.';
+
+  @override
+  String get homeFallUnavailable => 'Niet beschikbaar in dit profiel';
+
+  @override
+  String homeAlertPaused(String time) {
+    return 'GEPAUZEERD tot $time';
+  }
+
+  @override
+  String get a11ySosHint =>
+      'Houd 3 seconden ingedrukt om je contacten te waarschuwen';
+
+  @override
+  String get a11ySosLongPress => 'SOS sturen';
+
+  @override
+  String get a11ySosCountdown =>
+      'SOS over 3 seconden. Dubbeltik om te annuleren.';
+
+  @override
+  String get a11yStopLabel => 'Oksigenia SOS stoppen';
+
+  @override
+  String get a11yStopHint =>
+      'Houd 2 seconden ingedrukt. Stopt alle bewaking en sluit de app.';
+
+  @override
+  String get a11yStopLongPress => 'bewaking stoppen en app sluiten';
+
+  @override
+  String get a11yStopCountdown =>
+      'Stopt over 2 seconden. Dubbeltik om te annuleren.';
+
+  @override
+  String get a11yAlarmCancelHint =>
+      'Houd 2 seconden ingedrukt om het alarm te annuleren';
+
+  @override
+  String get a11yAlarmCancelLongPress => 'alarm annuleren';
+
+  @override
+  String get a11yAlarmCancelCountdown =>
+      'Het alarm wordt over 2 seconden geannuleerd. Dubbeltik om het te behouden.';
+
+  @override
+  String get a11yMotionOk => 'Bewegingssensor actief';
+
+  @override
+  String get a11yMotionOff => 'Bewegingssensor niet toegestaan';
+
+  @override
+  String a11yBattery(int level) {
+    return 'Batterij $level%';
+  }
+
+  @override
+  String a11yBatteryRestricted(int level) {
+    return 'Batterij $level%, beperkt door Android';
+  }
+
+  @override
+  String a11yGps(String meters) {
+    return 'GPS-nauwkeurigheid $meters m';
+  }
+
+  @override
+  String get a11yGpsNone => 'GPS: nog geen positie';
+
+  @override
+  String get a11yAddContact => 'Contact toevoegen';
+
+  @override
+  String a11yDeleteContact(String number) {
+    return '$number verwijderen';
+  }
+
+  @override
+  String get a11yStopTracking => 'Live tracking stoppen';
+
+  @override
+  String get contactCheckTitle => 'Klopt de landcode?';
+
+  @override
+  String contactCheckBody(String number) {
+    return 'Je SOS wordt verstuurd naar $number. Is de landcode fout, typ het nummer dan met + en de landcode.';
+  }
+
+  @override
+  String get contactCheckSave => 'Ja, opslaan';
+
+  @override
+  String get contactCheckEdit => 'Corrigeren';
+
+  @override
+  String get onboardingPermLocation => 'GPS / Locatie';
+
+  @override
+  String get onboardingPermNotifications => 'Meldingen';
+
+  @override
+  String get onboardingPermActivity => 'Fysieke activiteit';
+
+  @override
+  String get onboardingPermSensors => 'Bewegingssensoren';
+
+  @override
+  String get onboardingSettingsLocation => 'Locatie';
+
+  @override
+  String get onboardingSettingsSensors => 'Sensoren';
+
+  @override
+  String onboardingSettingsPath(String permission) {
+    return 'Instellingen → Apps → Oksigenia SOS → Rechten → $permission';
+  }
+
+  @override
+  String get onboardingSmsStep1Done =>
+      'Stap 1 klaar: Android heeft zijn beveiligingsmelding getoond.';
+
+  @override
+  String get onboardingSmsStep2 => '2. Open Instellingen (knop hieronder).';
+
+  @override
+  String get onboardingSmsStep3 =>
+      '3. Tik op ⋮ (rechtsboven) → \'Beperkte instellingen toestaan\' → pincode.';
+
+  @override
+  String get onboardingSmsStep4 => '4. Rechten → SMS → Toestaan.';
 }

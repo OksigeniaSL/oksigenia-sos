@@ -32,6 +32,58 @@ class PreferencesService {
   // ACTIVITY PROFILE (v4.0.0)
   static const String keyActivityProfile = 'activity_profile';
 
+  // Why the alarm in course started: 'fall', 'inactivity' or 'manual'. Written
+  // by whoever starts it, read by both isolates after a respawn.
+  static const String keyAlarmCause = 'alarm_cause';
+
+  // The texts Sylvia shows and sends (notifications, SMS), as JSON, in the
+  // language the UI last gave it. Sylvia saves them on setConfig and reads them
+  // back when it starts alone (boot, watchdog): without them it spoke English.
+  static const String keyServiceTexts = 'service_texts';
+
+  // Language the UI was last shown in. Unlike 'language_code' (only set when
+  // the user picks a language by hand, and then it rules the whole app), this
+  // one just remembers: it is what code without a widget falls back to.
+  static const String keyLastUiLanguage = 'last_ui_language';
+
+  // Where the Smart Beacon started and last reported. Removed as soon as the
+  // beacon ends (expiry, "I'm safe", stop, reset), so the phone doesn't keep
+  // the last known position around once it no longer serves anybody.
+  static const List<String> beaconPositionKeys = [
+    'beacon_origin_lat',
+    'beacon_origin_lon',
+    'beacon_last_lat',
+    'beacon_last_lon',
+  ];
+
+  static Future<void> clearBeaconPosition(SharedPreferences p) async {
+    for (final k in beaconPositionKeys) {
+      await p.remove(k);
+    }
+  }
+
+  // SOS RETRY QUEUE (shared by both isolates and OksigeniaBootReceiver.kt,
+  // which reads the bool as "flutter.sos_retry_active")
+  static const String keySosRetryActive = 'sos_retry_active';
+  static const String keySosRetryNumbers = 'sos_retry_numbers';
+  static const String keySosRetryNext = 'sos_retry_next_ms';
+  static const String keySosRetryAttempt = 'sos_retry_attempt';
+  static const String keySosRetryUntil = 'sos_retry_until_ms';
+
+  // When the inactivity backstop (scheduled notification 889) is due, in epoch
+  // ms; 0 when none is armed. Sylvia writes it. A Sylvia that starts and finds
+  // it in the recent past raises the alarm itself (the phone was still and the
+  // service was down); the UI only clears it when inactivity is switched off.
+  // A new key on purpose: the old 'inactivity_alarm_scheduled_for' meant "last
+  // re-arm + limit" and the UI started its own silent alarm from it.
+  static const String keyInactivityBackstopDue = 'inactivity_backstop_due_ms';
+
+  // How the last SOS went: contacts reached so far and contacts in total.
+  // Written by whichever isolate sent it (and by Sylvia after each retry), read
+  // by the sent screen, which must not say "sent" when it reached 1 of 3.
+  static const String keySosLastSent = 'sos_last_sent';
+  static const String keySosLastTotal = 'sos_last_total';
+
   Future<void> init() async {
     _prefs = await SharedPreferences.getInstance();
   }

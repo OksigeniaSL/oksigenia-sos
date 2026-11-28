@@ -3,7 +3,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:provider/provider.dart'; 
 import 'package:flutter_background_service/flutter_background_service.dart';
-import 'package:wakelock_plus/wakelock_plus.dart';
 import 'package:permission_handler/permission_handler.dart'; 
 import 'package:oksigenia_sos/l10n/app_localizations.dart';
 import 'package:oksigenia_sos/logic/sos_logic.dart';
@@ -25,6 +24,12 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver, Ti
   late AnimationController _sosHoldController;
   late AnimationController _stopHoldController;
   late AnimationController _liveTrackingHoldController;
+  // TalkBack turns "double-tap and hold" into one long-press action, never a
+  // held finger, so the pointer-driven holds below could not be started and a
+  // screen-reader user could not send an SOS. The action now starts the same
+  // countdown, and a double-tap while it runs stops it.
+  bool _sosA11yHold = false;
+  bool _stopA11yHold = false;
 
   @override
   void initState() {
@@ -33,7 +38,9 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver, Ti
     
     _sosLogic = context.read<SOSLogic>();
     _sosLogic.init();
-    WakelockPlus.enable();
+    // No WakelockPlus.enable() here any more: it kept the screen on for as
+    // long as Home was open, also in a pocket. The alarm wakes the screen by
+    // itself (full-screen intent + wakeScreen).
     
     _sosHoldController = AnimationController(
       vsync: this,
@@ -44,6 +51,7 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver, Ti
       if (status == AnimationStatus.completed) {
         _triggerHaptic();
         _sosHoldController.reset();
+        if (_sosA11yHold && mounted) setState(() => _sosA11yHold = false);
         _sosLogic.sendSOS();
       }
     });
@@ -55,6 +63,7 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver, Ti
     _stopHoldController.addStatusListener((status) async {
       if (status == AnimationStatus.completed) {
         _triggerHaptic();
+        _stopA11yHold = false;
         await _sosLogic.stopSystem();
         if (mounted) SystemNavigator.pop();
       }
@@ -91,6 +100,43 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver, Ti
     if (await Vibration.hasVibrator() ?? false) {
       Vibration.vibrate(pattern: [0, 50, 50, 50]);
     }
+  }
+
+  void _showNoContactSnack(AppLocalizations l10n) {
+    _triggerErrorHaptic();
+    ScaffoldMessenger.of(context).clearSnackBars();
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Row(
+          children: [
+            const Icon(Icons.error_outline, color: Colors.white),
+            const SizedBox(width: 10),
+            Expanded(
+              child: Text(
+                l10n.errorNoContact,
+                style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 15),
+                maxLines: 2,
+                overflow: TextOverflow.ellipsis,
+              ),
+            ),
+          ],
+        ),
+        backgroundColor: Colors.redAccent.shade700,
+        behavior: SnackBarBehavior.floating,
+        margin: const EdgeInsets.all(16),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+        duration: const Duration(seconds: 4),
+        action: SnackBarAction(
+          label: l10n.menuSettings.toUpperCase(),
+          textColor: Colors.white,
+          backgroundColor: Colors.white24,
+          onPressed: () {
+            ScaffoldMessenger.of(context).clearSnackBars();
+            _sosLogic.openSettings(context);
+          }
+        ),
+      )
+    );
   }
 
   Future<void> _triggerErrorHaptic() async {
@@ -190,6 +236,9 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver, Ti
     }
 
     final l10n = AppLocalizations.of(context)!;
+    final bool impactAvailable = activityProfileConfigs[
+            PreferencesService().getActivityProfile()]!
+        .impactDetectionEnabled;
 
     // --- VISUAL FUERZA G ---
     Color gForceColor = Colors.grey; 
@@ -251,76 +300,39 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver, Ti
                 mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                 children: [
                   // Fuerza G
-                  GestureDetector(
+                  _statusIndicator(
+                    a11yLabel: _sosLogic.sensorsPermissionOk ? l10n.a11yMotionOk : l10n.a11yMotionOff,
                     onTap: !_sosLogic.sensorsPermissionOk ? () {
                       _showSensorErrorDialog(context, l10n);
                     } : null,
-                    child: Column(
-                      children: [
-                        Icon(gForceIcon, color: gForceColor, size: 48),
-                        const SizedBox(height: 6),
-                        Text(
-                          gForceText,
-                          style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 14, color: Colors.white)
-                        ),
-                      ],
-                    ),
+                    icon: Icon(gForceIcon, color: gForceColor, size: 48),
+                    text: gForceText,
                   ),
 
                   // Batería
-                  GestureDetector(
+                  _statusIndicator(
+                    a11yLabel: _sosLogic.batteryOptimizationOk
+                        ? l10n.a11yBattery(_sosLogic.batteryLevel)
+                        : l10n.a11yBatteryRestricted(_sosLogic.batteryLevel),
                     onTap: !_sosLogic.batteryOptimizationOk ? () {
                        _showBatteryDialog(context, l10n);
                     } : null,
-                    child: Column(
-                      children: [
-                        Icon(battIcon, color: battColor, size: 48),
-                        const SizedBox(height: 6),
-                        Text(
-                          "${_sosLogic.batteryLevel}%", 
-                          style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 14, color: Colors.white)
-                        ),
-                      ],
-                    ),
+                    icon: Icon(battIcon, color: battColor, size: 48),
+                    text: "${_sosLogic.batteryLevel}%",
                   ),
 
                   // GPS
-                  GestureDetector(
-                    onTap: () {
-                      showDialog(
-                        context: context,
-                        builder: (ctx) => AlertDialog(
-                          title: Row(
-                            children: [
-                              const Icon(Icons.info_outline, color: Colors.blue),
-                              const SizedBox(width: 10),
-                              Text(l10n.gpsHelpTitle),
-                            ],
-                          ),
-                          content: Text(l10n.gpsHelpBody),
-                          actions: [
-                            TextButton(
-                              onPressed: () => Navigator.pop(ctx),
-                              child: const Text("OK"),
-                            )
-                          ],
-                        ),
-                      );
-                    },
-                    child: Column(
-                      children: [
-                        Icon(
-                          Icons.gps_fixed, 
-                          color: _sosLogic.gpsAccuracy > 0 ? Colors.green : Colors.grey, 
-                          size: 48
-                        ),
-                        const SizedBox(height: 6),
-                        Text(
-                          _sosLogic.gpsAccuracy > 0 ? "${_sosLogic.gpsAccuracy.toStringAsFixed(0)}m" : "--", 
-                          style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 14, color: Colors.white)
-                        ),
-                      ],
+                  _statusIndicator(
+                    a11yLabel: _sosLogic.gpsAccuracy > 0
+                        ? l10n.a11yGps(_sosLogic.gpsAccuracy.toStringAsFixed(0))
+                        : l10n.a11yGpsNone,
+                    onTap: () => _showGpsHelp(l10n),
+                    icon: Icon(
+                      Icons.gps_fixed, 
+                      color: _sosLogic.gpsAccuracy > 0 ? Colors.green : Colors.grey, 
+                      size: 48
                     ),
+                    text: _sosLogic.gpsAccuracy > 0 ? "${_sosLogic.gpsAccuracy.toStringAsFixed(0)}m" : "--",
                   ),
                 ],
               ),
@@ -329,54 +341,52 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver, Ti
             const SizedBox(height: 20),
 
             // BOTÓN SOS
-            GestureDetector(
-              behavior: HitTestBehavior.opaque,
-              onPanDown: (_) {
+            // A Listener, not a pan GestureDetector: the page scrolls, and with
+            // 20 px of drift (a shaky thumb) the scroll won the gesture arena
+            // and reset the 3 s hold without a word. Pointer events are not
+            // part of the arena, so the hold survives a small slide.
+            // One semantics node for the whole button: TalkBack read "0%, SOS"
+            // (the ring's progress) and had no action to run.
+            Semantics(
+              container: true,
+              button: true,
+              liveRegion: true,
+              label: l10n.sosButton,
+              value: _sosA11yHold ? l10n.a11ySosCountdown : null,
+              hint: l10n.a11ySosHint,
+              onLongPressHint: l10n.a11ySosLongPress,
+              onLongPress: () {
                 if (_sosLogic.emergencyContact == null) {
-                  _triggerErrorHaptic();
-                  ScaffoldMessenger.of(context).clearSnackBars();
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(
-                      content: Row(
-                        children: [
-                          const Icon(Icons.error_outline, color: Colors.white),
-                          const SizedBox(width: 10),
-                          Expanded(
-                            child: Text(
-                              l10n.errorNoContact,
-                              style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 15),
-                              maxLines: 2,
-                              overflow: TextOverflow.ellipsis,
-                            ),
-                          ),
-                        ],
-                      ),
-                      backgroundColor: Colors.redAccent.shade700,
-                      behavior: SnackBarBehavior.floating,
-                      margin: const EdgeInsets.all(16),
-                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-                      duration: const Duration(seconds: 4),
-                      action: SnackBarAction(
-                        label: l10n.menuSettings.toUpperCase(),
-                        textColor: Colors.white,
-                        backgroundColor: Colors.white24,
-                        onPressed: () {
-                          ScaffoldMessenger.of(context).clearSnackBars();
-                          _sosLogic.openSettings(context);
-                        }
-                      ),
-                    )
-                  );
-                  return; 
+                  _showNoContactSnack(l10n);
+                  return;
+                }
+                setState(() => _sosA11yHold = true);
+                _sosHoldController.forward();
+              },
+              onTap: _sosA11yHold
+                  ? () {
+                      setState(() => _sosA11yHold = false);
+                      _sosHoldController.reverse();
+                    }
+                  : null,
+              excludeSemantics: true,
+              child: Listener(
+              behavior: HitTestBehavior.opaque,
+              onPointerDown: (_) {
+                // A real finger takes over from a screen-reader countdown.
+                if (_sosA11yHold) setState(() => _sosA11yHold = false);
+                if (_sosLogic.emergencyContact == null) {
+                  _showNoContactSnack(l10n);
+                  return;
                 }
                 _sosHoldController.forward();
               },
-              onPanEnd: (_) {
+              onPointerUp: (_) {
                 if (_sosHoldController.status != AnimationStatus.completed) {
                   _sosHoldController.reverse();
                 }
               },
-              onPanCancel: () => _sosHoldController.reverse(),
+              onPointerCancel: (_) => _sosHoldController.reverse(),
               
               child: Stack(
                 alignment: Alignment.center,
@@ -384,8 +394,14 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver, Ti
                   AnimatedBuilder(
                     animation: _pulseController,
                     builder: (context, child) {
-                      final bool monitoring = _sosLogic.isFallDetectionActive || _sosLogic.isInactivityMonitorActive;
-                      final Color glowColor = monitoring ? _sosLogic.sentinelColor : Colors.red;
+                      // Green only when something automatic really watches:
+                      // the fall switch alone in paragliding is not enough.
+                      final bool monitoring = _sosLogic.protectionEffective;
+                      final Color glowColor = !monitoring
+                          ? Colors.red
+                          : _sosLogic.isMonitoringPaused
+                              ? Colors.orange
+                              : _sosLogic.sentinelColor;
                       final double glowSpread = monitoring && _sosLogic.sentinelState != SentinelState.green
                           ? 5 + (_pulseController.value * 8)
                           : 5;
@@ -435,12 +451,15 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver, Ti
                   ),
                 ],
               ),
-            ),
+            )),
 
             const SizedBox(height: 15),
-            Text(
-              "${l10n.toastHoldToSOS} (3s)", 
-              style: const TextStyle(color: Colors.grey)
+            // The button's own hint already says this to screen readers.
+            ExcludeSemantics(
+              child: Text(
+                "${l10n.toastHoldToSOS} (3s)",
+                style: const TextStyle(color: Colors.grey)
+              ),
             ),
             
             // TEST MODE BANNER
@@ -473,13 +492,57 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver, Ti
               ),
             ],
 
+            // Right under the SOS button, where the eyes are after pressing
+            // it: at the bottom of the list it sat under the gesture bar.
+            if (_sosLogic.status == SOSStatus.error) ...[
+               const SizedBox(height: 12),
+               Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 30),
+                child: Column(
+                  children: [
+                    Text(
+                      _sosLogic.errorMessage == "NO_CONTACT"
+                          ? l10n.errorNoContact
+                          : _sosLogic.errorMessage == "SMS_FAILED"
+                              ? l10n.statusSendFailed
+                              : _sosLogic.errorMessage,
+                      textAlign: TextAlign.center,
+                      style: const TextStyle(color: Colors.redAccent, fontWeight: FontWeight.bold, fontSize: 16)
+                    ),
+                    // No signal: the SOS is queued and Sylvia keeps trying.
+                    // Without this line the user read "NOT SENT" and nothing
+                    // else, while the SMS left by itself a minute later.
+                    if (_sosLogic.errorMessage == "SMS_FAILED" && _sosLogic.retryPendingCount > 0) ...[
+                      const SizedBox(height: 6),
+                      Text(
+                        l10n.statusSendRetrying,
+                        textAlign: TextAlign.center,
+                        style: const TextStyle(color: Colors.amberAccent, fontWeight: FontWeight.bold, fontSize: 15),
+                      ),
+                    ],
+                    const SizedBox(height: 10),
+                    if (_sosLogic.errorMessage == "NO_CONTACT" || _sosLogic.errorMessage.contains("Configura")) 
+                      ElevatedButton.icon(
+                        icon: const Icon(Icons.settings),
+                        label: Text(l10n.menuSettings.toUpperCase()),
+                        style: ElevatedButton.styleFrom(backgroundColor: Colors.redAccent, foregroundColor: Colors.white),
+                        onPressed: () => _sosLogic.openSettings(context),
+                      )
+                  ],
+                ),
+              )
+            ],
+
             const SizedBox(height: 12),
 
             // INTERRUPTORES
+            // In profiles without impact detection the fall switch is shown
+            // off and greyed out, but the saved choice is left alone, so it
+            // comes back when the user returns to trekking.
             _buildQuickToggle(
-              context, 
-              l10n.autoModeLabel, 
-              _sosLogic.isFallDetectionActive, 
+              context,
+              l10n.autoModeLabel,
+              impactAvailable && _sosLogic.isFallDetectionActive,
               (v) {
                 if (v && !_sosLogic.smsPermissionOk) {
                    _showSmsRequiredError(context, l10n);
@@ -491,7 +554,8 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver, Ti
                    _hasShownWarning = true;
                 }
               },
-              Icons.health_and_safety 
+              Icons.health_and_safety,
+              unavailable: impactAvailable ? null : l10n.homeFallUnavailable,
             ),
             _buildQuickToggle(
               context,
@@ -516,92 +580,120 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver, Ti
             const SizedBox(height: 30),
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 30, vertical: 10),
-              child: GestureDetector(
+              // Same screen-reader treatment as the SOS button.
+              child: Semantics(
+                container: true,
+                button: true,
+                liveRegion: true,
+                label: l10n.a11yStopLabel,
+                value: _stopA11yHold ? l10n.a11yStopCountdown : null,
+                hint: l10n.a11yStopHint,
+                onLongPressHint: l10n.a11yStopLongPress,
+                onLongPress: () {
+                  setState(() => _stopA11yHold = true);
+                  _stopHoldController.forward();
+                },
+                onTap: _stopA11yHold
+                    ? () {
+                        setState(() => _stopA11yHold = false);
+                        _stopHoldController.reverse();
+                      }
+                    : null,
+                excludeSemantics: true,
+              // Listener for the same reason as the SOS button.
+              child: Listener(
                 behavior: HitTestBehavior.opaque,
-                onPanDown: (_) => _stopHoldController.forward(),
-                onPanEnd: (_) {
+                onPointerDown: (_) {
+                  if (_stopA11yHold) setState(() => _stopA11yHold = false);
+                  _stopHoldController.forward();
+                },
+                onPointerUp: (_) {
                   if (_stopHoldController.status != AnimationStatus.completed) {
                     _stopHoldController.reverse();
                   }
                 },
-                onPanCancel: () => _stopHoldController.reverse(),
+                onPointerCancel: (_) => _stopHoldController.reverse(),
                 child: ClipRRect(
                   borderRadius: BorderRadius.circular(12),
-                  child: SizedBox(
-                    height: 54,
-                    child: AnimatedBuilder(
-                      animation: _stopHoldController,
-                      builder: (context, child) {
-                        return Stack(
-                          children: [
-                            Container(color: Colors.white10),
-                            FractionallySizedBox(
+                  // At least 54 high but grows with the label: at 200 % the
+                  // one-line label overflowed (69 px in English, 222 in
+                  // Russian on a 360 dp phone). It now wraps by words.
+                  child: AnimatedBuilder(
+                    animation: _stopHoldController,
+                    builder: (context, child) {
+                      return Stack(
+                        children: [
+                          Positioned.fill(child: Container(color: Colors.white10)),
+                          Positioned.fill(
+                            child: FractionallySizedBox(
+                              alignment: AlignmentDirectional.centerStart,
                               widthFactor: _stopHoldController.value,
                               child: Container(color: Colors.redAccent),
                             ),
-                            Center(
-                              child: Row(
-                                mainAxisAlignment: MainAxisAlignment.center,
-                                children: [
-                                  const Icon(Icons.power_settings_new, color: Colors.white, size: 20),
-                                  const SizedBox(width: 10),
-                                  Text(
-                                    l10n.slideStopSystem,
-                                    style: const TextStyle(
-                                      color: Colors.white,
-                                      fontSize: 15,
-                                      fontWeight: FontWeight.bold,
-                                    ),
-                                  ),
-                                ],
+                          ),
+                          child!,
+                        ],
+                      );
+                    },
+                    child: ConstrainedBox(
+                      constraints: const BoxConstraints(minHeight: 54),
+                      child: Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            const Icon(Icons.power_settings_new, color: Colors.white, size: 20),
+                            const SizedBox(width: 10),
+                            Flexible(
+                              child: Text(
+                                l10n.slideStopSystem,
+                                textAlign: TextAlign.center,
+                                style: const TextStyle(
+                                  color: Colors.white,
+                                  fontSize: 15,
+                                  fontWeight: FontWeight.bold,
+                                ),
                               ),
                             ),
                           ],
-                        );
-                      },
+                        ),
+                      ),
                     ),
                   ),
                 ),
               ),
+              ),
             ),
-            
-            const SizedBox(height: 20),
 
-            if (_sosLogic.status == SOSStatus.error) ...[
-               const SizedBox(height: 20),
-               Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 30),
-                child: Column(
-                  children: [
-                    Text(
-                      _sosLogic.errorMessage == "NO_CONTACT"
-                          ? l10n.errorNoContact
-                          : _sosLogic.errorMessage == "SMS_FAILED"
-                              ? l10n.statusSendFailed
-                              : _sosLogic.errorMessage,
-                      textAlign: TextAlign.center,
-                      style: const TextStyle(color: Colors.redAccent, fontWeight: FontWeight.bold, fontSize: 16)
-                    ),
-                    const SizedBox(height: 10),
-                    if (_sosLogic.errorMessage == "NO_CONTACT" || _sosLogic.errorMessage.contains("Configura")) 
-                      ElevatedButton.icon(
-                        icon: const Icon(Icons.settings),
-                        label: Text(l10n.menuSettings.toUpperCase()),
-                        style: ElevatedButton.styleFrom(backgroundColor: Colors.redAccent, foregroundColor: Colors.white),
-                        onPressed: () => _sosLogic.openSettings(context),
-                      )
-                  ],
-                ),
-              )
-            ]
           ],
         ),
       ),
     );
   }
 
-  Widget _buildQuickToggle(BuildContext context, String label, bool value, Function(bool) onChanged, IconData icon, {String? subtitle}) {
+  Widget _buildQuickToggle(BuildContext context, String label, bool value, Function(bool) onChanged, IconData icon, {String? subtitle, String? unavailable}) {
     final l10n = AppLocalizations.of(context)!;
+    // Above 150 % the 30 dp side margins left the title so little room that
+    // "Inactividad" broke mid-word; give that room back to the text.
+    final double side = MediaQuery.textScalerOf(context).scale(16) > 24 ? 8 : 30;
+
+    if (unavailable != null) {
+      // Disabled, not switched off: nothing is written to the preferences.
+      return Container(
+        margin: EdgeInsets.symmetric(horizontal: side, vertical: 5),
+        child: SwitchListTile(
+          title: _WholeWordsText(label, style: const TextStyle(fontWeight: FontWeight.w500, color: Colors.grey, fontSize: 16)),
+          subtitle: Text(
+            unavailable,
+            style: const TextStyle(color: Colors.white70, fontSize: 13, fontWeight: FontWeight.bold),
+          ),
+          secondary: Icon(icon, color: Colors.grey.shade700),
+          value: false,
+          onChanged: null,
+        ),
+      );
+    }
+
     final isPaused = value && _sosLogic.isMonitoringPaused;
 
     String? effectiveSubtitle = subtitle;
@@ -617,9 +709,9 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver, Ti
     return GestureDetector(
       onLongPress: value ? () => _showPauseSheet(context, l10n) : null,
       child: Container(
-        margin: const EdgeInsets.symmetric(horizontal: 30, vertical: 5),
+        margin: EdgeInsets.symmetric(horizontal: side, vertical: 5),
         child: SwitchListTile(
-          title: Text(label, style: const TextStyle(fontWeight: FontWeight.w500, color: Colors.white)),
+          title: _WholeWordsText(label, style: const TextStyle(fontWeight: FontWeight.w500, color: Colors.white, fontSize: 16)),
           subtitle: effectiveSubtitle != null
               ? Text(
                   effectiveSubtitle,
@@ -750,6 +842,27 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver, Ti
     );
   }
 
+  // Wall-clock time the pause ends, to the nearest minute, in the user's
+  // 12/24 h format.
+  String _pauseEndClock(BuildContext context) {
+    final DateTime end = DateTime.now()
+        .add(Duration(seconds: _sosLogic.pauseRemainingSeconds + 30));
+    return MaterialLocalizations.of(context).formatTimeOfDay(
+      TimeOfDay.fromDateTime(end),
+      alwaysUse24HourFormat: MediaQuery.of(context).alwaysUse24HourFormat,
+    );
+  }
+
+  void _resumeFromBanner(AppLocalizations l10n) {
+    _sosLogic.resumeMonitoring();
+    ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+      content: Text(l10n.pauseResumedMsg, style: const TextStyle(color: Colors.white)),
+      backgroundColor: Colors.green[700],
+      behavior: SnackBarBehavior.floating,
+      duration: const Duration(seconds: 2),
+    ));
+  }
+
   // Single conditional banner — replaces the old StatusPill + SentinelBadge
   // pair. Stays silent when everything is fine (the hero card already proves
   // the app is configured). Shouts only when there's something to act on:
@@ -764,8 +877,10 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver, Ti
     IconData icon = Icons.info_outline;
     VoidCallback? onTap;
     bool isBeacon = false;
+    bool isPaused = false;
 
-    // Order matters: emergency > permissions > sentinel state > idle.
+    // Order matters: emergency > permissions > beacon > nothing really
+    // watching (no contact, profile without falls) > paused > warnings > idle.
     if (_sosLogic.status == SOSStatus.preAlert) {
       level = _AlertLevel.critical;
       text = "🚨 SOS";
@@ -805,6 +920,26 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver, Ti
         await _sosLogic.stopBeacon();
         if (mounted) _showSuccessToast(context, l10n.beaconStopped);
       };
+    } else if (monitoring && _sosLogic.emergencyContact == null) {
+      // Armed with nobody to text (e.g. the last contact was deleted): it
+      // must not look protected.
+      level = _AlertLevel.critical;
+      text = l10n.noContacts;
+      icon = Icons.person_off_outlined;
+      onTap = () => _sosLogic.openSettings(context);
+    } else if (monitoring && !_sosLogic.protectionEffective) {
+      // Fall detection switched on in a profile without it, inactivity off:
+      // nothing automatic is watching.
+      level = _AlertLevel.critical;
+      text = l10n.homeAlertProfileNoImpact;
+      icon = Icons.shield_outlined;
+    } else if (monitoring && _sosLogic.isMonitoringPaused) {
+      // Paused looked exactly like protected (green halo, no banner). Above
+      // the permission warnings, which can stay for weeks and would hide it.
+      level = _AlertLevel.warning;
+      isPaused = true;
+      text = l10n.homeAlertPaused(_pauseEndClock(context));
+      icon = Icons.pause_circle_filled;
     } else if (!_sosLogic.batteryOptimizationOk) {
       level = _AlertLevel.warning;
       text = l10n.batteryDialogTitle;
@@ -834,6 +969,8 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver, Ti
 
     final Widget banner = Container(
       width: double.infinity,
+      // Several banners are tappable: at least a 48 dp target.
+      constraints: const BoxConstraints(minHeight: 48),
       margin: const EdgeInsets.symmetric(horizontal: 20, vertical: 6),
       padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 11),
       decoration: BoxDecoration(
@@ -846,14 +983,29 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver, Ti
           Icon(icon, color: color, size: 20),
           const SizedBox(width: 10),
           Expanded(
-            child: Text(
-              text,
-              style: TextStyle(
-                color: color,
-                fontWeight: FontWeight.bold,
-                fontSize: 13,
-                letterSpacing: 0.3,
-              ),
+            // Wrap: the resume button sits at the end of the line, or drops
+            // below the text when a large font leaves no room for both.
+            child: Wrap(
+              alignment: WrapAlignment.spaceBetween,
+              crossAxisAlignment: WrapCrossAlignment.center,
+              children: [
+                Text(
+                  text,
+                  style: TextStyle(
+                    color: color,
+                    fontWeight: FontWeight.bold,
+                    fontSize: 13,
+                    letterSpacing: 0.3,
+                  ),
+                ),
+                if (isPaused)
+                  TextButton(
+                    onPressed: () => _resumeFromBanner(l10n),
+                    style: TextButton.styleFrom(foregroundColor: Colors.white),
+                    child: Text(l10n.pauseResumeNow,
+                        style: const TextStyle(fontWeight: FontWeight.bold)),
+                  ),
+              ],
             ),
           ),
         ],
@@ -961,6 +1113,8 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver, Ti
     final ActivityProfile current = PreferencesService().getActivityProfile();
     final Color accent = _profileColor(current);
     final bool hasImpact = activityProfileConfigs[current]!.impactDetectionEnabled;
+    // Above 150 % the decorative icon gives its width to the profile name.
+    final bool largeText = MediaQuery.textScalerOf(context).scale(16) > 24;
 
     return Padding(
       padding: const EdgeInsets.fromLTRB(20, 4, 20, 8),
@@ -978,19 +1132,22 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver, Ti
             ),
             child: Row(
               children: [
-                Icon(_profileIcon(current), size: 36, color: accent),
-                const SizedBox(width: 14),
+                if (!largeText) ...[
+                  Icon(_profileIcon(current), size: 36, color: accent),
+                  const SizedBox(width: 14),
+                ],
                 Expanded(
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Text(
-                        _profileLabel(l10n, current).toUpperCase(),
+                      // Not upper-cased: capitals are wider, and at 200 %
+                      // "SENDERISMO" no longer fitted and broke mid-word.
+                      _WholeWordsText(
+                        _profileLabel(l10n, current),
                         style: TextStyle(
                           color: accent,
                           fontSize: 17,
                           fontWeight: FontWeight.w700,
-                          letterSpacing: 0.6,
                         ),
                       ),
                       const SizedBox(height: 4),
@@ -1035,11 +1192,15 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver, Ti
       context: context,
       backgroundColor: Colors.grey[900],
       isScrollControlled: true,
+      // Below the status bar, and scrollable: in es, de, pl and ru the last
+      // profile was cut off even at 100 % font size, and at 200 % half the
+      // list could not be reached.
+      useSafeArea: true,
       shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
       ),
       builder: (ctx) => SafeArea(
-        child: Padding(
+        child: SingleChildScrollView(
           padding: const EdgeInsets.symmetric(vertical: 16),
           child: Column(
             mainAxisSize: MainAxisSize.min,
@@ -1272,15 +1433,21 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver, Ti
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Text(l10n.inactivityTitle,
-                  style: const TextStyle(color: Colors.white70, fontSize: 12)),
-              Text("${fmt(elapsed)} / ${fmt(limit)}",
-                  style: const TextStyle(
-                      color: Colors.white, fontWeight: FontWeight.bold, fontSize: 12)),
-            ],
+          // Wrap, not Row: with a large font the time goes under the title
+          // instead of running off the card.
+          SizedBox(
+            width: double.infinity,
+            child: Wrap(
+              alignment: WrapAlignment.spaceBetween,
+              spacing: 8,
+              children: [
+                Text(l10n.inactivityTitle,
+                    style: const TextStyle(color: Colors.white70, fontSize: 12)),
+                Text("${fmt(elapsed)} / ${fmt(limit)}",
+                    style: const TextStyle(
+                        color: Colors.white, fontWeight: FontWeight.bold, fontSize: 12)),
+              ],
+            ),
           ),
           const SizedBox(height: 6),
           ClipRRect(
@@ -1366,39 +1533,50 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver, Ti
                         style: TextStyle(color: accentColor, fontWeight: FontWeight.bold, fontSize: 13),
                       ),
                     ),
-                    GestureDetector(
-                      onTap: () {
+                    // Was a bare 22 dp icon with no name; now a 48 dp button.
+                    IconButton(
+                      tooltip: l10n.a11yStopTracking,
+                      constraints: const BoxConstraints(minWidth: 48, minHeight: 48),
+                      padding: EdgeInsets.zero,
+                      onPressed: () {
                         _liveTrackingHoldController.reset();
                         _sosLogic.disableLiveTracking();
                       },
-                      child: const Icon(Icons.stop_circle, color: Colors.redAccent, size: 22),
+                      icon: const Icon(Icons.stop_circle, color: Colors.redAccent, size: 26),
                     ),
                   ],
                 ),
                 const SizedBox(height: 6),
-                Row(
+                // Wrap: with a large font the button drops below the text
+                // instead of squeezing it.
+                SizedBox(
+                  width: double.infinity,
+                  child: Wrap(
+                  alignment: WrapAlignment.spaceBetween,
+                  crossAxisAlignment: WrapCrossAlignment.center,
+                  spacing: 8,
                   children: [
-                    Expanded(
-                      child: Text(
-                        l10n.liveTrackingNextUpdate(timeStr),
-                        style: const TextStyle(color: Colors.white70, fontSize: 12),
-                      ),
+                    Text(
+                      l10n.liveTrackingNextUpdate(timeStr),
+                      style: const TextStyle(color: Colors.white70, fontSize: 12),
                     ),
-                    GestureDetector(
-                      onTap: () => _sosLogic.sendLiveCheckin(),
-                      child: Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-                        decoration: BoxDecoration(
-                          color: Colors.green[700],
-                          borderRadius: BorderRadius.circular(6),
-                        ),
-                        child: Text(
-                          l10n.btnImOkay,
-                          style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 11),
-                        ),
+                    // Was about 20 dp high with 11 px text; now a 48 dp touch
+                    // target, larger text and a darker green for contrast.
+                    ElevatedButton(
+                      onPressed: () => _sosLogic.sendLiveCheckin(),
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: Colors.green[800],
+                        foregroundColor: Colors.white,
+                        minimumSize: const Size(64, 40),
+                        tapTargetSize: MaterialTapTargetSize.padded,
+                        padding: const EdgeInsets.symmetric(horizontal: 14),
+                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(6)),
+                        textStyle: const TextStyle(fontWeight: FontWeight.bold, fontSize: 14),
                       ),
+                      child: Text(l10n.btnImOkay),
                     ),
                   ],
+                  ),
                 ),
                 if (isHolding) ...[
                   const SizedBox(height: 8),
@@ -1416,6 +1594,55 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver, Ti
             ),
           );
         },
+      ),
+    );
+  }
+
+  // One indicator under the profile card. Screen readers heard only "1.00G",
+  // "80%" or "--"; they now get a sentence, and the tap action when there is
+  // one.
+  Widget _statusIndicator({required String a11yLabel, VoidCallback? onTap, required Widget icon, required String text}) {
+    return Semantics(
+      container: true,
+      button: onTap != null,
+      label: a11yLabel,
+      onTap: onTap,
+      excludeSemantics: true,
+      child: GestureDetector(
+        behavior: HitTestBehavior.opaque,
+        onTap: onTap,
+        child: Column(
+          children: [
+            icon,
+            const SizedBox(height: 6),
+            Text(
+              text,
+              style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 14, color: Colors.white)
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  void _showGpsHelp(AppLocalizations l10n) {
+    showDialog(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: Row(
+          children: [
+            const Icon(Icons.info_outline, color: Colors.blue),
+            const SizedBox(width: 10),
+            Expanded(child: Text(l10n.gpsHelpTitle)),
+          ],
+        ),
+        content: SingleChildScrollView(child: Text(l10n.gpsHelpBody)),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(ctx),
+            child: const Text("OK"),
+          )
+        ],
       ),
     );
   }
@@ -1570,3 +1797,41 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver, Ti
 }
 
 enum _AlertLevel { warning, critical }
+
+/// A title that wraps between words but never inside one. Only when a single
+/// word is wider than the whole line (a long name at 200 % on a small phone,
+/// e.g. "Профессиональный") is this one text scaled down, just enough for that
+/// word to fit; everywhere else it keeps the user's font size.
+class _WholeWordsText extends StatelessWidget {
+  const _WholeWordsText(this.text, {required this.style});
+
+  final String text;
+  final TextStyle style;
+
+  @override
+  Widget build(BuildContext context) {
+    return LayoutBuilder(builder: (context, constraints) {
+      final TextScaler scaler = MediaQuery.textScalerOf(context);
+      final TextStyle base = DefaultTextStyle.of(context).style.merge(style);
+      double widest = 0;
+      for (final String word in text.split(RegExp(r'\s+'))) {
+        if (word.isEmpty) continue;
+        final TextPainter tp = TextPainter(
+          text: TextSpan(text: word, style: base),
+          textDirection: Directionality.of(context),
+          textScaler: scaler,
+          maxLines: 1,
+        )..layout();
+        if (tp.width > widest) widest = tp.width;
+        tp.dispose();
+      }
+      final double fit = constraints.maxWidth.isFinite && widest > constraints.maxWidth
+          ? constraints.maxWidth / widest
+          : 1.0;
+      return Text(
+        text,
+        style: fit < 1.0 ? style.copyWith(fontSize: (base.fontSize ?? 14) * fit * 0.98) : style,
+      );
+    });
+  }
+}

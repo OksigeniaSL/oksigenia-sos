@@ -43,6 +43,37 @@ class AppLocalizationsFr extends AppLocalizations {
       'Aucun SMS n\'a pu être envoyé. Vérifiez la couverture et les contacts, puis réessayez.';
 
   @override
+  String get statusSendRetrying =>
+      'Tous les contacts ne l\'ont pas encore reçu (pas de réseau ?). Nouvel essai automatique.';
+
+  @override
+  String pauseNotifResumesIn(String time) {
+    return 'Reprise dans $time';
+  }
+
+  @override
+  String get smsLiveTrackingHeader => '📍 SUIVI EN DIRECT — Oksigenia SOS';
+
+  @override
+  String get smsLiveCheckinHeader => '✅ TOUT VA BIEN — Oksigenia SOS';
+
+  @override
+  String sentPartialTitle(String sent, String total) {
+    return 'Alerte envoyée à $sent contact(s) sur $total';
+  }
+
+  @override
+  String get sentBeaconInfo =>
+      'Si vous vous déplacez de plus de 300 m, votre nouvelle position est envoyée à vos contacts.';
+
+  @override
+  String get sentStopExplain =>
+      'Le bouton ci-dessous arrête les envois de position et les nouveaux essais en attente. N\'appuyez que lorsque vous êtes en sécurité.';
+
+  @override
+  String get btnSafeStop => 'JE SUIS EN SÉCURITÉ — ARRÊTER LES ENVOIS';
+
+  @override
   String statusError(Object error) {
     return 'ERREUR : $error';
   }
@@ -63,7 +94,7 @@ class AppLocalizationsFr extends AppLocalizations {
   String get menuPrivacy => 'Confidentialité et Légal';
 
   @override
-  String get menuDonate => 'Donar / Donate';
+  String get menuDonate => 'Faire un don';
 
   @override
   String get menuX => '𝕏 (Twitter)';
@@ -269,7 +300,7 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get warningKeepAlive =>
-      '⚠️ IMPORTANT : Ne fermez pas l\'application (Gestionnaire de tâches) en la faisant glisser. Laissez-la en arrière-plan pour qu\'elle puisse redémarrer automatiquement.';
+      'Laissez l\'application ouverte en arrière-plan. Si vous la balayez hors des applications récentes, la protection peut s\'arrêter.';
 
   @override
   String get aboutTitle => 'À propos';
@@ -315,7 +346,8 @@ class AppLocalizationsFr extends AppLocalizations {
   String get invalidNumberWarning => 'Numéro invalide ou trop court';
 
   @override
-  String get contactMain => 'Principal (Suivi / Batterie)';
+  String get contactMain =>
+      'Contact principal — reçoit aussi le Suivi en Direct';
 
   @override
   String get inactivitySubtitle =>
@@ -435,7 +467,7 @@ class AppLocalizationsFr extends AppLocalizations {
   String get permLocMissing => 'Permission localisation manquante';
 
   @override
-  String get slideStopSystem => 'GLISSER POUR ARRÊTER';
+  String get slideStopSystem => 'MAINTENIR POUR TOUT ARRÊTER';
 
   @override
   String get onboardingTitle => 'Configurer votre système de sécurité';
@@ -454,7 +486,7 @@ class AppLocalizationsFr extends AppLocalizations {
   String get onboardingNext => 'CONTINUER';
 
   @override
-  String get onboardingFinish => 'PRÊT — DÉMARRER LA SURVEILLANCE';
+  String get onboardingFinish => 'PRÊT — OUVRIR L\'APPLICATION';
 
   @override
   String get onboardingMandatory => 'Requis pour activer la surveillance';
@@ -473,7 +505,8 @@ class AppLocalizationsFr extends AppLocalizations {
   String get btnEnableFullScreenIntent => 'ACTIVER';
 
   @override
-  String get pauseMonitoringSheet => 'Mettre en pause pour...';
+  String get pauseMonitoringSheet =>
+      'Mettre toute la surveillance en pause pendant… (reprend toute seule)';
 
   @override
   String get pauseTitle => 'Surveillance en pause';
@@ -490,7 +523,7 @@ class AppLocalizationsFr extends AppLocalizations {
   String get pauseResumedMsg => 'Surveillance reprise';
 
   @override
-  String get pauseHoldHint => 'Appuyez longuement pour pausar';
+  String get pauseHoldHint => 'Maintenir pour mettre en pause';
 
   @override
   String get pauseSec5 => '5 secondes';
@@ -703,7 +736,7 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get homeProfileNoFallWarning =>
-      'Ce profil NE détecte PAS les chutes. Le SOS doit être déclenché manuellement.';
+      'Ce profil NE détecte PAS les chutes. Activez le Moniteur d\'Inactivité ; le bouton SOS fonctionne toujours.';
 
   @override
   String get homeActionApply => 'Appliquer';
@@ -734,4 +767,139 @@ class AppLocalizationsFr extends AppLocalizations {
   String smsLimitBodyAlways(int needed) {
     return 'Ce téléphone demande une confirmation avant tout envoi de SMS par une app (« Toujours confirmer ») : si personne ne confirme, votre SOS ne sera pas envoyé.\n\nChoisissez une limite d\'au moins $needed (sous LineageOS : Trust → Limiter l\'émission de SMS) puis redémarrez le téléphone par précaution : sur certains téléphones, le changement ne s\'applique qu\'après un redémarrage.';
   }
+
+  @override
+  String get homeAlertProfileNoImpact =>
+      'NON PROTÉGÉ — ce profil ne détecte pas les chutes. Activez le Moniteur d\'Inactivité.';
+
+  @override
+  String get homeFallUnavailable => 'Non disponible avec ce profil';
+
+  @override
+  String homeAlertPaused(String time) {
+    return 'EN PAUSE jusqu\'à $time';
+  }
+
+  @override
+  String get a11ySosHint => 'Maintenez 3 secondes pour alerter vos contacts';
+
+  @override
+  String get a11ySosLongPress => 'envoyer un SOS';
+
+  @override
+  String get a11ySosCountdown =>
+      'SOS dans 3 secondes. Touchez deux fois pour annuler.';
+
+  @override
+  String get a11yStopLabel => 'Arrêter Oksigenia SOS';
+
+  @override
+  String get a11yStopHint =>
+      'Maintenez 2 secondes. Arrête toute la surveillance et ferme l\'application.';
+
+  @override
+  String get a11yStopLongPress =>
+      'arrêter la surveillance et fermer l\'application';
+
+  @override
+  String get a11yStopCountdown =>
+      'Arrêt dans 2 secondes. Touchez deux fois pour annuler.';
+
+  @override
+  String get a11yAlarmCancelHint =>
+      'Maintenez 2 secondes pour annuler l\'alerte';
+
+  @override
+  String get a11yAlarmCancelLongPress => 'annuler l\'alerte';
+
+  @override
+  String get a11yAlarmCancelCountdown =>
+      'Annulation de l\'alerte dans 2 secondes. Touchez deux fois pour la maintenir.';
+
+  @override
+  String get a11yMotionOk => 'Capteur de mouvement actif';
+
+  @override
+  String get a11yMotionOff => 'Capteur de mouvement non autorisé';
+
+  @override
+  String a11yBattery(int level) {
+    return 'Batterie $level %';
+  }
+
+  @override
+  String a11yBatteryRestricted(int level) {
+    return 'Batterie $level %, restreinte par Android';
+  }
+
+  @override
+  String a11yGps(String meters) {
+    return 'GPS précis à $meters m';
+  }
+
+  @override
+  String get a11yGpsNone => 'GPS : pas encore de position';
+
+  @override
+  String get a11yAddContact => 'Ajouter le contact';
+
+  @override
+  String a11yDeleteContact(String number) {
+    return 'Supprimer $number';
+  }
+
+  @override
+  String get a11yStopTracking => 'Arrêter le suivi en direct';
+
+  @override
+  String get contactCheckTitle => 'L\'indicatif du pays est-il correct ?';
+
+  @override
+  String contactCheckBody(String number) {
+    return 'Votre SOS sera envoyé au $number. Si l\'indicatif n\'est pas le bon, écrivez le numéro avec + et son indicatif.';
+  }
+
+  @override
+  String get contactCheckSave => 'Oui, enregistrer';
+
+  @override
+  String get contactCheckEdit => 'Corriger';
+
+  @override
+  String get onboardingPermLocation => 'GPS / Position';
+
+  @override
+  String get onboardingPermNotifications => 'Notifications';
+
+  @override
+  String get onboardingPermActivity => 'Activité physique';
+
+  @override
+  String get onboardingPermSensors => 'Capteurs de mouvement';
+
+  @override
+  String get onboardingSettingsLocation => 'Position';
+
+  @override
+  String get onboardingSettingsSensors => 'Capteurs';
+
+  @override
+  String onboardingSettingsPath(String permission) {
+    return 'Paramètres → Applications → Oksigenia SOS → Autorisations → $permission';
+  }
+
+  @override
+  String get onboardingSmsStep1Done =>
+      'Étape 1 terminée : Android a affiché son avertissement de sécurité.';
+
+  @override
+  String get onboardingSmsStep2 =>
+      '2. Ouvrez les Paramètres (bouton ci-dessous).';
+
+  @override
+  String get onboardingSmsStep3 =>
+      '3. Appuyez sur ⋮ (en haut à droite) → « Autoriser les paramètres restreints » → code PIN.';
+
+  @override
+  String get onboardingSmsStep4 => '4. Autorisations → SMS → Autoriser.';
 }
